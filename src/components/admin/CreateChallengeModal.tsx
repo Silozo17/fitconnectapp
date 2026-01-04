@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NativeDateInput } from "@/components/ui/native-date-input";
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
@@ -513,19 +514,19 @@ export function CreateChallengeModal({ open, onOpenChange, challenge }: CreateCh
             
             <div>
               <Label htmlFor="start_date">{t('challenges.startDate')}</Label>
-              <Input
+              <NativeDateInput
                 id="start_date"
-                type="date"
-                {...form.register('start_date')}
+                value={form.watch('start_date')}
+                onChange={(value) => form.setValue('start_date', value)}
               />
             </div>
             
             <div>
               <Label htmlFor="end_date">{t('challenges.endDate')}</Label>
-              <Input
+              <NativeDateInput
                 id="end_date"
-                type="date"
-                {...form.register('end_date')}
+                value={form.watch('end_date')}
+                onChange={(value) => form.setValue('end_date', value)}
               />
             </div>
             

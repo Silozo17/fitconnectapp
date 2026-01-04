@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronUp, Clock, Trash2, Plus, Minus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NativeTimeInput } from "@/components/ui/native-time-input";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Meal, MealFood, calculateMealMacros } from '@/hooks/useFoods';
 import { MacroTracker } from './MacroTracker';
@@ -94,10 +95,9 @@ export const MealCard = ({ meal, onUpdateMeal, onDeleteMeal }: MealCardProps) =>
             {/* Time Input */}
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-muted-foreground" />
-              <Input
-                type="time"
+              <NativeTimeInput
                 value={meal.time || ''}
-                onChange={(e) => updateMealTime(e.target.value)}
+                onChange={(value) => updateMealTime(value)}
                 className="h-8 w-32 bg-background border-border"
               />
             </div>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeTimeInput } from "@/components/ui/native-time-input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -164,10 +165,9 @@ export function ReminderSettings() {
                   </div>
                   <div>
                     <Label>Default Time</Label>
-                    <Input
-                      type="time"
+                    <NativeTimeInput
                       value={newTemplate.default_time}
-                      onChange={(e) => setNewTemplate(prev => ({ ...prev, default_time: e.target.value }))}
+                      onChange={(value) => setNewTemplate(prev => ({ ...prev, default_time: value }))}
                     />
                   </div>
                   <div>

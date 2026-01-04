@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeDateInput } from "@/components/ui/native-date-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useGrantFreePlan } from "@/hooks/useAdminData";
@@ -136,11 +137,9 @@ export function AssignFreePlanModal({ open, onOpenChange, coach }: AssignFreePla
           {!isFounderSelected && (
             <div className="space-y-2 min-w-0 overflow-hidden">
               <Label>Expiry Date (optional)</Label>
-              <Input
-                className="w-full min-w-0"
-                type="date"
+              <NativeDateInput
                 value={expiresAt}
-                onChange={(e) => setExpiresAt(e.target.value)}
+                onChange={setExpiresAt}
                 min={new Date().toISOString().split("T")[0]}
               />
               <p className="text-xs text-muted-foreground">

@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeDateInput } from "@/components/ui/native-date-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Plus, Trash2, GripVertical } from "lucide-react";
@@ -182,12 +183,10 @@ export const LogWorkoutModal = ({
               <div className="grid grid-cols-[1fr_100px] sm:grid-cols-[1fr_120px] gap-3">
                 <div className="min-w-0">
                   <Label htmlFor="loggedAt">Date</Label>
-                  <Input
+                  <NativeDateInput
                     id="loggedAt"
-                    type="date"
-                    className="w-full min-w-0"
                     value={loggedAt}
-                    onChange={(e) => setLoggedAt(e.target.value)}
+                    onChange={setLoggedAt}
                   />
                 </div>
                 <div className="min-w-0">
