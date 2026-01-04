@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { NativeDateInput } from "@/components/ui/native-date-input";
+import { SmartDateInput } from "@/components/ui/smart-date-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -118,7 +118,7 @@ export function CreateExpenseModal({
 
             <div className="space-y-2 min-w-0 overflow-hidden">
               <Label>Date</Label>
-              <NativeDateInput
+              <SmartDateInput
                 value={expenseDate}
                 onChange={setExpenseDate}
               />

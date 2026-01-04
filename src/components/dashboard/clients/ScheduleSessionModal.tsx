@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Calendar, Video } from "lucide-react";
-import { NativeDateInput } from "@/components/ui/native-date-input";
-import { NativeTimeInput } from "@/components/ui/native-time-input";
+import { SmartDateInput } from "@/components/ui/smart-date-input";
+import { SmartTimeInput } from "@/components/ui/smart-time-input";
 import { useScheduleSessionWithPackage } from "@/hooks/useScheduleSessionWithPackage";
 import { useClientActivePackage } from "@/hooks/usePackages";
 import { useCoachProfile } from "@/hooks/useCoachClients";
@@ -98,7 +98,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="date">{t('scheduleSessionModal.date')}</Label>
-                <NativeDateInput
+                <SmartDateInput
                   id="date"
                   value={date}
                   onChange={setDate}
@@ -108,7 +108,7 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
               </div>
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="time">{t('scheduleSessionModal.time')}</Label>
-                <NativeTimeInput
+                <SmartTimeInput
                   id="time"
                   value={time}
                   onChange={setTime}
