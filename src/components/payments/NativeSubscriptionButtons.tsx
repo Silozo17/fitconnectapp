@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Crown, Check, Loader2, Smartphone, ExternalLink } from 'lucide-react';
+import { openExternalUrl } from '@/lib/external-links';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,9 +79,9 @@ export const NativeSubscriptionButtons = ({
   // Phase 2: Open platform subscription management for downgrades
   const handleOpenPlatformSubscriptions = () => {
     if (isIOS) {
-      window.open('https://apps.apple.com/account/subscriptions', '_blank');
+      openExternalUrl('https://apps.apple.com/account/subscriptions');
     } else if (isAndroid) {
-      window.open('https://play.google.com/store/account/subscriptions', '_blank');
+      openExternalUrl('https://play.google.com/store/account/subscriptions');
     }
   };
 
@@ -347,14 +348,14 @@ export const NativeSubscriptionButtons = ({
         <p className="text-xs text-muted-foreground text-center pt-4 border-t border-border">
           By continuing, you agree to our{" "}
           <button 
-            onClick={() => window.open(`${window.location.origin}/terms`, '_blank', 'noopener,noreferrer')}
+            onClick={() => openExternalUrl(`${window.location.origin}/terms`)}
             className="text-primary hover:underline"
           >
             Terms of Use (EULA)
           </button>
           {" "}and{" "}
           <button 
-            onClick={() => window.open(`${window.location.origin}/privacy`, '_blank', 'noopener,noreferrer')}
+            onClick={() => openExternalUrl(`${window.location.origin}/privacy`)}
             className="text-primary hover:underline"
           >
             Privacy Policy
