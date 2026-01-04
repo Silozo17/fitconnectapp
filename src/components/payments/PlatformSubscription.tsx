@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
@@ -55,8 +55,27 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const nativePricing = useNativePricing();
   const pricing = isNativeApp ? nativePricing : webPricing;
   
-  // Native IAP hook
-  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP();
+  // Callback for successful upgrade - shows confetti and toast
+  const handleUpgradeSuccess = useCallback((tier: string) => {
+    // Import dynamically to avoid bundling on web
+    import('@/lib/confetti').then(({ triggerConfetti, confettiPresets }) => {
+      triggerConfetti(confettiPresets.achievement);
+    }).catch(() => {});
+    
+    import('@/lib/despia').then(({ triggerHaptic }) => {
+      triggerHaptic('success');
+    }).catch(() => {});
+    
+    toast.success(`Welcome to ${tier.charAt(0).toUpperCase() + tier.slice(1)}!`, {
+      description: 'Your subscription is now active. Enjoy your new features!',
+      duration: 5000,
+    });
+  }, []);
+  
+  // Native IAP hook with upgrade callback
+  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP({
+    onPurchaseComplete: handleUpgradeSuccess,
+  });
 
   // Unified subscription status - single source of truth
   const subscriptionStatus = useSubscriptionStatus();
