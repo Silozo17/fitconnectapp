@@ -62,11 +62,13 @@ export function ProgressChart({ data, title = "Progress Over Time" }: ProgressCh
 
   return (
     <Card className="bg-card border-border">
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-lg font-semibold text-foreground">{title}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+        <CardTitle className="text-lg font-semibold text-foreground min-w-0 truncate">{title}</CardTitle>
         <Select value={selectedMetric} onValueChange={(v) => setSelectedMetric(v as MetricKey)}>
-          <SelectTrigger className="w-[140px] bg-background border-border">
-            <SelectValue />
+          <SelectTrigger className="w-full sm:w-[140px] min-w-0 max-w-full sm:max-w-[140px] overflow-hidden bg-background border-border shrink-0">
+            <span className="flex-1 min-w-0 truncate">
+              <SelectValue />
+            </span>
           </SelectTrigger>
           <SelectContent>
             {Object.entries(metricConfig).map(([key, cfg]) => (

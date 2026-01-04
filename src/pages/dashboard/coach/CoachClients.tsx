@@ -221,8 +221,10 @@ const CoachClients = () => {
             />
           </div>
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder={t("common:status")} />
+            <SelectTrigger className="w-full sm:w-40 min-w-0 max-w-full overflow-hidden">
+              <span className="flex-1 min-w-0 truncate">
+                <SelectValue placeholder={t("common:status")} />
+              </span>
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t("clients.allStatus")}</SelectItem>
@@ -233,8 +235,10 @@ const CoachClients = () => {
           </Select>
           {uniquePlans.length > 0 && (
             <Select value={planFilter} onValueChange={setPlanFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder={t("common:planType")} />
+              <SelectTrigger className="w-full sm:w-48 min-w-0 max-w-full overflow-hidden">
+                <span className="flex-1 min-w-0 truncate">
+                  <SelectValue placeholder={t("common:planType")} />
+                </span>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">{t("clients.allPlans")}</SelectItem>

@@ -125,8 +125,10 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="sessionType">{t('scheduleSessionModal.sessionType')}</Label>
                 <Select value={sessionType} onValueChange={setSessionType} required>
-                  <SelectTrigger className="w-full bg-background border-border">
-                    <SelectValue placeholder={t('scheduleSessionModal.selectType')} />
+                  <SelectTrigger className="w-full min-w-0 max-w-full overflow-hidden bg-background border-border">
+                    <span className="flex-1 min-w-0 truncate">
+                      <SelectValue placeholder={t('scheduleSessionModal.selectType')} />
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="1-on-1">{t('scheduleSessionModal.sessionTypes.oneOnOne')}</SelectItem>
@@ -140,8 +142,10 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="duration">{t('scheduleSessionModal.duration')}</Label>
                 <Select value={duration} onValueChange={setDuration}>
-                  <SelectTrigger className="w-full bg-background border-border">
-                    <SelectValue />
+                  <SelectTrigger className="w-full min-w-0 max-w-full overflow-hidden bg-background border-border">
+                    <span className="flex-1 min-w-0 truncate">
+                      <SelectValue />
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="30">{t('scheduleSessionModal.durations.30min')}</SelectItem>
