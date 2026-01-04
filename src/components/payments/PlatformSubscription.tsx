@@ -360,7 +360,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                   onClick={() => setSelectedTier(tierKey)}
                   disabled={isPurchasing}
                   className={cn(
-                    "w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3 text-left",
+                    "w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3 text-left relative",
                     isSelected
                       ? "border-primary bg-primary/5"
                       : isCurrentTier
@@ -368,6 +368,13 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                         : "border-border hover:border-muted-foreground"
                   )}
                 >
+                  {/* Current Plan badge - positioned in top-right corner */}
+                  {isCurrentTier && (
+                    <Badge className="absolute top-1 right-1 text-[10px] py-0 px-1.5">
+                      {t("subscription.currentPlan")}
+                    </Badge>
+                  )}
+                  
                   {/* Radio-style indicator - shows SELECTED state */}
                   <div className={cn(
                     "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
@@ -388,7 +395,6 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-foreground text-sm">{tier.name}</h3>
-                      {isCurrentTier && <Badge className="text-xs py-0">{t("subscription.currentPlan")}</Badge>}
                       {tier.highlighted && !isCurrentTier && <Badge variant="secondary" className="text-xs py-0">{t("subscription.popular")}</Badge>}
                     </div>
                     <p className="text-xs text-muted-foreground line-clamp-1">{tier.description}</p>
