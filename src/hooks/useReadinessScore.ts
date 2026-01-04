@@ -37,13 +37,18 @@ export function useReadinessScore() {
 
     // Get baseline averages (7-day)
     const avgSleep = getDailyAverage('sleep', 7);
-    const avgRestingHR = getDailyAverage('heart_rate', 7); // Using heart_rate as proxy
+    const avgRestingHR = getDailyAverage('heart_rate', 7);
     const avgActiveMinutes = getDailyAverage('active_minutes', 7);
 
     // Get current values
     const currentSleep = getLatestValue('sleep');
     const currentRestingHR = getLatestValue('heart_rate');
     const currentActiveMinutes = getLatestValue('active_minutes');
+    
+    // Track which components have data for weighted calculation
+    let hasRecoveryData = currentRestingHR !== null && avgRestingHR > 0;
+    let hasSleepData = currentSleep !== null;
+    let hasActivityData = currentActiveMinutes !== null;
 
     // Calculate component scores (0-100)
     let sleepScore = 50;
@@ -61,9 +66,9 @@ export function useReadinessScore() {
     }
 
     let recoveryScore = 50;
-    if (currentRestingHR !== null && avgRestingHR > 0) {
+    if (hasRecoveryData) {
       // Lower resting HR relative to average = better recovery
-      const hrRatio = currentRestingHR / avgRestingHR;
+      const hrRatio = currentRestingHR! / avgRestingHR;
       if (hrRatio <= 0.95) {
         recoveryScore = 100;
       } else if (hrRatio <= 1.0) {
@@ -88,8 +93,22 @@ export function useReadinessScore() {
       }
     }
 
-    // Weighted average
-    const weights = { sleep: 0.5, recovery: 0.3, activity: 0.2 };
+    // Dynamic weighting based on available data
+    let weights = { sleep: 0.5, recovery: 0.3, activity: 0.2 };
+    
+    // If no recovery data, redistribute weights
+    if (!hasRecoveryData) {
+      weights = { sleep: 0.65, recovery: 0, activity: 0.35 };
+    }
+    // If only sleep data available
+    if (!hasRecoveryData && !hasActivityData) {
+      weights = { sleep: 1.0, recovery: 0, activity: 0 };
+    }
+    // If only activity data available
+    if (!hasSleepData && !hasRecoveryData) {
+      weights = { sleep: 0, recovery: 0, activity: 1.0 };
+    }
+
     const totalScore = Math.round(
       sleepScore * weights.sleep +
       recoveryScore * weights.recovery +

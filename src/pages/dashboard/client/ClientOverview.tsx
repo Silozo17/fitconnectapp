@@ -14,6 +14,10 @@ import { ReadinessWidget } from "@/components/dashboard/client/ReadinessWidget";
 import { WearableTrendCard } from "@/components/dashboard/client/WearableTrendCard";
 import { GoalSuggestionBanner } from "@/components/dashboard/client/GoalSuggestionBanner";
 import { WeeklySummaryCard } from "@/components/dashboard/client/WeeklySummaryCard";
+import { PersonalRecordsWidget } from "@/components/dashboard/client/PersonalRecordsWidget";
+import { TrainingStreakWidget } from "@/components/dashboard/client/TrainingStreakWidget";
+import { MuscleRecoveryWidget } from "@/components/dashboard/client/MuscleRecoveryWidget";
+import { WeeklyVolumeWidget } from "@/components/dashboard/client/WeeklyVolumeWidget";
 import MonthlyReviewCard from "@/components/dashboard/client/MonthlyReviewCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -183,6 +187,17 @@ const ClientOverview = () => {
       <div className="grid md:grid-cols-2 gap-5 mb-6">
         <ReadinessWidget />
         <WearableTrendCard />
+      </div>
+
+      {/* Training Stats - PRs, Streak, Volume, Recovery */}
+      <div className="grid md:grid-cols-2 gap-5 mb-6">
+        <PersonalRecordsWidget />
+        <TrainingStreakWidget />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-5 mb-6">
+        <MuscleRecoveryWidget />
+        <WeeklyVolumeWidget />
       </div>
 
       {/* Daily Tip */}

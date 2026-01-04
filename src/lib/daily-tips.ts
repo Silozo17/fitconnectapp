@@ -1,6 +1,7 @@
 /**
  * Smart Daily Tip Library
  * Rule-based tips personalized by user profile and activity patterns.
+ * Tracks shown tips to avoid repetition.
  */
 
 export interface DailyTip {
@@ -22,6 +23,10 @@ interface UserContext {
   hasWearable?: boolean;
   hasMissedHabitRecently?: boolean;
 }
+
+// Storage key for tracking shown tips
+const SHOWN_TIPS_KEY = 'shown-daily-tips';
+const MAX_SHOWN_TIPS = 30; // Remember last 30 tips
 
 // Tip library organized by category
 const tipLibrary: Record<string, DailyTip[]> = {
@@ -66,6 +71,46 @@ const tipLibrary: Record<string, DailyTip[]> = {
       whyMatters: 'It takes time for your brain to register fullness. Eating slowly prevents overeating.',
       icon: 'utensils',
     },
+    {
+      id: 'post-workout-protein',
+      category: 'nutrition',
+      title: 'Post-Workout Protein',
+      body: 'Consume 20-40g of protein within 2 hours after training.',
+      whyMatters: 'This window is when your muscles are most receptive to protein for repair and growth.',
+      icon: 'utensils',
+    },
+    {
+      id: 'creatine-daily',
+      category: 'nutrition',
+      title: 'Creatine Consistency',
+      body: 'Take creatine daily at any time. Loading phases are optional.',
+      whyMatters: '3-5g daily saturates muscles within 3-4 weeks. Timing matters less than consistency.',
+      icon: 'utensils',
+    },
+    {
+      id: 'caffeine-timing',
+      category: 'nutrition',
+      title: 'Caffeine Strategy',
+      body: 'Have coffee 30-60 minutes before your workout, not immediately before.',
+      whyMatters: 'Caffeine peaks in your blood after 30-60 minutes, maximizing performance benefits.',
+      icon: 'utensils',
+    },
+    {
+      id: 'electrolytes',
+      category: 'nutrition',
+      title: 'Electrolyte Balance',
+      body: 'Add salt to your pre-workout meal on heavy training days.',
+      whyMatters: 'Sodium helps maintain hydration and muscle function during intense exercise.',
+      icon: 'utensils',
+    },
+    {
+      id: 'meal-prep',
+      category: 'nutrition',
+      title: 'Prep for Success',
+      body: 'Spend 1-2 hours on Sunday preparing meals for the week.',
+      whyMatters: 'Having healthy meals ready reduces the temptation to eat out or skip meals.',
+      icon: 'utensils',
+    },
   ],
   training: [
     {
@@ -106,6 +151,46 @@ const tipLibrary: Record<string, DailyTip[]> = {
       title: 'Form First',
       body: 'If your form breaks down, lower the weight.',
       whyMatters: 'Perfect form prevents injuries and ensures the target muscles do the work.',
+      icon: 'dumbbell',
+    },
+    {
+      id: 'mind-muscle',
+      category: 'training',
+      title: 'Mind-Muscle Connection',
+      body: 'Focus on feeling the target muscle work during each rep.',
+      whyMatters: 'Conscious muscle engagement increases activation and accelerates growth.',
+      icon: 'dumbbell',
+    },
+    {
+      id: 'tempo-control',
+      category: 'training',
+      title: 'Control the Tempo',
+      body: 'Lower the weight slowly (3 seconds) and lift explosively.',
+      whyMatters: 'Time under tension during the eccentric phase stimulates more muscle growth.',
+      icon: 'dumbbell',
+    },
+    {
+      id: 'train-weaknesses',
+      category: 'training',
+      title: 'Train Your Weaknesses',
+      body: 'Prioritize exercises you like least at the start of your workout.',
+      whyMatters: 'Weak points often become strong once you give them proper attention.',
+      icon: 'dumbbell',
+    },
+    {
+      id: 'full-rom',
+      category: 'training',
+      title: 'Full Range of Motion',
+      body: 'Use the complete range of motion for each exercise.',
+      whyMatters: 'Full ROM builds more muscle and maintains flexibility.',
+      icon: 'dumbbell',
+    },
+    {
+      id: 'track-workouts',
+      category: 'training',
+      title: 'Log Your Lifts',
+      body: 'Record every set, rep, and weight in your training log.',
+      whyMatters: 'What gets measured gets managed. Tracking ensures progressive overload.',
       icon: 'dumbbell',
     },
   ],
@@ -150,6 +235,46 @@ const tipLibrary: Record<string, DailyTip[]> = {
       whyMatters: 'High stress raises cortisol, which impairs muscle recovery and sleep.',
       icon: 'moon',
     },
+    {
+      id: 'cold-exposure',
+      category: 'recovery',
+      title: 'Cold Water Benefits',
+      body: 'End your shower with 30 seconds of cold water.',
+      whyMatters: 'Cold exposure reduces inflammation and may improve recovery speed.',
+      icon: 'moon',
+    },
+    {
+      id: 'foam-rolling',
+      category: 'recovery',
+      title: 'Roll It Out',
+      body: 'Spend 5 minutes foam rolling tight muscles before bed.',
+      whyMatters: 'Foam rolling releases muscle tension and improves blood flow for recovery.',
+      icon: 'moon',
+    },
+    {
+      id: 'sleep-environment',
+      category: 'recovery',
+      title: 'Optimize Your Bedroom',
+      body: 'Keep your room cool (18-20°C), dark, and phone-free.',
+      whyMatters: 'Sleep environment dramatically impacts sleep quality and recovery.',
+      icon: 'moon',
+    },
+    {
+      id: 'protein-before-bed',
+      category: 'recovery',
+      title: 'Casein Before Bed',
+      body: 'Have cottage cheese or casein protein before sleep.',
+      whyMatters: 'Slow-digesting protein feeds muscles throughout the night.',
+      icon: 'moon',
+    },
+    {
+      id: 'rest-day-nutrition',
+      category: 'recovery',
+      title: 'Eat on Rest Days Too',
+      body: "Don't cut calories dramatically on rest days.",
+      whyMatters: 'Your body repairs and builds muscle on rest days—it needs fuel.',
+      icon: 'moon',
+    },
   ],
   motivation: [
     {
@@ -190,6 +315,46 @@ const tipLibrary: Record<string, DailyTip[]> = {
       title: 'Take a Progress Photo',
       body: 'The scale lies. Photos show real changes over time.',
       whyMatters: 'Visual progress is often more motivating than numbers on a scale.',
+      icon: 'sparkles',
+    },
+    {
+      id: 'gym-playlist',
+      category: 'motivation',
+      title: 'Update Your Playlist',
+      body: 'Add new songs that pump you up for training.',
+      whyMatters: 'Music can boost performance by 15% and make tough workouts feel easier.',
+      icon: 'sparkles',
+    },
+    {
+      id: 'workout-buddy',
+      category: 'motivation',
+      title: 'Find a Training Partner',
+      body: 'Schedule a workout with a friend this week.',
+      whyMatters: 'Accountability partners increase workout consistency by up to 95%.',
+      icon: 'sparkles',
+    },
+    {
+      id: 'no-zero-days',
+      category: 'motivation',
+      title: 'No Zero Days',
+      body: 'Do something active every single day, even if tiny.',
+      whyMatters: 'Consistency beats intensity. Small actions maintain momentum.',
+      icon: 'sparkles',
+    },
+    {
+      id: 'embrace-hard',
+      category: 'motivation',
+      title: 'Embrace the Hard',
+      body: 'The workout you dread most is probably the one you need most.',
+      whyMatters: 'Growth happens at the edge of your comfort zone.',
+      icon: 'sparkles',
+    },
+    {
+      id: 'long-game',
+      category: 'motivation',
+      title: 'Play the Long Game',
+      body: 'Think in months and years, not days and weeks.',
+      whyMatters: 'Sustainable progress requires patience. Trust the process.',
       icon: 'sparkles',
     },
   ],
@@ -234,12 +399,80 @@ const tipLibrary: Record<string, DailyTip[]> = {
       whyMatters: 'Identity-based habits are more resilient than goal-based ones.',
       icon: 'target',
     },
+    {
+      id: 'pack-bag-night',
+      category: 'habit',
+      title: 'Pack Your Bag Tonight',
+      body: 'Prepare your gym bag the night before.',
+      whyMatters: 'Removing morning friction increases the chance you\'ll actually go.',
+      icon: 'target',
+    },
+    {
+      id: 'morning-workout',
+      category: 'habit',
+      title: 'Train in the Morning',
+      body: 'Consider shifting your workout to before work or school.',
+      whyMatters: 'Morning exercisers are more consistent—fewer excuses accumulate.',
+      icon: 'target',
+    },
+    {
+      id: 'habit-tracking',
+      category: 'habit',
+      title: 'Check the Box',
+      body: 'Use your habit tracker daily—don\'t let it slip.',
+      whyMatters: 'The act of tracking reinforces the behavior you want to build.',
+      icon: 'target',
+    },
+    {
+      id: 'social-commitment',
+      category: 'habit',
+      title: 'Tell Someone',
+      body: 'Share your fitness goal with a friend or family member.',
+      whyMatters: 'Public commitment increases follow-through and accountability.',
+      icon: 'target',
+    },
+    {
+      id: 'implementation-intention',
+      category: 'habit',
+      title: 'Be Specific',
+      body: 'Plan exactly when, where, and what you\'ll do for exercise.',
+      whyMatters: '"I\'ll work out at 7am at the gym" beats "I\'ll exercise more."',
+      icon: 'target',
+    },
   ],
 };
 
 /**
+ * Get previously shown tip IDs from localStorage
+ */
+function getShownTips(): string[] {
+  try {
+    const stored = localStorage.getItem(SHOWN_TIPS_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Mark a tip as shown
+ */
+function markTipAsShown(tipId: string): void {
+  try {
+    const shown = getShownTips();
+    if (!shown.includes(tipId)) {
+      const updated = [tipId, ...shown].slice(0, MAX_SHOWN_TIPS);
+      localStorage.setItem(SHOWN_TIPS_KEY, JSON.stringify(updated));
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+/**
  * Get a personalized daily tip based on user context.
  * Uses a deterministic seed based on the date to show the same tip throughout the day.
+ * Tracks shown tips to avoid repetition within the last 30 tips.
  */
 export function getDailyTip(context: UserContext = {}): DailyTip {
   const today = new Date();
@@ -284,17 +517,30 @@ export function getDailyTip(context: UserContext = {}): DailyTip {
   // Get unique categories (remove duplicates)
   const categories = [...new Set(preferredCategories)];
   
-  // Select category based on seed
-  const categoryIndex = seed % categories.length;
-  const selectedCategory = categories[categoryIndex];
+  // Get all tips from preferred categories
+  const allTips: DailyTip[] = [];
+  for (const cat of categories) {
+    const categoryTips = tipLibrary[cat] || [];
+    allTips.push(...categoryTips);
+  }
   
-  // Get tips from selected category
-  const tips = tipLibrary[selectedCategory] || tipLibrary.motivation;
+  // Get shown tips to filter out
+  const shownTips = getShownTips();
+  
+  // Filter out recently shown tips
+  const availableTips = allTips.filter(t => !shownTips.includes(t.id));
+  
+  // If all tips have been shown, reset and use all
+  const tipsToChooseFrom = availableTips.length > 0 ? availableTips : allTips;
   
   // Select tip based on seed
-  const tipIndex = Math.floor(seed / 10) % tips.length;
+  const tipIndex = seed % tipsToChooseFrom.length;
+  const selectedTip = tipsToChooseFrom[tipIndex];
   
-  return tips[tipIndex];
+  // Mark as shown
+  markTipAsShown(selectedTip.id);
+  
+  return selectedTip;
 }
 
 /**
@@ -302,4 +548,15 @@ export function getDailyTip(context: UserContext = {}): DailyTip {
  */
 export function getAllTips(): DailyTip[] {
   return Object.values(tipLibrary).flat();
+}
+
+/**
+ * Clear shown tips history (for testing)
+ */
+export function clearShownTips(): void {
+  try {
+    localStorage.removeItem(SHOWN_TIPS_KEY);
+  } catch {
+    // Ignore
+  }
 }

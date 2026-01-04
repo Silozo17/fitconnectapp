@@ -45,16 +45,41 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
   const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
+  // Cache key for localStorage
+  const cacheKey = `weekly-summary-${user?.id}`;
+  
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ["weekly-client-summary", user?.id],
     queryFn: async (): Promise<WeeklySummaryData | null> => {
       const { data, error } = await supabase.functions.invoke("generate-weekly-client-summary");
       if (error) throw error;
+      // Cache to localStorage for faster subsequent loads
+      if (data) {
+        try {
+          localStorage.setItem(cacheKey, JSON.stringify({ data, cachedAt: Date.now() }));
+        } catch { /* ignore storage errors */ }
+      }
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 30 * 60 * 1000, // 30 minutes
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours - weekly data doesn't change often
+    gcTime: 48 * 60 * 60 * 1000, // Keep in cache for 48 hours
     refetchOnWindowFocus: false,
+    refetchOnMount: false,
+    // Use cached data as placeholder for instant render
+    placeholderData: () => {
+      try {
+        const cached = localStorage.getItem(cacheKey);
+        if (cached) {
+          const { data, cachedAt } = JSON.parse(cached);
+          // Use cache if less than 24 hours old
+          if (Date.now() - cachedAt < 24 * 60 * 60 * 1000) {
+            return data;
+          }
+        }
+      } catch { /* ignore */ }
+      return undefined;
+    },
   });
 
   if (isLoading) {
