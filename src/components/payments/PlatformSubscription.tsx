@@ -81,6 +81,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const queryClient = useQueryClient();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
+  const [selectedTier, setSelectedTier] = useState<TierKey | null>(null);
   
   // UPGRADE SUCCESS DIALOG state
   const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
@@ -341,8 +342,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
 
             const renderTierCard = ([tierKey, tier]: [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]]) => {
               const isCurrentTier = activeTier === tierKey;
-              const isLoading = loadingTier === tierKey || (isPurchasing && loadingTier === null);
-              const buttonConfig = getButtonConfig(tierKey);
+              const isSelected = selectedTier === tierKey;
               const isPricedTier = ['starter', 'pro', 'enterprise'].includes(tierKey);
               const Icon = TIER_ICONS[tierKey];
               
@@ -354,29 +354,34 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                 : price;
 
               return (
-                <div
+                <button
                   key={tierKey}
+                  type="button"
+                  onClick={() => setSelectedTier(tierKey)}
+                  disabled={isPurchasing}
                   className={cn(
-                    "p-3 rounded-xl border-2 transition-all flex items-center gap-3",
-                    isCurrentTier 
-                      ? "border-primary bg-primary/5" 
-                      : "border-border hover:border-muted-foreground"
+                    "w-full p-3 rounded-xl border-2 transition-all flex items-center gap-3 text-left",
+                    isSelected
+                      ? "border-primary bg-primary/5"
+                      : isCurrentTier
+                        ? "border-border ring-2 ring-primary/30"
+                        : "border-border hover:border-muted-foreground"
                   )}
                 >
-                  {/* Radio-style indicator */}
+                  {/* Radio-style indicator - shows SELECTED state */}
                   <div className={cn(
                     "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
-                    isCurrentTier ? "border-primary bg-primary" : "border-muted-foreground"
+                    isSelected ? "border-primary bg-primary" : "border-muted-foreground"
                   )}>
-                    {isCurrentTier && <Check className="w-3 h-3 text-primary-foreground" />}
+                    {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
                   </div>
                   
                   {/* Tier icon */}
                   <div className={cn(
                     "w-9 h-9 rounded-lg flex items-center justify-center shrink-0",
-                    isCurrentTier ? "bg-primary" : "bg-secondary"
+                    isSelected ? "bg-primary" : "bg-secondary"
                   )}>
-                    <Icon className={cn("w-4 h-4", isCurrentTier ? "text-primary-foreground" : "text-muted-foreground")} />
+                    <Icon className={cn("w-4 h-4", isSelected ? "text-primary-foreground" : "text-muted-foreground")} />
                   </div>
                   
                   {/* Tier info */}
@@ -389,45 +394,66 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                     <p className="text-xs text-muted-foreground line-clamp-1">{tier.description}</p>
                   </div>
                   
-                  {/* Price + Action */}
+                  {/* Price only - no inline action button */}
                   <div className="text-right shrink-0">
                     <span className="font-bold text-primary text-sm">
                       {pricing.formatPrice(monthlyEquivalent)}
                     </span>
                     <span className="text-xs text-muted-foreground">/mo</span>
-                    
-                    {!isCurrentTier && (
-                      <Button
-                        variant={buttonConfig.variant}
-                        size="sm"
-                        className="mt-1 h-7 text-xs w-full"
-                        onClick={() => handleSubscribe(tierKey)}
-                        disabled={!!loadingTier || isPurchasing}
-                      >
-                        {(isLoading || isPurchasing) && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
-                        {buttonConfig.text}
-                      </Button>
-                    )}
-                    {isCurrentTier && !isNativeSubscription && activeTier !== 'free' && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="mt-1 h-7 text-xs w-full"
-                        onClick={handleManageStripeSubscription}
-                        disabled={loadingTier === "manage"}
-                      >
-                        {loadingTier === "manage" && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
-                        {t("subscription.manage", "Manage")}
-                      </Button>
-                    )}
                   </div>
-                </div>
+                </button>
               );
             };
 
+            // Determine if we should show the action button
+            const showActionButton = selectedTier && selectedTier !== activeTier;
+            const isUpgrade = selectedTier ? getTierPosition(selectedTier) > currentPosition : false;
+            const selectedTierData = selectedTier ? SUBSCRIPTION_TIERS[selectedTier] : null;
+
             return (
-              <div className="space-y-2">
-                {paidTiers.map(renderTierCard)}
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  {paidTiers.map(renderTierCard)}
+                </div>
+                
+                {/* Dedicated action button - above cancel subscription */}
+                {showActionButton && selectedTierData && (
+                  <div className="pt-2">
+                    <Button
+                      className={cn(
+                        "w-full",
+                        isUpgrade ? "" : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+                      )}
+                      onClick={() => handleSubscribe(selectedTier)}
+                      disabled={!!loadingTier || isPurchasing}
+                    >
+                      {isPurchasing && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      {isUpgrade 
+                        ? t("subscription.upgradeTo", { tier: selectedTierData.name })
+                        : t("subscription.downgradeTo", { tier: selectedTierData.name })
+                      }
+                    </Button>
+                    <p className="text-xs text-muted-foreground text-center mt-1">
+                      {isUpgrade
+                        ? t("subscription.upgradeNote", "You'll be charged the difference immediately")
+                        : t("subscription.downgradeNote", "Change takes effect at end of billing period")
+                      }
+                    </p>
+                  </div>
+                )}
+                
+                {/* Manage subscription button for current tier (Stripe only) */}
+                {!isNativeSubscription && activeTier !== 'free' && (!selectedTier || selectedTier === activeTier) && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleManageStripeSubscription}
+                    disabled={loadingTier === "manage"}
+                  >
+                    {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                    {t("subscription.manage", "Manage Subscription")}
+                  </Button>
+                )}
               </div>
             );
           })()}
