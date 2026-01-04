@@ -21,10 +21,22 @@ export interface GoalSuggestion {
 export function useAdaptiveGoalSuggestions() {
   const { user } = useAuth();
 
-  // Track dismissed suggestions in state for reactivity
-  const [dismissedIds, setDismissedIds] = useState<string[]>(() => 
-    JSON.parse(sessionStorage.getItem('dismissed-suggestions') || '[]')
-  );
+  // Track dismissed suggestions in localStorage with expiry (2 weeks)
+  const [dismissedIds, setDismissedIds] = useState<string[]>(() => {
+    try {
+      const stored = localStorage.getItem('dismissed-goal-suggestions');
+      if (!stored) return [];
+      const parsed = JSON.parse(stored);
+      const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+      // Filter out expired dismissals
+      const valid = parsed.filter((item: { id: string; dismissedAt: number }) => 
+        item.dismissedAt > twoWeeksAgo
+      );
+      return valid.map((item: { id: string }) => item.id);
+    } catch {
+      return [];
+    }
+  });
 
   const { data: suggestions, isLoading } = useQuery<GoalSuggestion[]>({
     queryKey: ['adaptive-goal-suggestions', user?.id],
@@ -154,11 +166,20 @@ export function useAdaptiveGoalSuggestions() {
   // Filter out dismissed suggestions
   const activeSuggestions = suggestions?.filter(s => !dismissedIds.includes(s.id)) || [];
 
-  // Dismiss a suggestion - updates state to trigger re-render
+  // Dismiss a suggestion - persists with expiry timestamp
   const dismissSuggestion = useCallback((id: string) => {
     setDismissedIds(prev => {
       const updated = [...prev, id];
-      sessionStorage.setItem('dismissed-suggestions', JSON.stringify(updated));
+      // Store with timestamps for expiry
+      try {
+        const stored = localStorage.getItem('dismissed-goal-suggestions');
+        const existing = stored ? JSON.parse(stored) : [];
+        const newEntry = { id, dismissedAt: Date.now() };
+        const filtered = existing.filter((item: { id: string }) => item.id !== id);
+        localStorage.setItem('dismissed-goal-suggestions', JSON.stringify([...filtered, newEntry]));
+      } catch {
+        // Fallback silently
+      }
       return updated;
     });
   }, []);
