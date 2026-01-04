@@ -34,7 +34,6 @@ import {
   Sparkles,
 } from "lucide-react";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
-import { HealthKitStatusWidget } from "@/components/dashboard/HealthKitStatusWidget";
 // Lazy load HealthDataWidget - it has realtime subscriptions that slow initial render
 const HealthDataWidget = lazy(() => import("@/components/integrations/HealthDataWidget"));
 
@@ -171,9 +170,6 @@ const ClientOverview = () => {
           {t('client.overview.welcomeBack', "Let's crush your goals today")}
         </p>
       </div>
-
-      {/* Apple Health Status - iOS only, prominently displayed per App Store guidelines */}
-      <HealthKitStatusWidget />
 
       {/* Today's Health - Lazy loaded */}
       <Suspense fallback={<HealthWidgetSkeleton />}>
