@@ -43,6 +43,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     queryFn: async () => {
       if (!coachProfileId) return null;
 
+      console.log('[useSubscriptionStatus] Fetching subscription data for coach:', coachProfileId);
+
       // Fetch both platform subscription and admin grant in parallel
       const [platformSubResult, adminGrantResult, coachProfileResult] = await Promise.all([
         supabase
@@ -62,6 +64,12 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
           .eq("id", coachProfileId)
           .single(),
       ]);
+
+      console.log('[useSubscriptionStatus] Raw data:', {
+        platformSub: platformSubResult.data,
+        adminGrant: adminGrantResult.data,
+        coachProfile: coachProfileResult.data,
+      });
 
       return {
         platformSub: platformSubResult.data,
@@ -97,9 +105,11 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
 
   const { platformSub, adminGrant, coachProfile } = subscriptionData;
   const currentTier = normalizeTier(coachProfile?.subscription_tier || 'free');
+  console.log('[useSubscriptionStatus] Profile tier:', currentTier);
 
   // Check for founder tier first (immutable)
   if (currentTier === 'founder') {
+    console.log('[useSubscriptionStatus] Founder tier detected - immutable');
     return {
       tier: 'founder',
       source: 'admin',
@@ -185,6 +195,15 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     // Track what tier expired for messaging purposes
     const expiredTier = isExpired ? normalizeTier(platformSub.tier || 'free') : null;
 
+    console.log('[useSubscriptionStatus] Platform subscription resolved:', {
+      tier: effectiveTier,
+      status: effectiveStatus,
+      isExpired,
+      isWithinGracePeriod,
+      hasPendingChange,
+      pendingTier: isExpired ? null : pendingTier,
+    });
+
     return {
       tier: effectiveTier,
       source: isNative ? 'revenuecat' : 'stripe',
@@ -204,6 +223,7 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
   }
 
   // No subscription found
+  console.log('[useSubscriptionStatus] No platform subscription found, using profile tier:', currentTier);
   return {
     tier: currentTier,
     source: 'none',

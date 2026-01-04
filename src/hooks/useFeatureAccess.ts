@@ -106,6 +106,7 @@ export const useFeatureAccess = () => {
       const normalizedTier = normalizeTier(coachProfile.subscription_tier);
       // FOUNDER PROTECTION in resolution
       if (lastKnownTierRef.current === 'founder' && normalizedTier !== 'founder') {
+        console.log('[useFeatureAccess] FOUNDER PROTECTION: Blocking tier change from founder to', normalizedTier);
         return 'founder';
       }
       return normalizedTier;
@@ -113,17 +114,22 @@ export const useFeatureAccess = () => {
     
     // Profile is loading - use cached tier to prevent flash
     if (profileLoading && lastKnownTierRef.current) {
+      console.log('[useFeatureAccess] Using cached tier during load:', lastKnownTierRef.current);
       return lastKnownTierRef.current;
     }
     
     // Profile loaded but no tier set - check cache first, then default to free
     if (!profileLoading && !coachProfile?.subscription_tier) {
-      return lastKnownTierRef.current || 'free';
+      const fallback = lastKnownTierRef.current || 'free';
+      console.log('[useFeatureAccess] No profile tier, using fallback:', fallback);
+      return fallback;
     }
     
     // Still loading with no cache - return null to indicate loading
     return lastKnownTierRef.current;
   })();
+  
+  console.log('[useFeatureAccess] Effective tier resolved:', effectiveTier);
   
   // Phase 5 & 7: Determine access tier based on subscription state
   // - For cancelled subscriptions within grace period: use paid tier
@@ -131,14 +137,18 @@ export const useFeatureAccess = () => {
   const accessTier: TierKey = (() => {
     // Phase 7: If subscription is expired, useSubscriptionStatus already returns downgraded tier
     if (subscriptionStatus.isExpired) {
+      console.log('[useFeatureAccess] Subscription expired, using downgraded tier:', subscriptionStatus.tier);
       return subscriptionStatus.tier; // Already downgraded to pendingTier or 'free'
     }
     // Phase 5: User is cancelled but still has access until period ends
     if (subscriptionStatus.isWithinGracePeriod && subscriptionStatus.tier !== 'free') {
+      console.log('[useFeatureAccess] Within grace period, maintaining tier:', subscriptionStatus.tier);
       return subscriptionStatus.tier;
     }
     return effectiveTier || 'free';
   })();
+  
+  console.log('[useFeatureAccess] Access tier for feature gating:', accessTier);
 
   // Use free tier config as fallback only when effectiveTier is null
   const tierConfig = effectiveTier ? SUBSCRIPTION_TIERS[effectiveTier] : SUBSCRIPTION_TIERS.free;
