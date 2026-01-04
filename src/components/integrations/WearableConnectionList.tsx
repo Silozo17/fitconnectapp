@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Activity, Heart, Watch, Apple, PenLine } from "lucide-react";
+import { Activity, Apple, PenLine, Watch, Info } from "lucide-react";
 import WearableConnectionCard from "./WearableConnectionCard";
 import { useWearables, WearableProvider } from "@/hooks/useWearables";
 import ManualHealthDataModal from "./ManualHealthDataModal";
@@ -27,9 +27,9 @@ const WearableConnectionList = () => {
 
   // Platform-aware provider configuration
   // STRICT RULES:
-  // - Apple Health: ONLY visible on iOS native (NOT on web, NOT on Android)
-  // - Health Connect: ONLY visible on Android native (NOT on web, NOT on iOS)
-  // - Fitbit/Garmin: Always available (OAuth-based, works everywhere)
+  // - Apple Health: ONLY visible on iOS native
+  // - Health Connect: ONLY visible on Android native
+  // - Fitbit/Garmin: REMOVED - users should connect these to their phone's health app
   const providers = useMemo(() => {
     const isIOSNative = isDespia && isIOS;
     const isAndroidNative = isDespia && isAndroid;
@@ -43,7 +43,7 @@ const WearableConnectionList = () => {
       disabledMessage?: string;
     }> = [];
 
-    // Apple Health: ONLY on iOS native - never on web, never on Android
+    // Apple Health: ONLY on iOS native
     if (isIOSNative) {
       allProviders.push({
         id: "apple_health" as WearableProvider,
@@ -54,7 +54,7 @@ const WearableConnectionList = () => {
       });
     }
 
-    // Health Connect: ONLY on Android native - never on web, never on iOS
+    // Health Connect: ONLY on Android native
     if (isAndroidNative) {
       allProviders.push({
         id: "health_connect" as WearableProvider,
@@ -65,23 +65,7 @@ const WearableConnectionList = () => {
       });
     }
 
-    // Fitbit and Garmin: Always available (OAuth-based, works on all platforms)
-    allProviders.push(
-      {
-        id: "fitbit" as WearableProvider,
-        name: "Fitbit",
-        icon: <Heart className="w-6 h-6 text-white" />,
-        color: "bg-gradient-to-br from-teal-500 to-cyan-500",
-        disabled: false,
-      },
-      {
-        id: "garmin" as WearableProvider,
-        name: "Garmin",
-        icon: <Watch className="w-6 h-6 text-white" />,
-        color: "bg-gradient-to-br from-blue-600 to-blue-800",
-        disabled: false,
-      }
-    );
+    // Fitbit and Garmin removed - users connect via their phone's health app
 
     return allProviders;
   }, [isDespia, isIOS, isAndroid]);
@@ -131,32 +115,90 @@ const WearableConnectionList = () => {
     );
   }
 
+  const isIOSNative = isDespia && isIOS;
+  const isAndroidNative = isDespia && isAndroid;
+  const isNativeApp = isIOSNative || isAndroidNative;
+
   return (
     <div className="space-y-4">
+      {/* Supported Devices Info Card - only show on native apps */}
+      {isNativeApp && (
+        <Card variant="glass" className="border-primary/20 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Watch className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h4 className="font-medium text-sm mb-1">
+                  {t('integrations.supportedDevices.title', 'Sync Your Wearable')}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {isIOSNative 
+                    ? t('integrations.supportedDevices.iosDescription', 'Connect Apple Health to sync your fitness data. Any wearable that writes to Apple Health will automatically sync with FitConnect.')
+                    : t('integrations.supportedDevices.androidDescription', 'Connect Health Connect to sync your fitness data. Any wearable that writes to Health Connect will automatically sync with FitConnect.')
+                  }
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  <span className="font-medium text-foreground">{t('integrations.supportedDevices.supported', 'Supported devices')}:</span>{' '}
+                  {isIOSNative
+                    ? 'Apple Watch, Fitbit, Garmin, Huawei Watch, Samsung Watch, Oura Ring, WHOOP'
+                    : 'Samsung Watch, Fitbit, Garmin, Huawei Watch, Xiaomi Mi Band, Oura Ring, WHOOP'
+                  }
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Wearable Providers Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {providers.map((provider) => {
-          const connection = getConnection(provider.id);
-          return (
-            <WearableConnectionCard
-              key={provider.id}
-              provider={provider.id}
-              providerName={provider.name}
-              providerIcon={provider.icon}
-              providerColor={provider.color}
-              isConnected={!!connection}
-              lastSynced={connection?.last_synced_at}
-              onConnect={() => handleConnect(provider.id)}
-              onDisconnect={() => connection && disconnectWearable.mutate(connection.id)}
-              onSync={() => connection && syncWearable.mutate(provider.id)}
-              isConnecting={connectingProvider === provider.id}
-              isSyncing={syncWearable.isPending}
-              disabled={provider.disabled}
-              disabledMessage={provider.disabledMessage}
-            />
-          );
-        })}
-      </div>
+      {providers.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {providers.map((provider) => {
+            const connection = getConnection(provider.id);
+            return (
+              <WearableConnectionCard
+                key={provider.id}
+                provider={provider.id}
+                providerName={provider.name}
+                providerIcon={provider.icon}
+                providerColor={provider.color}
+                isConnected={!!connection}
+                lastSynced={connection?.last_synced_at}
+                onConnect={() => handleConnect(provider.id)}
+                onDisconnect={() => connection && disconnectWearable.mutate(connection.id)}
+                onSync={() => connection && syncWearable.mutate(provider.id)}
+                isConnecting={connectingProvider === provider.id}
+                isSyncing={syncWearable.isPending}
+                disabled={provider.disabled}
+                disabledMessage={provider.disabledMessage}
+              />
+            );
+          })}
+        </div>
+      )}
+
+      {/* Web fallback message */}
+      {!isNativeApp && (
+        <Card variant="glass" className="border-border">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                <Info className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div>
+                <h4 className="font-medium text-sm mb-1">
+                  {t('integrations.installAppTitle', 'Install the FitConnect App')}
+                </h4>
+                <p className="text-xs text-muted-foreground">
+                  {t('integrations.installAppDescription', 'To sync your health data from wearables, install the FitConnect app on your iOS or Android device. The app connects to Apple Health or Health Connect, which automatically syncs data from your wearable devices.')}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Manual Entry Card */}
       <Card variant="glass" className="border-dashed">
