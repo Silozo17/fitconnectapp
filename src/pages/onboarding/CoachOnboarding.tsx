@@ -530,23 +530,13 @@ const CoachOnboarding = () => {
           
           toast.success("Profile saved! Completing subscription...");
           
-          // Start the IAP flow
+          // Start the IAP flow - NO FALLBACK TIMER
+          // The handleIAPSuccess callback handles navigation on success
+          // If purchase is cancelled/fails, user stays on paywall and can retry
           await nativePurchase(tier, billingInterval);
           
-          // PHASE 1 FIX: Reduced fallback timer to 5 seconds
-          // Since onboarding is already complete in DB, user can always navigate manually
-          setTimeout(() => {
-            if (window.location.pathname.includes('/onboarding/coach')) {
-              console.warn('[CoachOnboarding] Fallback navigation triggered after 5s timeout');
-              if (formData.alsoClient) {
-                navigate("/onboarding/client", { replace: true });
-              } else {
-                navigate("/dashboard/coach", { replace: true });
-              }
-            }
-          }, 5000);
-          
-          // IAP hook handles success/error and navigation
+          // IAP hook handles success/error and navigation via handleIAPSuccess callback
+          // Do NOT auto-navigate - wait for confirmed purchase success
           return;
         }
         

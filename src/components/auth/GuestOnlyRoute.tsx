@@ -12,6 +12,10 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
   const hasRenderedContent = useRef(false);
   const [minLoadingComplete, setMinLoadingComplete] = useState(false);
 
+  // Check if signup is in progress (set by Auth.tsx before signUp call)
+  // This prevents the home page flash after OTP verification
+  const isSignupInProgress = sessionStorage.getItem('fitconnect_signup_in_progress') === 'true';
+
   // Prevent flash by ensuring minimum loading time on first render
   useEffect(() => {
     if (!hasRenderedContent.current && loading) {
@@ -24,8 +28,8 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
     }
   }, [loading]);
 
-  // Show loading only during actual loading state
-  if (loading && !minLoadingComplete) {
+  // Show loading while signup is completing or during actual loading state
+  if (isSignupInProgress || (loading && !minLoadingComplete)) {
     return <PageLoadingSpinner />;
   }
 

@@ -1,9 +1,33 @@
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { useCoachProfile } from "./useCoachClients";
 import { useCoachClients } from "./useCoachClients";
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier } from "@/lib/stripe-config";
 import { FEATURE_ACCESS, FeatureKey, getMinimumTierForFeature } from "@/lib/feature-config";
 import { useSubscriptionStatus } from "./useSubscriptionStatus";
+
+// Upgrade protection - set by useNativeIAP on purchase success
+// Provides instant tier access while webhooks process
+const UPGRADE_PROTECTION_KEY = 'fitconnect_upgrade_protection';
+const UPGRADE_PROTECTION_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+const getUpgradeProtection = (): TierKey | null => {
+  try {
+    const protection = localStorage.getItem(UPGRADE_PROTECTION_KEY);
+    if (protection) {
+      const { tier, timestamp } = JSON.parse(protection);
+      // Valid for 5 minutes after purchase
+      if (Date.now() - timestamp < UPGRADE_PROTECTION_TTL_MS) {
+        console.log('[useFeatureAccess] Using upgrade protection tier:', tier);
+        return tier as TierKey;
+      }
+      // Expired - clean up
+      localStorage.removeItem(UPGRADE_PROTECTION_KEY);
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null;
+};
 
 // CRITICAL: Persistent storage key for subscription tier
 // This prevents tier resets on page reload, session refresh, or profile loading delays
@@ -96,12 +120,27 @@ export const useFeatureAccess = () => {
   }
   
   // CRITICAL TIER RESOLUTION LOGIC:
-  // 1. If profile is loaded with tier data -> use that (source of truth)
-  // 2. If loading but we have cached tier -> use cached (prevents flash)
-  // 3. If loading and no cache -> use null (will show loading state)
-  // 4. NEVER default to "free" during loading - this was the bug
+  // Priority order:
+  // 1. Upgrade protection (instant access after purchase)
+  // 2. Subscription status tier (from platform_subscriptions - updated first by webhook)
+  // 3. Profile tier (coach_profiles - may lag behind)
+  // 4. Cached tier (prevents flash during loading)
+  // 5. NEVER default to "free" during loading - this was the bug
   const effectiveTier: TierKey | null = (() => {
-    // Profile is loaded and has tier data - use it
+    // PRIORITY 1: Check upgrade protection (instant access after purchase)
+    const upgradeProtectedTier = getUpgradeProtection();
+    if (upgradeProtectedTier) {
+      return upgradeProtectedTier;
+    }
+    
+    // PRIORITY 2: Use subscription status tier (platform_subscriptions updates first)
+    // This gives instant access when webhook has processed but coach_profile hasn't synced
+    if (subscriptionStatus.status === 'active' && subscriptionStatus.tier !== 'free') {
+      console.log('[useFeatureAccess] Using subscription status tier:', subscriptionStatus.tier);
+      return subscriptionStatus.tier;
+    }
+    
+    // PRIORITY 3: Profile is loaded and has tier data
     if (!profileLoading && coachProfile?.subscription_tier) {
       const normalizedTier = normalizeTier(coachProfile.subscription_tier);
       // FOUNDER PROTECTION in resolution
@@ -112,7 +151,7 @@ export const useFeatureAccess = () => {
       return normalizedTier;
     }
     
-    // Profile is loading - use cached tier to prevent flash
+    // PRIORITY 4: Profile is loading - use cached tier to prevent flash
     if (profileLoading && lastKnownTierRef.current) {
       console.log('[useFeatureAccess] Using cached tier during load:', lastKnownTierRef.current);
       return lastKnownTierRef.current;
