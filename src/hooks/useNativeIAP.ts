@@ -31,6 +31,14 @@ export type PurchaseStatus =
   | 'failed'         // Error occurred - show retry option
   | 'pending';       // StoreKit returned deferred (e.g., Ask to Buy)
 
+// TIER PRIORITY: Lower index = higher priority (enterprise=0, pro=1, starter=2, free=3)
+const TIER_PRIORITY: Record<string, number> = {
+  'enterprise': 0,
+  'pro': 1,
+  'starter': 2,
+  'free': 3,
+};
+
 interface NativeIAPState {
   isAvailable: boolean;
   purchaseStatus: PurchaseStatus;
@@ -330,9 +338,10 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
 
-        // PHASE 2 FIX: Clear localStorage cache and use resetQueries for critical tier data
+        // Clear localStorage cache and upgrade protection
         localStorage.removeItem('fitconnect_cached_tier');
         localStorage.removeItem('fitconnect_tier_timestamp');
+        localStorage.removeItem('fitconnect_upgrade_protection');
         localStorage.setItem('fitconnect_coach_onboarded', 'true');
         
         // Use resetQueries for tier-related queries to force complete cache clear and refetch
@@ -381,7 +390,8 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
   /**
    * Handle IAP success callback from Despia
-   * PHASE 2 FIX: Immediately reconcile after success, then poll as fallback
+   * UPGRADE FIX: For upgrades, skip immediate reconciliation (stale RevenueCat data)
+   * and go straight to polling which checks the DATABASE directly
    */
   const handleIAPSuccess = useCallback(async (data: IAPSuccessData) => {
     clearPurchaseTimeout();
@@ -408,35 +418,60 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       purchaseStatus: 'success',
     }));
 
-    // PHASE 2: Immediately try to reconcile with RevenueCat
-    console.log('[NativeIAP] Purchase success - immediately reconciling with RevenueCat');
+    // Store upgrade protection in localStorage for extra safety
+    localStorage.setItem('fitconnect_upgrade_protection', JSON.stringify({
+      tier,
+      timestamp: Date.now(),
+    }));
+
+    // Determine if this is an UPGRADE from current tier
+    const currentTierFromCache = localStorage.getItem('fitconnect_cached_tier') || 'free';
+    const currentPriority = TIER_PRIORITY[currentTierFromCache] ?? 3;
+    const newPriority = TIER_PRIORITY[tier] ?? 3;
+    const isUpgrade = newPriority < currentPriority;
+
+    console.log('[NativeIAP] Purchase success', { 
+      tier, 
+      currentTierFromCache, 
+      isUpgrade,
+      productId: data.planID 
+    });
+
+    // UPGRADE FIX: For UPGRADES, skip immediate reconciliation entirely
+    // RevenueCat API has 30-60s lag and returns stale data which would revert the tier
+    // The webhook already updated the DB, so polling (which reads DB) is reliable
+    if (isUpgrade) {
+      console.log('[NativeIAP] UPGRADE detected - skipping reconciliation, using polling');
+      // Go straight to polling which checks the DATABASE directly
+      startPolling(tier);
+      return;
+    }
+
+    // For NEW subscriptions (not upgrades), try immediate reconciliation
+    console.log('[NativeIAP] New subscription - trying immediate reconciliation');
     reconciliationAttemptedRef.current = false;
     
     try {
-      // PHASE 1 FIX: Reduced delay from 500ms to 300ms for faster response
       await new Promise(resolve => setTimeout(resolve, 300));
       
       const { data: reconcileResult, error } = await supabase.functions.invoke('verify-subscription-entitlement');
       
-      // FIX: Accept success if we have any valid tier, not just if reconciled flag is true
-      // This handles cases where status is "already_correct" or similar
+      // Accept success if we have any valid tier
       const activePaidTiers = ['starter', 'pro', 'enterprise'];
       if (!error && reconcileResult?.tier && activePaidTiers.includes(reconcileResult.tier)) {
-        console.log('[NativeIAP] Immediate reconciliation succeeded:', reconcileResult.tier, 'reconciled:', reconcileResult.reconciled);
+        console.log('[NativeIAP] Immediate reconciliation succeeded:', reconcileResult.tier);
         
-        // Success! Update state and notify
         setState(prev => ({
           ...prev,
           isPolling: false,
           purchaseStatus: 'idle',
         }));
         
-        // PHASE 2 FIX: Clear localStorage cache and use resetQueries for critical tier data
         localStorage.removeItem('fitconnect_cached_tier');
         localStorage.removeItem('fitconnect_tier_timestamp');
+        localStorage.removeItem('fitconnect_upgrade_protection');
         localStorage.setItem('fitconnect_coach_onboarded', 'true');
         
-        // Use resetQueries for tier-related queries to force complete cache clear and refetch
         await Promise.all([
           queryClient.resetQueries({ queryKey: ['subscription-status'] }),
           queryClient.resetQueries({ queryKey: ['feature-access'] }),
