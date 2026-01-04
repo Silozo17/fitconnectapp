@@ -121,11 +121,13 @@ export function PlanAssignmentActionsModal({
           <ScrollArea className="flex-1 pr-4">
             <div className="grid gap-4 py-4">
               {/* Status */}
-              <div className="grid gap-2">
+              <div className="grid gap-2 min-w-0">
                 <Label>{t("coach:clientDetail.planActions.status")}</Label>
                 <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger>
-                    <SelectValue />
+                  <SelectTrigger className="w-full min-w-0 max-w-full overflow-hidden">
+                    <span className="flex-1 min-w-0 truncate">
+                      <SelectValue />
+                    </span>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="active">
@@ -142,19 +144,21 @@ export function PlanAssignmentActionsModal({
               </div>
 
               {/* Start Date */}
-              <div className="grid gap-2">
+              <div className="grid gap-2 min-w-0">
                 <Label>{t("coach:clientDetail.planActions.startDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "justify-start text-left font-normal",
+                        "w-full min-w-0 max-w-full overflow-hidden justify-start text-left font-normal",
                         !startDate && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : t("coach:clientDetail.planActions.selectDate")}
+                      <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                      <span className="flex-1 min-w-0 truncate">
+                        {startDate ? format(startDate, "PPP") : t("coach:clientDetail.planActions.selectDate")}
+                      </span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 z-[100]" align="start">
@@ -169,19 +173,21 @@ export function PlanAssignmentActionsModal({
               </div>
 
               {/* End Date */}
-              <div className="grid gap-2">
+              <div className="grid gap-2 min-w-0">
                 <Label>{t("coach:clientDetail.planActions.endDate")}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "justify-start text-left font-normal",
+                        "w-full min-w-0 max-w-full overflow-hidden justify-start text-left font-normal",
                         !endDate && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : t("coach:clientDetail.planActions.selectDate")}
+                      <CalendarIcon className="mr-2 h-4 w-4 shrink-0" />
+                      <span className="flex-1 min-w-0 truncate">
+                        {endDate ? format(endDate, "PPP") : t("coach:clientDetail.planActions.selectDate")}
+                      </span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0 z-[100]" align="start">
