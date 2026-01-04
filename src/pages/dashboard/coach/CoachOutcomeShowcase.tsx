@@ -97,6 +97,8 @@ export default function CoachOutcomeShowcase() {
     duration: "",
     bodyFatChange: "",
     consentAcknowledged: false,
+    beforePhotoUrl: "",
+    afterPhotoUrl: "",
   });
 
   const handleTogglePublish = (item: OutcomeShowcase) => {
@@ -231,6 +233,8 @@ export default function CoachOutcomeShowcase() {
         duration: externalForm.duration || null,
         bodyFatChange: externalForm.bodyFatChange || null,
       },
+      beforePhotoUrl: externalForm.beforePhotoUrl || undefined,
+      afterPhotoUrl: externalForm.afterPhotoUrl || undefined,
     }, {
       onSuccess: () => {
         setIsExternalModalOpen(false);
@@ -242,6 +246,8 @@ export default function CoachOutcomeShowcase() {
           duration: "",
           bodyFatChange: "",
           consentAcknowledged: false,
+          beforePhotoUrl: "",
+          afterPhotoUrl: "",
         });
       },
     });
@@ -690,6 +696,26 @@ export default function CoachOutcomeShowcase() {
                     value={externalForm.bodyFatChange}
                     onChange={(e) => setExternalForm({ ...externalForm, bodyFatChange: e.target.value })}
                     placeholder="-8%"
+                  />
+                </div>
+              </div>
+
+              {/* Before/After Photos */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>{t("showcase.beforePhoto", "Before Photo URL")}</Label>
+                  <Input
+                    value={externalForm.beforePhotoUrl}
+                    onChange={(e) => setExternalForm({ ...externalForm, beforePhotoUrl: e.target.value })}
+                    placeholder="https://..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("showcase.afterPhoto", "After Photo URL")}</Label>
+                  <Input
+                    value={externalForm.afterPhotoUrl}
+                    onChange={(e) => setExternalForm({ ...externalForm, afterPhotoUrl: e.target.value })}
+                    placeholder="https://..."
                   />
                 </div>
               </div>

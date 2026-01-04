@@ -163,11 +163,11 @@ export function useAutomationSettings() {
     upsertMutation.mutate({ type, is_enabled: enabled });
   };
 
-  const updateConfig = (type: AutomationType, config: any) => {
+  const updateConfig = (type: AutomationType, config: any, is_enabled?: boolean) => {
     const existingSetting = getSettingForType(type);
     upsertMutation.mutate({
       type,
-      is_enabled: existingSetting?.is_enabled ?? false,
+      is_enabled: is_enabled !== undefined ? is_enabled : (existingSetting?.is_enabled ?? false),
       config,
     });
   };

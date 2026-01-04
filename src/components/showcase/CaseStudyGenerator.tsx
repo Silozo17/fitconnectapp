@@ -89,7 +89,7 @@ export function CaseStudyGenerator({ open, onOpenChange }: Props) {
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            {t("common.cancel")}
+            {t("common:common.cancel", "Cancel")}
           </Button>
           <Button onClick={handleGenerate} disabled={!selectedShowcaseId || isGenerating}>
             {isGenerating ? (

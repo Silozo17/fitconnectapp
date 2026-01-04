@@ -54,6 +54,7 @@ import { NoteCard } from "@/components/dashboard/clients/NoteCard";
 import { SessionCalendar } from "@/components/dashboard/clients/SessionCalendar";
 import { HealthProfileCard } from "@/components/dashboard/clients/HealthProfileCard";
 import { PackageCreditsInfo } from "@/components/dashboard/clients/PackageCreditsInfo";
+import { EditFitnessGoalsModal } from "@/components/dashboard/clients/EditFitnessGoalsModal";
 import HabitManager from "@/components/dashboard/clients/HabitManager";
 import { FeatureGate } from "@/components/FeatureGate";
 // Phase 2 Components
@@ -131,6 +132,7 @@ const CoachClientDetail = () => {
   const [isAddProgressOpen, setIsAddProgressOpen] = useState(false);
   const [isAssignPlanOpen, setIsAssignPlanOpen] = useState(false);
   const [isPlanActionsOpen, setIsPlanActionsOpen] = useState(false);
+  const [isEditGoalsOpen, setIsEditGoalsOpen] = useState(false);
   const [selectedPlanAssignment, setSelectedPlanAssignment] = useState<typeof planAssignments[0] | null>(null);
 
   // Plan action handlers
@@ -490,7 +492,7 @@ const CoachClientDetail = () => {
             <div className="glass-card p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-display font-bold text-foreground">{t('clientDetail.overview.fitnessGoals')}</h3>
-                <Button variant="ghost" size="sm">
+                <Button variant="ghost" size="sm" onClick={() => setIsEditGoalsOpen(true)}>
                   <Edit className="w-4 h-4" />
                 </Button>
               </div>
@@ -1087,6 +1089,13 @@ const CoachClientDetail = () => {
         onRemove={handleRemovePlanAssignment}
         isUpdating={updatePlanAssignment.isPending}
         isRemoving={removePlanAssignment.isPending}
+      />
+
+      <EditFitnessGoalsModal
+        open={isEditGoalsOpen}
+        onOpenChange={setIsEditGoalsOpen}
+        clientId={id || ""}
+        currentGoals={client?.fitness_goals || []}
       />
       </div>
     </DashboardLayout>
