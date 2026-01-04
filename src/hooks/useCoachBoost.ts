@@ -1,5 +1,4 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { isDespia } from "@/lib/despia";
 import { supabase } from "@/integrations/supabase/client";
 import { useCoachProfileId } from "./useCoachProfileId";
 import { toast } from "sonner";
@@ -145,11 +144,6 @@ export const usePurchaseBoost = (countryCode?: string) => {
 
   return useMutation({
     mutationFn: async () => {
-      // PHASE 7 FIX: HARD BLOCK - Never use Stripe for boost on native apps
-      if (isDespia()) {
-        throw new Error("Boost purchase is not available in the mobile app. Please use the web version.");
-      }
-      
       const { data, error } = await supabase.functions.invoke("boost-checkout", {
         body: { countryCode: countryCode || "GB" },
       });

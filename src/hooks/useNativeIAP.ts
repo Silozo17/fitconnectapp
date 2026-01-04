@@ -323,13 +323,11 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
 
-        // PHASE 2 FIX: Use refetchQueries with await to GUARANTEE fresh data
-        await Promise.all([
-          queryClient.refetchQueries({ queryKey: ['coach-profile'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['platform-subscription'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['feature-access'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['subscription-status'], type: 'active' }),
-        ]);
+        // Invalidate queries to refresh subscription data throughout the app
+        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+        queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
+        queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+        queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
         
         // Call the success callback if provided (handles celebration/navigation)
         options?.onPurchaseComplete?.(expectedTier);
@@ -395,13 +393,13 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       purchaseStatus: 'success',
     }));
 
-    // PHASE 2 FIX: Immediately try to reconcile with RevenueCat with SHORTER delay
+    // PHASE 2: Immediately try to reconcile with RevenueCat
     console.log('[NativeIAP] Purchase success - immediately reconciling with RevenueCat');
     reconciliationAttemptedRef.current = false;
     
     try {
-      // PHASE 2 FIX: Reduced delay from 500ms to 300ms
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Small delay to allow webhook to process first
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       const { data: reconcileResult, error } = await supabase.functions.invoke('verify-subscription-entitlement');
       
@@ -418,13 +416,13 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
         
-        // PHASE 2 FIX: Use refetchQueries with await to GUARANTEE fresh data before callback
+        // Invalidate queries with refetchType: 'all' for immediate refetch
         await Promise.all([
-          queryClient.refetchQueries({ queryKey: ['coach-profile'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['platform-subscription'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['feature-access'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['subscription-status'], type: 'active' }),
-          queryClient.refetchQueries({ queryKey: ['coach-onboarding-status'], type: 'active' }),
+          queryClient.invalidateQueries({ queryKey: ['coach-profile'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['feature-access'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['subscription-status'], refetchType: 'all' }),
+          queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'], refetchType: 'all' }),
         ]);
         
         triggerHaptic('success');
