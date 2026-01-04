@@ -24,22 +24,15 @@ export function SubscriptionCheckout({ tier, billingInterval }: SubscriptionChec
   
   // PHASE 6: Hard block Stripe on native platforms
   const isNativeApp = isDespia();
-  
-  // If on native, show hard block immediately
-  if (isNativeApp) {
-    return (
-      <Alert variant="destructive" className="max-w-md">
-        <AlertTriangle className="h-4 w-4" />
-        <AlertTitle>Payment Not Available</AlertTitle>
-        <AlertDescription>
-          Please use the in-app purchase options to subscribe. Stripe checkout is not available in the mobile app.
-        </AlertDescription>
-      </Alert>
-    );
-  }
 
-  // Fetch Stripe publishable key on mount
+  // Fetch Stripe publishable key on mount (must be called unconditionally for hooks rules)
   useEffect(() => {
+    // Skip initialization on native - we'll show the block message instead
+    if (isNativeApp) {
+      setIsLoadingStripe(false);
+      return;
+    }
+    
     async function initStripe() {
       try {
         const { data, error: fnError } = await supabase.functions.invoke("get-stripe-config");
@@ -57,7 +50,7 @@ export function SubscriptionCheckout({ tier, billingInterval }: SubscriptionChec
     }
     
     initStripe();
-  }, []);
+  }, [isNativeApp]);
 
   const fetchClientSecret = useCallback(async () => {
     setError(null);
@@ -89,6 +82,19 @@ export function SubscriptionCheckout({ tier, billingInterval }: SubscriptionChec
       throw err;
     }
   }, [tier, billingInterval, countryCode]);
+  
+  // Show hard block for native apps (after all hooks are called)
+  if (isNativeApp) {
+    return (
+      <Alert variant="destructive" className="max-w-md">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Payment Not Available</AlertTitle>
+        <AlertDescription>
+          Please use the in-app purchase options to subscribe. Stripe checkout is not available in the mobile app.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   if (isLoadingStripe) {
     return <CheckoutLoading />;
