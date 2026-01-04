@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
@@ -16,7 +16,7 @@ import { SUBSCRIPTION_TIERS, TierKey, normalizeTier, getTierPosition } from "@/l
 import { useActivePricing } from "@/hooks/useActivePricing";
 import { useNativePricing } from "@/hooks/useNativePricing";
 import { useNativeIAP, SubscriptionTier } from "@/hooks/useNativeIAP";
-import { isDespia } from "@/lib/despia";
+import { isDespia, triggerHaptic } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscriptionManagement";
@@ -55,8 +55,33 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const nativePricing = useNativePricing();
   const pricing = isNativeApp ? nativePricing : webPricing;
   
-  // Native IAP hook
-  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP();
+  // PHASE 4 FIX: Handle upgrade success with celebration UI
+  const handleUpgradeSuccess = useCallback(async (tier: SubscriptionTier) => {
+    console.log('[PlatformSubscription] Upgrade success:', tier);
+    
+    // Trigger confetti celebration
+    try {
+      const { triggerConfetti, confettiPresets } = await import('@/lib/confetti');
+      triggerConfetti(confettiPresets.achievement);
+    } catch (e) {
+      console.warn('[PlatformSubscription] Confetti failed (non-critical):', e);
+    }
+    
+    // Trigger haptic feedback
+    triggerHaptic('success');
+    
+    // Show success toast
+    const tierName = SUBSCRIPTION_TIERS[tier]?.name || tier;
+    toast.success(`🎉 Upgraded to ${tierName}!`, {
+      description: 'Your new features are now active.',
+      duration: 4000,
+    });
+  }, []);
+
+  // Native IAP hook with success callback
+  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP({
+    onPurchaseComplete: handleUpgradeSuccess,
+  });
 
   // Unified subscription status - single source of truth
   const subscriptionStatus = useSubscriptionStatus();
@@ -87,7 +112,14 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const handleManageStripeSubscription = async () => {
     if (!user) return;
 
-    // Safety check: Don't open Stripe for native subscriptions
+    // PHASE 7 FIX: HARD BLOCK - Never open Stripe on native apps
+    if (isDespia()) {
+      console.warn('[PlatformSubscription] BLOCKED: Attempted to open Stripe on native app');
+      toast.info("Please manage your subscription through the App Store or Google Play");
+      return;
+    }
+
+    // Safety check: Don't open Stripe for native subscriptions (redundant but safe)
     if (isNativeSubscription) {
       toast.info("Please manage your subscription through the App Store or Google Play");
       return;
