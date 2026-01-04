@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeDateInput } from "@/components/ui/native-date-input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -167,20 +168,16 @@ export function AdminQualificationsManager({ coachId }: AdminQualificationsManag
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2 min-w-0 overflow-hidden">
                   <Label>Issue Date</Label>
-                  <Input 
-                    className="w-full min-w-0"
-                    type="date" 
+                  <NativeDateInput 
                     value={issueDate} 
-                    onChange={(e) => setIssueDate(e.target.value)}
+                    onChange={setIssueDate}
                   />
                 </div>
                 <div className="space-y-2 min-w-0 overflow-hidden">
                   <Label>Expiry Date</Label>
-                  <Input 
-                    className="w-full min-w-0"
-                    type="date" 
+                  <NativeDateInput 
                     value={expiryDate} 
-                    onChange={(e) => setExpiryDate(e.target.value)}
+                    onChange={setExpiryDate}
                   />
                 </div>
               </div>

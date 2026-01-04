@@ -32,6 +32,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { NativeTimeInput } from "@/components/ui/native-time-input";
 import { VenueAutocomplete } from "@/components/shared/VenueAutocomplete";
 import {
   Select,
@@ -1376,18 +1377,16 @@ const CoachSchedule = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>{t("schedule.availabilityModal.startTime")}</Label>
-                  <Input 
-                    type="time"
+                  <NativeTimeInput 
                     value={availStartTime}
-                    onChange={(e) => setAvailStartTime(e.target.value)}
+                    onChange={setAvailStartTime}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>{t("schedule.availabilityModal.endTime")}</Label>
-                  <Input 
-                    type="time"
+                  <NativeTimeInput 
                     value={availEndTime}
-                    onChange={(e) => setAvailEndTime(e.target.value)}
+                    onChange={setAvailEndTime}
                   />
                 </div>
               </div>

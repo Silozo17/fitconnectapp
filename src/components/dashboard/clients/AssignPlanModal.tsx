@@ -4,6 +4,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeDateInput } from "@/components/ui/native-date-input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -195,12 +196,11 @@ export function AssignPlanModal({ open, onOpenChange, clientName, clientId }: As
             {selectedPlan && (
               <div className="space-y-2 min-w-0 overflow-hidden">
                 <Label htmlFor="startDate">{t('assignPlanModal.startDate')}</Label>
-                <Input 
-                  id="startDate" 
-                  type="date" 
-                  value={startDate} 
-                  onChange={(e) => setStartDate(e.target.value)} 
-                  className="w-full min-w-0 bg-background border-border" 
+                <NativeDateInput
+                  id="startDate"
+                  value={startDate}
+                  onChange={setStartDate}
+                  className="bg-background border-border"
                 />
               </div>
             )}

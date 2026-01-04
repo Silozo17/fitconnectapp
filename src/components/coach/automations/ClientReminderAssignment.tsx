@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeDateInput } from "@/components/ui/native-date-input";
+import { NativeTimeInput } from "@/components/ui/native-time-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -212,10 +214,9 @@ export function ClientReminderAssignment({ open, onOpenChange, template }: Clien
                 <Clock className="h-4 w-4" />
                 Time
               </Label>
-              <Input 
-                type="time" 
+              <NativeTimeInput 
                 value={timeOfDay}
-                onChange={(e) => setTimeOfDay(e.target.value)}
+                onChange={setTimeOfDay}
               />
             </div>
 
@@ -254,18 +255,16 @@ export function ClientReminderAssignment({ open, onOpenChange, template }: Clien
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Start Date</Label>
-              <Input 
-                type="date" 
+              <NativeDateInput 
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                onChange={setStartDate}
               />
             </div>
             <div className="space-y-2">
               <Label>End Date (optional)</Label>
-              <Input 
-                type="date" 
+              <NativeDateInput 
                 value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
+                onChange={setEndDate}
                 min={startDate}
               />
             </div>

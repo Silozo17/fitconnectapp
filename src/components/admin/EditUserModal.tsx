@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeDateInput } from "@/components/ui/native-date-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
@@ -279,13 +280,11 @@ const EditUserModal = ({ user, open, onClose, onSaved }: EditUserModalProps) => 
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <div className="space-y-2 min-w-0 overflow-hidden">
                   <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                  <Input
+                  <NativeDateInput
                     id="dateOfBirth"
-                    type="date"
                     value={dateOfBirth}
-                    onChange={(e) => setDateOfBirth(e.target.value)}
+                    onChange={setDateOfBirth}
                     max={new Date().toISOString().split('T')[0]}
-                    className="w-full min-w-0"
                   />
                   {user.age !== null && (
                     <p className="text-xs text-muted-foreground">Current age: {user.age} years</p>

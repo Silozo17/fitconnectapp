@@ -5,7 +5,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Calendar, Clock, Video } from "lucide-react";
+import { Calendar, Video } from "lucide-react";
+import { NativeDateInput } from "@/components/ui/native-date-input";
+import { NativeTimeInput } from "@/components/ui/native-time-input";
 import { useScheduleSessionWithPackage } from "@/hooks/useScheduleSessionWithPackage";
 import { useClientActivePackage } from "@/hooks/usePackages";
 import { useCoachProfile } from "@/hooks/useCoachClients";
@@ -96,28 +98,23 @@ export function ScheduleSessionModal({ open, onOpenChange, clientName, clientId 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="date">{t('scheduleSessionModal.date')}</Label>
-                <Input
+                <NativeDateInput
                   id="date"
-                  type="date"
                   value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  className="w-full bg-background border-border"
+                  onChange={setDate}
+                  className="bg-background border-border"
                   required
                 />
               </div>
               <div className="space-y-2 min-w-0">
                 <Label htmlFor="time">{t('scheduleSessionModal.time')}</Label>
-                <div className="relative min-w-0">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary" />
-                  <Input
-                    id="time"
-                    type="time"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="w-full pl-10 bg-background border-border"
-                    required
-                  />
-                </div>
+                <NativeTimeInput
+                  id="time"
+                  value={time}
+                  onChange={setTime}
+                  className="bg-background border-border"
+                  required
+                />
               </div>
             </div>
             

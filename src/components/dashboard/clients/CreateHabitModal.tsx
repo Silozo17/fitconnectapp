@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NativeTimeInput } from "@/components/ui/native-time-input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -312,12 +313,10 @@ const CreateHabitModal = ({ open, onOpenChange, coachId, clientId, habit }: Crea
           {/* Reminder Time */}
           <div className="space-y-2 min-w-0">
             <Label htmlFor="reminder">Reminder Time (optional)</Label>
-            <Input
+            <NativeTimeInput
               id="reminder"
-              className="w-full"
-              type="time"
               value={formData.reminder_time}
-              onChange={(e) => setFormData({ ...formData, reminder_time: e.target.value })}
+              onChange={(value) => setFormData({ ...formData, reminder_time: value })}
             />
           </div>
           
