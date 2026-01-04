@@ -29,7 +29,7 @@ interface NativeSubscriptionManagementProps {
 export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeSubscriptionManagementProps) => {
   const { t } = useTranslation("settings");
   const { isIOS, isAndroid } = useEnvironment();
-  const { isCancelled, isWithinGracePeriod, hasAccessUntil, status, hasPendingChange, pendingTier, currentPeriodEnd: periodEnd } = useSubscriptionStatus();
+  const { isCancelled, isWithinGracePeriod, hasAccessUntil, status, hasPendingChange, pendingTier, currentPeriodEnd: periodEnd, isExpired, expiredTier } = useSubscriptionStatus();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
@@ -194,8 +194,12 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
   // Get pending tier display name
   const pendingTierName = pendingTier ? SUBSCRIPTION_TIERS[pendingTier]?.name || pendingTier : null;
 
+  // Get expired tier display name (for messaging)
+  const expiredTierName = expiredTier ? SUBSCRIPTION_TIERS[expiredTier]?.name || expiredTier : null;
+
   // Determine badge status
   const getBadgeStatus = (): 'active' | 'activating' | 'cancelled' | 'past_due' | 'pending_change' | 'expired' => {
+    if (isExpired) return 'expired';
     if (hasPendingChange && !isCancelled) return 'pending_change';
     if (isCancelled && isWithinGracePeriod) return 'cancelled';
     if (status === 'past_due') return 'past_due';
@@ -228,8 +232,18 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Phase 7: Show expired subscription message */}
+        {isExpired && expiredTierName && (
+          <Alert className="border-muted bg-muted/50">
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <AlertDescription className="text-muted-foreground">
+              Your <strong>{expiredTierName}</strong> subscription has expired. Subscribe again to restore your features.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Phase 5: Show pending downgrade message */}
-        {hasPendingChange && pendingTierName && formattedPendingChangeDate && !isCancelled && (
+        {hasPendingChange && pendingTierName && formattedPendingChangeDate && !isCancelled && !isExpired && (
           <Alert className="border-blue-500/30 bg-blue-500/10">
             <Clock className="h-4 w-4 text-blue-600" />
             <AlertDescription className="text-blue-700">
@@ -240,7 +254,7 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
         )}
 
         {/* Phase 3: Show cancellation warning with access end date */}
-        {isCancelled && isWithinGracePeriod && formattedGracePeriodEnd && (
+        {isCancelled && isWithinGracePeriod && formattedGracePeriodEnd && !isExpired && (
           <Alert className="border-amber-500/30 bg-amber-500/10">
             <Clock className="h-4 w-4 text-amber-600" />
             <AlertDescription className="text-amber-700">
@@ -251,15 +265,7 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
         )}
 
         {/* Past due warning */}
-        {status === 'past_due' && (
-          <Alert variant="destructive">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              Your payment is past due. Please update your payment method to avoid losing access.
-            </AlertDescription>
-          </Alert>
-        )}
-        {status === 'past_due' && (
+        {status === 'past_due' && !isExpired && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -272,7 +278,7 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
           <p>
             <strong>Current Plan:</strong> {tier.charAt(0).toUpperCase() + tier.slice(1)}
           </p>
-          {formattedExpiryDate && !isCancelled && (
+          {formattedExpiryDate && !isCancelled && !isExpired && (
             <p>
               <strong>Renews:</strong> {formattedExpiryDate}
             </p>
@@ -343,9 +349,11 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
         </div>
 
         <p className="text-xs text-muted-foreground text-center">
-          {isCancelled 
-            ? "Resubscribing will restore your access immediately"
-            : "If your plan doesn't update after purchase, tap 'Refresh Purchase Status'"
+          {isExpired
+            ? "Subscribe again to restore your premium features"
+            : isCancelled 
+              ? "Resubscribing will restore your access immediately"
+              : "If your plan doesn't update after purchase, tap 'Refresh Purchase Status'"
           }
         </p>
       </CardContent>

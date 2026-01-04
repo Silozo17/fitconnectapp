@@ -125,11 +125,16 @@ export const useFeatureAccess = () => {
     return lastKnownTierRef.current;
   })();
   
-  // Phase 5: For cancelled subscriptions within grace period, use the paid tier for access
-  // This ensures users keep their features until their paid period actually ends
+  // Phase 5 & 7: Determine access tier based on subscription state
+  // - For cancelled subscriptions within grace period: use paid tier
+  // - For expired subscriptions: tier is already downgraded in useSubscriptionStatus
   const accessTier: TierKey = (() => {
+    // Phase 7: If subscription is expired, useSubscriptionStatus already returns downgraded tier
+    if (subscriptionStatus.isExpired) {
+      return subscriptionStatus.tier; // Already downgraded to pendingTier or 'free'
+    }
+    // Phase 5: User is cancelled but still has access until period ends
     if (subscriptionStatus.isWithinGracePeriod && subscriptionStatus.tier !== 'free') {
-      // User is cancelled but still has access until period ends
       return subscriptionStatus.tier;
     }
     return effectiveTier || 'free';
@@ -202,12 +207,15 @@ export const useFeatureAccess = () => {
     isLoading: profileLoading || clientsLoading,
     // New: Expose whether we have confirmed tier data
     hasFreshData: hasReceivedFreshDataRef.current,
-    // Phase 5: Expose cancellation and pending change status for UI messaging
+    // Phase 5 & 7: Expose subscription state for UI messaging
     isCancelled: subscriptionStatus.isCancelled,
     isWithinGracePeriod: subscriptionStatus.isWithinGracePeriod,
     accessEndsDate: subscriptionStatus.hasAccessUntil,
     hasPendingChange: subscriptionStatus.hasPendingChange,
     pendingTier: subscriptionStatus.pendingTier,
     pendingChangeDate: subscriptionStatus.currentPeriodEnd,
+    // Phase 7: Expiry state
+    isExpired: subscriptionStatus.isExpired,
+    expiredTier: subscriptionStatus.expiredTier,
   };
 };
