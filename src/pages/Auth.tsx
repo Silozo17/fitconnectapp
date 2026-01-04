@@ -297,7 +297,10 @@ const Auth = () => {
   const handleOTPVerified = async () => {
     if (!pendingSignupData) return;
 
+    // Set flag BEFORE signup to prevent GuestOnlyRoute flash
+    sessionStorage.setItem('fitconnect_signup_in_progress', 'true');
     setIsSubmitting(true);
+    
     try {
       const { error } = await signUp(
         pendingSignupData.email, 
@@ -307,6 +310,9 @@ const Auth = () => {
         pendingSignupData.lastName
       );
       if (error) {
+        // Clear flag on error
+        sessionStorage.removeItem('fitconnect_signup_in_progress');
+        
         if (error.message.includes("already registered")) {
           toast.error(t("auth.emailAlreadyRegistered"));
           setShowOTPVerification(false);
@@ -329,13 +335,19 @@ const Auth = () => {
         // Mark that we've already navigated to prevent useEffect from triggering duplicate navigation
         setHasNavigated(true);
         
-        // Explicit navigation based on selected role
+        // Explicit navigation based on selected role - BEFORE auth state change can trigger GuestOnlyRoute
         const targetRoute = selectedRole === "coach" 
           ? "/onboarding/coach" 
           : "/onboarding/client";
         navigate(targetRoute, { replace: true });
+        
+        // Clear flag after navigation (slight delay to ensure navigation starts)
+        setTimeout(() => {
+          sessionStorage.removeItem('fitconnect_signup_in_progress');
+        }, 500);
       }
     } catch (error) {
+      sessionStorage.removeItem('fitconnect_signup_in_progress');
       toast.error(t("auth.unexpectedError"));
     } finally {
       setIsSubmitting(false);
