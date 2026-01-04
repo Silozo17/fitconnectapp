@@ -2,7 +2,7 @@ import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
-import { Crown, Check, Loader2, Clock, AlertTriangle, ExternalLink, CreditCard } from "lucide-react";
+import { Crown, Check, Loader2, Clock, AlertTriangle, ExternalLink, CreditCard, Zap, Star, Users, Brain, TrendingUp, MessageSquare, Infinity, Headphones, Cog } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +43,34 @@ const translateFeature = (featureKey: string, t: TFunction, tPages: TFunction): 
     return tPages(`pricing.tierFeatures.${match[1]}`);
   }
   return featureKey;
+};
+
+// Map tier icons for display
+const TIER_ICONS: Record<TierKey, typeof Crown> = {
+  free: Crown,
+  starter: Zap,
+  pro: Star,
+  enterprise: Crown,
+  founder: Crown,
+};
+
+// Dynamic benefits per tier
+const TIER_BENEFITS = {
+  starter: [
+    { icon: Users, text: "Manage up to 10 clients" },
+    { icon: Crown, text: "Workout plan builder" },
+    { icon: MessageSquare, text: "Client messaging & scheduling" },
+  ],
+  pro: [
+    { icon: Users, text: "Manage up to 50 clients" },
+    { icon: Brain, text: "AI workout & meal planners" },
+    { icon: TrendingUp, text: "Advanced analytics & insights" },
+  ],
+  enterprise: [
+    { icon: Infinity, text: "Unlimited clients" },
+    { icon: Headphones, text: "Priority support & account manager" },
+    { icon: Cog, text: "Custom integrations & white-label" },
+  ],
 };
 
 const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscriptionProps) => {
@@ -280,7 +308,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
 
             {/* Billing interval toggle for native apps - using Switch like onboarding */}
             {isNativeApp && (
-              <div className="mb-6 flex items-center justify-center gap-3">
+              <div className="mb-6 flex items-center justify-center gap-2">
                 <span className={`text-sm font-medium transition-colors ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
                   {t("subscription.monthly", "Monthly")}
                 </span>
@@ -291,21 +319,23 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                 <span className={`text-sm font-medium transition-colors ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
                   {t("subscription.yearly", "Yearly")}
                 </span>
-                {billingInterval === 'yearly' && (
-                  <Badge variant="secondary" className="ml-1 text-xs">
-                    {t("subscription.save", "Save")} ~17%
-                  </Badge>
-                )}
+                {/* Always show Save badge, highlight when yearly selected */}
+                <Badge 
+                  variant={billingInterval === 'yearly' ? 'default' : 'secondary'} 
+                  className={`ml-1 text-xs ${billingInterval === 'monthly' ? 'opacity-60' : ''}`}
+                >
+                  {t("subscription.save", "Save")} ~17%
+                </Badge>
               </div>
             )}
 
-          {/* Tier cards - exclude free tier, show as compact cards */}
+          {/* Tier cards - compact Apple-style like onboarding */}
           {(() => {
             // Filter out free tier from display - free is handled by "Cancel Subscription" button
             const paidTiers = (Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
               .filter(([tierKey, tier]) => {
                 if (tier.adminOnly && activeTier !== tierKey) return false;
-                if (tierKey === 'free') return false; // Never show free as a selectable card
+                if (tierKey === 'free') return false;
                 return true;
               });
 
@@ -314,158 +344,89 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
               const isLoading = loadingTier === tierKey || (isPurchasing && loadingTier === null);
               const buttonConfig = getButtonConfig(tierKey);
               const isPricedTier = ['starter', 'pro', 'enterprise'].includes(tierKey);
+              const Icon = TIER_ICONS[tierKey];
+              
+              const price = isPricedTier 
+                ? pricing.getSubscriptionPrice(tierKey as SubscriptionTier, (tierKey === 'enterprise' && isAndroidNative) ? 'monthly' : billingInterval)
+                : tier.prices.monthly.amount;
+              const monthlyEquivalent = (billingInterval === 'yearly' && !(tierKey === 'enterprise' && isAndroidNative))
+                ? Math.round(price / 12) 
+                : price;
 
               return (
                 <div
                   key={tierKey}
                   className={cn(
-                    "border rounded-lg p-4 relative transition-all h-full",
+                    "p-3 rounded-xl border-2 transition-all flex items-center gap-3",
                     isCurrentTier 
                       ? "border-primary bg-primary/5" 
-                      : "border-border hover:border-primary/50",
-                    tier.highlighted && "ring-2 ring-primary"
+                      : "border-border hover:border-muted-foreground"
                   )}
                 >
-                {isCurrentTier && (
-                    <Badge className="absolute top-2 right-2">{t("subscription.currentPlan")}</Badge>
-                  )}
-                  {tier.highlighted && !isCurrentTier && (
-                    <Badge variant="secondary" className="absolute top-2 right-2">{t("subscription.popular")}</Badge>
-                  )}
-                  
-                  <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
-                  {tierKey === 'enterprise' && isAndroidNative && billingInterval === 'yearly' && (
-                    <p className="text-xs text-muted-foreground mb-2">
-                      {t("subscription.monthlyOnlyAndroid", "Monthly only on Android")}
-                    </p>
-                  )}
-                  <div className="flex items-baseline gap-1 mb-4">
-                    <span className="text-3xl font-bold">
-                      {tier.prices.monthly.amount === 0 
-                        ? t("subscription.free")
-                        : (isPricedTier
-                            ? pricing.formatPrice(
-                                pricing.getSubscriptionPrice(
-                                  tierKey as SubscriptionTier, 
-                                  (tierKey === 'enterprise' && isAndroidNative) ? 'monthly' : billingInterval
-                                )
-                              )
-                            : `${pricing.currencySymbol}${tier.prices.monthly.amount}`)}
-                    </span>
-                    {tier.prices.monthly.amount > 0 && (
-                      <span className="text-muted-foreground">
-                        {billingInterval === 'yearly' && !(tierKey === 'enterprise' && isAndroidNative)
-                          ? t("subscription.perYear", "/year") 
-                          : t("subscription.perMonth")}
-                      </span>
-                    )}
+                  {/* Radio-style indicator */}
+                  <div className={cn(
+                    "w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0",
+                    isCurrentTier ? "border-primary bg-primary" : "border-muted-foreground"
+                  )}>
+                    {isCurrentTier && <Check className="w-3 h-3 text-primary-foreground" />}
                   </div>
-
-                  <ul className="space-y-2 mb-4">
-                    {tier.featureKeys.slice(0, 5).map((featureKey, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm">
-                        <Check className="h-4 w-4 text-primary" />
-                        <span className="text-muted-foreground">{translateFeature(featureKey, t, tPages)}</span>
-                      </li>
-                    ))}
-                    {tier.featureKeys.length > 5 && (
-                      <li className="text-xs text-muted-foreground">
-                        +{tier.featureKeys.length - 5} more features
-                      </li>
-                    )}
-                  </ul>
                   
-                  <a 
-                    href="/pricing" 
-                    className="text-xs text-muted-foreground underline hover:text-primary block mb-3"
-                  >
-                    See full feature comparison
-                  </a>
-
-                  {isCurrentTier ? (
-                    activeTier !== "free" ? (
-                      isNativeSubscription ? (
-                        <Button variant="outline" className="w-full" disabled>
-                          {t("subscription.currentPlan")}
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={handleManageStripeSubscription}
-                          disabled={loadingTier === "manage"}
-                        >
-                          {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                          {t("subscription.manageSubscription")}
-                        </Button>
-                      )
-                    ) : (
-                      <Button variant="outline" className="w-full" disabled>
-                        {t("subscription.currentPlan")}
-                      </Button>
-                    )
-                  ) : tierKey === "free" ? (
-                    isNativeSubscription ? (
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={() => {
-                          // Open native subscription management for cancellation
-                          if (typeof window !== 'undefined' && (window as any).despia?.openURL) {
-                            (window as any).despia.openURL('https://apps.apple.com/account/subscriptions');
-                          } else {
-                            window.open('https://apps.apple.com/account/subscriptions', '_blank');
-                          }
-                        }}
+                  {/* Tier icon */}
+                  <div className={cn(
+                    "w-9 h-9 rounded-lg flex items-center justify-center shrink-0",
+                    isCurrentTier ? "bg-primary" : "bg-secondary"
+                  )}>
+                    <Icon className={cn("w-4 h-4", isCurrentTier ? "text-primary-foreground" : "text-muted-foreground")} />
+                  </div>
+                  
+                  {/* Tier info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-foreground text-sm">{tier.name}</h3>
+                      {isCurrentTier && <Badge className="text-xs py-0">{t("subscription.currentPlan")}</Badge>}
+                      {tier.highlighted && !isCurrentTier && <Badge variant="secondary" className="text-xs py-0">{t("subscription.popular")}</Badge>}
+                    </div>
+                    <p className="text-xs text-muted-foreground line-clamp-1">{tier.description}</p>
+                  </div>
+                  
+                  {/* Price + Action */}
+                  <div className="text-right shrink-0">
+                    <span className="font-bold text-primary text-sm">
+                      {pricing.formatPrice(monthlyEquivalent)}
+                    </span>
+                    <span className="text-xs text-muted-foreground">/mo</span>
+                    
+                    {!isCurrentTier && (
+                      <Button
+                        variant={buttonConfig.variant}
+                        size="sm"
+                        className="mt-1 h-7 text-xs w-full"
+                        onClick={() => handleSubscribe(tierKey)}
+                        disabled={!!loadingTier || isPurchasing}
                       >
-                        {t("subscription.cancelSubscription", "Cancel Subscription")}
+                        {(isLoading || isPurchasing) && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                        {buttonConfig.text}
                       </Button>
-                    ) : (
+                    )}
+                    {isCurrentTier && !isNativeSubscription && activeTier !== 'free' && (
                       <Button
                         variant="outline"
-                        className="w-full"
+                        size="sm"
+                        className="mt-1 h-7 text-xs w-full"
                         onClick={handleManageStripeSubscription}
                         disabled={loadingTier === "manage"}
                       >
-                        {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        {t("subscription.downgrade")}
+                        {loadingTier === "manage" && <Loader2 className="h-3 w-3 mr-1 animate-spin" />}
+                        {t("subscription.manage", "Manage")}
                       </Button>
-                    )
-                  ) : (
-                    <Button
-                      variant={buttonConfig.variant}
-                      className="w-full"
-                      onClick={() => handleSubscribe(tierKey)}
-                      disabled={!!loadingTier || isPurchasing}
-                    >
-                      {(isLoading || isPurchasing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                      {buttonConfig.text}
-                    </Button>
-                  )}
+                    )}
+                  </div>
                 </div>
               );
             };
 
-            return isMobile ? (
-              <Carousel 
-                className="w-full overflow-visible" 
-                opts={{ align: "center", containScroll: "trimSnaps" }}
-              >
-                <CarouselContent className="py-4">
-                  {paidTiers.map((tierEntry) => (
-                    <CarouselItem key={tierEntry[0]} className="basis-[90%] px-2">
-                      {renderTierCard(tierEntry)}
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <div className="flex justify-center gap-1 mt-4">
-                  {paidTiers.map((_, idx) => (
-                    <div key={idx} className="w-2 h-2 rounded-full bg-muted" />
-                  ))}
-                </div>
-              </Carousel>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            return (
+              <div className="space-y-2">
                 {paidTiers.map(renderTierCard)}
               </div>
             );
