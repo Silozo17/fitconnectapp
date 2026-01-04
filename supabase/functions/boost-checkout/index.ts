@@ -32,9 +32,22 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    // Get country code from request body
-    const { countryCode } = await req.json() as { countryCode?: string };
-    logStep("Request parsed", { countryCode });
+    // Get country code and native app flag from request body
+    const { countryCode, isNativeApp } = await req.json() as { countryCode?: string; isNativeApp?: boolean };
+    logStep("Request parsed", { countryCode, isNativeApp });
+
+    // PHASE 6: Hard block Stripe checkout on native platforms (backend enforcement)
+    // Check both explicit flag and User-Agent for native app indicators
+    const userAgent = req.headers.get("user-agent") || "";
+    const isNativeRequest = isNativeApp === true || 
+      userAgent.includes("Despia") || 
+      userAgent.includes("FitConnect-iOS") || 
+      userAgent.includes("FitConnect-Android");
+    
+    if (isNativeRequest) {
+      logStep("BLOCKED: Native app attempted Stripe boost checkout", { userAgent, isNativeApp });
+      throw new Error("Stripe boost checkout is not available in the mobile app. Please use in-app purchases.");
+    }
 
     // Get authenticated user
     const authHeader = req.headers.get("Authorization");
