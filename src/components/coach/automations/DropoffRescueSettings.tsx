@@ -63,10 +63,9 @@ export function DropoffRescueSettings() {
       stage3_days: stage3Days,
       stage1_template: stage1Template,
     };
-    updateConfig('dropoff_rescue', newConfig);
-    if (isEnabled !== dropoffSetting?.is_enabled) {
-      toggleAutomation('dropoff_rescue', isEnabled);
-    }
+    
+    // Save config AND enabled state together to avoid stale state issues
+    updateConfig('dropoff_rescue', newConfig, isEnabled);
   };
 
   const [isTesting, setIsTesting] = useState(false);

@@ -102,12 +102,12 @@ export const LogProgressModal = ({ open, onOpenChange, clientId }: LogProgressMo
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[550px] bg-card border-border max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[550px] bg-card border-border max-h-[85vh] flex flex-col">
+        <DialogHeader className="shrink-0">
           <DialogTitle className="text-foreground">{t("progress.logProgress")}</DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto space-y-6 pr-1">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-3 bg-secondary">
               <TabsTrigger value="weight" className="gap-2">
@@ -267,15 +267,16 @@ export const LogProgressModal = ({ open, onOpenChange, clientId }: LogProgressMo
             />
           </div>
 
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
-              {tCommon("actions.cancel")}
-            </Button>
-            <Button type="submit" disabled={createProgress.isPending}>
-              {createProgress.isPending ? t("progress.saving") : t("progress.logProgress")}
-            </Button>
-          </DialogFooter>
         </form>
+
+        <DialogFooter className="shrink-0 border-t border-border pt-4 mt-4">
+          <Button type="button" variant="outline" onClick={handleClose}>
+            {tCommon("actions.cancel")}
+          </Button>
+          <Button onClick={handleSubmit(onSubmit)} disabled={createProgress.isPending}>
+            {createProgress.isPending ? t("progress.saving") : t("progress.logProgress")}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

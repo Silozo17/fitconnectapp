@@ -1714,7 +1714,10 @@
     "sessionAttendance": "Frekwencja sesji",
     "exportComparison": "Eksportuj",
     "noDataForPeriod": "Brak danych dla wybranego okresu",
-    "selectAtLeastTwo": "Wybierz co najmniej 2 klientów"
+    "selectAtLeastTwo": "Wybierz co najmniej 2 klientów",
+    "client": "Klient",
+    "startWeight": "Waga początkowa",
+    "currentWeight": "Aktualna waga"
   },
   "caseStudies": {
     "title": "Studia przypadków",

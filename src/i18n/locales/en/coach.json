@@ -1615,6 +1615,7 @@
     "subtitle": "AI-powered insights for your clients",
     "noRecommendations": "No recommendations at this time",
     "generateNew": "Generate Recommendations",
+    "generating": "Generating...",
     "applyToPlan": "Apply to Plan",
     "dismiss": "Dismiss",
     "applied": "Applied",
@@ -1709,7 +1710,10 @@
     "sessionAttendance": "Session Attendance",
     "exportComparison": "Export",
     "noDataForPeriod": "No data available for the selected period",
-    "selectAtLeastTwo": "Select at least 2 clients to compare"
+    "selectAtLeastTwo": "Select at least 2 clients to compare",
+    "client": "Client",
+    "startWeight": "Start Weight",
+    "currentWeight": "Current Weight"
   },
   "caseStudies": {
     "title": "Case Studies",
