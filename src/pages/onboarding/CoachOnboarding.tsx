@@ -9,7 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Check, Loader2, Crown, Zap, Sparkles, Star } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Check, Loader2, Crown, Zap, Sparkles, Star, Users, Dumbbell, Brain, ExternalLink } from "lucide-react";
+import { LegalLinks, LegalDisclosure } from "@/components/shared/LegalLinks";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { toast } from "sonner";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
@@ -29,7 +31,6 @@ import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { triggerHaptic } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { useQueryClient } from "@tanstack/react-query";
-import { LegalDisclosure } from "@/components/shared/LegalLinks";
 
 // Full steps array (for new users without client profile)
 const FULL_STEPS = [
@@ -68,10 +69,14 @@ const TIER_ICONS: Record<TierKey, typeof Sparkles> = {
   founder: Crown,
 };
 
-// Get displayable tiers (exclude admin-only tiers)
-const getDisplayableTiers = () => {
+// Get displayable tiers (exclude admin-only tiers AND free tier for paywall)
+const getDisplayableTiers = (excludeFree = false) => {
   return (Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS.free][])
-    .filter(([_, config]) => !config.adminOnly)
+    .filter(([key, config]) => {
+      if (config.adminOnly) return false;
+      if (excludeFree && key === 'free') return false;
+      return true;
+    })
     .map(([key, config]) => ({
       id: key,
       name: config.name,
@@ -658,42 +663,38 @@ const CoachOnboarding = () => {
       };
     }
 
-    // Choose Your Plan
+    // Choose Your Plan - Footer is now handled inside the step content (Apple-style paywall)
     if (currentStepName === "Choose Your Plan") {
-      const isPaidTier = formData.subscriptionTier !== "free";
-      const isProcessingIAP = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
-      
-      // On native mobile (iOS/Android): save profile FIRST, then trigger IAP
-      if (isNativeMobile) {
-        return {
-          primary: { 
-            label: "Select Plan", 
-            onClick: async () => {
-              // PHASE 1 FIX: Always call handleComplete first to save profile with onboarding_completed: true
-              // For paid tiers, handleComplete triggers IAP after saving
-              // For free tier, handleComplete navigates directly
-              await handleComplete();
-            },
-            disabled: isNavigating || isProcessingIAP || !hasSelectedPlan,
-            loading: isSubmitting || isProcessingIAP,
-          },
-          secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating || isProcessingIAP } : undefined,
-        };
-      }
-      
-      // Web: unified "Select Plan" button
-      return {
-        primary: { 
-          label: "Select Plan", 
-          onClick: handleComplete,
-          disabled: isNavigating || !hasSelectedPlan,
-          loading: isSubmitting,
-        },
-        secondary: baseSecondary ? { ...baseSecondary, disabled: isNavigating } : undefined,
-      };
+      return undefined; // No default footer - we render custom CTA inline
     }
 
     return undefined;
+  };
+
+  // Handle restore purchases for native apps
+  const handleRestorePurchases = async () => {
+    if (typeof window !== 'undefined' && (window as any).despia?.restorePurchases) {
+      try {
+        toast.loading("Restoring purchases...");
+        await (window as any).despia.restorePurchases();
+        toast.success("Purchases restored successfully");
+      } catch (error) {
+        console.error("Failed to restore purchases:", error);
+        toast.error("Failed to restore purchases");
+      }
+    } else {
+      toast.info("Restore purchases is only available on iOS/Android");
+    }
+  };
+
+  // Handle "Continue without upgrading" - sets free tier and completes onboarding
+  const handleContinueWithoutUpgrading = async () => {
+    handleInputChange("subscriptionTier", "free");
+    setHasSelectedPlan(true);
+    // Small delay to ensure state is set, then complete
+    setTimeout(() => {
+      handleComplete();
+    }, 100);
   };
 
   const renderStepContent = () => {
@@ -1001,567 +1002,179 @@ const CoachOnboarding = () => {
         ) : null;
 
       case "Choose Your Plan": {
-        const tiers = getDisplayableTiers();
-        const freeTier = tiers.find(t => t.id === 'free');
-        const paidTiers = tiers.filter(t => t.id !== 'free');
+        // Apple-style paywall - get ONLY paid tiers (no free plan card)
+        const paidTiers = getDisplayableTiers(true); // excludeFree = true
+        const isProcessingIAP = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
         
-        // For native mobile (iOS/Android): show Monthly + Annual stacked vertically for paid tiers
-        if (isNativeMobile) {
-          return (
-            <div className="space-y-5">
-              <div className="text-center mb-4">
-                <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
-                  Choose your plan
-                </h2>
-                <p className="text-muted-foreground text-sm mt-1.5">Swipe to browse plans</p>
-              </div>
-
-              <Carousel
-                opts={{ align: "center", loop: true }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-2">
-                  {/* Free tier - single centered card */}
-                  {freeTier && (
-                    <CarouselItem className="pl-2 basis-[85%]">
-                      <div className="flex justify-center">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleInputChange("subscriptionTier", "free");
-                            setHasSelectedPlan(true);
-                          }}
-                          className={`w-full max-w-xs p-4 rounded-xl border-2 transition-all text-left ${
-                            formData.subscriptionTier === "free" 
-                              ? "border-primary bg-primary/10" 
-                              : "border-border hover:border-muted-foreground"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              formData.subscriptionTier === "free" ? "bg-primary" : "bg-secondary"
-                            }`}>
-                              <Sparkles className={`w-5 h-5 ${formData.subscriptionTier === "free" ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                            </div>
-                            <div>
-                              <h3 className="font-display font-bold text-foreground">{freeTier.name}</h3>
-                              <span className="text-lg font-bold text-primary">{nativePricing.formatPrice(0)}<span className="text-xs text-muted-foreground">/mo</span></span>
-                            </div>
-                            {formData.subscriptionTier === "free" && <Check className="w-5 h-5 text-primary ml-auto" />}
-                          </div>
-                          <p className="text-muted-foreground text-xs mb-2">{freeTier.description}</p>
-                          <ul className="space-y-0.5">
-                            {freeTier.features.slice(0, 3).map((feature, i) => (
-                              <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                                <span className="break-words">{feature}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </button>
-                      </div>
-                    </CarouselItem>
-                  )}
-                  
-                  {/* Paid tiers - Monthly + Annual stacked vertically */}
-                  {paidTiers.map((tier) => {
-                    const Icon = tier.icon;
-                    const tierConfig = SUBSCRIPTION_TIERS[tier.id as TierKey];
-                    const monthlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'monthly');
-                    const yearlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'yearly');
-                    const yearlyMonthly = Math.round(yearlyPrice / 12);
-                    const savings = nativePricing.getSubscriptionSavings(tier.id as SubscriptionTier);
-                    
-                    const isSelectedMonthly = formData.subscriptionTier === tier.id && billingInterval === 'monthly';
-                    const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
-                    
-                    return (
-                      <CarouselItem key={tier.id} className="pl-2 basis-[85%]">
-                        <div className="flex flex-col gap-3">
-                          {/* Monthly card */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleInputChange("subscriptionTier", tier.id);
-                              setBillingInterval('monthly');
-                              setHasSelectedPlan(true);
-                            }}
-                            className={`w-full p-3 rounded-xl border-2 transition-all text-left relative ${
-                              isSelectedMonthly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 mb-1.5">
-                              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                                isSelectedMonthly ? "bg-primary" : "bg-secondary"
-                              }`}>
-                                <Icon className={`w-4 h-4 ${isSelectedMonthly ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-display font-bold text-foreground text-sm">{tier.name} - Monthly</h3>
-                                <span className="text-base font-bold text-primary">{nativePricing.formatPrice(monthlyPrice)}<span className="text-xs text-muted-foreground">/mo</span></span>
-                              </div>
-                              {isSelectedMonthly && <Check className="w-5 h-5 text-primary" />}
-                            </div>
-                            <ul className="space-y-0.5 ml-12">
-                              {tier.features.slice(0, 2).map((feature, i) => (
-                                <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                  <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                                  <span className="break-words line-clamp-1">{feature}</span>
-                                </li>
-                              ))}
-                              {tier.features.length > 2 && (
-                                <li className="text-xs text-primary">+{tier.features.length - 2} more</li>
-                              )}
-                            </ul>
-                          </button>
-                          
-                          {/* Annual card */}
-                          <button
-                            type="button"
-                            onClick={() => {
-                              handleInputChange("subscriptionTier", tier.id);
-                              setBillingInterval('yearly');
-                              setHasSelectedPlan(true);
-                            }}
-                            className={`w-full p-3 rounded-xl border-2 transition-all text-left relative ${
-                              isSelectedYearly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
-                            }`}
-                          >
-                            {savings > 0 && (
-                              <span className="absolute -top-2 right-3 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded-full">
-                                Save {nativePricing.formatPrice(savings)}
-                              </span>
-                            )}
-                            <div className="flex items-center gap-3 mb-1.5">
-                              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-                                isSelectedYearly ? "bg-primary" : "bg-secondary"
-                              }`}>
-                                <Icon className={`w-4 h-4 ${isSelectedYearly ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="font-display font-bold text-foreground text-sm">{tier.name} - Annual</h3>
-                                <div>
-                                  <span className="text-base font-bold text-primary">{nativePricing.formatPrice(yearlyMonthly)}<span className="text-xs text-muted-foreground">/mo</span></span>
-                                  <span className="text-xs text-muted-foreground ml-2">Billed {nativePricing.formatPrice(yearlyPrice)}/year</span>
-                                </div>
-                              </div>
-                              {isSelectedYearly && <Check className="w-5 h-5 text-primary" />}
-                            </div>
-                            <ul className="space-y-0.5 ml-12">
-                              {tier.features.slice(0, 2).map((feature, i) => (
-                                <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                  <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                                  <span className="break-words line-clamp-1">{feature}</span>
-                                </li>
-                              ))}
-                              {tier.features.length > 2 && (
-                                <li className="text-xs text-primary">+{tier.features.length - 2} more</li>
-                              )}
-                            </ul>
-                          </button>
-                        </div>
-                      </CarouselItem>
-                    );
-                  })}
-                </CarouselContent>
-              </Carousel>
-
-              {/* Dot indicators for iOS - clickable */}
-              <div className="flex justify-center gap-1.5 pt-2">
-                {[freeTier, ...paidTiers].filter(Boolean).map((tier) => {
-                  if (!tier) return null;
-                  const isActive = formData.subscriptionTier === tier.id;
-                  return (
-                    <button
-                      key={tier.id}
-                      type="button"
-                      onClick={() => {
-                        handleInputChange("subscriptionTier", tier.id);
-                        if (tier.id !== 'free') setBillingInterval('monthly');
-                        setHasSelectedPlan(true);
-                      }}
-                      className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                        isActive ? "bg-primary" : "bg-border hover:bg-muted-foreground"
-                      }`}
-                      aria-label={`Select ${tier.name}`}
-                    />
-                  );
-                })}
-              </div>
-              
-              {/* Visual hint when no plan selected */}
-              {!hasSelectedPlan && (
-                <div className="text-center py-2">
-                  <p className="text-sm text-amber-500 font-medium animate-pulse">
-                    👆 Tap a plan to select it
-                  </p>
-                </div>
-              )}
-              
-              <p className="text-sm text-muted-foreground text-center mt-2">
-                <a href="/pricing" target="_blank" className="underline hover:text-primary">
-                  Compare all features
-                </a>
+        // Key benefits for the hero section
+        const benefits = [
+          { icon: Users, text: "Unlimited client management & messaging" },
+          { icon: Dumbbell, text: "Custom workout & nutrition plan builders" },
+          { icon: Brain, text: "AI-powered program generation & insights" },
+        ];
+        
+        return (
+          <div className="flex flex-col min-h-[60vh]">
+            {/* Hero section with title */}
+            <div className="text-center mb-6">
+              <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+                Unlock all coaching features
+              </h2>
+              <p className="text-muted-foreground text-sm mt-2">
+                Start your 7-day free trial today
               </p>
             </div>
-          );
-        }
-        
-        // Non-iOS: Web version with responsive grid on desktop, carousel on mobile
-        const isMobileView = typeof window !== 'undefined' && window.innerWidth < 768;
-        
-        // Desktop grid layout - all plans visible at once
-        const renderDesktopGrid = () => (
-          <div className="hidden md:block">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
-              {/* Free tier */}
-              {freeTier && (() => {
-                const Icon = freeTier.icon;
-                const isSelected = formData.subscriptionTier === freeTier.id;
+
+            {/* Key benefits list */}
+            <div className="space-y-3 mb-6">
+              {benefits.map((benefit, idx) => {
+                const Icon = benefit.icon;
                 return (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleInputChange("subscriptionTier", freeTier.id);
-                      setBillingInterval('monthly');
-                      setHasSelectedPlan(true);
-                    }}
-                    className={`w-full h-full p-4 lg:p-5 rounded-xl border-2 transition-all text-left relative hover:shadow-lg ${
-                      isSelected ? "border-primary bg-primary/10 shadow-md" : "border-border hover:border-muted-foreground"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${
-                        isSelected ? "bg-primary" : "bg-secondary"
-                      }`}>
-                        <Icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-display font-bold text-foreground text-base lg:text-lg">{freeTier.name}</h3>
-                        <span className="text-xl lg:text-2xl font-bold text-primary">Free</span>
-                      </div>
-                      {isSelected && <Check className="w-6 h-6 text-primary" />}
+                  <div key={idx} className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      <Icon className="h-4 w-4 text-primary" />
                     </div>
-                    <p className="text-muted-foreground text-sm mb-3">{freeTier.description}</p>
-                    <ul className="space-y-1">
-                      {freeTier.features.slice(0, 4).map((feature, i) => (
-                        <li key={i} className="text-xs lg:text-sm text-muted-foreground flex items-start gap-2">
-                          <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                          <span className="break-words">{feature}</span>
-                        </li>
-                      ))}
-                      {freeTier.features.length > 4 && (
-                        <li className="text-sm text-primary font-medium">+{freeTier.features.length - 4} more</li>
-                      )}
-                    </ul>
-                  </button>
-                );
-              })()}
-              
-              {/* Paid tiers - each with Monthly + Annual stacked */}
-              {paidTiers.map((tier) => {
-                const Icon = tier.icon;
-                const tierConfig = SUBSCRIPTION_TIERS[tier.id as TierKey];
-                const monthlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'monthly');
-                const yearlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'yearly');
-                const yearlyMonthlyEquivalent = Math.round(yearlyPrice / 12);
-                const savings = nativePricing.getSubscriptionSavings(tier.id as SubscriptionTier);
-                
-                const isSelectedMonthly = formData.subscriptionTier === tier.id && billingInterval === 'monthly';
-                const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
-                
-                return (
-                  <div key={tier.id} className="flex flex-col gap-3">
-                    {/* Monthly card */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleInputChange("subscriptionTier", tier.id);
-                        setBillingInterval('monthly');
-                        setHasSelectedPlan(true);
-                      }}
-                      className={`w-full p-4 lg:p-5 rounded-xl border-2 transition-all text-left relative hover:shadow-lg ${
-                        isSelectedMonthly ? "border-primary bg-primary/10 shadow-md" : "border-border hover:border-muted-foreground"
-                      }`}
-                    >
-                      {tier.popular && (
-                        <span className="absolute -top-2.5 right-3 px-3 py-1 bg-accent text-accent-foreground text-xs font-bold rounded-full">
-                          Popular
-                        </span>
-                      )}
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${
-                          isSelectedMonthly ? "bg-primary" : "bg-secondary"
-                        }`}>
-                          <Icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isSelectedMonthly ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-display font-bold text-foreground text-base lg:text-lg">{tier.name}</h3>
-                          <span className="text-xl lg:text-2xl font-bold text-primary">{nativePricing.formatPrice(monthlyPrice)}<span className="text-sm text-muted-foreground">/mo</span></span>
-                        </div>
-                        {isSelectedMonthly && <Check className="w-6 h-6 text-primary" />}
-                      </div>
-                      <p className="text-muted-foreground text-sm mb-3">{tier.description}</p>
-                      <ul className="space-y-1">
-                        {tier.features.slice(0, 3).map((feature, i) => (
-                          <li key={i} className="text-xs lg:text-sm text-muted-foreground flex items-start gap-2">
-                            <Check className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                            <span className="break-words line-clamp-1">{feature}</span>
-                          </li>
-                        ))}
-                        {tier.features.length > 3 && (
-                          <li className="text-sm text-primary font-medium">+{tier.features.length - 3} more</li>
-                        )}
-                      </ul>
-                    </button>
-                    
-                    {/* Annual card with savings */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleInputChange("subscriptionTier", tier.id);
-                        setBillingInterval('yearly');
-                        setHasSelectedPlan(true);
-                      }}
-                      className={`w-full p-4 lg:p-5 rounded-xl border-2 transition-all text-left relative hover:shadow-lg ${
-                        isSelectedYearly ? "border-primary bg-primary/10 shadow-md" : "border-border hover:border-muted-foreground"
-                      }`}
-                    >
-                      {savings > 0 && (
-                        <span className="absolute -top-2.5 right-3 px-3 py-1 bg-green-500 text-white text-xs font-bold rounded-full">
-                          Save {nativePricing.formatPrice(savings)}
-                        </span>
-                      )}
-                      <div className="flex items-center gap-3">
-                        <div className={`w-10 h-10 lg:w-12 lg:h-12 rounded-lg flex items-center justify-center ${
-                          isSelectedYearly ? "bg-primary" : "bg-secondary"
-                        }`}>
-                          <Icon className={`w-5 h-5 lg:w-6 lg:h-6 ${isSelectedYearly ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                        </div>
-                        <div className="flex-1">
-                          <h3 className="font-display font-bold text-foreground text-base lg:text-lg">{tier.name} <span className="text-xs lg:text-sm font-normal text-muted-foreground">(Annual)</span></h3>
-                          <div className="flex items-baseline gap-2">
-                            <span className="text-xl lg:text-2xl font-bold text-primary">{nativePricing.formatPrice(yearlyMonthlyEquivalent)}<span className="text-sm text-muted-foreground">/mo</span></span>
-                            <span className="text-sm text-muted-foreground line-through">{nativePricing.formatPrice(monthlyPrice)}</span>
-                          </div>
-                        </div>
-                        {isSelectedYearly && <Check className="w-6 h-6 text-primary" />}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-2">Billed annually at {nativePricing.formatPrice(yearlyPrice)}/year</p>
-                    </button>
+                    <p className="text-sm text-muted-foreground pt-1">
+                      {benefit.text}
+                    </p>
                   </div>
                 );
               })}
             </div>
-          </div>
-        );
-        
-        // Mobile carousel layout
-        const renderMobileCarousel = () => (
-          <div className="md:hidden">
-            <Carousel
-              opts={{ align: "center", loop: true }}
-              className="w-full"
-            >
-              <CarouselContent className="-ml-2">
-                {/* Free tier - single card */}
-                {freeTier && (
-                  <CarouselItem className="pl-2 basis-[85%]">
-                    {(() => {
-                      const Icon = freeTier.icon;
-                      const isSelected = formData.subscriptionTier === freeTier.id;
-                      return (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleInputChange("subscriptionTier", freeTier.id);
-                            setBillingInterval('monthly');
-                            setHasSelectedPlan(true);
-                          }}
-                          className={`w-full h-full p-4 rounded-xl border-2 transition-all text-left relative ${
-                            isSelected ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
-                          }`}
-                        >
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              isSelected ? "bg-primary" : "bg-secondary"
-                            }`}>
-                              <Icon className={`w-5 h-5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                            </div>
-                            <div>
-                              <h3 className="font-display font-bold text-foreground">{freeTier.name}</h3>
-                              <span className="text-lg font-bold text-primary">Free</span>
-                            </div>
-                            {isSelected && <Check className="w-5 h-5 text-primary ml-auto" />}
-                          </div>
-                          <p className="text-muted-foreground text-xs mb-2">{freeTier.description}</p>
-                          <ul className="space-y-0.5">
-                            {freeTier.features.slice(0, 3).map((feature, i) => (
-                              <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                                <span className="break-words">{feature}</span>
-                              </li>
-                            ))}
-                            {freeTier.features.length > 3 && (
-                              <li className="text-xs text-primary">+{freeTier.features.length - 3} more</li>
-                            )}
-                          </ul>
-                        </button>
-                      );
-                    })()}
-                  </CarouselItem>
-                )}
-                
-                {/* Paid tiers - each with Monthly + Annual stacked cards */}
-                {paidTiers.map((tier) => {
-                  const Icon = tier.icon;
-                  const tierConfig = SUBSCRIPTION_TIERS[tier.id as TierKey];
-                  const monthlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'monthly');
-                  const yearlyPrice = nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'yearly');
-                  const yearlyMonthlyEquivalent = Math.round(yearlyPrice / 12);
-                  const savings = nativePricing.getSubscriptionSavings(tier.id as SubscriptionTier);
-                  
-                  const isSelectedMonthly = formData.subscriptionTier === tier.id && billingInterval === 'monthly';
-                  const isSelectedYearly = formData.subscriptionTier === tier.id && billingInterval === 'yearly';
-                  
-                  return (
-                    <CarouselItem key={tier.id} className="pl-2 basis-[85%]">
-                      <div className="flex flex-col gap-3">
-                        {/* Monthly card */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleInputChange("subscriptionTier", tier.id);
-                            setBillingInterval('monthly');
-                            setHasSelectedPlan(true);
-                          }}
-                          className={`w-full p-4 rounded-xl border-2 transition-all text-left relative ${
-                            isSelectedMonthly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
-                          }`}
-                        >
-                          {tier.popular && (
-                            <span className="absolute -top-2 right-3 px-2 py-0.5 bg-accent text-accent-foreground text-xs font-bold rounded-full">
-                              Popular
-                            </span>
-                          )}
-                          <div className="flex items-center gap-3 mb-2">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              isSelectedMonthly ? "bg-primary" : "bg-secondary"
-                            }`}>
-                              <Icon className={`w-5 h-5 ${isSelectedMonthly ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                            </div>
-                            <div>
-                              <h3 className="font-display font-bold text-foreground">{tier.name}</h3>
-                              <span className="text-lg font-bold text-primary">{nativePricing.formatPrice(monthlyPrice)}<span className="text-xs text-muted-foreground">/mo</span></span>
-                            </div>
-                            {isSelectedMonthly && <Check className="w-5 h-5 text-primary ml-auto" />}
-                          </div>
-                          <p className="text-muted-foreground text-xs mb-2">{tier.description}</p>
-                          <ul className="space-y-0.5">
-                            {tier.features.slice(0, 2).map((feature, i) => (
-                              <li key={i} className="text-xs text-muted-foreground flex items-start gap-1.5">
-                                <Check className="w-3 h-3 text-primary shrink-0 mt-0.5" />
-                                <span className="break-words line-clamp-1">{feature}</span>
-                              </li>
-                            ))}
-                            {tier.features.length > 2 && (
-                              <li className="text-xs text-primary">+{tier.features.length - 2} more</li>
-                            )}
-                          </ul>
-                        </button>
-                        
-                        {/* Annual card with savings */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            handleInputChange("subscriptionTier", tier.id);
-                            setBillingInterval('yearly');
-                            setHasSelectedPlan(true);
-                          }}
-                          className={`w-full p-4 rounded-xl border-2 transition-all text-left relative ${
-                            isSelectedYearly ? "border-primary bg-primary/10" : "border-border hover:border-muted-foreground"
-                          }`}
-                        >
-                          {savings > 0 && (
-                            <span className="absolute -top-2 right-3 px-2 py-0.5 bg-green-500 text-white text-xs font-bold rounded-full">
-                              Save {nativePricing.formatPrice(savings)}
-                            </span>
-                          )}
-                          <div className="flex items-center gap-3">
-                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              isSelectedYearly ? "bg-primary" : "bg-secondary"
-                            }`}>
-                              <Icon className={`w-5 h-5 ${isSelectedYearly ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                            </div>
-                            <div>
-                              <h3 className="font-display font-bold text-foreground">{tier.name} <span className="text-xs font-normal text-muted-foreground">(Annual)</span></h3>
-                              <div className="flex items-baseline gap-1.5">
-                                <span className="text-lg font-bold text-primary">{nativePricing.formatPrice(yearlyMonthlyEquivalent)}<span className="text-xs text-muted-foreground">/mo</span></span>
-                                <span className="text-xs text-muted-foreground line-through">{nativePricing.formatPrice(monthlyPrice)}</span>
-                              </div>
-                            </div>
-                            {isSelectedYearly && <Check className="w-5 h-5 text-primary ml-auto" />}
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">Billed annually at {nativePricing.formatPrice(yearlyPrice)}/year</p>
-                        </button>
-                      </div>
-                    </CarouselItem>
-                  );
-                })}
-              </CarouselContent>
-            </Carousel>
 
-            {/* Dot indicators - mobile only */}
-            <div className="flex justify-center gap-1.5 pt-3">
-              {[freeTier, ...paidTiers].filter(Boolean).map((tier) => {
-                if (!tier) return null;
-                const isActive = formData.subscriptionTier === tier.id;
+            {/* Billing toggle */}
+            <div className="flex items-center justify-center gap-3 mb-5">
+              <span className={`text-sm font-medium transition-colors ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Monthly
+              </span>
+              <Switch 
+                checked={billingInterval === 'yearly'}
+                onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
+              />
+              <span className={`text-sm font-medium transition-colors ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Yearly
+              </span>
+              {billingInterval === 'yearly' && (
+                <Badge variant="secondary" className="ml-1 text-xs">Save ~17%</Badge>
+              )}
+            </div>
+
+            {/* Tier cards - stacked vertically (Apple-style compact cards) */}
+            <div className="space-y-3 flex-1">
+              {paidTiers.map((tier) => {
+                const Icon = tier.icon;
+                const isSelected = formData.subscriptionTier === tier.id;
+                const price = billingInterval === 'monthly' 
+                  ? nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'monthly')
+                  : nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'yearly');
+                const monthlyEquivalent = billingInterval === 'yearly' 
+                  ? Math.round(price / 12) 
+                  : price;
+                
                 return (
                   <button
                     key={tier.id}
                     type="button"
                     onClick={() => {
                       handleInputChange("subscriptionTier", tier.id);
-                      if (tier.id !== 'free') setBillingInterval('monthly');
                       setHasSelectedPlan(true);
                     }}
-                    className={`w-2.5 h-2.5 rounded-full transition-colors ${
-                      isActive ? "bg-primary" : "bg-border hover:bg-muted-foreground"
+                    className={`w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
+                      isSelected 
+                        ? "border-primary bg-primary/5" 
+                        : "border-border hover:border-muted-foreground"
                     }`}
-                    aria-label={`Select ${tier.name}`}
-                  />
+                  >
+                    {/* Radio-style indicator */}
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                      isSelected ? "border-primary bg-primary" : "border-muted-foreground"
+                    }`}>
+                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                    </div>
+                    
+                    {/* Tier icon */}
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                      isSelected ? "bg-primary" : "bg-secondary"
+                    }`}>
+                      <Icon className={`w-5 h-5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                    </div>
+                    
+                    {/* Tier info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-semibold text-foreground">{tier.name}</h3>
+                        {tier.popular && (
+                          <Badge variant="secondary" className="text-xs">Popular</Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground line-clamp-1">{tier.description}</p>
+                    </div>
+                    
+                    {/* Price */}
+                    <div className="text-right shrink-0">
+                      <span className="font-bold text-primary">
+                        {nativePricing.formatPrice(monthlyEquivalent)}
+                      </span>
+                      <span className="text-xs text-muted-foreground">/mo</span>
+                    </div>
+                  </button>
                 );
               })}
             </div>
-          </div>
-        );
-        
-        return (
-          <div className="space-y-5">
-            <div className="text-center mb-4 md:mb-6">
-              <h2 className="font-display text-xl sm:text-2xl lg:text-3xl font-bold text-foreground">
-                Choose your plan
-              </h2>
-              <p className="text-muted-foreground text-sm md:text-base mt-1.5">
-                <span className="md:hidden">Swipe to browse. </span>Upgrade anytime.
+
+            {/* CTA Section */}
+            <div className="mt-6 space-y-3">
+              {/* Main CTA Button */}
+              <Button 
+                className="w-full py-6 text-lg font-semibold"
+                onClick={handleComplete}
+                disabled={!hasSelectedPlan || isSubmitting || isNavigating || isProcessingIAP}
+              >
+                {(isSubmitting || isProcessingIAP) && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                Start 7-day free trial
+              </Button>
+              
+              {/* Trial disclosure - required by Apple */}
+              <p className="text-xs text-center text-muted-foreground">
+                Cancel anytime during your trial. After 7 days, you'll be charged 
+                {billingInterval === 'monthly' ? ' monthly' : ' yearly'}.
               </p>
+              
+              {/* Continue without upgrading */}
+              <button
+                type="button"
+                onClick={handleContinueWithoutUpgrading}
+                disabled={isSubmitting || isNavigating || isProcessingIAP}
+                className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors py-2 disabled:opacity-50"
+              >
+                Continue without upgrading
+              </button>
             </div>
 
-            {renderDesktopGrid()}
-            {renderMobileCarousel()}
-            
-            {/* Visual hint when no plan selected */}
-            {!hasSelectedPlan && (
-              <div className="text-center py-2">
-                <p className="text-sm text-amber-500 font-medium animate-pulse">
-                  <span className="md:hidden">👆 Swipe and tap to select a plan</span>
-                  <span className="hidden md:inline">👆 Click a plan to select it</span>
-                </p>
+            {/* Legal footer */}
+            <div className="mt-6 pt-4 border-t border-border">
+              <div className="flex flex-wrap justify-center items-center gap-4 text-sm">
+                {isNativeMobile && (
+                  <button 
+                    type="button"
+                    onClick={handleRestorePurchases}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Restore Purchases
+                  </button>
+                )}
+                <LegalLinks variant="compact" />
               </div>
-            )}
+              <LegalDisclosure className="mt-3" />
+            </div>
             
-            {/* Legal disclosure - required for iOS App Store compliance */}
-            <LegalDisclosure className="mt-4" />
+            {/* Compare features link */}
+            <p className="text-sm text-muted-foreground text-center mt-4">
+              <a href="/pricing" target="_blank" className="underline hover:text-primary inline-flex items-center gap-1">
+                Compare all features
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </p>
           </div>
         );
       }
@@ -1586,8 +1199,8 @@ const CoachOnboarding = () => {
         showBackButton={currentStep > 0 && STEPS[currentStep] !== "Connect Payments" && !isNavigating}
         onBack={handleBack}
         footerActions={getFooterActions()}
-        hideFooter={STEPS[currentStep] === "Connect Payments"}
-        maxWidth={STEPS[currentStep] === "Choose Your Plan" ? "2xl" : STEPS[currentStep] === "Specialties" ? "xl" : "lg"}
+        hideFooter={STEPS[currentStep] === "Connect Payments" || STEPS[currentStep] === "Choose Your Plan"}
+        maxWidth={STEPS[currentStep] === "Choose Your Plan" ? "lg" : STEPS[currentStep] === "Specialties" ? "xl" : "lg"}
         backDisabled={isNavigating}
         skipDisabled={isNavigating}
       >
