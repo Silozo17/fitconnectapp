@@ -24,6 +24,9 @@ import {
   Link as LinkIcon,
   Apple,
   Award,
+  Wallet,
+  RotateCcw,
+  Banknote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -207,7 +210,7 @@ const CoachSettings = () => {
   
   // Read tab from URL params for deep linking (e.g., ?tab=verification or ?tab=subscription)
   const urlTab = searchParams.get("tab");
-  const validTabs = ["profile", "notifications", "preferences", "subscription", "invoice", "integrations", "verification", "security", "marketplace", "account", "qualifications", "legal"];
+  const validTabs = ["profile", "notifications", "preferences", "subscription", "payments", "invoice", "integrations", "verification", "security", "marketplace", "account", "qualifications", "legal"];
   const initialTab = urlTab && validTabs.includes(urlTab) ? urlTab : "profile";
   const [selectedTab, setSelectedTab] = useState(initialTab);
 
@@ -556,6 +559,7 @@ const CoachSettings = () => {
                 { id: "preferences", icon: Globe, label: t('tabs.preferences') },
                 { id: "notifications", icon: Bell, label: t('tabs.notifications') },
                 { id: "subscription", icon: CreditCard, label: t('tabs.subscription') },
+                { id: "payments", icon: Wallet, label: t('tabs.payments', 'Payments') },
                 { id: "legal", icon: FileText, label: t('tabs.legal', 'Legal') },
                 { id: "account", icon: Shield, label: t('tabs.account') },
               ].map((item) => (
@@ -1276,17 +1280,92 @@ const CoachSettings = () => {
               </div>
             )}
 
-            {/* Subscription & Payments Tab */}
+            {/* Subscription Tab - Plans only */}
             {selectedTab === "subscription" && coachData && (
               <div className="space-y-6">
-                {/* Stripe Connect for receiving payments */}
-                <StripeConnectButton coachId={coachData.id} onSuccess={() => refetch()} />
-
                 {/* Platform Subscription */}
                 <PlatformSubscription 
                   coachId={coachData.id} 
                   currentTier={profile.subscription_tier || "free"} 
                 />
+              </div>
+            )}
+
+            {/* Payments Tab - Stripe Connect & Payment Settings */}
+            {selectedTab === "payments" && coachData && (
+              <div className="space-y-6">
+                {/* Stripe Connect for receiving payments */}
+                <StripeConnectButton coachId={coachData.id} onSuccess={() => refetch()} />
+
+                {/* Payout Settings Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Banknote className="h-5 w-5" />
+                      {t('payments.payoutSettings', 'Payout Settings')}
+                    </CardTitle>
+                    <CardDescription>
+                      {t('payments.payoutSettingsDesc', 'Manage how and when you receive your earnings')}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      {t('payments.payoutSettingsInfo', 'View and manage your payout schedule, bank details, and earning reports.')}
+                    </p>
+                    <Button variant="outline" asChild>
+                      <Link to="/dashboard/coach/earnings">
+                        {t('payments.viewEarnings', 'View Earnings & Payouts')}
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                {/* Refund Policy Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <RotateCcw className="h-5 w-5" />
+                      {t('payments.refundPolicy', 'Refund Policy')}
+                    </CardTitle>
+                    <CardDescription>
+                      {t('payments.refundPolicyDesc', 'Your refund policy for client bookings')}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground">
+                      {t('payments.refundPolicyInfo', 'Refund requests are handled through Stripe. Clients can request refunds for their first session within 48 hours if unsatisfied. Package refunds are prorated based on unused sessions.')}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-3">
+                      <Link to="/terms#refunds" className="text-primary hover:underline">
+                        {t('payments.viewFullPolicy', 'View full refund policy')}
+                      </Link>
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Payment Methods Accepted Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <CreditCard className="h-5 w-5" />
+                      {t('payments.acceptedMethods', 'Accepted Payment Methods')}
+                    </CardTitle>
+                    <CardDescription>
+                      {t('payments.acceptedMethodsDesc', 'Payment options available to your clients')}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Badge variant="secondary">Credit/Debit Cards</Badge>
+                      <Badge variant="secondary">Apple Pay</Badge>
+                      <Badge variant="secondary">Google Pay</Badge>
+                      <Badge variant="secondary">Link</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {t('payments.stripeProcessed', 'All payments are securely processed through Stripe')}
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
