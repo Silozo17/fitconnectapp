@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
-import { Crown, Check, Loader2, Clock } from "lucide-react";
+import { Crown, Check, Loader2, Clock, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -99,7 +99,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const activeTier = subscriptionStatus.tier;
   const isNativeSubscription = subscriptionStatus.isNativeSubscription;
   const currentPeriodEnd = subscriptionStatus.currentPeriodEnd;
-  const { hasPendingChange, pendingTier } = subscriptionStatus;
+  const { hasPendingChange, pendingTier, isExpired, expiredTier } = subscriptionStatus;
 
   // Format the pending change date
   const formattedPendingChangeDate = currentPeriodEnd
@@ -112,6 +112,9 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
 
   // Get pending tier display name
   const pendingTierName = pendingTier ? SUBSCRIPTION_TIERS[pendingTier]?.name || pendingTier : null;
+
+  // Get expired tier display name for messaging
+  const expiredTierName = expiredTier ? SUBSCRIPTION_TIERS[expiredTier]?.name || expiredTier : null;
 
   const handleSubscribe = (tierKey: TierKey) => {
     if (isNativeApp && ['starter', 'pro', 'enterprise'].includes(tierKey)) {
@@ -205,8 +208,18 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
           </CardDescription>
         </CardHeader>
         <CardContent>
+            {/* Phase 7: Show expired subscription message for non-native subscriptions */}
+            {!isNativeSubscription && isExpired && expiredTierName && (
+              <Alert className="mb-6 border-muted bg-muted/50">
+                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                <AlertDescription className="text-muted-foreground">
+                  Your <strong>{expiredTierName}</strong> subscription has expired. Subscribe again to restore your features.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Phase 5: Show pending downgrade message for non-native subscriptions */}
-            {!isNativeSubscription && hasPendingChange && pendingTierName && formattedPendingChangeDate && (
+            {!isNativeSubscription && !isExpired && hasPendingChange && pendingTierName && formattedPendingChangeDate && (
               <Alert className="mb-6 border-blue-500/30 bg-blue-500/10">
                 <Clock className="h-4 w-4 text-blue-600" />
                 <AlertDescription className="text-blue-700">

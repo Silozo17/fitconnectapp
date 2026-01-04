@@ -21,6 +21,9 @@ export interface SubscriptionStatus {
   // Phase 5: Pending tier change (for downgrades scheduled at period end)
   pendingTier: TierKey | null;
   hasPendingChange: boolean;
+  // Phase 7: Subscription expiry handling
+  isExpired: boolean;
+  expiredTier: TierKey | null; // The tier that expired (for messaging)
 }
 
 /**
@@ -87,6 +90,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isWithinGracePeriod: false,
       pendingTier: null,
       hasPendingChange: false,
+      isExpired: false,
+      expiredTier: null,
     };
   }
 
@@ -108,13 +113,15 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isWithinGracePeriod: false,
       pendingTier: null,
       hasPendingChange: false,
+      isExpired: false,
+      expiredTier: null,
     };
   }
 
   // Check for active admin grant
   if (adminGrant && adminGrant.is_active) {
-    const isExpired = adminGrant.expires_at && new Date(adminGrant.expires_at) < new Date();
-    if (!isExpired) {
+    const adminGrantExpired = adminGrant.expires_at && new Date(adminGrant.expires_at) < new Date();
+    if (!adminGrantExpired) {
       return {
         tier: normalizeTier(adminGrant.tier),
         source: 'admin',
@@ -128,6 +135,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
         isWithinGracePeriod: false,
         pendingTier: null,
         hasPendingChange: false,
+        isExpired: false,
+        expiredTier: null,
       };
     }
   }
@@ -148,18 +157,36 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     const now = new Date();
     const isWithinGracePeriod = isCancelled && periodEnd && new Date(periodEnd) > now;
 
+    // Phase 7: Check if subscription period has expired
+    // This applies to both cancelled (grace period ended) and expired statuses
+    const isPeriodExpired = periodEnd && new Date(periodEnd) < now;
+    const isExpired = (isCancelled && isPeriodExpired) || platformSub.status === 'expired';
+
     // Phase 5: Check for pending tier change (scheduled downgrade)
     const pendingTierValue = (platformSub as any).pending_tier;
     const pendingTier = pendingTierValue ? normalizeTier(pendingTierValue) : null;
     const hasPendingChange = !!pendingTier && pendingTier !== normalizeTier(platformSub.tier || 'free');
 
-    // If cancelled but still within period, treat as active for access purposes
-    const effectiveStatus = isWithinGracePeriod 
-      ? 'cancelled' // Keep cancelled status for UI messaging
-      : (platformSub.status as 'active' | 'past_due' | 'cancelled' | 'expired') || 'none';
+    // Determine effective status for UI
+    let effectiveStatus: 'active' | 'past_due' | 'cancelled' | 'expired' | 'none';
+    if (isExpired) {
+      effectiveStatus = 'expired';
+    } else if (isWithinGracePeriod) {
+      effectiveStatus = 'cancelled'; // Keep cancelled status for UI messaging
+    } else {
+      effectiveStatus = (platformSub.status as 'active' | 'past_due' | 'cancelled' | 'expired') || 'none';
+    }
+
+    // Phase 7: If expired, tier should be the pending tier (if scheduled downgrade) or free
+    const effectiveTier = isExpired 
+      ? (pendingTier || 'free') 
+      : normalizeTier(platformSub.tier || 'free');
+    
+    // Track what tier expired for messaging purposes
+    const expiredTier = isExpired ? normalizeTier(platformSub.tier || 'free') : null;
 
     return {
-      tier: normalizeTier(platformSub.tier || 'free'),
+      tier: effectiveTier,
       source: isNative ? 'revenuecat' : 'stripe',
       status: effectiveStatus,
       currentPeriodEnd: periodEnd,
@@ -169,8 +196,10 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isCancelled,
       hasAccessUntil: isWithinGracePeriod ? periodEnd : null,
       isWithinGracePeriod,
-      pendingTier,
-      hasPendingChange,
+      pendingTier: isExpired ? null : pendingTier, // Clear pending if already expired
+      hasPendingChange: isExpired ? false : hasPendingChange,
+      isExpired,
+      expiredTier,
     };
   }
 
@@ -188,6 +217,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     isWithinGracePeriod: false,
     pendingTier: null,
     hasPendingChange: false,
+    isExpired: false,
+    expiredTier: null,
   };
 };
 
