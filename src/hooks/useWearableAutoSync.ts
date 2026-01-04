@@ -69,22 +69,19 @@ export const useWearableAutoSync = () => {
      * 
      * Now syncing all supported QUANTITY types every 15 minutes:
      * - Steps (HKQuantityTypeIdentifierStepCount)
-     * - Heart Rate (HKQuantityTypeIdentifierHeartRate)
      * - Calories (HKQuantityTypeIdentifierActiveEnergyBurned)
-     * - Active Minutes (HKQuantityTypeIdentifierAppleExerciseTime)
      * - Distance (HKQuantityTypeIdentifierDistanceWalkingRunning)
      * 
-     * NOTE: Sleep is NOT synced because it's a CATEGORY type which requires
-     * HKSampleQuery. Despia only supports HKStatisticsCollectionQuery.
-     * Users can enter sleep manually or sync from Fitbit/Garmin.
+     * NOTE: HeartRate, Sleep, and ActiveMinutes are NOT synced due to Despia SDK crashes.
+     * Users can enter these manually or sync from Fitbit/Garmin.
      */
-    console.log(`[useWearableAutoSync] Performing auto-sync (all wearables including Apple Health)... ${isRetry ? '[RETRY]' : ''}`);
+    console.log(`[useWearableAutoSync] Performing auto-sync (all wearables INCLUDING Apple Health)... ${isRetry ? '[RETRY]' : ''}`);
     lastAutoSyncRef.current = new Date();
     
     try {
-      // Include Apple Health in auto-sync - multi-metric sync is now supported
+      // Include Apple Health in auto-sync on foreground/interval
       await syncAll({ includeAppleHealth: true });
-      console.log('[useWearableAutoSync] Auto-sync complete');
+      console.log('[useWearableAutoSync] Auto-sync complete (Apple Health included)');
       retryCountRef.current = 0; // Reset retry count on success
     } catch (error) {
       console.error('[useWearableAutoSync] Auto-sync failed:', error);

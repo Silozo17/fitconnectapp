@@ -46,9 +46,10 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
   const { user } = useAuth();
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   
-  // Memoize default dates to prevent query key instability
-  const defaultStartDate = useMemo(() => startOfDay(subDays(new Date(), 7)), []);
-  const defaultEndDate = useMemo(() => startOfDay(new Date()), []);
+  // Calculate fresh dates on each render - memoization with [] caused stale dates
+  // when app stays open across days. Query key uses formatted strings for stability.
+  const defaultStartDate = startOfDay(subDays(new Date(), 7));
+  const defaultEndDate = startOfDay(new Date());
   
   const {
     dataType,
@@ -75,18 +76,21 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
           .single();
 
         if (profileError) {
-          console.error('[useHealthData] Error fetching client profile:', profileError);
+          console.error('[useHealthData] Client profile lookup failed:', profileError.message);
           return [];
         }
 
         if (!clientProfile) {
+          console.log('[useHealthData] No client profile found for user');
           return [];
         }
         targetClientId = clientProfile.id;
+        console.log('[useHealthData] Found client profile:', targetClientId);
       }
 
       const startDateStr = format(startDate, "yyyy-MM-dd");
       const endDateStr = format(endDate, "yyyy-MM-dd");
+      console.log(`[useHealthData] Querying date range: ${startDateStr} to ${endDateStr}`);
 
       let query = supabase
         .from("health_data_sync")
@@ -107,6 +111,7 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
         throw error;
       }
 
+      console.log(`[useHealthData] Fetched ${data?.length || 0} records`);
       return data as HealthDataPoint[];
     },
     enabled: !!user,
@@ -177,18 +182,20 @@ export const useHealthData = (options: UseHealthDataOptions = {}) => {
     };
   }, [user, refetch]);
 
-  // Memoize today's date string
-  const todayStr = useMemo(() => format(new Date(), "yyyy-MM-dd"), []);
+  // Calculate today's date string fresh each time (not memoized with [])
+  const todayStr = format(new Date(), "yyyy-MM-dd");
   
   // Filter today's data with improved date comparison
   const todayData = useMemo(() => {
-    return data?.filter((d) => {
+    const filtered = data?.filter((d) => {
       // Handle both string dates and full ISO timestamps
       const recordedDate = typeof d.recorded_at === 'string' 
         ? d.recorded_at.split('T')[0]  // Extract date part from ISO string
         : format(new Date(d.recorded_at), "yyyy-MM-dd");
       return recordedDate === todayStr;
     });
+    console.log(`[useHealthData] Today (${todayStr}) data: ${filtered?.length || 0} records`);
+    return filtered;
   }, [data, todayStr]);
 
   // Get today's value using priority-based selection for multi-device deduplication
