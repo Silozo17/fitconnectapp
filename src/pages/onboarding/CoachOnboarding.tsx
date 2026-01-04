@@ -115,11 +115,11 @@ const CoachOnboarding = () => {
   // Store formData in a ref for the callback to access latest values
   const formDataRef = useRef<{ alsoClient: boolean }>({ alsoClient: false });
   
-  // Handle successful IAP purchase - show celebration and navigate
+  // Handle successful IAP purchase - show celebration and navigate IMMEDIATELY
   const handleIAPSuccess = useCallback(async (tier: SubscriptionTier) => {
     console.log('[CoachOnboarding] IAP Success callback fired:', tier);
     
-    // Trigger confetti celebration
+    // PHASE 1 FIX: Trigger confetti celebration FIRST (before any async work)
     triggerConfetti(confettiPresets.medium);
     triggerHaptic('success');
     
@@ -127,24 +127,29 @@ const CoachOnboarding = () => {
     const tierName = SUBSCRIPTION_TIERS[tier]?.name || tier;
     toast.success(`🎉 Welcome to ${tierName}!`, {
       description: 'Your subscription is now active. Let\'s get started!',
-      duration: 3000,
+      duration: 4000,
     });
+    
+    // PHASE 1 FIX: Clear stale caches BEFORE any queries
+    localStorage.removeItem('fitconnect_cached_tier');
+    localStorage.setItem('fitconnect_coach_onboarded', 'true');
+    
+    // Invalidate and refetch critical queries (non-blocking)
+    queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'] });
+    queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+    queryClient.invalidateQueries({ queryKey: ['feature-access'] });
+    queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
     
     // Non-blocking profile refresh - don't let errors block navigation
     refreshProfiles().catch(e => console.warn('[CoachOnboarding] Profile refresh failed (non-critical):', e));
     
-    // Invalidate onboarding status queries
-    queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'] });
-    
-    // Navigate after a shorter delay (1.5s instead of 2.5s)
-    setTimeout(() => {
-      console.log('[CoachOnboarding] Navigating after IAP success, alsoClient:', formDataRef.current.alsoClient);
-      if (formDataRef.current.alsoClient) {
-        navigate("/onboarding/client", { replace: true });
-      } else {
-        navigate("/dashboard/coach", { replace: true });
-      }
-    }, 1500);
+    // PHASE 1 FIX: Navigate IMMEDIATELY - purchase is confirmed, onboarding already complete in DB
+    console.log('[CoachOnboarding] Navigating IMMEDIATELY after IAP success, alsoClient:', formDataRef.current.alsoClient);
+    if (formDataRef.current.alsoClient) {
+      navigate("/onboarding/client", { replace: true });
+    } else {
+      navigate("/dashboard/coach", { replace: true });
+    }
   }, [navigate, refreshProfiles, queryClient]);
   
   const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP({
@@ -507,21 +512,33 @@ const CoachOnboarding = () => {
         
         // On native mobile (iOS/Android), trigger native IAP directly
         if (isNativeMobile && (tier === 'starter' || tier === 'pro' || tier === 'enterprise')) {
-          // Set completion flag BEFORE IAP - ensures dashboard knows onboarding is done
+          // PHASE 1 FIX: Profile is already saved with onboarding_completed: true above
+          // Set session/localStorage flags for additional safety
           sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
-          console.log('[CoachOnboarding] Starting native IAP for tier:', tier);
+          localStorage.setItem('fitconnect_coach_onboarded', 'true');
+          
+          // Clear cached tier to ensure fresh data after purchase
+          localStorage.removeItem('fitconnect_cached_tier');
+          
+          console.log('[CoachOnboarding] Profile saved with onboarding_completed: true. Starting native IAP for tier:', tier);
           
           toast.success("Profile saved! Completing subscription...");
+          
+          // Start the IAP flow
           await nativePurchase(tier, billingInterval);
           
-          // Fallback navigation timer - if IAP callback doesn't fire within 60s, navigate anyway
-          // This prevents users from getting stuck if there's a callback issue
+          // PHASE 1 FIX: Reduced fallback timer to 5 seconds
+          // Since onboarding is already complete in DB, user can always navigate manually
           setTimeout(() => {
             if (window.location.pathname.includes('/onboarding/coach')) {
-              console.warn('[CoachOnboarding] Fallback navigation triggered after IAP timeout');
-              navigate("/dashboard/coach", { replace: true });
+              console.warn('[CoachOnboarding] Fallback navigation triggered after 5s timeout');
+              if (formData.alsoClient) {
+                navigate("/onboarding/client", { replace: true });
+              } else {
+                navigate("/dashboard/coach", { replace: true });
+              }
             }
-          }, 60000);
+          }, 5000);
           
           // IAP hook handles success/error and navigation
           return;
@@ -646,20 +663,16 @@ const CoachOnboarding = () => {
       const isPaidTier = formData.subscriptionTier !== "free";
       const isProcessingIAP = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
       
-      // On native mobile (iOS/Android): trigger IAP directly
+      // On native mobile (iOS/Android): save profile FIRST, then trigger IAP
       if (isNativeMobile) {
         return {
           primary: { 
             label: "Select Plan", 
             onClick: async () => {
-              if (isPaidTier) {
-                // Trigger native IAP immediately
-                const tier = formData.subscriptionTier as SubscriptionTier;
-                await nativePurchase(tier, billingInterval);
-              } else {
-                // Free tier - just complete onboarding
-                await handleComplete();
-              }
+              // PHASE 1 FIX: Always call handleComplete first to save profile with onboarding_completed: true
+              // For paid tiers, handleComplete triggers IAP after saving
+              // For free tier, handleComplete navigates directly
+              await handleComplete();
             },
             disabled: isNavigating || isProcessingIAP || !hasSelectedPlan,
             loading: isSubmitting || isProcessingIAP,

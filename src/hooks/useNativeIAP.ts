@@ -323,11 +323,16 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
 
+        // PHASE 1 FIX: Clear localStorage cache BEFORE invalidating queries
+        localStorage.removeItem('fitconnect_cached_tier');
+        localStorage.setItem('fitconnect_coach_onboarded', 'true');
+        
         // Invalidate queries to refresh subscription data throughout the app
         queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
         queryClient.invalidateQueries({ queryKey: ['platform-subscription'] });
         queryClient.invalidateQueries({ queryKey: ['feature-access'] });
         queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+        queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'] });
         
         // Call the success callback if provided (handles celebration/navigation)
         options?.onPurchaseComplete?.(expectedTier);
@@ -398,8 +403,8 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     reconciliationAttemptedRef.current = false;
     
     try {
-      // Small delay to allow webhook to process first
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // PHASE 1 FIX: Reduced delay from 500ms to 300ms for faster response
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       const { data: reconcileResult, error } = await supabase.functions.invoke('verify-subscription-entitlement');
       
@@ -415,6 +420,10 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           isPolling: false,
           purchaseStatus: 'idle',
         }));
+        
+        // PHASE 1 FIX: Clear localStorage cache BEFORE invalidating queries
+        localStorage.removeItem('fitconnect_cached_tier');
+        localStorage.setItem('fitconnect_coach_onboarded', 'true');
         
         // Invalidate queries with refetchType: 'all' for immediate refetch
         await Promise.all([
