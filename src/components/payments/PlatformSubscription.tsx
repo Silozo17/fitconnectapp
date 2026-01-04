@@ -20,7 +20,7 @@ import { isDespia } from "@/lib/despia";
 import { triggerHaptic } from "@/lib/despia";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
-import { UpgradeSuccessDialog } from "@/components/subscription/UpgradeSuccessDialog";
+import { FeaturesActivatedModal } from "@/components/subscription/FeaturesActivatedModal";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscriptionManagement";
 import { BillingInterval } from "@/lib/pricing-config";
@@ -83,8 +83,8 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [selectedTier, setSelectedTier] = useState<TierKey | null>(null);
   
-  // UPGRADE SUCCESS DIALOG state
-  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  // FEATURES ACTIVATED MODAL state
+  const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [upgradedToTier, setUpgradedToTier] = useState<TierKey>('free');
   const previousTierRef = useRef<TierKey>('free');
   
@@ -104,14 +104,11 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
     triggerConfetti(confettiPresets.achievement);
     triggerHaptic('success');
     
-    // 2. Store previous tier for the dialog
-    const prevTier = previousTierRef.current;
-    
-    // 3. Set the upgraded tier and show the success dialog
+    // 2. Set the upgraded tier and show the features activated modal
     setUpgradedToTier(tier as TierKey);
-    setShowUpgradeDialog(true);
+    setShowFeaturesModal(true);
     
-    // 4. Clear tier cache and force refetch for immediate UI update
+    // 3. Clear tier cache and force refetch for immediate UI update
     localStorage.removeItem('fitconnect_cached_tier');
     localStorage.removeItem('fitconnect_tier_timestamp');
     
@@ -122,7 +119,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
       queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
     ]);
     
-    console.log('[PlatformSubscription] Upgrade complete - dialog shown for', tier, 'from', prevTier);
+    console.log('[PlatformSubscription] Upgrade complete - features modal shown for', tier);
   }, [queryClient]);
   
   // Native IAP hook with success callback
@@ -525,12 +522,11 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
         onOpenChange={dismissUnsuccessfulModal}
       />
       
-      {/* Upgrade success dialog with unlocked features */}
-      <UpgradeSuccessDialog
-        isOpen={showUpgradeDialog}
-        onClose={() => setShowUpgradeDialog(false)}
-        newTier={upgradedToTier}
-        previousTier={previousTierRef.current}
+      {/* Features activated modal */}
+      <FeaturesActivatedModal
+        isOpen={showFeaturesModal}
+        onClose={() => setShowFeaturesModal(false)}
+        tier={upgradedToTier}
       />
     </>
   );

@@ -31,7 +31,9 @@ import { useNativePricing } from "@/hooks/useNativePricing";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { triggerHaptic } from "@/lib/despia";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
+import { FeaturesActivatedModal } from "@/components/subscription/FeaturesActivatedModal";
 import { useQueryClient } from "@tanstack/react-query";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Full steps array (for new users without client profile)
 const FULL_STEPS = [
@@ -121,22 +123,19 @@ const CoachOnboarding = () => {
   // Store formData in a ref for the callback to access latest values
   const formDataRef = useRef<{ alsoClient: boolean }>({ alsoClient: false });
   
-  // Handle successful IAP purchase - show celebration and navigate IMMEDIATELY
+  // Features activated modal state for onboarding
+  const [showFeaturesModal, setShowFeaturesModal] = useState(false);
+  const [purchasedTier, setPurchasedTier] = useState<TierKey | null>(null);
+  
+  // Handle successful IAP purchase - show features modal FIRST, then navigate
   const handleIAPSuccess = useCallback(async (tier: SubscriptionTier) => {
     console.log('[CoachOnboarding] IAP Success callback fired:', tier);
     
-    // PHASE 1 FIX: Trigger confetti celebration FIRST (before any async work)
+    // Trigger confetti celebration FIRST (before any async work)
     triggerConfetti(confettiPresets.medium);
     triggerHaptic('success');
     
-    // Show celebration toast with tier name
-    const tierName = SUBSCRIPTION_TIERS[tier]?.name || tier;
-    toast.success(`🎉 Welcome to ${tierName}!`, {
-      description: 'Your subscription is now active. Let\'s get started!',
-      duration: 4000,
-    });
-    
-    // PHASE 1 FIX: Clear stale caches BEFORE any queries
+    // Clear stale caches BEFORE any queries
     localStorage.removeItem('fitconnect_cached_tier');
     localStorage.setItem('fitconnect_coach_onboarded', 'true');
     
@@ -146,17 +145,25 @@ const CoachOnboarding = () => {
     queryClient.invalidateQueries({ queryKey: ['feature-access'] });
     queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
     
-    // Non-blocking profile refresh - don't let errors block navigation
+    // Non-blocking profile refresh - don't let errors block modal
     refreshProfiles().catch(e => console.warn('[CoachOnboarding] Profile refresh failed (non-critical):', e));
     
-    // PHASE 1 FIX: Navigate IMMEDIATELY - purchase is confirmed, onboarding already complete in DB
-    console.log('[CoachOnboarding] Navigating IMMEDIATELY after IAP success, alsoClient:', formDataRef.current.alsoClient);
+    // Show features activated modal FIRST - navigation happens when user closes it
+    console.log('[CoachOnboarding] Showing FeaturesActivatedModal for tier:', tier);
+    setPurchasedTier(tier as TierKey);
+    setShowFeaturesModal(true);
+  }, [refreshProfiles, queryClient]);
+  
+  // Handle closing the features modal - navigate to dashboard
+  const handleFeaturesModalClose = useCallback(() => {
+    setShowFeaturesModal(false);
+    console.log('[CoachOnboarding] Features modal closed, navigating. alsoClient:', formDataRef.current.alsoClient);
     if (formDataRef.current.alsoClient) {
       navigate("/onboarding/client", { replace: true });
     } else {
       navigate("/dashboard/coach", { replace: true });
     }
-  }, [navigate, refreshProfiles, queryClient]);
+  }, [navigate]);
   
   const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP({
     onPurchaseComplete: handleIAPSuccess,
@@ -1138,6 +1145,15 @@ const CoachOnboarding = () => {
               })}
             </div>
 
+            {/* Purchase cancelled/failed alert - retry immediately available */}
+            {iapState.purchaseStatus === 'cancelled' && (
+              <Alert className="mb-2 border-muted bg-muted/50">
+                <AlertDescription className="text-sm text-muted-foreground text-center">
+                  Purchase cancelled. Select a plan to try again.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* CTA Section - compact */}
             <div className="mt-3 space-y-2">
               <Button 
@@ -1230,6 +1246,13 @@ const CoachOnboarding = () => {
       <IAPUnsuccessfulDialog 
         open={iapState.showUnsuccessfulModal} 
         onOpenChange={dismissUnsuccessfulModal}
+      />
+      
+      {/* Features Activated Modal - shown before navigating to dashboard */}
+      <FeaturesActivatedModal
+        isOpen={showFeaturesModal}
+        onClose={handleFeaturesModalClose}
+        tier={purchasedTier || 'starter'}
       />
     </>
   );
