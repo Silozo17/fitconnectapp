@@ -136,9 +136,12 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
       }
 
       if (data?.reconciled) {
-        // Invalidate queries to refresh boost data
-        queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
-        queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
+        // Reset reconciliation flag to allow future checks
+        reconciliationAttemptedRef.current = false;
+        
+        // Force immediate refetch (not just invalidate) to refresh boost data
+        await queryClient.refetchQueries({ queryKey: ['coach-boost-status'] });
+        await queryClient.refetchQueries({ queryKey: ['boost-attributions'] });
         
         // Trigger celebration
         triggerCelebration();
@@ -246,9 +249,9 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
           purchaseStatus: 'idle',
         }));
 
-        // Invalidate queries to refresh boost data
-        queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
-        queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
+        // Force immediate refetch to refresh boost data
+        await queryClient.refetchQueries({ queryKey: ['coach-boost-status'] });
+        await queryClient.refetchQueries({ queryKey: ['boost-attributions'] });
 
         // Trigger celebration
         triggerCelebration();
@@ -278,8 +281,8 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
         reconciliationAttemptedRef.current = false;
         await reconcileBoostEntitlement();
 
-        queryClient.invalidateQueries({ queryKey: ['coach-boost-status'] });
-        queryClient.invalidateQueries({ queryKey: ['boost-attributions'] });
+        await queryClient.refetchQueries({ queryKey: ['coach-boost-status'] });
+        await queryClient.refetchQueries({ queryKey: ['boost-attributions'] });
       }
     }, POLL_INTERVAL_MS);
   }, [pollBoostStatus, queryClient, triggerCelebration, reconcileBoostEntitlement]);
