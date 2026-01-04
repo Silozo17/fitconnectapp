@@ -785,19 +785,54 @@ export const unregisterIAPCallbacks = (): void => {
 };
 
 /**
+ * Android replacement mode for subscription upgrades/downgrades
+ * Maps to Google Play's ReplacementMode enum
+ */
+export type AndroidReplacementMode = 
+  | 'IMMEDIATE_WITH_TIME_PRORATION'    // Prorated refund with immediate upgrade
+  | 'IMMEDIATE_AND_CHARGE_PRORATED_PRICE' // Charge difference immediately
+  | 'IMMEDIATE_WITHOUT_PRORATION'       // No proration, just switch
+  | 'DEFERRED';                          // Change takes effect at next renewal
+
+/**
+ * Upgrade info for Android subscription changes
+ */
+export interface AndroidUpgradeInfo {
+  oldProductId: string;
+  replacementMode?: AndroidReplacementMode;
+}
+
+/**
  * Trigger a RevenueCat purchase through Despia native runtime
  * @param userId The user's ID (typically the auth user ID or coach profile ID)
  * @param productId The RevenueCat product ID to purchase
+ * @param upgradeInfo Optional upgrade info for Android subscription changes
  * @returns true if the purchase was triggered, false if not in Despia environment
  */
-export const triggerRevenueCatPurchase = (userId: string, productId: string): boolean => {
+export const triggerRevenueCatPurchase = (
+  userId: string, 
+  productId: string,
+  upgradeInfo?: AndroidUpgradeInfo
+): boolean => {
   if (!isDespia()) {
     console.warn('[Despia IAP] Attempted purchase outside of Despia environment');
     return false;
   }
   
   try {
-    const command = `revenuecat://purchase?external_id=${encodeURIComponent(userId)}&product=${encodeURIComponent(productId)}`;
+    let command = `revenuecat://purchase?external_id=${encodeURIComponent(userId)}&product=${encodeURIComponent(productId)}`;
+    
+    // For Android upgrades, include old product and replacement mode
+    if (isDespiaAndroid() && upgradeInfo?.oldProductId) {
+      command += `&oldProduct=${encodeURIComponent(upgradeInfo.oldProductId)}`;
+      command += `&replacementMode=${upgradeInfo.replacementMode || 'IMMEDIATE_AND_CHARGE_PRORATED_PRICE'}`;
+      console.log('[Despia IAP] Android upgrade with replacement mode:', {
+        oldProduct: upgradeInfo.oldProductId,
+        newProduct: productId,
+        mode: upgradeInfo.replacementMode || 'IMMEDIATE_AND_CHARGE_PRORATED_PRICE',
+      });
+    }
+    
     console.log('[Despia IAP] Triggering purchase:', command);
     console.log(`[Despia IAP] Active listeners: ${Array.from(iapCallbackRegistry.keys()).join(', ')}`);
     despia(command);

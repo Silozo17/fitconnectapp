@@ -2,11 +2,11 @@ import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
-import { Crown, Check, Loader2, Clock, AlertTriangle, ExternalLink } from "lucide-react";
+import { Crown, Check, Loader2, Clock, AlertTriangle, ExternalLink, CreditCard } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -220,6 +220,33 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
           </CardDescription>
         </CardHeader>
         <CardContent>
+            {/* Billing grace period warning - show when subscription has payment issues */}
+            {subscriptionStatus.status === 'past_due' && (
+              <Alert variant="destructive" className="mb-6">
+                <CreditCard className="h-4 w-4" />
+                <AlertTitle>{t("subscription.paymentIssue", "Payment Issue")}</AlertTitle>
+                <AlertDescription>
+                  {t("subscription.paymentIssueDesc", "There's a problem with your subscription payment. Please update your payment method to avoid losing access.")}
+                  {isNativeSubscription ? (
+                    <Button 
+                      variant="link" 
+                      className="h-auto p-0 ml-1"
+                      onClick={() => {
+                        if (typeof window !== 'undefined' && (window as any).despia?.openURL) {
+                          (window as any).despia.openURL('https://apps.apple.com/account/subscriptions');
+                        } else {
+                          window.open('https://apps.apple.com/account/subscriptions', '_blank');
+                        }
+                      }}
+                    >
+                      {t("subscription.updatePaymentMethod", "Update Payment Method")}
+                      <ExternalLink className="h-3 w-3 ml-1" />
+                    </Button>
+                  ) : null}
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Phase 7: Show expired subscription message for non-native subscriptions */}
             {!isNativeSubscription && isExpired && expiredTierName && (
               <Alert className="mb-6 border-muted bg-muted/50">

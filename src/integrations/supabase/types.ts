@@ -6252,10 +6252,12 @@ export type Database = {
       }
       platform_subscriptions: {
         Row: {
+          billing_interval: string | null
           coach_id: string
           created_at: string
           current_period_end: string | null
           current_period_start: string | null
+          current_product_id: string | null
           id: string
           pending_tier: string | null
           status: string | null
@@ -6265,10 +6267,12 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          billing_interval?: string | null
           coach_id: string
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          current_product_id?: string | null
           id?: string
           pending_tier?: string | null
           status?: string | null
@@ -6278,10 +6282,12 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          billing_interval?: string | null
           coach_id?: string
           created_at?: string
           current_period_end?: string | null
           current_period_start?: string | null
+          current_product_id?: string | null
           id?: string
           pending_tier?: string | null
           status?: string | null

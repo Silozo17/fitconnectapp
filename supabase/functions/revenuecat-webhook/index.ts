@@ -80,6 +80,14 @@ const productToTier: Record<string, string> = {
   "enterprise.monthly.play": "enterprise",
   "enterprise.annual.play": "enterprise",
   
+  // Android Google Play with base plan suffix (RevenueCat format: productId:basePlanId)
+  "starter.monthly.play:starter-monthly-play": "starter",
+  "starter.annual.play:starter-annual-play": "starter",
+  "pro.monthly.play:pro-monthly-play": "pro",
+  "pro.annual.play:pro-annual-play": "pro",
+  "enterprise.monthly.play:enterprise-monthly-play": "enterprise",
+  "enterprise.annual.play:enterprise-annual-play": "enterprise",
+  
   // Legacy underscore format for backwards compatibility
   "fitconnect_starter_monthly": "starter",
   "fitconnect_starter_yearly": "starter",
@@ -437,7 +445,13 @@ serve(async (req) => {
           ? new Date(event.expiration_at_ms).toISOString() 
           : null;
 
-        // Upsert platform subscription
+        // Extract billing interval from product ID for tracking
+        const billingInterval = event.product_id?.toLowerCase().includes('annual') || 
+                                event.product_id?.toLowerCase().includes('yearly') 
+          ? 'yearly' 
+          : 'monthly';
+
+        // Upsert platform subscription with product tracking for Android upgrades
         const { error: subError } = await supabase
           .from("platform_subscriptions")
           .upsert({
@@ -451,6 +465,9 @@ serve(async (req) => {
             // Store RevenueCat IDs in stripe fields for now (they're just identifiers)
             stripe_subscription_id: transactionId,
             stripe_customer_id: `rc_${event.app_user_id}`,
+            // Track current product for Android upgrade flow
+            current_product_id: event.product_id,
+            billing_interval: billingInterval,
             updated_at: new Date().toISOString(),
           }, { onConflict: "coach_id" });
 
@@ -481,6 +498,12 @@ serve(async (req) => {
 
         const renewalTier = tier || 'starter';
 
+        // Extract billing interval from product ID for tracking
+        const renewalBillingInterval = event.product_id?.toLowerCase().includes('annual') || 
+                                       event.product_id?.toLowerCase().includes('yearly') 
+          ? 'yearly' 
+          : 'monthly';
+
         // Use UPSERT to handle case where subscription record might not exist
         const { data: renewalData, error } = await supabase
           .from("platform_subscriptions")
@@ -494,6 +517,9 @@ serve(async (req) => {
             current_period_end: periodEnd,
             stripe_customer_id: `rc_${event.app_user_id}`,
             stripe_subscription_id: `rc_${event.original_transaction_id || event.transaction_id}`,
+            // Track current product for Android upgrade flow
+            current_product_id: event.product_id,
+            billing_interval: renewalBillingInterval,
             updated_at: new Date().toISOString(),
           }, { onConflict: "coach_id" })
           .select('id');

@@ -15,6 +15,8 @@ import {
   getPlatformProductId,
   IAPSuccessData,
   triggerHaptic,
+  isDespiaAndroid,
+  AndroidUpgradeInfo,
 } from '@/lib/despia';
 
 export type SubscriptionTier = 'starter' | 'pro' | 'enterprise';
@@ -572,6 +574,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
   /**
    * Trigger a purchase
+   * ANDROID FIX: For upgrades, pass oldProductId and replacementMode to RevenueCat
    */
   const purchase = useCallback(async (tier: SubscriptionTier, interval: BillingInterval) => {
     if (!state.isAvailable) {
@@ -594,6 +597,36 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     if (!productId) {
       toast.error('Invalid subscription selection for this platform');
       return;
+    }
+
+    // ANDROID FIX: Detect if this is an upgrade and pass old product info
+    let upgradeInfo: AndroidUpgradeInfo | undefined;
+    
+    if (isDespiaAndroid()) {
+      const currentTier = coachProfile?.subscription_tier || 'free';
+      const currentPriority = TIER_PRIORITY[currentTier] ?? 3;
+      const newPriority = TIER_PRIORITY[tier] ?? 3;
+      const isUpgrade = newPriority < currentPriority && currentTier !== 'free';
+      
+      if (isUpgrade) {
+        // For upgrades, we need the old product ID
+        // Try to get the current billing interval from localStorage or default to monthly
+        const cachedInterval = localStorage.getItem('fitconnect_current_billing_interval') as BillingInterval || 'monthly';
+        const oldProductId = getPlatformProductId(currentTier as SubscriptionTier, cachedInterval);
+        
+        if (oldProductId) {
+          upgradeInfo = {
+            oldProductId,
+            replacementMode: 'IMMEDIATE_AND_CHARGE_PRORATED_PRICE',
+          };
+          console.log('[NativeIAP] Android upgrade detected', {
+            fromTier: currentTier,
+            toTier: tier,
+            oldProductId,
+            newProductId: productId,
+          });
+        }
+      }
     }
 
     setState(prev => ({
@@ -628,8 +661,8 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     requestAnimationFrame(() => {
       triggerHaptic('light');
       
-      // Trigger the native purchase
-      const triggered = triggerRevenueCatPurchase(externalId, productId);
+      // Trigger the native purchase (with upgrade info for Android if applicable)
+      const triggered = triggerRevenueCatPurchase(externalId, productId, upgradeInfo);
 
       if (!triggered) {
         clearPurchaseTimeout();
@@ -642,7 +675,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         toast.error('Failed to start purchase');
       }
     });
-  }, [state.isAvailable, user, clearPurchaseTimeout]);
+  }, [state.isAvailable, user, clearPurchaseTimeout, coachProfile?.subscription_tier]);
 
   /**
    * Reset all state - useful for recovering from stuck states
