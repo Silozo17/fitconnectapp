@@ -28,7 +28,8 @@ import { BillingInterval } from "@/lib/pricing-config";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { LegalDisclosure } from "@/components/shared/LegalLinks";
 import { useQueryClient } from "@tanstack/react-query";
-
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 interface PlatformSubscriptionProps {
   coachId: string;
   currentTier?: string;
@@ -61,6 +62,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   
   // Platform detection and pricing
   const isNativeApp = isDespia();
+  const isMobile = useIsMobile();
   const { isAndroidNative } = usePlatformRestrictions();
   const webPricing = useActivePricing();
   const nativePricing = useNativePricing();
@@ -277,113 +279,89 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
               </div>
             )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
-              .filter(([tierKey, tier]) => !tier.adminOnly || activeTier === tierKey)
-              .map(([tierKey, tier]) => {
-                const isCurrentTier = activeTier === tierKey;
-                const isLoading = loadingTier === tierKey || (isPurchasing && loadingTier === null);
-                const buttonConfig = getButtonConfig(tierKey);
-                const isPricedTier = ['starter', 'pro', 'enterprise'].includes(tierKey);
+          {/* Tier cards - carousel on mobile, grid on desktop */}
+          {(() => {
+            const tiers = (Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])
+              .filter(([tierKey, tier]) => !tier.adminOnly || activeTier === tierKey);
 
-                return (
-                  <div
-                    key={tierKey}
-                    className={cn(
-                      "border rounded-lg p-4 relative transition-all",
-                      isCurrentTier 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-primary/50",
-                      tier.highlighted && "ring-2 ring-primary"
-                    )}
-                  >
-                    {isCurrentTier && (
-                      <Badge className="absolute -top-2 right-2">{t("subscription.currentPlan")}</Badge>
-                    )}
-                    {tier.highlighted && !isCurrentTier && (
-                      <Badge variant="secondary" className="absolute -top-2 right-2">{t("subscription.popular")}</Badge>
-                    )}
-                    
-                    <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
-                    {/* Show "Monthly only" note for Enterprise on Android when yearly is selected */}
-                    {tierKey === 'enterprise' && isAndroidNative && billingInterval === 'yearly' && (
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {t("subscription.monthlyOnlyAndroid", "Monthly only on Android")}
-                      </p>
-                    )}
-                    <div className="flex items-baseline gap-1 mb-4">
-                      <span className="text-3xl font-bold">
-                        {tier.prices.monthly.amount === 0 
-                          ? t("subscription.free")
-                          : (isPricedTier
-                              ? pricing.formatPrice(
-                                  pricing.getSubscriptionPrice(
-                                    tierKey as SubscriptionTier, 
-                                    // Enterprise on Android: always show monthly
-                                    (tierKey === 'enterprise' && isAndroidNative) ? 'monthly' : billingInterval
-                                  )
+            const renderTierCard = ([tierKey, tier]: [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]]) => {
+              const isCurrentTier = activeTier === tierKey;
+              const isLoading = loadingTier === tierKey || (isPurchasing && loadingTier === null);
+              const buttonConfig = getButtonConfig(tierKey);
+              const isPricedTier = ['starter', 'pro', 'enterprise'].includes(tierKey);
+
+              return (
+                <div
+                  key={tierKey}
+                  className={cn(
+                    "border rounded-lg p-4 relative transition-all h-full",
+                    isCurrentTier 
+                      ? "border-primary bg-primary/5" 
+                      : "border-border hover:border-primary/50",
+                    tier.highlighted && "ring-2 ring-primary"
+                  )}
+                >
+                  {isCurrentTier && (
+                    <Badge className="absolute -top-2 right-2">{t("subscription.currentPlan")}</Badge>
+                  )}
+                  {tier.highlighted && !isCurrentTier && (
+                    <Badge variant="secondary" className="absolute -top-2 right-2">{t("subscription.popular")}</Badge>
+                  )}
+                  
+                  <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
+                  {tierKey === 'enterprise' && isAndroidNative && billingInterval === 'yearly' && (
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {t("subscription.monthlyOnlyAndroid", "Monthly only on Android")}
+                    </p>
+                  )}
+                  <div className="flex items-baseline gap-1 mb-4">
+                    <span className="text-3xl font-bold">
+                      {tier.prices.monthly.amount === 0 
+                        ? t("subscription.free")
+                        : (isPricedTier
+                            ? pricing.formatPrice(
+                                pricing.getSubscriptionPrice(
+                                  tierKey as SubscriptionTier, 
+                                  (tierKey === 'enterprise' && isAndroidNative) ? 'monthly' : billingInterval
                                 )
-                              : `${pricing.currencySymbol}${tier.prices.monthly.amount}`)}
+                              )
+                            : `${pricing.currencySymbol}${tier.prices.monthly.amount}`)}
+                    </span>
+                    {tier.prices.monthly.amount > 0 && (
+                      <span className="text-muted-foreground">
+                        {billingInterval === 'yearly' && !(tierKey === 'enterprise' && isAndroidNative)
+                          ? t("subscription.perYear", "/year") 
+                          : t("subscription.perMonth")}
                       </span>
-                      {tier.prices.monthly.amount > 0 && (
-                        <span className="text-muted-foreground">
-                          {billingInterval === 'yearly' && !(tierKey === 'enterprise' && isAndroidNative)
-                            ? t("subscription.perYear", "/year") 
-                            : t("subscription.perMonth")}
-                        </span>
-                      )}
-                    </div>
+                    )}
+                  </div>
 
-                    <ul className="space-y-2 mb-4">
-                      {tier.featureKeys.slice(0, 5).map((featureKey, i) => (
-                        <li key={i} className="flex items-center gap-2 text-sm">
-                          <Check className="h-4 w-4 text-primary" />
-                          <span className="text-muted-foreground">{translateFeature(featureKey, t, tPages)}</span>
-                        </li>
-                      ))}
-                      {tier.featureKeys.length > 5 && (
-                        <li className="text-xs text-muted-foreground">
-                          +{tier.featureKeys.length - 5} more features
-                        </li>
-                      )}
-                    </ul>
-                    
-                    <a 
-                      href="/pricing" 
-                      className="text-xs text-muted-foreground underline hover:text-primary block mb-3"
-                    >
-                      See full feature comparison
-                    </a>
+                  <ul className="space-y-2 mb-4">
+                    {tier.featureKeys.slice(0, 5).map((featureKey, i) => (
+                      <li key={i} className="flex items-center gap-2 text-sm">
+                        <Check className="h-4 w-4 text-primary" />
+                        <span className="text-muted-foreground">{translateFeature(featureKey, t, tPages)}</span>
+                      </li>
+                    ))}
+                    {tier.featureKeys.length > 5 && (
+                      <li className="text-xs text-muted-foreground">
+                        +{tier.featureKeys.length - 5} more features
+                      </li>
+                    )}
+                  </ul>
+                  
+                  <a 
+                    href="/pricing" 
+                    className="text-xs text-muted-foreground underline hover:text-primary block mb-3"
+                  >
+                    See full feature comparison
+                  </a>
 
-                    {isCurrentTier ? (
-                      activeTier !== "free" ? (
-                        // For current paid tier: Show "Manage" for Stripe, hide for native (shown above)
-                        isNativeSubscription ? (
-                          <Button variant="outline" className="w-full" disabled>
-                            {t("subscription.currentPlan")}
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={handleManageStripeSubscription}
-                            disabled={loadingTier === "manage"}
-                          >
-                            {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                            {t("subscription.manageSubscription")}
-                          </Button>
-                        )
-                      ) : (
-                        <Button variant="outline" className="w-full" disabled>
-                          {t("subscription.currentPlan")}
-                        </Button>
-                      )
-                    ) : tierKey === "free" ? (
-                      // Downgrade to free: For native, show disabled (managed via platform)
-                      // For Stripe, show portal link
+                  {isCurrentTier ? (
+                    activeTier !== "free" ? (
                       isNativeSubscription ? (
                         <Button variant="outline" className="w-full" disabled>
-                          {t("subscription.managedViaPlatform", "Manage via App Store/Play Store")}
+                          {t("subscription.currentPlan")}
                         </Button>
                       ) : (
                         <Button
@@ -393,26 +371,68 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                           disabled={loadingTier === "manage"}
                         >
                           {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                          {t("subscription.downgrade")}
+                          {t("subscription.manageSubscription")}
                         </Button>
                       )
                     ) : (
-                      <Button
-                        variant={buttonConfig.variant}
-                        className="w-full"
-                        onClick={() => handleSubscribe(tierKey)}
-                        disabled={!!loadingTier || isPurchasing}
-                      >
-                        {(isLoading || isPurchasing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-                        {buttonConfig.text}
+                      <Button variant="outline" className="w-full" disabled>
+                        {t("subscription.currentPlan")}
                       </Button>
-                    )}
-                  </div>
-                );
-              })}
-          </div>
+                    )
+                  ) : tierKey === "free" ? (
+                    isNativeSubscription ? (
+                      <Button variant="outline" className="w-full" disabled>
+                        {t("subscription.managedViaPlatform", "Manage via App Store/Play Store")}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        className="w-full"
+                        onClick={handleManageStripeSubscription}
+                        disabled={loadingTier === "manage"}
+                      >
+                        {loadingTier === "manage" && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                        {t("subscription.downgrade")}
+                      </Button>
+                    )
+                  ) : (
+                    <Button
+                      variant={buttonConfig.variant}
+                      className="w-full"
+                      onClick={() => handleSubscribe(tierKey)}
+                      disabled={!!loadingTier || isPurchasing}
+                    >
+                      {(isLoading || isPurchasing) && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+                      {buttonConfig.text}
+                    </Button>
+                  )}
+                </div>
+              );
+            };
+
+            return isMobile ? (
+              <Carousel className="w-full" opts={{ align: "start" }}>
+                <CarouselContent className="-ml-2">
+                  {tiers.map((tierEntry) => (
+                    <CarouselItem key={tierEntry[0]} className="pl-2 basis-[85%]">
+                      {renderTierCard(tierEntry)}
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                <div className="flex justify-center gap-1 mt-4">
+                  {tiers.map((_, idx) => (
+                    <div key={idx} className="w-2 h-2 rounded-full bg-muted" />
+                  ))}
+                </div>
+              </Carousel>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {tiers.map(renderTierCard)}
+              </div>
+            );
+          })()}
           
-          {/* Legal disclosure - required for iOS App Store compliance */}
+          {/* Legal disclosure - always visible below carousel/grid */}
           <LegalDisclosure className="mt-6 pt-4 border-t" />
         </CardContent>
       </Card>
