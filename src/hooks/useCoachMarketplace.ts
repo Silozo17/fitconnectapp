@@ -127,6 +127,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.userLocation?.city || null,
     options.userLocation?.region || options.userLocation?.county || null,
     options.userLocation?.countryCode || null,
+    options.userLocation?.lat || null,
+    options.userLocation?.lng || null,
     options.countryCode || null,
     options.search || null,
     options.coachTypes?.join(',') || null,
@@ -140,6 +142,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.userLocation?.region,
     options.userLocation?.county,
     options.userLocation?.countryCode,
+    options.userLocation?.lat,
+    options.userLocation?.lng,
     options.countryCode,
     options.search,
     options.coachTypes,
@@ -166,6 +170,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         p_online_only: options.onlineOnly || false,
         p_in_person_only: options.inPersonOnly || false,
         p_limit: options.limit || 50,
+        p_user_lat: options.userLocation?.lat || null,
+        p_user_lng: options.userLocation?.lng || null,
       });
 
       if (error) throw error;
