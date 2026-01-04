@@ -1386,6 +1386,25 @@
   color-scheme: dark;
 }
 
+/* iOS Safari / WebKit temporal input width fix
+   On iOS, native date/time picker indicators render outside the input's layout box,
+   causing visual overflow even with width: 100%. This fix compensates for the ~16px
+   indicator width and forces WebKit to respect container bounds. */
+@supports (-webkit-touch-callout: none) {
+  input[type="date"],
+  input[type="time"],
+  input[type="datetime-local"] {
+    /* Override WebKit's intrinsic min-width that causes overflow */
+    -webkit-min-logical-width: 0;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    /* Ensure proper box-sizing */
+    box-sizing: border-box !important;
+    /* Clip any overflow from picker indicator */
+    overflow: hidden;
+  }
+}
+
 /* Badge claim animations */
 @keyframes shine {
   0% { transform: translateX(-200%); }
