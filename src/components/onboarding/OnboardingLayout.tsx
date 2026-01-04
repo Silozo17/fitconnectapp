@@ -56,6 +56,8 @@ interface OnboardingLayoutProps {
   backDisabled?: boolean;
   /** Disable skip button */
   skipDisabled?: boolean;
+  /** Hide entire header (progress, back, title, logo) */
+  hideHeader?: boolean;
 }
 
 const MAX_WIDTH_CLASSES = {
@@ -87,6 +89,7 @@ export function OnboardingLayout({
   skipLabel = 'Skip',
   backDisabled = false,
   skipDisabled = false,
+  hideHeader = false,
 }: OnboardingLayoutProps) {
   const progressPercent = totalSteps > 0 ? ((currentStep + 1) / totalSteps) * 100 : 0;
   const { isDespia, isIOS } = useEnvironment();
@@ -133,78 +136,92 @@ export function OnboardingLayout({
         paddingRight: 'env(safe-area-inset-right)',
       }}
     >
-      {/* Fixed Header */}
-      <header 
-        ref={headerRef}
-        className="flex-shrink-0 border-b border-border bg-background z-10"
-        style={{
-          // Native iOS (Despia) uses runtime variable, web/PWA uses standard env()
-          paddingTop: isDespia && isIOS 
-            ? 'var(--safe-area-top, 59px)' 
-            : 'env(safe-area-inset-top)',
-        }}
-      >
-        {/* Logo Row (optional) */}
-        {headerLogo && (
-          <div className="px-4 py-2.5 flex items-center justify-between border-b border-border">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center">
-                <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+      {/* Fixed Header - completely hidden when hideHeader is true */}
+      {!hideHeader && (
+        <header 
+          ref={headerRef}
+          className="flex-shrink-0 border-b border-border bg-background z-10"
+          style={{
+            // Native iOS (Despia) uses runtime variable, web/PWA uses standard env()
+            paddingTop: isDespia && isIOS 
+              ? 'var(--safe-area-top, 59px)' 
+              : 'env(safe-area-inset-top)',
+          }}
+        >
+          {/* Logo Row (optional) */}
+          {headerLogo && (
+            <div className="px-4 py-2.5 flex items-center justify-between border-b border-border">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
+                </div>
+                <span className="font-display font-bold text-lg sm:text-xl text-foreground">FitConnect</span>
               </div>
-              <span className="font-display font-bold text-lg sm:text-xl text-foreground">FitConnect</span>
+              {resolvedHeaderRight}
             </div>
-            {resolvedHeaderRight}
-          </div>
-        )}
+          )}
 
-        {/* Progress Bar */}
-        {!hideProgress && (
-          <div className={cn("px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 mx-auto w-full", maxWidthClass)}>
-            <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground mb-1.5 sm:mb-2">
-              <span>Step {currentStep + 1} of {totalSteps}</span>
-              <span>{Math.round(progressPercent)}%</span>
+          {/* Progress Bar */}
+          {!hideProgress && (
+            <div className={cn("px-4 sm:px-6 lg:px-8 pt-3 sm:pt-4 mx-auto w-full", maxWidthClass)}>
+              <div className="flex items-center justify-between text-xs sm:text-sm text-muted-foreground mb-1.5 sm:mb-2">
+                <span>Step {currentStep + 1} of {totalSteps}</span>
+                <span>{Math.round(progressPercent)}%</span>
+              </div>
+              <Progress value={progressPercent} className="h-1.5 sm:h-2" />
             </div>
-            <Progress value={progressPercent} className="h-1.5 sm:h-2" />
-          </div>
-        )}
+          )}
 
-        {/* Title Row (only show if not using headerLogo OR if there's a title) */}
-        {(title || (!headerLogo && resolvedHeaderRight) || showBackButton) && (
-          <div className={cn("flex items-center justify-between px-4 py-3 mx-auto w-full", maxWidthClass)}>
-            <div className="flex items-center gap-3 min-w-0 flex-1">
-              {showBackButton && onBack && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={onBack}
-                  disabled={backDisabled}
-                  className="flex-shrink-0 -ml-2"
-                  aria-label="Go back"
-                >
-                  <ArrowLeft className="h-5 w-5" />
-                </Button>
+          {/* Title Row (only show if not using headerLogo OR if there's a title) */}
+          {(title || (!headerLogo && resolvedHeaderRight) || showBackButton) && (
+            <div className={cn("flex items-center justify-between px-4 py-3 mx-auto w-full", maxWidthClass)}>
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                {showBackButton && onBack && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onBack}
+                    disabled={backDisabled}
+                    className="flex-shrink-0 -ml-2"
+                    aria-label="Go back"
+                  >
+                    <ArrowLeft className="h-5 w-5" />
+                  </Button>
+                )}
+                <div className="min-w-0 flex-1">
+                  {title && (
+                    <h1 className="text-base sm:text-lg font-semibold text-foreground leading-snug">
+                      {title}
+                    </h1>
+                  )}
+                  {subtitle && (
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {subtitle}
+                    </p>
+                  )}
+                </div>
+              </div>
+              {!headerLogo && resolvedHeaderRight && (
+                <div className="flex-shrink-0 ml-2">
+                  {resolvedHeaderRight}
+                </div>
               )}
-              <div className="min-w-0 flex-1">
-                {title && (
-                  <h1 className="text-base sm:text-lg font-semibold text-foreground leading-snug">
-                    {title}
-                  </h1>
-                )}
-                {subtitle && (
-                  <p className="text-sm text-muted-foreground line-clamp-2">
-                    {subtitle}
-                  </p>
-                )}
-              </div>
             </div>
-            {!headerLogo && resolvedHeaderRight && (
-              <div className="flex-shrink-0 ml-2">
-                {resolvedHeaderRight}
-              </div>
-            )}
-          </div>
-        )}
-      </header>
+          )}
+        </header>
+      )}
+      
+      {/* Safe area top padding when header is hidden */}
+      {hideHeader && (
+        <div 
+          className="flex-shrink-0"
+          style={{
+            paddingTop: isDespia && isIOS 
+              ? 'var(--safe-area-top, 59px)' 
+              : 'env(safe-area-inset-top)',
+          }}
+        />
+      )}
 
       {/* Scrollable Content Area - takes remaining space */}
       <main 

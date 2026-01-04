@@ -10,8 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, Crown, Zap, Sparkles, Star, Users, Dumbbell, Brain, ExternalLink } from "lucide-react";
-import { LegalLinks, LegalDisclosure } from "@/components/shared/LegalLinks";
+import { Check, Loader2, Crown, Zap, Sparkles, Star, Users, Dumbbell, Brain, TrendingUp, MessageSquare, Infinity, Headphones, Cog } from "lucide-react";
+import { openExternalUrl, shouldOpenExternally } from "@/lib/external-links";
+import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { toast } from "sonner";
 import { ProfileImageUpload } from "@/components/shared/ProfileImageUpload";
@@ -1006,44 +1007,66 @@ const CoachOnboarding = () => {
         const paidTiers = getDisplayableTiers(true); // excludeFree = true
         const isProcessingIAP = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
         
-        // Key benefits for the hero section
-        const benefits = [
-          { icon: Users, text: "Unlimited client management & messaging" },
-          { icon: Dumbbell, text: "Custom workout & nutrition plan builders" },
-          { icon: Brain, text: "AI-powered program generation & insights" },
-        ];
+        // Dynamic benefits per tier
+        const tierBenefits = {
+          starter: [
+            { icon: Users, text: "Manage up to 10 clients" },
+            { icon: Dumbbell, text: "Workout plan builder" },
+            { icon: MessageSquare, text: "Client messaging & scheduling" },
+          ],
+          pro: [
+            { icon: Users, text: "Manage up to 50 clients" },
+            { icon: Brain, text: "AI workout & meal planners" },
+            { icon: TrendingUp, text: "Advanced analytics & insights" },
+          ],
+          enterprise: [
+            { icon: Infinity, text: "Unlimited clients" },
+            { icon: Headphones, text: "Priority support & account manager" },
+            { icon: Cog, text: "Custom integrations & white-label" },
+          ],
+        };
+        
+        // Use selected tier benefits or default to Pro
+        const selectedTierKey = (formData.subscriptionTier || 'pro') as keyof typeof tierBenefits;
+        const benefits = tierBenefits[selectedTierKey] || tierBenefits.pro;
         
         return (
-          <div className="flex flex-col min-h-[60vh]">
-            {/* Hero section with title */}
-            <div className="text-center mb-6">
-              <h2 className="font-display text-2xl sm:text-3xl font-bold text-foreground">
+          <div className="flex flex-col h-full">
+            {/* Logo - compact */}
+            <div className="flex items-center justify-center gap-2 pt-2 pb-3">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <Dumbbell className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="font-display font-bold text-lg">FitConnect</span>
+            </div>
+
+            {/* Title - compact */}
+            <div className="text-center mb-3">
+              <h2 className="font-display text-xl font-bold text-foreground">
                 Unlock all coaching features
               </h2>
-              <p className="text-muted-foreground text-sm mt-2">
+              <p className="text-muted-foreground text-sm mt-1">
                 Start your 7-day free trial today
               </p>
             </div>
 
-            {/* Key benefits list */}
-            <div className="space-y-3 mb-6">
+            {/* Dynamic benefits list - compact */}
+            <div className="space-y-2 mb-3">
               {benefits.map((benefit, idx) => {
                 const Icon = benefit.icon;
                 return (
-                  <div key={idx} className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      <Icon className="h-4 w-4 text-primary" />
+                  <div key={idx} className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
+                      <Icon className="h-3.5 w-3.5 text-primary" />
                     </div>
-                    <p className="text-sm text-muted-foreground pt-1">
-                      {benefit.text}
-                    </p>
+                    <p className="text-sm text-muted-foreground">{benefit.text}</p>
                   </div>
                 );
               })}
             </div>
 
-            {/* Billing toggle */}
-            <div className="flex items-center justify-center gap-3 mb-5">
+            {/* Billing toggle - always show Save badge */}
+            <div className="flex items-center justify-center gap-2 mb-3">
               <span className={`text-sm font-medium transition-colors ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
                 Monthly
               </span>
@@ -1054,13 +1077,16 @@ const CoachOnboarding = () => {
               <span className={`text-sm font-medium transition-colors ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
                 Yearly
               </span>
-              {billingInterval === 'yearly' && (
-                <Badge variant="secondary" className="ml-1 text-xs">Save ~17%</Badge>
-              )}
+              <Badge 
+                variant={billingInterval === 'yearly' ? 'default' : 'secondary'} 
+                className={`ml-1 text-xs ${billingInterval === 'monthly' ? 'opacity-60' : ''}`}
+              >
+                Save ~17%
+              </Badge>
             </div>
 
-            {/* Tier cards - stacked vertically (Apple-style compact cards) */}
-            <div className="space-y-3 flex-1">
+            {/* Tier cards - compact Apple-style */}
+            <div className="space-y-2 flex-1 min-h-0 overflow-y-auto">
               {paidTiers.map((tier) => {
                 const Icon = tier.icon;
                 const isSelected = formData.subscriptionTier === tier.id;
@@ -1079,7 +1105,7 @@ const CoachOnboarding = () => {
                       handleInputChange("subscriptionTier", tier.id);
                       setHasSelectedPlan(true);
                     }}
-                    className={`w-full p-4 rounded-xl border-2 transition-all text-left flex items-center gap-4 ${
+                    className={`w-full p-3 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
                       isSelected 
                         ? "border-primary bg-primary/5" 
                         : "border-border hover:border-muted-foreground"
@@ -1093,18 +1119,18 @@ const CoachOnboarding = () => {
                     </div>
                     
                     {/* Tier icon */}
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
                       isSelected ? "bg-primary" : "bg-secondary"
                     }`}>
-                      <Icon className={`w-5 h-5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                      <Icon className={`w-4 h-4 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
                     </div>
                     
                     {/* Tier info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground">{tier.name}</h3>
+                        <h3 className="font-semibold text-foreground text-sm">{tier.name}</h3>
                         {tier.popular && (
-                          <Badge variant="secondary" className="text-xs">Popular</Badge>
+                          <Badge variant="secondary" className="text-xs py-0">Popular</Badge>
                         )}
                       </div>
                       <p className="text-xs text-muted-foreground line-clamp-1">{tier.description}</p>
@@ -1112,7 +1138,7 @@ const CoachOnboarding = () => {
                     
                     {/* Price */}
                     <div className="text-right shrink-0">
-                      <span className="font-bold text-primary">
+                      <span className="font-bold text-primary text-sm">
                         {nativePricing.formatPrice(monthlyEquivalent)}
                       </span>
                       <span className="text-xs text-muted-foreground">/mo</span>
@@ -1122,58 +1148,59 @@ const CoachOnboarding = () => {
               })}
             </div>
 
-            {/* CTA Section */}
-            <div className="mt-6 space-y-3">
-              {/* Main CTA Button */}
+            {/* CTA Section - compact */}
+            <div className="mt-3 space-y-2">
               <Button 
-                className="w-full py-6 text-lg font-semibold"
+                className="w-full py-5 text-base font-semibold"
                 onClick={handleComplete}
                 disabled={!hasSelectedPlan || isSubmitting || isNavigating || isProcessingIAP}
               >
-                {(isSubmitting || isProcessingIAP) && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                {(isSubmitting || isProcessingIAP) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Start 7-day free trial
               </Button>
               
-              {/* Trial disclosure - required by Apple */}
               <p className="text-xs text-center text-muted-foreground">
-                Cancel anytime during your trial. After 7 days, you'll be charged 
-                {billingInterval === 'monthly' ? ' monthly' : ' yearly'}.
+                Cancel anytime. After 7 days, charged {billingInterval === 'monthly' ? 'monthly' : 'yearly'}.
               </p>
               
-              {/* Continue without upgrading */}
               <button
                 type="button"
                 onClick={handleContinueWithoutUpgrading}
                 disabled={isSubmitting || isNavigating || isProcessingIAP}
-                className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors py-2 disabled:opacity-50"
+                className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors py-1 disabled:opacity-50"
               >
                 Continue without upgrading
               </button>
             </div>
 
-            {/* Legal footer */}
-            <div className="mt-6 pt-4 border-t border-border">
-              <div className="flex flex-wrap justify-center items-center gap-4 text-sm">
-                {isNativeMobile && (
+            {/* Consolidated legal footer - single paragraph */}
+            <p className="text-xs text-muted-foreground text-center mt-3 pb-1">
+              {isNativeMobile && (
+                <>
                   <button 
                     type="button"
                     onClick={handleRestorePurchases}
-                    className="text-muted-foreground hover:text-primary transition-colors"
+                    className="text-primary hover:underline"
                   >
                     Restore Purchases
                   </button>
-                )}
-                <LegalLinks variant="compact" />
-              </div>
-              <LegalDisclosure className="mt-3" />
-            </div>
-            
-            {/* Compare features link */}
-            <p className="text-sm text-muted-foreground text-center mt-4">
-              <a href="/pricing" target="_blank" className="underline hover:text-primary inline-flex items-center gap-1">
-                Compare all features
-                <ExternalLink className="w-3 h-3" />
-              </a>
+                  {" · "}
+                </>
+              )}
+              By continuing, you agree to our{" "}
+              {shouldOpenExternally() ? (
+                <>
+                  <button onClick={() => openExternalUrl(`${window.location.origin}/terms`)} className="text-primary hover:underline">Terms</button>,{" "}
+                  <button onClick={() => openExternalUrl(`${window.location.origin}/privacy`)} className="text-primary hover:underline">Privacy</button>{" "}
+                  & <button onClick={() => openExternalUrl(`${window.location.origin}/terms#eula`)} className="text-primary hover:underline">EULA</button>
+                </>
+              ) : (
+                <>
+                  <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms</Link>,{" "}
+                  <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy</Link>{" "}
+                  & <Link to="/terms#eula" target="_blank" className="text-primary hover:underline">EULA</Link>
+                </>
+              )}.
             </p>
           </div>
         );
@@ -1195,12 +1222,14 @@ const CoachOnboarding = () => {
         currentStep={currentStep}
         totalSteps={STEPS.length}
         title={STEPS[currentStep]}
-        headerLogo
-        showBackButton={currentStep > 0 && STEPS[currentStep] !== "Connect Payments" && !isNavigating}
+        headerLogo={STEPS[currentStep] !== "Choose Your Plan"}
+        showBackButton={currentStep > 0 && STEPS[currentStep] !== "Connect Payments" && STEPS[currentStep] !== "Choose Your Plan" && !isNavigating}
         onBack={handleBack}
         footerActions={getFooterActions()}
         hideFooter={STEPS[currentStep] === "Connect Payments" || STEPS[currentStep] === "Choose Your Plan"}
-        maxWidth={STEPS[currentStep] === "Choose Your Plan" ? "lg" : STEPS[currentStep] === "Specialties" ? "xl" : "lg"}
+        hideHeader={STEPS[currentStep] === "Choose Your Plan"}
+        hideProgress={STEPS[currentStep] === "Choose Your Plan"}
+        maxWidth={STEPS[currentStep] === "Choose Your Plan" ? "md" : STEPS[currentStep] === "Specialties" ? "xl" : "lg"}
         backDisabled={isNavigating}
         skipDisabled={isNavigating}
       >
