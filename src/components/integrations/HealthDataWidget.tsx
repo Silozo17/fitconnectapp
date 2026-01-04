@@ -78,6 +78,15 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
 
   const hasConnectedDevice = connections && connections.length > 0;
   const hasData = data && data.length > 0;
+  
+  // Debug: log data state for troubleshooting
+  console.log('[HealthDataWidget] Data state:', {
+    hasConnectedDevice,
+    hasData,
+    dataCount: data?.length || 0,
+    connections: connections?.map(c => c.provider),
+    lastSyncedAt: lastSyncedAt?.toISOString(),
+  });
 
   // Check if Apple Health is connected but has no data today
   const hasAppleHealth = connections?.some(c => c.provider === 'apple_health');
@@ -233,7 +242,17 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           <div className="flex items-center gap-2 p-2 mb-3 rounded-lg bg-muted/50 border border-border/50">
             <Smartphone className="w-4 h-4 text-muted-foreground shrink-0" />
             <p className="text-xs text-muted-foreground">
-              Apple Health connected — no data recorded yet today
+              Apple Health connected — tap sync to pull today's data
+            </p>
+          </div>
+        )}
+        
+        {/* No data from any source */}
+        {hasConnectedDevice && !hasData && !isSyncing && !isLoading && (
+          <div className="flex items-center gap-2 p-2 mb-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+            <RefreshCw className="w-4 h-4 text-amber-500 shrink-0" />
+            <p className="text-xs text-amber-600 dark:text-amber-400">
+              No data yet — tap sync to pull from your device
             </p>
           </div>
         )}
