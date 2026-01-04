@@ -2,10 +2,11 @@ import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
-import { Crown, Check, Loader2 } from "lucide-react";
+import { Crown, Check, Loader2, Clock } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
@@ -98,6 +99,19 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const activeTier = subscriptionStatus.tier;
   const isNativeSubscription = subscriptionStatus.isNativeSubscription;
   const currentPeriodEnd = subscriptionStatus.currentPeriodEnd;
+  const { hasPendingChange, pendingTier } = subscriptionStatus;
+
+  // Format the pending change date
+  const formattedPendingChangeDate = currentPeriodEnd
+    ? new Date(currentPeriodEnd).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  // Get pending tier display name
+  const pendingTierName = pendingTier ? SUBSCRIPTION_TIERS[pendingTier]?.name || pendingTier : null;
 
   const handleSubscribe = (tierKey: TierKey) => {
     if (isNativeApp && ['starter', 'pro', 'enterprise'].includes(tierKey)) {
@@ -181,42 +195,53 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {/* Show native subscription management for App Store / Play Store subscriptions */}
-          {isNativeSubscription && activeTier !== 'free' && (
-            <div className="mb-6">
-              <NativeSubscriptionManagement 
-                tier={activeTier} 
-                currentPeriodEnd={currentPeriodEnd}
-              />
-            </div>
-          )}
+            {/* Phase 5: Show pending downgrade message for non-native subscriptions */}
+            {!isNativeSubscription && hasPendingChange && pendingTierName && formattedPendingChangeDate && (
+              <Alert className="mb-6 border-blue-500/30 bg-blue-500/10">
+                <Clock className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-700">
+                  Your plan will change to <strong>{pendingTierName}</strong> on{' '}
+                  <strong>{formattedPendingChangeDate}</strong>. You'll keep your current features until then.
+                </AlertDescription>
+              </Alert>
+            )}
 
-          {/* Billing interval toggle for native apps */}
-          {isNativeApp && (
-            <div className="mb-6">
-              <RadioGroup
-                value={billingInterval}
-                onValueChange={(val) => setBillingInterval(val as BillingInterval)}
-                className="flex gap-4"
-              >
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="monthly" id="billing-monthly" />
-                  <Label htmlFor="billing-monthly" className="cursor-pointer">
-                    {t("subscription.monthly", "Monthly")}
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <RadioGroupItem value="yearly" id="billing-yearly" />
-                  <Label htmlFor="billing-yearly" className="cursor-pointer flex items-center gap-2">
-                    {t("subscription.yearly", "Yearly")}
-                    <Badge variant="secondary" className="text-xs">
-                      {t("subscription.save", "Save")} ~17%
-                    </Badge>
-                  </Label>
-                </div>
-              </RadioGroup>
-            </div>
-          )}
+            {/* Show native subscription management for App Store / Play Store subscriptions */}
+            {isNativeSubscription && activeTier !== 'free' && (
+              <div className="mb-6">
+                <NativeSubscriptionManagement 
+                  tier={activeTier} 
+                  currentPeriodEnd={currentPeriodEnd}
+                />
+              </div>
+            )}
+
+            {/* Billing interval toggle for native apps */}
+            {isNativeApp && (
+              <div className="mb-6">
+                <RadioGroup
+                  value={billingInterval}
+                  onValueChange={(val) => setBillingInterval(val as BillingInterval)}
+                  className="flex gap-4"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="monthly" id="billing-monthly" />
+                    <Label htmlFor="billing-monthly" className="cursor-pointer">
+                      {t("subscription.monthly", "Monthly")}
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="yearly" id="billing-yearly" />
+                    <Label htmlFor="billing-yearly" className="cursor-pointer flex items-center gap-2">
+                      {t("subscription.yearly", "Yearly")}
+                      <Badge variant="secondary" className="text-xs">
+                        {t("subscription.save", "Save")} ~17%
+                      </Badge>
+                    </Label>
+                  </div>
+                </RadioGroup>
+              </div>
+            )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {(Object.entries(SUBSCRIPTION_TIERS) as [TierKey, typeof SUBSCRIPTION_TIERS[TierKey]][])

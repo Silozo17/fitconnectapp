@@ -18,6 +18,9 @@ export interface SubscriptionStatus {
   isCancelled: boolean;
   hasAccessUntil: string | null;
   isWithinGracePeriod: boolean;
+  // Phase 5: Pending tier change (for downgrades scheduled at period end)
+  pendingTier: TierKey | null;
+  hasPendingChange: boolean;
 }
 
 /**
@@ -41,7 +44,7 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       const [platformSubResult, adminGrantResult, coachProfileResult] = await Promise.all([
         supabase
           .from("platform_subscriptions")
-          .select("tier, status, stripe_subscription_id, current_period_end")
+          .select("tier, status, stripe_subscription_id, current_period_end, pending_tier")
           .eq("coach_id", coachProfileId)
           .maybeSingle(),
         supabase
@@ -82,6 +85,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isCancelled: false,
       hasAccessUntil: null,
       isWithinGracePeriod: false,
+      pendingTier: null,
+      hasPendingChange: false,
     };
   }
 
@@ -101,6 +106,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isCancelled: false,
       hasAccessUntil: null,
       isWithinGracePeriod: false,
+      pendingTier: null,
+      hasPendingChange: false,
     };
   }
 
@@ -119,6 +126,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
         isCancelled: false,
         hasAccessUntil: adminGrant.expires_at,
         isWithinGracePeriod: false,
+        pendingTier: null,
+        hasPendingChange: false,
       };
     }
   }
@@ -139,6 +148,11 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     const now = new Date();
     const isWithinGracePeriod = isCancelled && periodEnd && new Date(periodEnd) > now;
 
+    // Phase 5: Check for pending tier change (scheduled downgrade)
+    const pendingTierValue = (platformSub as any).pending_tier;
+    const pendingTier = pendingTierValue ? normalizeTier(pendingTierValue) : null;
+    const hasPendingChange = !!pendingTier && pendingTier !== normalizeTier(platformSub.tier || 'free');
+
     // If cancelled but still within period, treat as active for access purposes
     const effectiveStatus = isWithinGracePeriod 
       ? 'cancelled' // Keep cancelled status for UI messaging
@@ -155,6 +169,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
       isCancelled,
       hasAccessUntil: isWithinGracePeriod ? periodEnd : null,
       isWithinGracePeriod,
+      pendingTier,
+      hasPendingChange,
     };
   }
 
@@ -170,6 +186,8 @@ export const useSubscriptionStatus = (): SubscriptionStatus => {
     isCancelled: false,
     hasAccessUntil: null,
     isWithinGracePeriod: false,
+    pendingTier: null,
+    hasPendingChange: false,
   };
 };
 

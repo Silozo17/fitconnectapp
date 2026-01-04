@@ -202,9 +202,12 @@ export const useFeatureAccess = () => {
     isLoading: profileLoading || clientsLoading,
     // New: Expose whether we have confirmed tier data
     hasFreshData: hasReceivedFreshDataRef.current,
-    // Phase 5: Expose cancellation status for UI messaging
+    // Phase 5: Expose cancellation and pending change status for UI messaging
     isCancelled: subscriptionStatus.isCancelled,
     isWithinGracePeriod: subscriptionStatus.isWithinGracePeriod,
     accessEndsDate: subscriptionStatus.hasAccessUntil,
+    hasPendingChange: subscriptionStatus.hasPendingChange,
+    pendingTier: subscriptionStatus.pendingTier,
+    pendingChangeDate: subscriptionStatus.currentPeriodEnd,
   };
 };
