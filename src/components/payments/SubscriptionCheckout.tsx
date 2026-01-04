@@ -6,8 +6,10 @@ import {
 } from "@stripe/react-stripe-js";
 import { supabase } from "@/integrations/supabase/client";
 import { TierKey, BillingInterval } from "@/lib/stripe-config";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertTriangle } from "lucide-react";
 import { useCountry } from "@/hooks/useCountry";
+import { isDespia } from "@/lib/despia";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 interface SubscriptionCheckoutProps {
   tier: TierKey;
@@ -19,6 +21,22 @@ export function SubscriptionCheckout({ tier, billingInterval }: SubscriptionChec
   const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
   const [isLoadingStripe, setIsLoadingStripe] = useState(true);
   const { countryCode } = useCountry();
+  
+  // PHASE 6: Hard block Stripe on native platforms
+  const isNativeApp = isDespia();
+  
+  // If on native, show hard block immediately
+  if (isNativeApp) {
+    return (
+      <Alert variant="destructive" className="max-w-md">
+        <AlertTriangle className="h-4 w-4" />
+        <AlertTitle>Payment Not Available</AlertTitle>
+        <AlertDescription>
+          Please use the in-app purchase options to subscribe. Stripe checkout is not available in the mobile app.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   // Fetch Stripe publishable key on mount
   useEffect(() => {

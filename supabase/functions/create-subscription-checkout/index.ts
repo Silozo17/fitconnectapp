@@ -57,11 +57,25 @@ serve(async (req) => {
     }
 
     const user = userData.user;
-    const { tier, billingInterval, countryCode } = await req.json() as {
+    const { tier, billingInterval, countryCode, isNativeApp } = await req.json() as {
       tier: string;
       billingInterval: string;
       countryCode?: string;
+      isNativeApp?: boolean;
     };
+
+    // PHASE 6: Hard block Stripe checkout on native platforms (backend enforcement)
+    // Check both explicit flag and User-Agent for native app indicators
+    const userAgent = req.headers.get("user-agent") || "";
+    const isNativeRequest = isNativeApp === true || 
+      userAgent.includes("Despia") || 
+      userAgent.includes("FitConnect-iOS") || 
+      userAgent.includes("FitConnect-Android");
+    
+    if (isNativeRequest) {
+      logStep("BLOCKED: Native app attempted Stripe checkout", { userAgent, isNativeApp });
+      throw new Error("Stripe checkout is not available in the mobile app. Please use in-app purchases.");
+    }
 
     logStep("Creating checkout", { tier, billingInterval, countryCode, userId: user.id });
 

@@ -130,9 +130,19 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
    * For native subscriptions (App Store / Play Store), this should NOT open Stripe.
    * The NativeSubscriptionManagement component handles that case.
    * This function is only called for actual Stripe subscriptions.
+   * 
+   * PHASE 6: Hard block Stripe portal on native platforms
    */
   const handleManageStripeSubscription = async () => {
     if (!user) return;
+
+    // PHASE 6: Hard block - prevent Stripe portal on native apps
+    if (isNativeApp) {
+      toast.error("Subscription Management", {
+        description: "Please manage your subscription through the App Store or Google Play.",
+      });
+      return;
+    }
 
     // Safety check: Don't open Stripe for native subscriptions
     if (isNativeSubscription) {

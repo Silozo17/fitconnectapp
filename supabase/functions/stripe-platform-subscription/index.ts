@@ -38,7 +38,19 @@ serve(async (req) => {
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
 
-    const { action, coachId, userId, email, tier, successUrl, cancelUrl } = await req.json();
+    const { action, coachId, userId, email, tier, successUrl, cancelUrl, isNativeApp } = await req.json();
+
+    // PHASE 6: Hard block Stripe on native platforms (backend enforcement)
+    const userAgent = req.headers.get("user-agent") || "";
+    const isNativeRequest = isNativeApp === true || 
+      userAgent.includes("Despia") || 
+      userAgent.includes("FitConnect-iOS") || 
+      userAgent.includes("FitConnect-Android");
+    
+    if (isNativeRequest) {
+      console.log("[BLOCKED] Native app attempted Stripe access:", { action, userAgent });
+      throw new Error("Stripe is not available in the mobile app. Please use in-app purchases or manage your subscription through the App Store/Play Store.");
+    }
 
     if (action === "create-checkout") {
       const tierConfig = PLATFORM_TIERS[tier as keyof typeof PLATFORM_TIERS];
