@@ -162,9 +162,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         
-        // Handle potential JWT errors
+        // PHASE 3 FIX: Handle JWT errors including "missing sub claim"
+        // These indicate a corrupted or invalid token that needs to be cleared
         if (error) {
-          if (error.message?.includes('JWT') || error.message?.includes('token') || error.message?.includes('claim')) {
+          const errorMessage = error.message?.toLowerCase() || '';
+          const isJWTError = 
+            errorMessage.includes('jwt') || 
+            errorMessage.includes('token') || 
+            errorMessage.includes('claim') ||
+            errorMessage.includes('sub claim') ||
+            errorMessage.includes('invalid claim');
+          
+          if (isJWTError) {
+            console.warn('[Auth] Corrupted JWT detected, signing out:', error.message);
+            // Clear all local storage that might hold stale tokens
+            try {
+              localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
+              localStorage.removeItem('fitconnect_cached_tier');
+              localStorage.removeItem('fitconnect_tier_timestamp');
+            } catch {}
+            
             await supabase.auth.signOut();
             setSession(null);
             setUser(null);
@@ -177,8 +194,35 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (session) {
           // Validate the session by checking if the user can be fetched
           const { error: userError } = await supabase.auth.getUser();
+          
           if (userError) {
-            // Try to refresh the session
+            const userErrorMessage = userError.message?.toLowerCase() || '';
+            const isUserJWTError = 
+              userErrorMessage.includes('jwt') || 
+              userErrorMessage.includes('token') || 
+              userErrorMessage.includes('claim') ||
+              userErrorMessage.includes('sub claim') ||
+              userErrorMessage.includes('invalid claim') ||
+              userErrorMessage.includes('403');
+            
+            // PHASE 3 FIX: If getUser fails with JWT error, clear session completely
+            if (isUserJWTError) {
+              console.warn('[Auth] User fetch failed with JWT error, signing out:', userError.message);
+              try {
+                localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
+                localStorage.removeItem('fitconnect_cached_tier');
+                localStorage.removeItem('fitconnect_tier_timestamp');
+              } catch {}
+              
+              await supabase.auth.signOut();
+              setSession(null);
+              setUser(null);
+              setRole(null);
+              setAllRoles([]);
+              return;
+            }
+            
+            // Try to refresh the session for non-JWT errors
             const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
             if (refreshError || !refreshData.session) {
               setSession(null);
@@ -191,6 +235,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       } catch (err) {
         console.error('[Auth] Session validation error:', err);
+        // PHASE 3 FIX: On unexpected errors, try to recover gracefully
+        // Check if it's a JWT-related error in the catch block too
+        const errorStr = String(err).toLowerCase();
+        if (errorStr.includes('jwt') || errorStr.includes('claim') || errorStr.includes('token')) {
+          console.warn('[Auth] JWT error in catch block, signing out');
+          try {
+            localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
+            localStorage.removeItem('fitconnect_cached_tier');
+            localStorage.removeItem('fitconnect_tier_timestamp');
+            await supabase.auth.signOut();
+          } catch {}
+          setSession(null);
+          setUser(null);
+          setRole(null);
+          setAllRoles([]);
+        }
       }
     };
     
