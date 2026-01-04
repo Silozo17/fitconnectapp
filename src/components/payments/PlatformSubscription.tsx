@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { TFunction } from "i18next";
@@ -21,6 +21,7 @@ import { isDespia } from "@/lib/despia";
 import { triggerHaptic } from "@/lib/despia";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
+import { UpgradeSuccessDialog } from "@/components/subscription/UpgradeSuccessDialog";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscriptionManagement";
 import { BillingInterval } from "@/lib/pricing-config";
@@ -53,6 +54,11 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   
+  // UPGRADE SUCCESS DIALOG state
+  const [showUpgradeDialog, setShowUpgradeDialog] = useState(false);
+  const [upgradedToTier, setUpgradedToTier] = useState<TierKey>('free');
+  const previousTierRef = useRef<TierKey>('free');
+  
   // Platform detection and pricing
   const isNativeApp = isDespia();
   const { isAndroidNative } = usePlatformRestrictions();
@@ -68,14 +74,14 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
     triggerConfetti(confettiPresets.achievement);
     triggerHaptic('success');
     
-    // 2. Show success toast with prominent styling
-    const tierName = SUBSCRIPTION_TIERS[tier]?.name || tier;
-    toast.success(`🎉 Upgraded to ${tierName}!`, {
-      description: 'Your new features are now active. Enjoy!',
-      duration: 5000,
-    });
+    // 2. Store previous tier for the dialog
+    const prevTier = previousTierRef.current;
     
-    // 3. Clear tier cache and force refetch for immediate UI update
+    // 3. Set the upgraded tier and show the success dialog
+    setUpgradedToTier(tier as TierKey);
+    setShowUpgradeDialog(true);
+    
+    // 4. Clear tier cache and force refetch for immediate UI update
     localStorage.removeItem('fitconnect_cached_tier');
     localStorage.removeItem('fitconnect_tier_timestamp');
     
@@ -85,6 +91,8 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
       queryClient.invalidateQueries({ queryKey: ['coach-profile'], refetchType: 'all' }),
       queryClient.invalidateQueries({ queryKey: ['platform-subscription'], refetchType: 'all' }),
     ]);
+    
+    console.log('[PlatformSubscription] Upgrade complete - dialog shown for', tier, 'from', prevTier);
   }, [queryClient]);
   
   // Native IAP hook with success callback
@@ -117,6 +125,9 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const expiredTierName = expiredTier ? SUBSCRIPTION_TIERS[expiredTier]?.name || expiredTier : null;
 
   const handleSubscribe = (tierKey: TierKey) => {
+    // Store current tier as previous (for upgrade dialog)
+    previousTierRef.current = activeTier;
+    
     if (isNativeApp && ['starter', 'pro', 'enterprise'].includes(tierKey)) {
       // For Enterprise on Android, yearly is not available
       const effectiveInterval = (tierKey === 'enterprise' && isAndroidNative && billingInterval === 'yearly') 
@@ -410,6 +421,14 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
       <IAPUnsuccessfulDialog 
         open={iapState.showUnsuccessfulModal} 
         onOpenChange={dismissUnsuccessfulModal}
+      />
+      
+      {/* Upgrade success dialog with unlocked features */}
+      <UpgradeSuccessDialog
+        isOpen={showUpgradeDialog}
+        onClose={() => setShowUpgradeDialog(false)}
+        newTier={upgradedToTier}
+        previousTier={previousTierRef.current}
       />
     </>
   );
