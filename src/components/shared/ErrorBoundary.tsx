@@ -24,9 +24,34 @@ export class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
+    
+    // Check if this is an auth-related error (JWT/token corruption)
+    const errorMessage = error.message?.toLowerCase() || '';
+    const isAuthError = 
+      errorMessage.includes('jwt') ||
+      errorMessage.includes('token') ||
+      errorMessage.includes('claim') ||
+      errorMessage.includes('unauthorized') ||
+      errorMessage.includes('403');
+    
+    if (isAuthError) {
+      console.warn('[ErrorBoundary] Auth error detected, clearing potentially corrupted tokens');
+      try {
+        localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
+        localStorage.removeItem('fitconnect_cached_tier');
+        localStorage.removeItem('fitconnect_tier_timestamp');
+      } catch {}
+    }
   }
 
   private handleReset = () => {
+    // Clear any potentially corrupted auth state before reload
+    try {
+      localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
+      localStorage.removeItem('fitconnect_cached_tier');
+      localStorage.removeItem('fitconnect_tier_timestamp');
+    } catch {}
+    
     this.setState({ hasError: false, error: null });
     window.location.reload();
   };

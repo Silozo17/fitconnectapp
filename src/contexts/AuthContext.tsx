@@ -121,6 +121,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // and will fire immediately with the cached session
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        // CRITICAL: Synchronous JWT validation BEFORE setting loading=false
+        // This prevents corrupted tokens from reaching components
+        if (session) {
+          const accessToken = session.access_token;
+          if (accessToken) {
+            try {
+              // Decode JWT payload (base64)
+              const payloadBase64 = accessToken.split('.')[1];
+              const payload = JSON.parse(atob(payloadBase64));
+              
+              // Check for required 'sub' claim - if missing, token is corrupted
+              if (!payload.sub) {
+                console.warn('[Auth] Corrupted JWT detected - missing sub claim, clearing session');
+                try {
+                  localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
+                  localStorage.removeItem('fitconnect_cached_tier');
+                  localStorage.removeItem('fitconnect_tier_timestamp');
+                } catch {}
+                
+                supabase.auth.signOut().catch(() => {});
+                setSession(null);
+                setUser(null);
+                setRole(null);
+                setAllRoles([]);
+                setLoading(false);
+                return; // Exit early - don't process corrupted session
+              }
+            } catch (e) {
+              console.warn('[Auth] Failed to decode JWT, may be corrupted:', e);
+              try {
+                localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
+                localStorage.removeItem('fitconnect_cached_tier');
+                localStorage.removeItem('fitconnect_tier_timestamp');
+              } catch {}
+              supabase.auth.signOut().catch(() => {});
+              setSession(null);
+              setUser(null);
+              setRole(null);
+              setAllRoles([]);
+              setLoading(false);
+              return;
+            }
+          }
+        }
+        
         setSession(session);
         setUser(session?.user ?? null);
         
