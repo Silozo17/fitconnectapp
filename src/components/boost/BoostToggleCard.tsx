@@ -18,7 +18,7 @@ import { LegalDisclosure } from "@/components/shared/LegalLinks";
 
 export const BoostToggleCard = () => {
   const { t } = useTranslation("coach");
-  const { data: boostStatus, isLoading: statusLoading } = useCoachBoostStatus();
+  const { data: boostStatus, isLoading: statusLoading, refetch: refetchStatus, isRefetching } = useCoachBoostStatus();
   const { data: settings, isLoading: settingsLoading } = useBoostSettings();
   const pricing = useActivePricing();
   const nativePricing = useNativePricing();
@@ -54,6 +54,13 @@ export const BoostToggleCard = () => {
   const isPurchasing = isNative 
     ? (nativeBoost.state.purchaseStatus === 'purchasing' || nativeBoost.state.isPolling)
     : purchaseBoost.isPending;
+
+  // Manual refresh handler for native users
+  const handleManualRefresh = async () => {
+    // Reset reconciliation flag and force re-check
+    await nativeBoost.reconcileBoostEntitlement();
+    refetchStatus();
+  };
 
   // Auto-reset stale pending boost on mount
   useEffect(() => {
@@ -216,6 +223,21 @@ export const BoostToggleCard = () => {
                   </Button>
                 </div>
               </div>
+              {/* Refresh Status button for native users when purchase completed but status not updated */}
+              {isNative && !isPurchasing && nativeBoost.state.purchaseStatus === 'success' && (
+                <div className="flex justify-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleManualRefresh}
+                    disabled={isRefetching}
+                    className="gap-2"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
+                    {isRefetching ? 'Refreshing...' : 'Refresh Status'}
+                  </Button>
+                </div>
+              )}
               <div className="rounded-lg bg-blue-500/5 border border-blue-500/20 p-3">
                 <p className="text-xs text-muted-foreground">
                   <span className="font-medium text-foreground">{t("boostCard.whatYouPay")}:</span> {formattedBoostPrice} {t("boostCard.activation")} + {settings ? `${Math.round(settings.commission_rate * 100)}%` : "30%"} {t("boostCard.ofFirstBooking")}.
