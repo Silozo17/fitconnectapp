@@ -7,6 +7,7 @@ import { useEnvironment } from "@/hooks/useEnvironment";
 import { useTranslation } from "react-i18next";
 import { SubscriptionStatusBadge } from "./SubscriptionStatusBadge";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -28,7 +29,7 @@ interface NativeSubscriptionManagementProps {
 export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeSubscriptionManagementProps) => {
   const { t } = useTranslation("settings");
   const { isIOS, isAndroid } = useEnvironment();
-  const { isCancelled, isWithinGracePeriod, hasAccessUntil, status } = useSubscriptionStatus();
+  const { isCancelled, isWithinGracePeriod, hasAccessUntil, status, hasPendingChange, pendingTier, currentPeriodEnd: periodEnd } = useSubscriptionStatus();
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
@@ -181,8 +182,21 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
       })
     : null;
 
+  // Format the pending change date (period end)
+  const formattedPendingChangeDate = periodEnd
+    ? new Date(periodEnd).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+      })
+    : null;
+
+  // Get pending tier display name
+  const pendingTierName = pendingTier ? SUBSCRIPTION_TIERS[pendingTier]?.name || pendingTier : null;
+
   // Determine badge status
-  const getBadgeStatus = () => {
+  const getBadgeStatus = (): 'active' | 'activating' | 'cancelled' | 'past_due' | 'pending_change' | 'expired' => {
+    if (hasPendingChange && !isCancelled) return 'pending_change';
     if (isCancelled && isWithinGracePeriod) return 'cancelled';
     if (status === 'past_due') return 'past_due';
     return 'active';
@@ -202,7 +216,8 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
           </CardTitle>
           <SubscriptionStatusBadge 
             status={getBadgeStatus()} 
-            effectiveDate={hasAccessUntil}
+            effectiveDate={hasPendingChange ? periodEnd : hasAccessUntil}
+            pendingTier={pendingTierName}
           />
         </div>
         <CardDescription>
@@ -213,6 +228,17 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Phase 5: Show pending downgrade message */}
+        {hasPendingChange && pendingTierName && formattedPendingChangeDate && !isCancelled && (
+          <Alert className="border-blue-500/30 bg-blue-500/10">
+            <Clock className="h-4 w-4 text-blue-600" />
+            <AlertDescription className="text-blue-700">
+              Your plan will change to <strong>{pendingTierName}</strong> on{' '}
+              <strong>{formattedPendingChangeDate}</strong>. You'll keep your current features until then.
+            </AlertDescription>
+          </Alert>
+        )}
+
         {/* Phase 3: Show cancellation warning with access end date */}
         {isCancelled && isWithinGracePeriod && formattedGracePeriodEnd && (
           <Alert className="border-amber-500/30 bg-amber-500/10">
@@ -225,6 +251,14 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
         )}
 
         {/* Past due warning */}
+        {status === 'past_due' && (
+          <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              Your payment is past due. Please update your payment method to avoid losing access.
+            </AlertDescription>
+          </Alert>
+        )}
         {status === 'past_due' && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
