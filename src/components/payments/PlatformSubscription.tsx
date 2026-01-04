@@ -301,11 +301,11 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                     tier.highlighted && "ring-2 ring-primary"
                   )}
                 >
-                  {isCurrentTier && (
-                    <Badge className="absolute -top-2 right-2">{t("subscription.currentPlan")}</Badge>
+                {isCurrentTier && (
+                    <Badge className="absolute top-2 right-2">{t("subscription.currentPlan")}</Badge>
                   )}
                   {tier.highlighted && !isCurrentTier && (
-                    <Badge variant="secondary" className="absolute -top-2 right-2">{t("subscription.popular")}</Badge>
+                    <Badge variant="secondary" className="absolute top-2 right-2">{t("subscription.popular")}</Badge>
                   )}
                   
                   <h3 className="font-semibold text-lg mb-1">{tier.name}</h3>
@@ -381,8 +381,19 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                     )
                   ) : tierKey === "free" ? (
                     isNativeSubscription ? (
-                      <Button variant="outline" className="w-full" disabled>
-                        {t("subscription.managedViaPlatform", "Manage via App Store/Play Store")}
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          // Open native subscription management for cancellation
+                          if (typeof window !== 'undefined' && (window as any).despia?.openURL) {
+                            (window as any).despia.openURL('https://apps.apple.com/account/subscriptions');
+                          } else {
+                            window.open('https://apps.apple.com/account/subscriptions', '_blank');
+                          }
+                        }}
+                      >
+                        {t("subscription.cancelSubscription", "Cancel Subscription")}
                       </Button>
                     ) : (
                       <Button
@@ -411,10 +422,13 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
             };
 
             return isMobile ? (
-              <Carousel className="w-full" opts={{ align: "start" }}>
-                <CarouselContent className="-ml-2">
+              <Carousel 
+                className="w-full overflow-visible" 
+                opts={{ align: "center", containScroll: "trimSnaps" }}
+              >
+                <CarouselContent className="py-4">
                   {tiers.map((tierEntry) => (
-                    <CarouselItem key={tierEntry[0]} className="pl-2 basis-[85%]">
+                    <CarouselItem key={tierEntry[0]} className="basis-[90%] px-2">
                       {renderTierCard(tierEntry)}
                     </CarouselItem>
                   ))}

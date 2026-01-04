@@ -216,13 +216,13 @@ serve(async (req) => {
 
     logStep("Current subscription record", { currentSub });
 
-    // UPGRADE PROTECTION WINDOW: If DB was updated within last 2 minutes, trust it over RevenueCat
-    // This prevents stale RevenueCat API data (30-60s lag) from overwriting webhook-set tier
+    // UPGRADE PROTECTION WINDOW: If DB was updated within last 5 minutes, trust it over RevenueCat
+    // This prevents stale RevenueCat API data (can take 30-120s to propagate) from overwriting webhook-set tier
     if (currentSub?.updated_at) {
       const updatedAt = new Date(currentSub.updated_at);
-      const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+      const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
       
-      if (updatedAt > twoMinutesAgo) {
+      if (updatedAt > fiveMinutesAgo) {
         logStep("UPGRADE PROTECTION: DB was recently updated - skipping reconciliation", {
           updatedAt: currentSub.updated_at,
           currentTier: currentSub.tier,
