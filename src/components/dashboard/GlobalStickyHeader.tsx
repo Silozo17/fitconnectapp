@@ -9,10 +9,9 @@ interface GlobalStickyHeaderProps {
   sectionTitle?: string;
   sectionDescription?: string;
   
-  // Visibility control
+  // Visibility control - opacity only, no showSection needed
   greetingOpacity: number;
   sectionOpacity: number;
-  showSection: boolean;
   
   className?: string;
 }
@@ -24,7 +23,6 @@ export function GlobalStickyHeader({
   sectionDescription,
   greetingOpacity,
   sectionOpacity,
-  showSection,
   className,
 }: GlobalStickyHeaderProps) {
   // Don't render anything if both are invisible
@@ -33,14 +31,14 @@ export function GlobalStickyHeader({
   return (
     <div
       className={cn(
-        "sticky top-0 z-20 bg-background/80 backdrop-blur-sm py-3 -mx-4 px-4 lg:-mx-6 lg:px-6 min-h-[4.5rem]",
+        "sticky top-0 z-0 py-3 -mx-4 px-4 lg:-mx-6 lg:px-6 min-h-[4.5rem] pointer-events-none",
         className
       )}
     >
-      {/* Greeting Layer */}
+      {/* Greeting Layer - always rendered, controlled by opacity */}
       <div
-        className="transition-opacity duration-200 ease-out"
-        style={{ opacity: greetingOpacity, display: showSection ? 'none' : 'block' }}
+        className="absolute inset-0 px-4 lg:px-6 py-3 transition-opacity duration-200 ease-out"
+        style={{ opacity: greetingOpacity }}
       >
         <h1 className="text-2xl md:text-3xl font-bold text-foreground font-display tracking-tight line-clamp-1">
           {greetingTitle}
@@ -50,10 +48,10 @@ export function GlobalStickyHeader({
         </p>
       </div>
 
-      {/* Section Layer */}
+      {/* Section Layer - always rendered, controlled by opacity */}
       <div
-        className="transition-opacity duration-200 ease-out"
-        style={{ opacity: sectionOpacity, display: showSection ? 'block' : 'none' }}
+        className="absolute inset-0 px-4 lg:px-6 py-3 transition-opacity duration-200 ease-out"
+        style={{ opacity: sectionOpacity }}
       >
         <h2 className="text-lg font-semibold text-foreground font-display tracking-tight line-clamp-1">
           {sectionTitle}

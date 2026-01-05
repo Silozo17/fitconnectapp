@@ -62,7 +62,7 @@ const ClientOverview = () => {
   const { displayName } = useUserProfile();
   
   // Global sticky header observer
-  const { activeSection, greetingOpacity, sectionOpacity, showSection, containerRef } = useSectionHeaderObserver();
+  const { activeSection, greetingOpacity, sectionOpacity, containerRef } = useSectionHeaderObserver();
   
   // Dynamic section data
   const readinessLevel = useReadinessLevel();
@@ -153,7 +153,6 @@ const ClientOverview = () => {
           sectionDescription={activeSection?.description}
           greetingOpacity={greetingOpacity}
           sectionOpacity={sectionOpacity}
-          showSection={showSection}
         />
 
         {/* Page Help Banner */}
@@ -184,96 +183,108 @@ const ClientOverview = () => {
         )}
 
         {/* Section: Today's Activity */}
-        <section className="mb-6">
+        <section className="mb-20">
           <SectionSentinel
             id="activity"
             title="Today's Activity"
             description="via Apple Health"
           />
-          <Suspense fallback={<HealthWidgetSkeleton />}>
-            <HealthDataWidget compact className="mb-5" />
-          </Suspense>
-          <GoalSuggestionBanner className="mb-5" />
+          <div className="relative z-10">
+            <Suspense fallback={<HealthWidgetSkeleton />}>
+              <HealthDataWidget compact className="mb-5" />
+            </Suspense>
+            <GoalSuggestionBanner className="mb-5" />
+          </div>
         </section>
 
         {/* Section: Daily Readiness */}
-        <section className="mb-6">
+        <section className="mb-20">
           <SectionSentinel
             id="readiness"
             title="Daily Readiness"
             description={readinessLevel || "Check your recovery status"}
           />
-          <div className="grid md:grid-cols-2 gap-4 mb-5">
+          <div className="relative z-10 grid md:grid-cols-2 gap-4 mb-5">
             <ReadinessWidget />
             <WearableTrendCard />
           </div>
         </section>
 
         {/* Section: Training Stats */}
-        <section className="mb-6">
+        <section className="mb-20">
           <SectionSentinel
             id="training"
             title="Training Stats"
             description="Personal records, streaks, and volume"
           />
-          <div className="grid md:grid-cols-2 gap-4 mb-5">
-            <PersonalRecordsWidget />
-            <TrainingStreakWidget />
-          </div>
-          <div className="grid md:grid-cols-2 gap-4 mb-5">
-            <MuscleRecoveryWidget />
-            <WeeklyVolumeWidget />
+          <div className="relative z-10">
+            <div className="grid md:grid-cols-2 gap-4 mb-5">
+              <PersonalRecordsWidget />
+              <TrainingStreakWidget />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4 mb-5">
+              <MuscleRecoveryWidget />
+              <WeeklyVolumeWidget />
+            </div>
           </div>
         </section>
 
         {/* Section: Insights */}
-        <section className="mb-6">
+        <section className="mb-20">
           <SectionSentinel
             id="insights"
             title="Insights"
             description="Tips, summaries, and reviews"
           />
-          <DailyTipWidget className="mb-5" />
+          <div className="relative z-10">
+            <DailyTipWidget className="mb-5" />
+          </div>
         </section>
 
         {/* Section: Weekly Summary */}
-        <section className="mb-6">
+        <section className="mb-20">
           <SectionSentinel
             id="weekly"
             title="Weekly Summary"
             description={weeklySummary || `${displayName || "User"}, great start to the week with consistent steps!`}
           />
-          <WeeklySummaryCard className="mb-5" />
+          <div className="relative z-10">
+            <WeeklySummaryCard className="mb-5" />
+          </div>
         </section>
 
         {/* Section: Monthly Review */}
-        <section className="mb-6">
+        <section className="mb-20">
           <SectionSentinel
             id="monthly"
             title={monthlyTitle}
             description={monthlySummary || `Great Start, Let's Build Momentum, ${displayName || "User"}!`}
           />
-          <MonthlyReviewCard className="mb-5" />
+          <div className="relative z-10">
+            <MonthlyReviewCard className="mb-5" />
+          </div>
         </section>
 
         {/* Section: Connections */}
-        <section className="mb-6">
+        <section className="mb-20">
           <SectionSentinel
             id="connections"
             title="Connections"
             description="Friend Requests and social"
           />
-          <UserConnectionRequests />
+          <div className="relative z-10">
+            <UserConnectionRequests />
+          </div>
         </section>
 
         {/* Section: Quick Actions */}
-        <section className="mb-6">
+        <section className="mb-20">
           <SectionSentinel
             id="quick-actions"
             title="Quick Actions"
             description="Navigate to your most used features"
           />
-          <div className="mb-5">
+          <div className="relative z-10 mb-5">
             {/* Mobile: 3D Carousel */}
             <div className="md:hidden -mx-5">
               <Carousel3D gap={12}>
