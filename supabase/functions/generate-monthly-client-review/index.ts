@@ -87,13 +87,13 @@ serve(async (req) => {
         .gte("recorded_at", startStr)
         .lte("recorded_at", endStr)
         .order("recorded_at"),
-      // FIXED: Query habit_logs through client_habits relationship using log_date
+      // Query habit_logs through client_habits relationship using logged_at
       supabase
         .from("habit_logs")
-        .select("completed_count, log_date, client_habits!inner(client_id, target_count)")
+        .select("completed_count, logged_at, client_habits!inner(client_id, target_count)")
         .eq("client_habits.client_id", clientId)
-        .gte("log_date", startStr)
-        .lte("log_date", endStr),
+        .gte("logged_at", startStr)
+        .lte("logged_at", endStr),
       supabase
         .from("training_logs")
         .select("duration_minutes")
@@ -102,7 +102,7 @@ serve(async (req) => {
         .lte("created_at", endStr),
       supabase
         .from("food_diary")
-        .select("calories, protein")
+        .select("calories, protein_g")
         .eq("client_id", clientId)
         .gte("logged_at", startStr)
         .lte("logged_at", endStr),
@@ -121,8 +121,8 @@ serve(async (req) => {
         .lte("completed_at", endStr),
       supabase
         .from("habit_streaks")
-        .select("current_streak, longest_streak")
-        .eq("client_id", clientId)
+        .select("current_streak, longest_streak, habit:client_habits!inner(client_id)")
+        .eq("client_habits.client_id", clientId)
         .order("current_streak", { ascending: false })
         .limit(1),
     ]);
@@ -154,7 +154,7 @@ serve(async (req) => {
       ? foodEntries.reduce((sum, f) => sum + (f.calories || 0), 0) / foodEntries.length
       : 0;
     const avgProtein = foodEntries.length > 0
-      ? foodEntries.reduce((sum, f) => sum + (f.protein || 0), 0) / foodEntries.length
+      ? foodEntries.reduce((sum, f) => sum + ((f as any).protein_g || 0), 0) / foodEntries.length
       : 0;
 
     // Process health data

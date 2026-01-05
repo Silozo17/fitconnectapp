@@ -101,11 +101,11 @@ serve(async (req) => {
 
           // Check each milestone type
           if (config.milestone_type === "streak") {
-            // Check habit streaks
+            // Check habit streaks - join through client_habits to filter by client_id
             const { data: streaks } = await supabase
               .from("habit_streaks")
-              .select("current_streak, habit:client_habits(name)")
-              .eq("client_id", clientId)
+              .select("current_streak, habit:client_habits!inner(name, client_id)")
+              .eq("client_habits.client_id", clientId)
               .gte("current_streak", config.threshold_value);
 
             if (streaks && streaks.length > 0) {
