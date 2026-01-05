@@ -237,7 +237,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           unit="steps"
           color="blue"
           weeklyData={getWeeklyData('steps')}
-          trend={calculateTrend('steps')}
+          showTrend={false}
         />
         <HealthMetricCard
           icon={Flame}
@@ -246,7 +246,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           unit="kcal"
           color="orange"
           weeklyData={getWeeklyData('calories')}
-          trend={calculateTrend('calories')}
+          showTrend={false}
         />
         <HealthMetricCard
           icon={Timer}

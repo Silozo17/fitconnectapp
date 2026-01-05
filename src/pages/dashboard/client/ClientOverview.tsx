@@ -6,6 +6,8 @@ import { useClientDashboardStats } from "@/hooks/useClientDashboardStats";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useMicroWinDetection } from "@/hooks/useMicroWinDetection";
 import { useAutoAwardClientBadges } from "@/hooks/useAutoAwardClientBadges";
+import { useReadinessScore } from "@/hooks/useReadinessScore";
+import { getDailyTip } from "@/lib/daily-tips";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 
 import UserConnectionRequests from "@/components/dashboard/client/UserConnectionRequests";
@@ -62,6 +64,16 @@ const ClientOverview = () => {
     if (hour < 18) return t('client.greeting.afternoon', 'Good afternoon');
     return t('client.greeting.evening', 'Good evening');
   };
+  
+  // Get readiness score for dynamic description
+  const { readiness } = useReadinessScore();
+  
+  // Get daily tip for dynamic description
+  const dailyTip = useMemo(() => {
+    const hour = new Date().getHours();
+    const dayOfWeek = new Date().getDay();
+    return getDailyTip({ hourOfDay: hour, dayOfWeek });
+  }, []);
   
   // OPTIMIZED: Moved badge awarding here from layout (prevents queries on every navigation)
   useAutoAwardClientBadges();
@@ -166,18 +178,18 @@ const ClientOverview = () => {
         </Alert>
       )}
 
-      {/* Section: Today's Health - 100px after */}
+      {/* Section: Today's Health - 64px after */}
       <Suspense fallback={<HealthWidgetSkeleton />}>
-        <HealthDataWidget compact className="mb-[100px]" />
+        <HealthDataWidget compact className="mb-16" />
       </Suspense>
 
       {/* Section: Daily Readiness */}
       <DashboardSectionHeader 
         title="Daily Readiness" 
-        description="How prepared you are for today" 
+        description={readiness?.recommendation || "How prepared you are for today"} 
       />
       <ReadinessScoreCard className="mb-3" />
-      <div className="grid grid-cols-3 gap-3 mb-[100px]">
+      <div className="grid grid-cols-3 gap-3 mb-16">
         <ReadinessComponentCard type="sleep" />
         <ReadinessComponentCard type="recovery" />
         <ReadinessComponentCard type="activity" />
@@ -185,45 +197,45 @@ const ClientOverview = () => {
 
       {/* Section: Insights */}
       <DashboardSectionHeader 
-        title="Insights" 
+        title="Your Insights" 
         description="Trends compared to last week" 
       />
-      <WearableTrendCard className="mb-[100px]" />
+      <WearableTrendCard className="mb-16" />
 
       {/* Section: Tip of the Day */}
       <DashboardSectionHeader 
-        title="Tip of the Day" 
-        description="Daily motivation and advice" 
+        title="Today's Tip" 
+        description={dailyTip.body} 
       />
-      <DailyTipWidget className="mb-[100px]" />
+      <DailyTipWidget className="mb-16" />
 
       {/* Section: Weekly Summary */}
       <DashboardSectionHeader 
         title="Weekly Summary" 
         description="Your week at a glance" 
       />
-      <WeeklySummaryCard className="mb-[100px]" />
+      <WeeklySummaryCard className="mb-16" />
 
       {/* Section: Monthly Review */}
       <DashboardSectionHeader 
         title="Monthly Review" 
         description="Your progress this month" 
       />
-      <MonthlyReviewCard className="mb-[100px]" />
+      <MonthlyReviewCard className="mb-16" />
 
       {/* Section: Friend Requests */}
       <DashboardSectionHeader 
         title="Friend Requests" 
         description="Pending connection requests" 
       />
-      <UserConnectionRequests className="mb-[100px]" />
+      <UserConnectionRequests className="mb-16" />
 
       {/* Section: Quick Actions */}
       <DashboardSectionHeader 
         title="Quick Actions" 
         description="Fast access to key features" 
       />
-      <div className="mb-[100px]">
+      <div className="mb-16">
         {/* Mobile: 3D Carousel */}
         <div className="md:hidden -mx-5">
           <Carousel3D gap={12}>
