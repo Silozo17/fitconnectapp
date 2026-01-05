@@ -416,21 +416,21 @@
   html.native-ios .card-elevated,
   html.native-ios .glass-interactive,
   html.native-ios .glass-nav {
-    backdrop-filter: blur(16px) saturate(120%);
-    -webkit-backdrop-filter: blur(16px) saturate(120%);
+    backdrop-filter: blur(12px) saturate(110%);
+    -webkit-backdrop-filter: blur(12px) saturate(110%);
   }
 
   html.native-ios .glass,
   html.native-ios .glass-dark,
   html.native-ios .glass-premium,
   html.native-ios .glass-floating {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 
   html.native-ios .glass-subtle {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
   }
   
   /* Disable glow orb animations in native apps */
@@ -458,7 +458,7 @@
   /* Base glass - subtle frosted effect */
   .glass {
     background: hsl(var(--card) / 0.25);
-    @apply backdrop-blur-2xl border border-border/30;
+    @apply backdrop-blur-xl border border-border/30;
     box-shadow: 
       inset 0 1px 0 hsl(0 0% 100% / 0.1),
       inset 1px 0 0 hsl(0 0% 100% / 0.05);
@@ -468,7 +468,7 @@
     background: linear-gradient(135deg, 
       hsl(var(--card) / 0.4), 
       hsl(var(--card) / 0.25));
-    @apply backdrop-blur-2xl border border-border/40;
+    @apply backdrop-blur-xl border border-border/40;
     box-shadow: 
       0 4px 24px hsl(0 0% 0% / 0.3),
       inset 0 1px 0 hsl(0 0% 100% / 0.08),
@@ -480,7 +480,7 @@
     background: linear-gradient(135deg, 
       hsl(var(--card) / 0.3), 
       hsl(var(--card) / 0.15));
-    @apply backdrop-blur-3xl border border-border/25;
+    @apply backdrop-blur-2xl border border-border/25;
     box-shadow: 
       0 8px 32px hsl(0 0% 0% / 0.35),
       0 2px 8px hsl(0 0% 0% / 0.2),
@@ -494,7 +494,7 @@
     background: linear-gradient(135deg, 
       hsl(var(--card) / 0.35), 
       hsl(var(--card) / 0.2));
-    @apply backdrop-blur-3xl border border-border/30 rounded-3xl;
+    @apply backdrop-blur-2xl border border-border/30 rounded-3xl;
     box-shadow: 
       0 20px 60px hsl(0 0% 0% / 0.45),
       0 8px 24px hsl(0 0% 0% / 0.3),
@@ -509,8 +509,8 @@
     background: linear-gradient(135deg, 
       hsl(var(--card) / 0.25), 
       hsl(var(--card) / 0.15));
-    backdrop-filter: blur(40px) saturate(150%);
-    -webkit-backdrop-filter: blur(40px) saturate(150%);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
     @apply border border-border/20 rounded-2xl;
     box-shadow: 
       /* Outer shadow for depth */
@@ -532,8 +532,8 @@
     background: linear-gradient(145deg, 
       hsl(var(--card) / 0.3), 
       hsl(var(--card) / 0.18));
-    backdrop-filter: blur(48px) saturate(160%);
-    -webkit-backdrop-filter: blur(48px) saturate(160%);
+    backdrop-filter: blur(28px) saturate(150%);
+    -webkit-backdrop-filter: blur(28px) saturate(150%);
     @apply border border-border/25 rounded-2xl transition-all duration-300;
     box-shadow: 
       0 12px 40px hsl(0 0% 0% / 0.35),
@@ -575,8 +575,8 @@
   /* Subtle glass - for nested elements */
   .glass-subtle {
     background: hsl(var(--card) / 0.2);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     @apply border border-border/15 rounded-xl;
     box-shadow: 
       inset 0 1px 0 hsl(0 0% 100% / 0.06),
@@ -598,8 +598,8 @@
     background: linear-gradient(145deg, 
       hsl(var(--card) / 0.3), 
       hsl(var(--card) / 0.18));
-    backdrop-filter: blur(48px) saturate(160%);
-    -webkit-backdrop-filter: blur(48px) saturate(160%);
+    backdrop-filter: blur(28px) saturate(150%);
+    -webkit-backdrop-filter: blur(28px) saturate(150%);
     @apply border border-border/25 rounded-2xl transition-all duration-300;
     box-shadow: 
       0 12px 40px hsl(0 0% 0% / 0.35),
@@ -615,8 +615,8 @@
     background: linear-gradient(135deg, 
       hsl(var(--card) / 0.25), 
       hsl(var(--card) / 0.15));
-    backdrop-filter: blur(32px) saturate(140%);
-    -webkit-backdrop-filter: blur(32px) saturate(140%);
+    backdrop-filter: blur(20px) saturate(130%);
+    -webkit-backdrop-filter: blur(20px) saturate(130%);
     @apply border border-border/20 rounded-xl transition-all duration-200;
     box-shadow: 
       0 4px 16px hsl(0 0% 0% / 0.2),
@@ -645,8 +645,8 @@
     background: linear-gradient(180deg, 
       hsl(var(--card) / 0.35), 
       hsl(var(--card) / 0.25));
-    backdrop-filter: blur(48px) saturate(150%);
-    -webkit-backdrop-filter: blur(48px) saturate(150%);
+    backdrop-filter: blur(28px) saturate(140%);
+    -webkit-backdrop-filter: blur(28px) saturate(140%);
     box-shadow: 
       0 4px 24px hsl(0 0% 0% / 0.3),
       inset 0 1px 0 hsl(0 0% 100% / 0.1),

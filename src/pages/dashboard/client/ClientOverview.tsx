@@ -177,44 +177,44 @@ const ClientOverview = () => {
 
       {/* Today's Health - Lazy loaded */}
       <Suspense fallback={<HealthWidgetSkeleton />}>
-        <HealthDataWidget compact className="mb-6" />
+        <HealthDataWidget compact className="mb-5" />
       </Suspense>
 
       {/* Goal Suggestions (Adaptive) */}
-      <GoalSuggestionBanner className="mb-6" />
+      <GoalSuggestionBanner className="mb-5" />
 
       {/* Readiness Score & Wearable Trends */}
-      <div className="grid md:grid-cols-2 gap-5 mb-6">
+      <div className="grid md:grid-cols-2 gap-4 mb-5">
         <ReadinessWidget />
         <WearableTrendCard />
       </div>
 
       {/* Training Stats - PRs, Streak, Volume, Recovery */}
-      <div className="grid md:grid-cols-2 gap-5 mb-6">
+      <div className="grid md:grid-cols-2 gap-4 mb-5">
         <PersonalRecordsWidget />
         <TrainingStreakWidget />
       </div>
 
-      <div className="grid md:grid-cols-2 gap-5 mb-6">
+      <div className="grid md:grid-cols-2 gap-4 mb-5">
         <MuscleRecoveryWidget />
         <WeeklyVolumeWidget />
       </div>
 
       {/* Daily Tip */}
-      <DailyTipWidget className="mb-6" />
+      <DailyTipWidget className="mb-5" />
 
       {/* Weekly Summary */}
-      <WeeklySummaryCard className="mb-6" />
+      <WeeklySummaryCard className="mb-5" />
 
       {/* Monthly Review */}
-      <MonthlyReviewCard className="mb-6" />
+      <MonthlyReviewCard className="mb-5" />
 
       {/* Friend Requests */}
       <UserConnectionRequests />
 
       {/* Quick Actions - Horizontal scroll on mobile, grid on desktop */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-5">
+      <div className="mb-5">
+        <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold text-foreground font-display">Quick Actions</h2>
         </div>
         
@@ -256,7 +256,7 @@ const ClientOverview = () => {
         </div>
 
         {/* Desktop: Grid */}
-        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
           {isLoading ? (
             Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} variant="elevated" className="rounded-3xl">
