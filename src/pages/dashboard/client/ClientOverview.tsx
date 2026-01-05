@@ -61,8 +61,8 @@ const ClientOverview = () => {
   const coachLinkPrefix = useCoachLinkPrefix();
   const { displayName } = useUserProfile();
   
-  // Global sticky header observer
-  const { activeSection, greetingOpacity, sectionOpacity, containerRef } = useSectionHeaderObserver();
+  // Single global sticky header observer
+  const { mode, activeSection, headerOpacity, scrollContainerRef } = useSectionHeaderObserver();
   
   // Dynamic section data
   const readinessLevel = useReadinessLevel();
@@ -144,16 +144,19 @@ const ClientOverview = () => {
       title={t('client.overview.title')}
       description={t('client.overview.description')}
     >
-      <div ref={containerRef}>
-        {/* Global Sticky Header Slot - Greeting transforms into section headers */}
+      <div ref={scrollContainerRef}>
+        {/* SINGLE STICKY HEADER SLOT - switches between greeting and section */}
         <GlobalStickyHeader
+          mode={mode}
           greetingTitle={`${getGreeting()}, ${displayName || "there"}`}
           greetingDescription={t('client.overview.welcomeBack', "Let's crush your goals today")}
           sectionTitle={activeSection?.title}
           sectionDescription={activeSection?.description}
-          greetingOpacity={greetingOpacity}
-          sectionOpacity={sectionOpacity}
+          opacity={headerOpacity}
         />
+
+        {/* GREETING SPACER - reserves space when header shows greeting */}
+        <div className="h-[72px]" aria-hidden="true" />
 
         {/* Page Help Banner */}
         <PageHelpBanner
@@ -183,186 +186,172 @@ const ClientOverview = () => {
         )}
 
         {/* Section: Today's Activity */}
-        <section className="mb-20">
-          <SectionSentinel
-            id="activity"
-            title="Today's Activity"
-            description="via Apple Health"
-          />
-          <div className="relative z-10">
-            <Suspense fallback={<HealthWidgetSkeleton />}>
-              <HealthDataWidget compact className="mb-5" />
-            </Suspense>
-            <GoalSuggestionBanner className="mb-5" />
-          </div>
-        </section>
+        <SectionSentinel
+          id="activity"
+          title="Today's Activity"
+          description="via Apple Health"
+        />
+        <div className="mb-16">
+          <Suspense fallback={<HealthWidgetSkeleton />}>
+            <HealthDataWidget compact className="mb-5" />
+          </Suspense>
+          <GoalSuggestionBanner className="mb-5" />
+        </div>
 
         {/* Section: Daily Readiness */}
-        <section className="mb-20">
-          <SectionSentinel
-            id="readiness"
-            title="Daily Readiness"
-            description={readinessLevel || "Check your recovery status"}
-          />
-          <div className="relative z-10 grid md:grid-cols-2 gap-4 mb-5">
+        <SectionSentinel
+          id="readiness"
+          title="Daily Readiness"
+          description={readinessLevel || "Check your recovery status"}
+        />
+        <div className="mb-16">
+          <div className="grid md:grid-cols-2 gap-4 mb-5">
             <ReadinessWidget />
             <WearableTrendCard />
           </div>
-        </section>
+        </div>
 
         {/* Section: Training Stats */}
-        <section className="mb-20">
-          <SectionSentinel
-            id="training"
-            title="Training Stats"
-            description="Personal records, streaks, and volume"
-          />
-          <div className="relative z-10">
-            <div className="grid md:grid-cols-2 gap-4 mb-5">
-              <PersonalRecordsWidget />
-              <TrainingStreakWidget />
-            </div>
-            <div className="grid md:grid-cols-2 gap-4 mb-5">
-              <MuscleRecoveryWidget />
-              <WeeklyVolumeWidget />
-            </div>
+        <SectionSentinel
+          id="training"
+          title="Training Stats"
+          description="Personal records, streaks, and volume"
+        />
+        <div className="mb-16">
+          <div className="grid md:grid-cols-2 gap-4 mb-5">
+            <PersonalRecordsWidget />
+            <TrainingStreakWidget />
           </div>
-        </section>
+          <div className="grid md:grid-cols-2 gap-4 mb-5">
+            <MuscleRecoveryWidget />
+            <WeeklyVolumeWidget />
+          </div>
+        </div>
 
         {/* Section: Insights */}
-        <section className="mb-20">
-          <SectionSentinel
-            id="insights"
-            title="Insights"
-            description="Tips, summaries, and reviews"
-          />
-          <div className="relative z-10">
-            <DailyTipWidget className="mb-5" />
-          </div>
-        </section>
+        <SectionSentinel
+          id="insights"
+          title="Insights"
+          description="Tips, summaries, and reviews"
+        />
+        <div className="mb-16">
+          <DailyTipWidget className="mb-5" />
+        </div>
 
         {/* Section: Weekly Summary */}
-        <section className="mb-20">
-          <SectionSentinel
-            id="weekly"
-            title="Weekly Summary"
-            description={weeklySummary || `${displayName || "User"}, great start to the week with consistent steps!`}
-          />
-          <div className="relative z-10">
-            <WeeklySummaryCard className="mb-5" />
-          </div>
-        </section>
+        <SectionSentinel
+          id="weekly"
+          title="Weekly Summary"
+          description={weeklySummary || `${displayName || "User"}, great start to the week with consistent steps!`}
+        />
+        <div className="mb-16">
+          <WeeklySummaryCard className="mb-5" />
+        </div>
 
         {/* Section: Monthly Review */}
-        <section className="mb-20">
-          <SectionSentinel
-            id="monthly"
-            title={monthlyTitle}
-            description={monthlySummary || `Great Start, Let's Build Momentum, ${displayName || "User"}!`}
-          />
-          <div className="relative z-10">
-            <MonthlyReviewCard className="mb-5" />
-          </div>
-        </section>
+        <SectionSentinel
+          id="monthly"
+          title={monthlyTitle}
+          description={monthlySummary || `Great Start, Let's Build Momentum, ${displayName || "User"}!`}
+        />
+        <div className="mb-16">
+          <MonthlyReviewCard className="mb-5" />
+        </div>
 
         {/* Section: Connections */}
-        <section className="mb-20">
-          <SectionSentinel
-            id="connections"
-            title="Connections"
-            description="Friend Requests and social"
-          />
-          <div className="relative z-10">
-            <UserConnectionRequests />
-          </div>
-        </section>
+        <SectionSentinel
+          id="connections"
+          title="Connections"
+          description="Friend Requests and social"
+        />
+        <div className="mb-16">
+          <UserConnectionRequests />
+        </div>
 
         {/* Section: Quick Actions */}
-        <section className="mb-20">
-          <SectionSentinel
-            id="quick-actions"
-            title="Quick Actions"
-            description="Navigate to your most used features"
-          />
-          <div className="relative z-10 mb-5">
-            {/* Mobile: 3D Carousel */}
-            <div className="md:hidden -mx-5">
-              <Carousel3D gap={12}>
-                {isLoading ? (
-                  Array.from({ length: 4 }).map((_, i) => (
-                    <Carousel3DItem key={i} className="w-[170px]">
-                      <Card variant="elevated" className="h-full rounded-3xl">
-                        <CardContent className="p-5">
-                          <ShimmerSkeleton className="h-14 w-14 rounded-2xl mb-4" />
-                          <ShimmerSkeleton className="h-5 w-24 mb-2" />
-                          <ShimmerSkeleton className="h-4 w-32" />
-                        </CardContent>
-                      </Card>
-                    </Carousel3DItem>
-                  ))
-                ) : (
-                  quickActions.map((action) => (
-                    <Carousel3DItem key={action.href} className="w-[170px]">
-                      <Link to={action.href}>
-                        <Card variant="elevated" className="h-full rounded-3xl transition-all duration-200 carousel-dim-overlay">
-                          <CardContent className="p-5">
-                            <IconSquare icon={action.icon} color={action.color} size="md" className="mb-4" />
-                            <h3 className="font-semibold text-foreground">
-                              {action.title}
-                            </h3>
-                            <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
-                              {action.description}
-                            </p>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </Carousel3DItem>
-                  ))
-                )}
-              </Carousel3D>
-            </div>
-
-            {/* Desktop: Grid */}
-            <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
+        <SectionSentinel
+          id="quick-actions"
+          title="Quick Actions"
+          description="Navigate to your most used features"
+        />
+        <div className="mb-16">
+          {/* Mobile: 3D Carousel */}
+          <div className="md:hidden -mx-5">
+            <Carousel3D gap={12}>
               {isLoading ? (
-                Array.from({ length: 6 }).map((_, i) => (
-                  <Card key={i} variant="elevated" className="rounded-3xl">
-                    <CardContent className="p-6">
-                      <div className="flex items-start gap-5">
-                        <ShimmerSkeleton className="h-16 w-16 rounded-2xl" />
-                        <div className="flex-1 space-y-2">
-                          <ShimmerSkeleton className="h-5 w-28" />
-                          <ShimmerSkeleton className="h-4 w-36" />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                Array.from({ length: 4 }).map((_, i) => (
+                  <Carousel3DItem key={i} className="w-[170px]">
+                    <Card variant="elevated" className="h-full rounded-3xl">
+                      <CardContent className="p-5">
+                        <ShimmerSkeleton className="h-14 w-14 rounded-2xl mb-4" />
+                        <ShimmerSkeleton className="h-5 w-24 mb-2" />
+                        <ShimmerSkeleton className="h-4 w-32" />
+                      </CardContent>
+                    </Card>
+                  </Carousel3DItem>
                 ))
               ) : (
                 quickActions.map((action) => (
-                  <Link key={action.href} to={action.href}>
-                    <Card variant="elevated" className="h-full rounded-3xl group hover:shadow-float-lg transition-all duration-300">
-                      <CardContent className="p-6">
-                        <div className="flex items-start gap-5">
-                          <IconSquare icon={action.icon} color={action.color} size="lg" />
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors text-lg">
-                              {action.title}
-                            </h3>
-                            <p className="text-muted-foreground mt-1">
-                              {action.description}
-                            </p>
-                          </div>
-                          <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
+                  <Carousel3DItem key={action.href} className="w-[170px]">
+                    <Link to={action.href}>
+                      <Card variant="elevated" className="h-full rounded-3xl transition-all duration-200 carousel-dim-overlay">
+                        <CardContent className="p-5">
+                          <IconSquare icon={action.icon} color={action.color} size="md" className="mb-4" />
+                          <h3 className="font-semibold text-foreground">
+                            {action.title}
+                          </h3>
+                          <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                            {action.description}
+                          </p>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  </Carousel3DItem>
                 ))
               )}
-            </div>
+            </Carousel3D>
           </div>
-        </section>
+
+          {/* Desktop: Grid */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-3 gap-4">
+            {isLoading ? (
+              Array.from({ length: 6 }).map((_, i) => (
+                <Card key={i} variant="elevated" className="rounded-3xl">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-5">
+                      <ShimmerSkeleton className="h-16 w-16 rounded-2xl" />
+                      <div className="flex-1 space-y-2">
+                        <ShimmerSkeleton className="h-5 w-28" />
+                        <ShimmerSkeleton className="h-4 w-36" />
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              quickActions.map((action) => (
+                <Link key={action.href} to={action.href}>
+                  <Card variant="elevated" className="h-full rounded-3xl group hover:shadow-float-lg transition-all duration-300">
+                    <CardContent className="p-6">
+                      <div className="flex items-start gap-5">
+                        <IconSquare icon={action.icon} color={action.color} size="lg" />
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors text-lg">
+                            {action.title}
+                          </h3>
+                          <p className="text-muted-foreground mt-1">
+                            {action.description}
+                          </p>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-muted-foreground opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))
+            )}
+          </div>
+        </div>
 
         {/* CTA Section - Find a Coach */}
         {!isLoading && (

@@ -1,171 +1,182 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 interface ActiveSection {
-  id: string;
   title: string;
   description: string;
 }
 
 interface UseSectionHeaderObserverResult {
+  mode: "greeting" | "section";
   activeSection: ActiveSection | null;
-  greetingOpacity: number;
-  sectionOpacity: number;
-  containerRef: React.RefObject<HTMLDivElement>;
+  headerOpacity: number;
+  scrollContainerRef: React.RefObject<HTMLDivElement>;
 }
 
-export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
-  const [activeSection, setActiveSection] = useState<ActiveSection | null>(null);
-  const [greetingOpacity, setGreetingOpacity] = useState(1);
-  const [sectionOpacity, setSectionOpacity] = useState(0);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const activeSectionRef = useRef<string | null>(null);
+// Clamp helper
+const clamp = (value: number, min: number, max: number) => 
+  Math.max(min, Math.min(max, value));
 
-  useEffect(() => {
-    const container = containerRef.current;
+export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
+  const [mode, setMode] = useState<"greeting" | "section">("greeting");
+  const [activeSection, setActiveSection] = useState<ActiveSection | null>(null);
+  const [headerOpacity, setHeaderOpacity] = useState(1);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Track visible sentinels with their intersection ratios
+  const visibleSentinelsRef = useRef<Map<string, { element: Element; ratio: number }>>(new Map());
+
+  const updateHeaderState = useCallback(() => {
+    const HEADER_HEIGHT = 72;
+    const container = scrollContainerRef.current;
     if (!container) return;
 
-    // Find all sentinel elements (skip the first "activity" section)
-    const allSentinels = container.querySelectorAll("[data-section-id]");
-    const sentinels = Array.from(allSentinels).filter(
-      (el) => el.getAttribute("data-section-id") !== "activity"
-    );
+    const sentinels = visibleSentinelsRef.current;
     
-    // Find the first section sentinel for greeting fade calculation
-    const firstSentinel = container.querySelector("[data-section-id='activity']");
+    // If no sentinels are visible/active, show greeting
+    if (sentinels.size === 0) {
+      setMode("greeting");
+      setActiveSection(null);
+      setHeaderOpacity(1);
+      return;
+    }
+
+    // Find the sentinel that's most "active" (closest to top, past the header)
+    let bestCandidate: { id: string; element: Element; top: number; ratio: number } | null = null;
     
-    if (sentinels.length === 0 && !firstSentinel) return;
-
-    // Track which sentinels are visible
-    const visibleSentinels = new Map<string, { element: Element }>();
-
-    const updateState = () => {
-      const headerHeight = 72; // Height of sticky header
-      const fadeZoneStart = headerHeight + 80; // Start fading when content is this far from top
-      const fadeZoneEnd = headerHeight + 20; // Fully faded when this close to top
+    sentinels.forEach(({ element, ratio }, id) => {
+      const rect = element.getBoundingClientRect();
+      // Sentinel should be at or above the activation threshold (35% from top)
+      const activationThreshold = window.innerHeight * 0.35;
       
-      // Calculate greeting opacity based on first section content position
-      if (firstSentinel) {
-        const firstSentinelRect = firstSentinel.getBoundingClientRect();
-        const nextElement = firstSentinel.nextElementSibling;
+      if (rect.top <= activationThreshold) {
+        if (!bestCandidate || rect.top > bestCandidate.top) {
+          bestCandidate = { id, element, top: rect.top, ratio };
+        }
+      }
+    });
+
+    if (bestCandidate) {
+      const { element } = bestCandidate;
+      const title = element.getAttribute("data-section-title") || "";
+      const description = element.getAttribute("data-section-description") || "";
+      
+      setMode("section");
+      setActiveSection({ title, description });
+      
+      // Calculate opacity based on how close the next content is to the header
+      // The content after the sentinel
+      const nextElement = element.nextElementSibling;
+      if (nextElement) {
+        const contentRect = nextElement.getBoundingClientRect();
+        const fadeZoneStart = HEADER_HEIGHT + 100; // Start fading when content is this far
+        const fadeZoneEnd = HEADER_HEIGHT + 20; // Fully faded when this close
         
-        if (nextElement) {
-          const contentRect = nextElement.getBoundingClientRect();
-          
-          // Fade greeting as first section content approaches header
-          if (contentRect.top > fadeZoneStart) {
-            setGreetingOpacity(1);
-          } else if (contentRect.top < fadeZoneEnd) {
-            setGreetingOpacity(0);
-          } else {
-            const progress = (contentRect.top - fadeZoneEnd) / (fadeZoneStart - fadeZoneEnd);
-            setGreetingOpacity(Math.max(0, Math.min(1, progress)));
-          }
-        }
-      }
-
-      // Find active section (from sections after the first)
-      if (visibleSentinels.size === 0) {
-        setActiveSection(null);
-        setSectionOpacity(0);
-        activeSectionRef.current = null;
-        return;
-      }
-
-      // Find the sentinel closest to the top but past the activation point
-      const activationPoint = window.innerHeight * 0.35; // 35% from top
-      let bestCandidate: { id: string; element: Element; top: number } | null = null;
-
-      visibleSentinels.forEach(({ element }, id) => {
-        const rect = element.getBoundingClientRect();
-        // Sentinel should be above or at the activation point
-        if (rect.top <= activationPoint) {
-          if (!bestCandidate || rect.top > bestCandidate.top) {
-            bestCandidate = { id, element, top: rect.top };
-          }
-        }
-      });
-
-      if (bestCandidate) {
-        const element = bestCandidate.element;
-        const id = element.getAttribute("data-section-id") || "";
-        const title = element.getAttribute("data-section-title") || "";
-        const description = element.getAttribute("data-section-description") || "";
-
-        // Update active section if changed
-        if (activeSectionRef.current !== id) {
-          activeSectionRef.current = id;
-          setActiveSection({ id, title, description });
-        }
-
-        // Calculate section header opacity
-        const nextElement = element.nextElementSibling;
-        if (nextElement) {
-          const contentRect = nextElement.getBoundingClientRect();
-          
-          // Fade out when cards approach the header
-          if (contentRect.top < fadeZoneEnd) {
-            const fadeProgress = Math.max(0, contentRect.top / fadeZoneEnd);
-            setSectionOpacity(fadeProgress);
-          } else if (contentRect.top < fadeZoneStart) {
-            // Fade in as section enters
-            const fadeInProgress = 1 - (contentRect.top - fadeZoneEnd) / (fadeZoneStart - fadeZoneEnd);
-            setSectionOpacity(Math.max(0, Math.min(1, fadeInProgress)));
-          } else {
-            setSectionOpacity(1);
-          }
+        if (contentRect.top > fadeZoneStart) {
+          setHeaderOpacity(1);
+        } else if (contentRect.top < fadeZoneEnd) {
+          setHeaderOpacity(0);
         } else {
-          setSectionOpacity(1);
+          const progress = (contentRect.top - fadeZoneEnd) / (fadeZoneStart - fadeZoneEnd);
+          setHeaderOpacity(clamp(progress, 0, 1));
         }
       } else {
-        // No active section from the tracked ones
-        setSectionOpacity(0);
-        activeSectionRef.current = null;
+        setHeaderOpacity(1);
       }
-    };
+    } else {
+      // No sentinel past activation threshold - check if we should show greeting
+      // Find if any sentinel is visible but above threshold
+      let highestVisibleSentinel: { element: Element; top: number } | null = null;
+      
+      sentinels.forEach(({ element }) => {
+        const rect = element.getBoundingClientRect();
+        if (!highestVisibleSentinel || rect.top < highestVisibleSentinel.top) {
+          highestVisibleSentinel = { element, top: rect.top };
+        }
+      });
+      
+      if (highestVisibleSentinel && highestVisibleSentinel.top > HEADER_HEIGHT) {
+        // Show greeting, fade based on how close first content is
+        setMode("greeting");
+        setActiveSection(null);
+        
+        const nextElement = highestVisibleSentinel.element.nextElementSibling;
+        if (nextElement) {
+          const contentRect = nextElement.getBoundingClientRect();
+          const fadeZoneStart = HEADER_HEIGHT + 100;
+          const fadeZoneEnd = HEADER_HEIGHT + 20;
+          
+          if (contentRect.top > fadeZoneStart) {
+            setHeaderOpacity(1);
+          } else if (contentRect.top < fadeZoneEnd) {
+            setHeaderOpacity(0);
+          } else {
+            const progress = (contentRect.top - fadeZoneEnd) / (fadeZoneStart - fadeZoneEnd);
+            setHeaderOpacity(clamp(progress, 0, 1));
+          }
+        } else {
+          setHeaderOpacity(1);
+        }
+      } else {
+        setMode("greeting");
+        setActiveSection(null);
+        setHeaderOpacity(1);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // Find all sentinel elements
+    const sentinels = container.querySelectorAll("[data-section-id]");
+    if (sentinels.length === 0) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           const id = entry.target.getAttribute("data-section-id");
-          if (!id || id === "activity") return; // Skip first section
+          if (!id) return;
 
           if (entry.isIntersecting) {
-            visibleSentinels.set(id, { element: entry.target });
+            visibleSentinelsRef.current.set(id, { 
+              element: entry.target, 
+              ratio: entry.intersectionRatio 
+            });
           } else {
-            visibleSentinels.delete(id);
+            visibleSentinelsRef.current.delete(id);
           }
         });
 
-        updateState();
+        updateHeaderState();
       },
       {
         root: null,
-        rootMargin: "0px 0px -40% 0px",
-        threshold: [0, 0.1, 0.5, 1],
+        rootMargin: "-72px 0px -30% 0px", // Account for header height
+        threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
       }
     );
 
     sentinels.forEach((sentinel) => observer.observe(sentinel));
 
-    // Also observe the first sentinel for greeting fade
-    if (firstSentinel) {
-      observer.observe(firstSentinel);
-    }
-
     // Listen to scroll for smooth opacity updates
     const handleScroll = () => {
-      requestAnimationFrame(updateState);
+      requestAnimationFrame(updateHeaderState);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
 
+    // Initial state
+    updateHeaderState();
+
     return () => {
       observer.disconnect();
       window.removeEventListener("scroll", handleScroll);
+      visibleSentinelsRef.current.clear();
     };
-  }, []);
+  }, [updateHeaderState]);
 
-  return { activeSection, greetingOpacity, sectionOpacity, containerRef };
+  return { mode, activeSection, headerOpacity, scrollContainerRef };
 }
 
 export default useSectionHeaderObserver;
