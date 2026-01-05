@@ -11,6 +11,9 @@ import {
   getViewModeFromPath,
 } from "@/lib/view-restoration";
 
+// Storage key for checking client onboarding status
+const CLIENT_ONBOARDING_KEY = "fitconnect_client_onboarding";
+
 const RouteRestorer = () => {
   const { user, role, loading } = useAuth();
   const { isLoadingProfiles, activeProfileType } = useAdminView();
@@ -48,6 +51,29 @@ const RouteRestorer = () => {
         : currentPath === "/" || currentPath === "/auth" || currentPath === "/get-started";
 
       if (shouldRestore) {
+        // CRITICAL FIX: For clients, check if onboarding is complete before restoring to dashboard
+        // This prevents navigation loops where dashboard redirects back to onboarding
+        if (role === "client") {
+          try {
+            const cachedOnboarding = localStorage.getItem(CLIENT_ONBOARDING_KEY);
+            const onboardingData = cachedOnboarding ? JSON.parse(cachedOnboarding) : null;
+            
+            // If we have cached data showing onboarding is incomplete, go directly to onboarding
+            if (onboardingData?.isOnboarded === false) {
+              console.log("[RouteRestorer] Client onboarding incomplete, redirecting to onboarding");
+              navigationInProgress.current = true;
+              requestAnimationFrame(() => {
+                navigate("/onboarding/client", { replace: true });
+                navigationInProgress.current = false;
+              });
+              hasRestored.current = true;
+              return;
+            }
+          } catch {
+            // If parsing fails, continue with normal restoration
+          }
+        }
+
         // Use centralized restoration logic
         const restoredRoute = getRestoredRoute(role);
         

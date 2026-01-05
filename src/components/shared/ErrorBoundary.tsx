@@ -1,6 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
 
 interface Props {
   children: ReactNode;
@@ -45,15 +45,19 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReset = () => {
-    // Clear any potentially corrupted auth state before reload
+    this.setState({ hasError: false, error: null });
+    window.location.reload();
+  };
+
+  private handleClearCacheAndRetry = () => {
+    // Clear ALL localStorage and sessionStorage for a fresh start
     try {
-      localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
-      localStorage.removeItem('fitconnect_cached_tier');
-      localStorage.removeItem('fitconnect_tier_timestamp');
+      localStorage.clear();
+      sessionStorage.clear();
     } catch {}
     
     this.setState({ hasError: false, error: null });
-    window.location.reload();
+    window.location.href = "/auth";
   };
 
   private handleGoHome = () => {
@@ -96,7 +100,11 @@ export class ErrorBoundary extends Component<Props, State> {
                 <RefreshCw className="w-4 h-4" />
                 Refresh Page
               </Button>
-              <Button variant="outline" onClick={this.handleGoHome}>
+              <Button variant="outline" onClick={this.handleClearCacheAndRetry} className="gap-2">
+                <Trash2 className="w-4 h-4" />
+                Clear Cache & Retry
+              </Button>
+              <Button variant="ghost" onClick={this.handleGoHome}>
                 Go to Home
               </Button>
             </div>

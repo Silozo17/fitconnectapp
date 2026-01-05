@@ -328,10 +328,10 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Get user profiles for email addresses
+    // Get user profiles for first names
     const { data: userProfiles, error: usersError } = await supabase
       .from("user_profiles")
-      .select("user_id, email, first_name")
+      .select("user_id, first_name")
       .in("user_id", coachesToEmail.map((c) => c.user_id));
 
     if (usersError) {
@@ -339,7 +339,28 @@ const handler = async (req: Request): Promise<Response> => {
       throw usersError;
     }
 
-    const userMap = new Map((userProfiles || []).map((u) => [u.user_id, u]));
+    // Get emails from auth.users using admin API
+    const emailResults: { user_id: string; email: string | null }[] = [];
+    for (const coach of coachesToEmail) {
+      try {
+        const { data } = await supabase.auth.admin.getUserById(coach.user_id);
+        emailResults.push({ user_id: coach.user_id, email: data?.user?.email || null });
+      } catch (err) {
+        console.error(`[Profile Reminder] Failed to get email for ${coach.user_id}:`, err);
+        emailResults.push({ user_id: coach.user_id, email: null });
+      }
+    }
+
+    // Combine user profiles with emails
+    const userMap = new Map<string, { user_id: string; first_name: string | null; email: string | null }>();
+    for (const profile of userProfiles || []) {
+      const emailData = emailResults.find(e => e.user_id === profile.user_id);
+      userMap.set(profile.user_id, {
+        user_id: profile.user_id,
+        first_name: profile.first_name,
+        email: emailData?.email || null,
+      });
+    }
 
     let sentCount = 0;
     const errors: string[] = [];

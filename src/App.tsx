@@ -41,6 +41,7 @@ import { WebsiteRouter } from "./components/routing/WebsiteRouter";
 import Auth from '@/pages/Auth';
 const ResetPassword = lazy(() => import('@/pages/ResetPassword'));
 const ReviewHandler = lazy(() => import('@/pages/ReviewHandler'));
+const Reset = lazy(() => import('@/pages/Reset'));
 
 // Zoom OAuth redirect (not lazy - must be immediate)
 import ZoomOAuth from '@/pages/api/zoom/OAuth';
@@ -359,6 +360,9 @@ const App = () => (
                             
                             {/* Debug page - direct SDK testing */}
                             <Route path="/debug" element={<Suspense fallback={<PageLoadingSpinner />}><Debug /></Suspense>} />
+                            
+                            {/* Reset page - emergency state clear for stuck users */}
+                            <Route path="/reset" element={<Suspense fallback={<PageLoadingSpinner />}><Reset /></Suspense>} />
                             
                             {/* Public routes - wrapped with WebsiteLocaleWrapper (simple spinner fallback) */}
                             <Route element={<WebsiteLocaleWrapper />}>
