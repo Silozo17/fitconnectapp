@@ -62,13 +62,21 @@ const ClientOverview = () => {
   const { displayName } = useUserProfile();
   
   // Global sticky header observer
-  const { activeSection, headerOpacity, containerRef } = useSectionHeaderObserver();
+  const { activeSection, greetingOpacity, sectionOpacity, showSection, containerRef } = useSectionHeaderObserver();
   
   // Dynamic section data
   const readinessLevel = useReadinessLevel();
   const weeklySummary = useWeeklySummary();
   const monthlyTitle = useMonthlyReviewTitle();
   const monthlySummary = useMonthlyReviewSummary();
+
+  // Get greeting based on time of day
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t('client.greeting.morning', 'Good morning');
+    if (hour < 18) return t('client.greeting.afternoon', 'Good afternoon');
+    return t('client.greeting.evening', 'Good evening');
+  };
   
   // OPTIMIZED: Moved badge awarding here from layout (prevents queries on every navigation)
   useAutoAwardClientBadges();
@@ -83,14 +91,6 @@ const ClientOverview = () => {
     refetch, 
     isRefetching 
   } = useClientDashboardStats();
-
-  // Get greeting based on time of day
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return t('client.greeting.morning', 'Good morning');
-    if (hour < 18) return t('client.greeting.afternoon', 'Good afternoon');
-    return t('client.greeting.evening', 'Good evening');
-  };
 
   const quickActions = useMemo(() => [
     {
@@ -145,14 +145,16 @@ const ClientOverview = () => {
       description={t('client.overview.description')}
     >
       <div ref={containerRef}>
-        {/* Global Sticky Header Slot */}
-        {activeSection && (
-          <GlobalStickyHeader
-            title={activeSection.title}
-            description={activeSection.description}
-            opacity={headerOpacity}
-          />
-        )}
+        {/* Global Sticky Header Slot - Greeting transforms into section headers */}
+        <GlobalStickyHeader
+          greetingTitle={`${getGreeting()}, ${displayName || "there"}`}
+          greetingDescription={t('client.overview.welcomeBack', "Let's crush your goals today")}
+          sectionTitle={activeSection?.title}
+          sectionDescription={activeSection?.description}
+          greetingOpacity={greetingOpacity}
+          sectionOpacity={sectionOpacity}
+          showSection={showSection}
+        />
 
         {/* Page Help Banner */}
         <PageHelpBanner
@@ -180,16 +182,6 @@ const ClientOverview = () => {
             </AlertDescription>
           </Alert>
         )}
-
-        {/* Static Greeting Header */}
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground font-display tracking-tight">
-            {getGreeting()}, <span className="gradient-text">{displayName || "there"}</span>
-          </h1>
-          <p className="text-muted-foreground mt-1 md:mt-2 text-base md:text-lg">
-            {t('client.overview.welcomeBack', "Let's crush your goals today")}
-          </p>
-        </div>
 
         {/* Section: Today's Activity */}
         <section className="mb-6">
