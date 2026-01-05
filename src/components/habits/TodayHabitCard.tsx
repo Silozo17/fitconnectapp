@@ -28,6 +28,8 @@ const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
   const category = getHabitCategory(habit.category);
   const isCompleted = !!habit.todayLog;
   const currentStreak = habit.streak?.current_streak || 0;
+  const isWearableTracked = !!habit.wearable_target_type;
+  const isAutoVerified = habit.todayLog?.verification_type === 'wearable_auto';
   
   const getVerificationBadge = (verificationType: string | undefined, wearableType: string | null) => {
     if (verificationType === 'wearable_auto') {
@@ -99,10 +101,11 @@ const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
             className={cn(
               "h-12 w-12 rounded-full shrink-0 transition-all",
               isCompleted && "bg-primary hover:bg-primary/90",
-              isAnimating && "animate-pulse"
+              isAnimating && "animate-pulse",
+              isWearableTracked && !isCompleted && "opacity-50 cursor-not-allowed"
             )}
             onClick={handleToggle}
-            disabled={logHabit.isPending || unlogHabit.isPending}
+            disabled={logHabit.isPending || unlogHabit.isPending || (isWearableTracked && !isCompleted)}
           >
             {isCompleted ? (
               <Check className="h-6 w-6" />
@@ -143,6 +146,13 @@ const TodayHabitCard = ({ habit }: TodayHabitCardProps) => {
               )}
               {getVerificationBadge(habit.todayLog?.verification_type, habit.wearable_target_type)}
             </div>
+            {/* Show sync message for wearable-tracked habits that aren't completed */}
+            {isWearableTracked && !isCompleted && (
+              <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
+                <Watch className="h-3 w-3" />
+                {t("habits.verification.syncsAutomatically", "Syncs automatically from your wearable")}
+              </p>
+            )}
           </div>
           
           {/* Undo button for completed */}
