@@ -86,7 +86,12 @@ export const connectAndSyncHealthKit = async (
       if (!aggregated[dateStr]) aggregated[dateStr] = {};
       if (!aggregated[dateStr][dataType]) aggregated[dateStr][dataType] = 0;
 
-      aggregated[dateStr][dataType] += Number(reading.value) || 0;
+      // Despia SDK returns distance in kilometers - convert to meters for storage
+      let numValue = Number(reading.value) || 0;
+      if (dataType.startsWith('distance_')) {
+        numValue = numValue * 1000;
+      }
+      aggregated[dateStr][dataType] += numValue;
     }
   }
 

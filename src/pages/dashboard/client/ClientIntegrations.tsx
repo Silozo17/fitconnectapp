@@ -2,7 +2,6 @@ import { useState } from "react";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import WearableConnectionList from "@/components/integrations/WearableConnectionList";
 import CalendarConnectionCard from "@/components/integrations/CalendarConnectionCard";
-import HealthDataWidget from "@/components/integrations/HealthDataWidget";
 import AppleCalendarConnectModal from "@/components/integrations/AppleCalendarConnectModal";
 import { useCalendarSync, CalendarProvider } from "@/hooks/useCalendarSync";
 import { Calendar, Apple, Shield, Heart } from "lucide-react";
@@ -87,9 +86,6 @@ const ClientIntegrations = () => {
             </div>
           </Card>
         )}
-
-        {/* Health Data Widget */}
-        <HealthDataWidget />
 
         <Separator />
 
