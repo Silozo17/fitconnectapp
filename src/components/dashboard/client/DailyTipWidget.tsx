@@ -80,9 +80,9 @@ export function DailyTipWidget({ className, context }: DailyTipWidgetProps) {
                     {t("client.dailyTip.label", "Tip of the Day")}
                   </span>
                 </div>
-                <h3 className="font-semibold text-foreground text-base">
+                <p className="font-semibold text-foreground text-base">
                   {tip.title}
-                </h3>
+                </p>
                 <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
                   {tip.body}
                 </p>

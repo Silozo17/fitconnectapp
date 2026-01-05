@@ -2,12 +2,11 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
+import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import {
-  CalendarDays,
   TrendingUp,
   TrendingDown,
   Target,
@@ -45,7 +44,6 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
   const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Cache key for localStorage
   const cacheKey = `weekly-summary-${user?.id}`;
   
   const { data, isLoading, error, refetch, isRefetching } = useQuery({
@@ -53,7 +51,6 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
     queryFn: async (): Promise<WeeklySummaryData | null> => {
       const { data, error } = await supabase.functions.invoke("generate-weekly-client-summary");
       if (error) throw error;
-      // Cache to localStorage for faster subsequent loads
       if (data) {
         try {
           localStorage.setItem(cacheKey, JSON.stringify({ data, cachedAt: Date.now() }));
@@ -62,17 +59,15 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
       return data;
     },
     enabled: !!user?.id,
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours - weekly data doesn't change often
-    gcTime: 48 * 60 * 60 * 1000, // Keep in cache for 48 hours
+    staleTime: 24 * 60 * 60 * 1000,
+    gcTime: 48 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
     refetchOnMount: false,
-    // Use cached data as placeholder for instant render
     placeholderData: () => {
       try {
         const cached = localStorage.getItem(cacheKey);
         if (cached) {
           const { data, cachedAt } = JSON.parse(cached);
-          // Use cache if less than 24 hours old
           if (Date.now() - cachedAt < 24 * 60 * 60 * 1000) {
             return data;
           }
@@ -85,13 +80,10 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
   if (isLoading) {
     return (
       <AccentCard className={cn("rounded-2xl", className)}>
-        <div className="p-5 pb-3">
-          <div className="flex items-center gap-3">
-            <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
-            <ShimmerSkeleton className="h-5 w-40" />
+        <AccentCardContent className="p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <ShimmerSkeleton className="h-4 w-20" />
           </div>
-        </div>
-        <AccentCardContent className="space-y-4">
           <ShimmerSkeleton className="h-4 w-full" />
           <ShimmerSkeleton className="h-4 w-3/4" />
           <div className="grid grid-cols-3 gap-3">
@@ -121,29 +113,24 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
 
   return (
     <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardHeader 
-        icon={CalendarDays} 
-        title="Weekly Summary"
-        action={
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              <Sparkles className="w-3 h-3 mr-1" />
-              AI
-            </Badge>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => refetch()}
-              disabled={isRefetching}
-            >
-              <RefreshCw className={cn("w-4 h-4", isRefetching && "animate-spin")} />
-            </Button>
-          </div>
-        }
-      />
+      <AccentCardContent className="p-5 space-y-4">
+        {/* Header actions */}
+        <div className="flex items-center justify-end gap-2">
+          <Badge variant="outline" className="text-xs">
+            <Sparkles className="w-3 h-3 mr-1" />
+            AI
+          </Badge>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+          >
+            <RefreshCw className={cn("w-4 h-4", isRefetching && "animate-spin")} />
+          </Button>
+        </div>
 
-      <AccentCardContent className="space-y-4">
         {/* AI Summary */}
         <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
 
@@ -204,7 +191,6 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
 
         {isExpanded && (
           <div className="space-y-3 animate-fade-in">
-            {/* Highlights */}
             {highlights.length > 0 && (
               <div>
                 <h4 className="text-xs font-medium text-foreground mb-2">Highlights</h4>
@@ -222,7 +208,6 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
               </div>
             )}
 
-            {/* Improvements */}
             {improvements.length > 0 && (
               <div>
                 <h4 className="text-xs font-medium text-foreground mb-2">Focus Areas</h4>

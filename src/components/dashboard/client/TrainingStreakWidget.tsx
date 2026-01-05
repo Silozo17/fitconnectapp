@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
+import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import { useTrainingLogs } from "@/hooks/useTrainingLogs";
@@ -17,24 +17,20 @@ export function TrainingStreakWidget({ className }: TrainingStreakWidgetProps) {
   const streakData = useMemo(() => {
     if (!logs || logs.length === 0) return null;
 
-    // Get unique training days
     const trainingDays = new Set<string>();
     for (const log of logs) {
       const day = format(new Date(log.logged_at), 'yyyy-MM-dd');
       trainingDays.add(day);
     }
 
-    // Calculate current streak
     let currentStreak = 0;
     let checkDate = startOfDay(new Date());
     
-    // If no workout today, start checking from yesterday
     const todayStr = format(checkDate, 'yyyy-MM-dd');
     if (!trainingDays.has(todayStr)) {
       checkDate = subDays(checkDate, 1);
     }
 
-    // Count consecutive days
     while (true) {
       const dayStr = format(checkDate, 'yyyy-MM-dd');
       if (trainingDays.has(dayStr)) {
@@ -45,18 +41,15 @@ export function TrainingStreakWidget({ className }: TrainingStreakWidgetProps) {
       }
     }
 
-    // Calculate weekly training count (last 7 days)
     const weekAgo = subDays(new Date(), 7);
     const weeklyCount = Array.from(trainingDays).filter(d => 
       new Date(d) >= weekAgo
     ).length;
 
-    // Check if at risk of breaking streak (no workout today and had one yesterday)
     const trainedToday = trainingDays.has(format(new Date(), 'yyyy-MM-dd'));
     const trainedYesterday = trainingDays.has(format(subDays(new Date(), 1), 'yyyy-MM-dd'));
     const atRisk = !trainedToday && trainedYesterday && currentStreak > 0;
 
-    // Calculate longest streak
     let longestStreak = 0;
     let tempStreak = 0;
     const sortedDays = Array.from(trainingDays).sort();
@@ -78,7 +71,6 @@ export function TrainingStreakWidget({ className }: TrainingStreakWidgetProps) {
       longestStreak = Math.max(longestStreak, tempStreak);
     }
 
-    // Total workouts this month
     const monthStart = new Date();
     monthStart.setDate(1);
     const monthlyCount = Array.from(trainingDays).filter(d => 
@@ -98,13 +90,7 @@ export function TrainingStreakWidget({ className }: TrainingStreakWidgetProps) {
   if (isLoading) {
     return (
       <AccentCard className={cn("rounded-2xl", className)}>
-        <div className="p-5 pb-3">
-          <div className="flex items-center gap-3">
-            <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
-            <ShimmerSkeleton className="h-5 w-28" />
-          </div>
-        </div>
-        <AccentCardContent>
+        <AccentCardContent className="p-5">
           <ShimmerSkeleton className="h-16 w-full" />
         </AccentCardContent>
       </AccentCard>
@@ -119,19 +105,16 @@ export function TrainingStreakWidget({ className }: TrainingStreakWidgetProps) {
 
   return (
     <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardHeader 
-        icon={Flame} 
-        title="Training Streak"
-        action={
-          trainedToday ? (
+      <AccentCardContent className="p-5 space-y-4">
+        {/* Trained today badge */}
+        {trainedToday && (
+          <div className="flex justify-end">
             <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/20">
               ✓ Trained today
             </Badge>
-          ) : undefined
-        }
-      />
+          </div>
+        )}
 
-      <AccentCardContent className="space-y-4">
         {/* Main streak display */}
         <div className="text-center py-4">
           <div className="text-5xl font-bold font-display text-primary">

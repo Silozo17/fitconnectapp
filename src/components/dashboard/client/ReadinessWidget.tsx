@@ -40,15 +40,8 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
   }
 
   if (!hasData || !readiness) {
-    return null; // Don't show if no wearable data
+    return null;
   }
-
-  const levelColors = {
-    optimal: "bg-green-500",
-    good: "bg-lime-500",
-    moderate: "bg-amber-500",
-    low: "bg-red-500",
-  };
 
   const componentIcons = {
     sleep: Moon,
@@ -59,21 +52,16 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
   return (
     <AccentCard className={cn("rounded-2xl", className)}>
       <AccentCardContent className="p-5">
-        {/* Header */}
+        {/* Header with score */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-2xl bg-primary/15">
               <Battery className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="font-semibold text-foreground">
-                  {t("client.readiness.title", "Today's Readiness")}
-                </h3>
-                <InfoTooltip explanation={readinessExplanation} side="top" />
-              </div>
-              <p className="text-sm text-muted-foreground capitalize">
+              <p className="text-sm text-muted-foreground capitalize flex items-center gap-1.5">
                 {readiness.level} readiness
+                <InfoTooltip explanation={readinessExplanation} side="top" />
               </p>
             </div>
           </div>
