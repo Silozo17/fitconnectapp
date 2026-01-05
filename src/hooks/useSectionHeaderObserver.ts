@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface ActiveSection {
   id: string;
@@ -8,13 +8,17 @@ interface ActiveSection {
 
 interface UseSectionHeaderObserverResult {
   activeSection: ActiveSection | null;
-  headerOpacity: number;
+  greetingOpacity: number;
+  sectionOpacity: number;
+  showSection: boolean;
   containerRef: React.RefObject<HTMLDivElement>;
 }
 
 export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
   const [activeSection, setActiveSection] = useState<ActiveSection | null>(null);
-  const [headerOpacity, setHeaderOpacity] = useState(0);
+  const [greetingOpacity, setGreetingOpacity] = useState(1);
+  const [sectionOpacity, setSectionOpacity] = useState(0);
+  const [showSection, setShowSection] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const activeSectionRef = useRef<string | null>(null);
 
@@ -22,30 +26,62 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
     const container = containerRef.current;
     if (!container) return;
 
-    // Find all sentinel elements
-    const sentinels = container.querySelectorAll("[data-section-id]");
-    if (sentinels.length === 0) return;
+    // Find all sentinel elements (skip the first "activity" section)
+    const allSentinels = container.querySelectorAll("[data-section-id]");
+    const sentinels = Array.from(allSentinels).filter(
+      (el) => el.getAttribute("data-section-id") !== "activity"
+    );
+    
+    // Find the first section sentinel for greeting fade calculation
+    const firstSentinel = container.querySelector("[data-section-id='activity']");
+    
+    if (sentinels.length === 0 && !firstSentinel) return;
 
-    // Track which sentinels are visible and their positions
-    const visibleSentinels = new Map<string, { entry: IntersectionObserverEntry; element: Element }>();
+    // Track which sentinels are visible
+    const visibleSentinels = new Map<string, { element: Element }>();
 
-    const updateActiveSection = () => {
+    const updateState = () => {
+      const headerHeight = 72; // Height of sticky header
+      const fadeZoneStart = headerHeight + 80; // Start fading when content is this far from top
+      const fadeZoneEnd = headerHeight + 20; // Fully faded when this close to top
+      
+      // Calculate greeting opacity based on first section content position
+      if (firstSentinel) {
+        const firstSentinelRect = firstSentinel.getBoundingClientRect();
+        const nextElement = firstSentinel.nextElementSibling;
+        
+        if (nextElement) {
+          const contentRect = nextElement.getBoundingClientRect();
+          
+          // Fade greeting as first section content approaches header
+          if (contentRect.top > fadeZoneStart) {
+            setGreetingOpacity(1);
+          } else if (contentRect.top < fadeZoneEnd) {
+            setGreetingOpacity(0);
+          } else {
+            const progress = (contentRect.top - fadeZoneEnd) / (fadeZoneStart - fadeZoneEnd);
+            setGreetingOpacity(Math.max(0, Math.min(1, progress)));
+          }
+        }
+      }
+
+      // Find active section (from sections after the first)
       if (visibleSentinels.size === 0) {
         setActiveSection(null);
-        setHeaderOpacity(0);
+        setSectionOpacity(0);
+        setShowSection(false);
         activeSectionRef.current = null;
         return;
       }
 
-      // Find the sentinel closest to the top of the activation zone (top 30% of viewport)
+      // Find the sentinel closest to the top but past the activation point
+      const activationPoint = window.innerHeight * 0.35; // 35% from top
       let bestCandidate: { id: string; element: Element; top: number } | null = null;
-      const activationZoneTop = window.innerHeight * 0.15; // 15% from top
-      const activationZoneBottom = window.innerHeight * 0.4; // 40% from top
 
       visibleSentinels.forEach(({ element }, id) => {
         const rect = element.getBoundingClientRect();
-        // Sentinel should be above or within the activation zone
-        if (rect.top <= activationZoneBottom) {
+        // Sentinel should be above or at the activation point
+        if (rect.top <= activationPoint) {
           if (!bestCandidate || rect.top > bestCandidate.top) {
             bestCandidate = { id, element, top: rect.top };
           }
@@ -58,46 +94,37 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
         const title = element.getAttribute("data-section-title") || "";
         const description = element.getAttribute("data-section-description") || "";
 
-        // Only update if section changed
+        // Update active section if changed
         if (activeSectionRef.current !== id) {
           activeSectionRef.current = id;
           setActiveSection({ id, title, description });
         }
 
-        // Calculate opacity based on how far past the activation zone the sentinel is
-        // Fade in as sentinel enters zone from bottom, stay visible while in zone
-        const rect = element.getBoundingClientRect();
-        
-        // Find the next card/content after this sentinel to know when to fade out
+        setShowSection(true);
+
+        // Calculate section header opacity
         const nextElement = element.nextElementSibling;
         if (nextElement) {
-          const nextRect = nextElement.getBoundingClientRect();
-          const headerHeight = 60; // Height of the sticky header
+          const contentRect = nextElement.getBoundingClientRect();
           
           // Fade out when cards approach the header
-          if (nextRect.top < headerHeight + 40) {
-            const fadeOutProgress = 1 - Math.max(0, Math.min(1, (headerHeight + 40 - nextRect.top) / 60));
-            setHeaderOpacity(fadeOutProgress);
-          } else if (rect.top < activationZoneTop) {
-            // Sentinel has scrolled above activation zone - full opacity
-            setHeaderOpacity(1);
-          } else if (rect.top <= activationZoneBottom) {
-            // Sentinel is entering activation zone - fade in
-            const fadeInProgress = 1 - (rect.top - activationZoneTop) / (activationZoneBottom - activationZoneTop);
-            setHeaderOpacity(Math.max(0, Math.min(1, fadeInProgress)));
+          if (contentRect.top < fadeZoneEnd) {
+            const fadeProgress = Math.max(0, contentRect.top / fadeZoneEnd);
+            setSectionOpacity(fadeProgress);
+          } else if (contentRect.top < fadeZoneStart) {
+            // Fade in as section enters
+            const fadeInProgress = 1 - (contentRect.top - fadeZoneEnd) / (fadeZoneStart - fadeZoneEnd);
+            setSectionOpacity(Math.max(0, Math.min(1, fadeInProgress)));
+          } else {
+            setSectionOpacity(1);
           }
         } else {
-          // No next element, just fade based on sentinel position
-          if (rect.top < activationZoneTop) {
-            setHeaderOpacity(1);
-          } else {
-            const fadeInProgress = 1 - (rect.top - activationZoneTop) / (activationZoneBottom - activationZoneTop);
-            setHeaderOpacity(Math.max(0, Math.min(1, fadeInProgress)));
-          }
+          setSectionOpacity(1);
         }
       } else {
-        setActiveSection(null);
-        setHeaderOpacity(0);
+        // No active section from the tracked ones
+        setShowSection(false);
+        setSectionOpacity(0);
         activeSectionRef.current = null;
       }
     };
@@ -106,30 +133,34 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
       (entries) => {
         entries.forEach((entry) => {
           const id = entry.target.getAttribute("data-section-id");
-          if (!id) return;
+          if (!id || id === "activity") return; // Skip first section
 
           if (entry.isIntersecting) {
-            visibleSentinels.set(id, { entry, element: entry.target });
+            visibleSentinels.set(id, { element: entry.target });
           } else {
             visibleSentinels.delete(id);
           }
         });
 
-        updateActiveSection();
+        updateState();
       },
       {
         root: null,
-        // Observe a large portion of the viewport
-        rootMargin: "0px 0px -50% 0px",
+        rootMargin: "0px 0px -40% 0px",
         threshold: [0, 0.1, 0.5, 1],
       }
     );
 
     sentinels.forEach((sentinel) => observer.observe(sentinel));
 
-    // Also listen to scroll for smooth opacity updates
+    // Also observe the first sentinel for greeting fade
+    if (firstSentinel) {
+      observer.observe(firstSentinel);
+    }
+
+    // Listen to scroll for smooth opacity updates
     const handleScroll = () => {
-      requestAnimationFrame(updateActiveSection);
+      requestAnimationFrame(updateState);
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -140,7 +171,7 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
     };
   }, []);
 
-  return { activeSection, headerOpacity, containerRef };
+  return { activeSection, greetingOpacity, sectionOpacity, showSection, containerRef };
 }
 
 export default useSectionHeaderObserver;
