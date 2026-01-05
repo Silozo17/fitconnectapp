@@ -14,7 +14,9 @@ import {
   Waves,
   TrendingUp,
   Plus,
-  History
+  History,
+  Heart,
+  Moon
 } from "lucide-react";
 import { useHealthData, HealthDataType } from "@/hooks/useHealthData";
 import { useWearables } from "@/hooks/useWearables";
@@ -61,10 +63,19 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   const steps = getTodayValue('steps');
   const calories = getTodayValue('calories');
   const activeMinutes = getTodayValue('active_minutes');
+  const heartRate = getTodayValue('heart_rate');
+  const sleep = getTodayValue('sleep');
   const distanceWalking = getTodayValue('distance_walking');
   const distanceCycling = getTodayValue('distance_cycling');
   const distanceSwimming = getTodayValue('distance_swimming');
   const totalDistance = distanceWalking + distanceCycling + distanceSwimming;
+
+  // Format sleep from minutes to hours
+  const formatSleep = (minutes: number) => {
+    if (minutes === 0) return "—";
+    const hours = minutes / 60;
+    return hours.toFixed(1);
+  };
 
   // Format helpers
   const formatDistance = (meters: number) => {
@@ -254,105 +265,112 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           </div>
         )}
 
-        {/* Hero Stats - Steps, Calories, Exercise Time */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* Steps */}
-          <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-3 border border-blue-500/20">
+        {/* Hero Stats - 2x3 Grid with all health metrics */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {/* Steps - Featured on mobile */}
+          <div className="relative col-span-2 sm:col-span-1 bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-2xl p-4 border border-blue-500/20 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400/60 to-transparent" />
             <div className="flex items-center gap-1.5 mb-2">
-              <div className="p-1.5 rounded-lg bg-blue-500/20">
-                <Footprints className="w-4 h-4 text-blue-400" />
+              <div className="p-2 rounded-xl bg-blue-500/20">
+                <Footprints className="w-5 h-5 text-blue-400" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-foreground">{steps.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">steps</p>
+            <p className="text-3xl font-bold text-foreground tracking-tight">{steps.toLocaleString()}</p>
+            <p className="text-sm text-muted-foreground">steps</p>
           </div>
 
           {/* Active Calories */}
-          <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-xl p-3 border border-orange-500/20">
+          <div className="relative bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-2xl p-4 border border-orange-500/20 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-400/60 to-transparent" />
             <div className="flex items-center gap-1.5 mb-2">
-              <div className="p-1.5 rounded-lg bg-orange-500/20">
-                <Flame className="w-4 h-4 text-orange-400" />
+              <div className="p-2 rounded-xl bg-orange-500/20">
+                <Flame className="w-5 h-5 text-orange-400" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-foreground">{calories.toLocaleString()}</p>
-            <p className="text-xs text-muted-foreground">kcal</p>
+            <p className="text-3xl font-bold text-foreground tracking-tight">{calories.toLocaleString()}</p>
+            <p className="text-sm text-muted-foreground">kcal</p>
           </div>
 
           {/* Exercise Time */}
-          <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-xl p-3 border border-green-500/20">
+          <div className="relative bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-2xl p-4 border border-green-500/20 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-400/60 to-transparent" />
             <div className="flex items-center gap-1.5 mb-2">
-              <div className="p-1.5 rounded-lg bg-green-500/20">
-                <Timer className="w-4 h-4 text-green-400" />
+              <div className="p-2 rounded-xl bg-green-500/20">
+                <Timer className="w-5 h-5 text-green-400" />
               </div>
             </div>
-            <p className="text-2xl font-bold text-foreground">{formatTime(activeMinutes)}</p>
-            <p className="text-xs text-muted-foreground">exercise</p>
+            <p className="text-3xl font-bold text-foreground tracking-tight">{formatTime(activeMinutes)}</p>
+            <p className="text-sm text-muted-foreground">exercise</p>
+          </div>
+
+          {/* Heart Rate */}
+          <div className="relative bg-gradient-to-br from-red-500/10 to-pink-600/5 rounded-2xl p-4 border border-red-500/20 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-400/60 to-transparent" />
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="p-2 rounded-xl bg-red-500/20">
+                <Heart className="w-5 h-5 text-red-400" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-foreground tracking-tight">
+              {heartRate > 0 ? heartRate : "—"}
+            </p>
+            <p className="text-sm text-muted-foreground">bpm</p>
+          </div>
+
+          {/* Sleep */}
+          <div className="relative bg-gradient-to-br from-purple-500/10 to-indigo-600/5 rounded-2xl p-4 border border-purple-500/20 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400/60 to-transparent" />
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="p-2 rounded-xl bg-purple-500/20">
+                <Moon className="w-5 h-5 text-purple-400" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-foreground tracking-tight">{formatSleep(sleep)}</p>
+            <p className="text-sm text-muted-foreground">hrs sleep</p>
+          </div>
+
+          {/* Distance Summary */}
+          <div className="relative bg-gradient-to-br from-cyan-500/10 to-cyan-600/5 rounded-2xl p-4 border border-cyan-500/20 overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400/60 to-transparent" />
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="p-2 rounded-xl bg-cyan-500/20">
+                <TrendingUp className="w-5 h-5 text-cyan-400" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-foreground tracking-tight">{formatDistance(totalDistance)}</p>
+            <p className="text-sm text-muted-foreground">distance</p>
           </div>
         </div>
 
-        {/* Distance Breakdown */}
-        <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium">Distance</span>
+        {/* Distance Breakdown - Collapsible on mobile */}
+        {totalDistance > 0 && (
+          <div className="bg-muted/20 rounded-2xl p-4 border border-border/30">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-muted-foreground">Distance Breakdown</span>
             </div>
-            <span className="text-lg font-bold">{formatDistance(totalDistance)}</span>
-          </div>
-          
-          <div className="space-y-3">
-            {/* Walking/Running */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Footprints className="w-3.5 h-3.5 text-cyan-400" />
-                  <span className="text-muted-foreground">Walking</span>
+            
+            <div className="flex items-center gap-4 text-sm">
+              {distanceWalking > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Footprints className="w-4 h-4 text-cyan-400" />
+                  <span>{formatDistance(distanceWalking)}</span>
                 </div>
-                <span className="font-medium">{formatDistance(distanceWalking)}</span>
-              </div>
-              <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full transition-all duration-500"
-                  style={{ width: `${getDistancePercentage(distanceWalking)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Cycling */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Bike className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-muted-foreground">Cycling</span>
+              )}
+              {distanceCycling > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Bike className="w-4 h-4 text-emerald-400" />
+                  <span>{formatDistance(distanceCycling)}</span>
                 </div>
-                <span className="font-medium">{formatDistance(distanceCycling)}</span>
-              </div>
-              <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500"
-                  style={{ width: `${getDistancePercentage(distanceCycling)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Swimming */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <Waves className="w-3.5 h-3.5 text-blue-400" />
-                  <span className="text-muted-foreground">Swimming</span>
+              )}
+              {distanceSwimming > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <Waves className="w-4 h-4 text-blue-400" />
+                  <span>{formatDistance(distanceSwimming)}</span>
                 </div>
-                <span className="font-medium">{formatDistance(distanceSwimming)}</span>
-              </div>
-              <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-500"
-                  style={{ width: `${getDistancePercentage(distanceSwimming)}%` }}
-                />
-              </div>
+              )}
             </div>
           </div>
-        </div>
+        )}
         
         {/* Manual Entry Modal */}
         <ManualHealthDataModal 
