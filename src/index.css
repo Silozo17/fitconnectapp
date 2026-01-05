@@ -367,26 +367,12 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-  /* Modal safe-area utilities for native apps */
-  /* Close button positioning that respects safe-area */
-  /* Uses margin-top instead of top to work additively with component's top-4 */
-  .modal-close-safe {
-    /* Base: no extra offset needed for web */
-  }
-  
-  html.native-ios .modal-close-safe {
-    /* On iOS, add safe-area offset via margin to preserve component's top-4 */
-    margin-top: var(--safe-area-top, 0px) !important;
-  }
-  
-  /* Modal content safe padding */
+  /* Modal content safe max-height (no padding-top - centered modals don't need it) */
   .modal-content-safe {
-    padding-top: max(1.5rem, env(safe-area-inset-top, 0px));
     max-height: calc(90vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
   }
   
   html.native-ios .modal-content-safe {
-    padding-top: max(1.5rem, var(--safe-area-top, 59px));
     max-height: calc(90vh - var(--safe-area-top, 59px) - env(safe-area-inset-bottom, 0px));
   }
 
@@ -417,10 +403,7 @@
     min-height: 42px !important;
   }
 
-  /* Native iOS toast safe area - ensure toasts don't overlap the notch/Dynamic Island */
-  html.native-ios .toaster {
-    padding-top: var(--safe-area-top, 59px) !important;
-  }
+  /* Toast safe area is now handled via Sonner's offset prop - no CSS override needed */
 
   /* ========================================
      NATIVE PERFORMANCE OPTIMIZATIONS

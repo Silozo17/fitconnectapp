@@ -38,7 +38,7 @@ const AlertDialogContent = React.forwardRef<
       className={cn(
         // Positioning
         "fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%]",
-        // Premium glass styling with safe-area aware padding
+        // Premium glass styling with safe-area aware max-height
         "gap-4 p-6 modal-content-safe",
         "glass-floating",
         // Inner highlight for depth
