@@ -83,9 +83,6 @@ export function DailyTipWidget({ className, context }: DailyTipWidgetProps) {
                 <h3 className="font-semibold text-foreground text-base">
                   {tip.title}
                 </h3>
-                <p className="text-muted-foreground text-sm mt-1 line-clamp-2">
-                  {tip.body}
-                </p>
               </div>
 
               {/* Expand indicator */}
