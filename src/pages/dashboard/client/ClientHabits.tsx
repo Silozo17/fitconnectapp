@@ -41,69 +41,69 @@ const ClientHabits = () => {
         {/* Today's Progress - Hero Card */}
         <Card className="rounded-3xl overflow-hidden relative">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/15 via-transparent to-accent/15 pointer-events-none" />
-          <CardContent className="p-8 relative">
-            <div className="flex items-center justify-between mb-6">
+          <CardContent className="p-5 sm:p-8 relative">
+            <div className="flex items-center justify-between mb-4 sm:mb-6">
               <div>
-                <h2 className="text-xl font-bold font-display">Today's Progress</h2>
-                <p className="text-muted-foreground mt-1">
+                <h2 className="text-lg sm:text-xl font-bold font-display">Today's Progress</h2>
+                <p className="text-muted-foreground text-sm sm:text-base mt-1">
                   {completedCount} of {totalCount} habits completed
                 </p>
               </div>
               <div className="text-right">
-                <span className="text-5xl font-bold text-primary font-display">
+                <span className="text-3xl sm:text-5xl font-bold text-primary font-display">
                   {Math.round(progressPercent)}%
                 </span>
               </div>
             </div>
-            <Progress value={progressPercent} className="h-4 rounded-full" />
+            <Progress value={progressPercent} className="h-3 sm:h-4 rounded-full" />
           </CardContent>
         </Card>
         
         {/* Stats Cards */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card className="rounded-3xl">
-            <CardContent className="p-6 text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-orange-500/10 flex items-center justify-center mb-3">
-                <Flame className="h-7 w-7 text-orange-500" />
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <Card className="rounded-2xl sm:rounded-3xl">
+            <CardContent className="p-3 sm:p-6 text-center">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 mx-auto rounded-xl sm:rounded-2xl bg-orange-500/10 flex items-center justify-center mb-2 sm:mb-3">
+                <Flame className="h-5 w-5 sm:h-7 sm:w-7 text-orange-500" />
               </div>
-              <p className="text-3xl font-bold font-display">{totalCurrentStreak}</p>
-              <p className="text-sm text-muted-foreground mt-1">Total Streak Days</p>
+              <p className="text-xl sm:text-3xl font-bold font-display">{totalCurrentStreak}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Streak Days</p>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl">
-            <CardContent className="p-6 text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-yellow-500/10 flex items-center justify-center mb-3">
-                <Trophy className="h-7 w-7 text-yellow-500" />
+          <Card className="rounded-2xl sm:rounded-3xl">
+            <CardContent className="p-3 sm:p-6 text-center">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 mx-auto rounded-xl sm:rounded-2xl bg-yellow-500/10 flex items-center justify-center mb-2 sm:mb-3">
+                <Trophy className="h-5 w-5 sm:h-7 sm:w-7 text-yellow-500" />
               </div>
-              <p className="text-3xl font-bold font-display">{bestStreak}</p>
-              <p className="text-sm text-muted-foreground mt-1">Best Streak</p>
+              <p className="text-xl sm:text-3xl font-bold font-display">{bestStreak}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Best Streak</p>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl">
-            <CardContent className="p-6 text-center">
-              <div className="w-14 h-14 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center mb-3">
-                <Target className="h-7 w-7 text-primary" />
+          <Card className="rounded-2xl sm:rounded-3xl">
+            <CardContent className="p-3 sm:p-6 text-center">
+              <div className="w-10 h-10 sm:w-14 sm:h-14 mx-auto rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center mb-2 sm:mb-3">
+                <Target className="h-5 w-5 sm:h-7 sm:w-7 text-primary" />
               </div>
-              <p className="text-3xl font-bold font-display">{totalCompletions}</p>
-              <p className="text-sm text-muted-foreground mt-1">Total Completions</p>
+              <p className="text-xl sm:text-3xl font-bold font-display">{totalCompletions}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">Completions</p>
             </CardContent>
           </Card>
         </div>
         
         {/* Tabs */}
-        <Tabs defaultValue="today" className="space-y-6">
-          <TabsList className="bg-secondary/50 rounded-2xl p-1.5 h-auto">
-            <TabsTrigger value="today" className="rounded-xl px-5 py-2.5 gap-2">
+        <Tabs defaultValue="today" className="space-y-4 sm:space-y-6">
+          <TabsList className="bg-secondary/50 rounded-xl sm:rounded-2xl p-1 sm:p-1.5 h-auto w-full justify-start">
+            <TabsTrigger value="today" className="rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 gap-1.5 sm:gap-2 text-xs sm:text-sm">
               <Calendar className="h-4 w-4" />
-              Today
+              <span className="hidden xs:inline">Today</span>
             </TabsTrigger>
-            <TabsTrigger value="streaks" className="rounded-xl px-5 py-2.5 gap-2">
+            <TabsTrigger value="streaks" className="rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 gap-1.5 sm:gap-2 text-xs sm:text-sm">
               <Flame className="h-4 w-4" />
-              Streaks
+              <span className="hidden xs:inline">Streaks</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="rounded-xl px-5 py-2.5 gap-2">
+            <TabsTrigger value="history" className="rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 gap-1.5 sm:gap-2 text-xs sm:text-sm">
               <Target className="h-4 w-4" />
-              History
+              <span className="hidden xs:inline">History</span>
             </TabsTrigger>
           </TabsList>
           

@@ -29,6 +29,67 @@ interface WeeklySummary {
   weeklyData: WeeklyData;
 }
 
+// Dynamic fallback based on actual data
+const getFallbackSummary = (data: WeeklyData, firstName: string): string => {
+  const { habitCompletionRate, workoutsLogged, avgSteps } = data;
+  const name = firstName || "there";
+  
+  if (habitCompletionRate === 0 && workoutsLogged === 0 && avgSteps === 0) {
+    return `Hey ${name}, this week is just getting started! Set some goals and track your progress to see insights here.`;
+  } else if (habitCompletionRate === 0 && workoutsLogged === 0) {
+    return `Hey ${name}, you're staying active with ${avgSteps.toLocaleString()} average daily steps! Start logging habits and workouts to see more insights.`;
+  } else if (habitCompletionRate < 30) {
+    return `You're building momentum, ${name}! You completed ${habitCompletionRate}% of your habits${workoutsLogged > 0 ? ` and logged ${workoutsLogged} workout${workoutsLogged > 1 ? 's' : ''}` : ''}. Every step counts!`;
+  } else if (habitCompletionRate < 70) {
+    return `Solid progress this week, ${name}! You completed ${habitCompletionRate}% of your habits${workoutsLogged > 0 ? ` and logged ${workoutsLogged} workout${workoutsLogged > 1 ? 's' : ''}` : ''}. Keep pushing!`;
+  } else {
+    return `Amazing week, ${name}! You crushed ${habitCompletionRate}% of your habits${workoutsLogged > 0 ? ` and logged ${workoutsLogged} workout${workoutsLogged > 1 ? 's' : ''}` : ''}. You're on fire!`;
+  }
+};
+
+const getFallbackHighlights = (data: WeeklyData): string[] => {
+  const highlights: string[] = [];
+  
+  if (data.habitCompletionRate >= 80) {
+    highlights.push("Excellent habit consistency this week!");
+  } else if (data.habitCompletionRate >= 50) {
+    highlights.push("Good habit completion rate");
+  }
+  
+  if (data.workoutsLogged >= 3) {
+    highlights.push(`Completed ${data.workoutsLogged} workouts`);
+  } else if (data.workoutsLogged > 0) {
+    highlights.push("Stayed active with training sessions");
+  }
+  
+  if (data.avgSteps >= 10000) {
+    highlights.push("Hit 10k+ average daily steps!");
+  } else if (data.avgSteps >= 7000) {
+    highlights.push("Strong step count this week");
+  }
+  
+  if (data.weekOverWeekChange.habits > 0) {
+    highlights.push(`${data.weekOverWeekChange.habits}% improvement in habits`);
+  }
+  
+  if (highlights.length === 0) {
+    highlights.push("Starting fresh - every journey begins with a single step");
+  }
+  
+  return highlights.slice(0, 2);
+};
+
+const getFallbackImprovements = (data: WeeklyData): string[] => {
+  if (data.habitCompletionRate < 50) {
+    return ["Focus on completing more daily habits"];
+  } else if (data.workoutsLogged < 2) {
+    return ["Try to fit in more workout sessions"];
+  } else if (data.avgSteps < 5000) {
+    return ["Aim to increase your daily step count"];
+  }
+  return ["Keep up the great momentum!"];
+};
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -79,21 +140,24 @@ Deno.serve(async (req) => {
     const prevWeekStart = new Date(weekStart);
     prevWeekStart.setDate(prevWeekStart.getDate() - 7);
 
-    console.log(`Generating weekly summary for client ${clientProfile.id}`);
+    const weekStartStr = weekStart.toISOString().split("T")[0];
+    const prevWeekStartStr = prevWeekStart.toISOString().split("T")[0];
+
+    console.log(`Generating weekly summary for client ${clientProfile.id}, week starting ${weekStartStr}`);
 
     // Get habit logs for this week
     const { data: thisWeekHabits } = await supabase
       .from("habit_logs")
       .select("completed_count, client_habits!inner(client_id, target_count)")
       .eq("client_habits.client_id", clientProfile.id)
-      .gte("log_date", weekStart.toISOString().split("T")[0]);
+      .gte("log_date", weekStartStr);
 
     const { data: prevWeekHabits } = await supabase
       .from("habit_logs")
       .select("completed_count, client_habits!inner(client_id, target_count)")
       .eq("client_habits.client_id", clientProfile.id)
-      .gte("log_date", prevWeekStart.toISOString().split("T")[0])
-      .lt("log_date", weekStart.toISOString().split("T")[0]);
+      .gte("log_date", prevWeekStartStr)
+      .lt("log_date", weekStartStr);
 
     // Calculate habit completion
     const thisWeekCompleted = thisWeekHabits?.reduce((sum, log) => sum + (log.completed_count || 0), 0) || 0;
@@ -117,23 +181,25 @@ Deno.serve(async (req) => {
       .gte("created_at", prevWeekStart.toISOString())
       .lt("created_at", weekStart.toISOString());
 
-    // Get wearable data
-    const { data: wearableData } = await supabase
-      .from("wearable_data")
-      .select("metric_type, value")
+    // Get health data from health_data_sync (FIXED: was querying non-existent wearable_data)
+    const { data: healthData } = await supabase
+      .from("health_data_sync")
+      .select("data_type, value")
       .eq("client_id", clientProfile.id)
-      .gte("recorded_at", weekStart.toISOString());
+      .gte("recorded_at", weekStartStr);
 
-    const { data: prevWearableData } = await supabase
-      .from("wearable_data")
-      .select("metric_type, value")
+    const { data: prevHealthData } = await supabase
+      .from("health_data_sync")
+      .select("data_type, value")
       .eq("client_id", clientProfile.id)
-      .gte("recorded_at", prevWeekStart.toISOString())
-      .lt("recorded_at", weekStart.toISOString());
+      .gte("recorded_at", prevWeekStartStr)
+      .lt("recorded_at", weekStartStr);
 
-    // Calculate averages
-    const stepsData = wearableData?.filter(d => d.metric_type === "steps") || [];
-    const prevStepsData = prevWearableData?.filter(d => d.metric_type === "steps") || [];
+    console.log(`Found ${healthData?.length || 0} health records this week`);
+
+    // Calculate averages using correct column name (data_type, not metric_type)
+    const stepsData = healthData?.filter(d => d.data_type === "steps") || [];
+    const prevStepsData = prevHealthData?.filter(d => d.data_type === "steps") || [];
     const avgSteps = stepsData.length > 0 
       ? Math.round(stepsData.reduce((sum, d) => sum + (d.value || 0), 0) / stepsData.length)
       : 0;
@@ -141,7 +207,7 @@ Deno.serve(async (req) => {
       ? Math.round(prevStepsData.reduce((sum, d) => sum + (d.value || 0), 0) / prevStepsData.length)
       : 0;
 
-    const sleepData = wearableData?.filter(d => d.metric_type === "sleep_hours") || [];
+    const sleepData = healthData?.filter(d => d.data_type === "sleep") || [];
     const avgSleep = sleepData.length > 0
       ? Math.round((sleepData.reduce((sum, d) => sum + (d.value || 0), 0) / sleepData.length) * 10) / 10
       : 0;
@@ -204,6 +270,13 @@ Respond in JSON format:
 
     const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
     
+    // Use dynamic fallback instead of static generic message
+    let aiSummary = {
+      summary: getFallbackSummary(weeklyData, clientProfile.first_name || ""),
+      highlights: getFallbackHighlights(weeklyData),
+      improvements: getFallbackImprovements(weeklyData),
+    };
+
     const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -223,33 +296,34 @@ Respond in JSON format:
       }),
     });
 
-    let aiSummary = {
-      summary: `Great week of progress! You completed ${weeklyData.habitCompletionRate}% of your habits and logged ${weeklyData.workoutsLogged} workouts.`,
-      highlights: ["Consistent effort throughout the week"],
-      improvements: ["Keep pushing towards your goals"],
-    };
-
     if (!aiResponse.ok) {
       if (aiResponse.status === 429) {
-        console.log("Rate limited by Lovable AI, using fallback summary");
+        console.log("Rate limited by Lovable AI, using dynamic fallback summary");
       } else if (aiResponse.status === 402) {
-        console.log("Payment required for Lovable AI, using fallback summary");
+        console.log("Payment required for Lovable AI, using dynamic fallback summary");
       } else {
-        console.log(`AI response error: ${aiResponse.status}, using fallback summary`);
+        console.log(`AI response error: ${aiResponse.status}, using dynamic fallback summary`);
       }
     } else {
       const aiData = await aiResponse.json();
       const content = aiData.choices?.[0]?.message?.content;
       if (content) {
         try {
-          const parsed = JSON.parse(content);
+          // Handle markdown code blocks if present
+          let jsonContent = content;
+          if (content.includes("```json")) {
+            jsonContent = content.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+          } else if (content.includes("```")) {
+            jsonContent = content.replace(/```\n?/g, "").trim();
+          }
+          const parsed = JSON.parse(jsonContent);
           aiSummary = {
             summary: parsed.summary || aiSummary.summary,
             highlights: parsed.highlights || aiSummary.highlights,
             improvements: parsed.improvements || aiSummary.improvements,
           };
         } catch (e) {
-          console.log("Using fallback summary due to parse error");
+          console.log("Using dynamic fallback summary due to parse error:", e);
         }
       }
     }

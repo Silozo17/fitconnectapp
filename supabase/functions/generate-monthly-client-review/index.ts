@@ -68,6 +68,8 @@ serve(async (req) => {
     const startStr = startOfMonth.toISOString().split("T")[0];
     const endStr = endOfMonth.toISOString().split("T")[0];
 
+    console.log(`Generating monthly review for client ${clientId}, period ${startStr} to ${endStr}`);
+
     // Gather data in parallel
     const [
       progressRes,
@@ -85,12 +87,13 @@ serve(async (req) => {
         .gte("recorded_at", startStr)
         .lte("recorded_at", endStr)
         .order("recorded_at"),
+      // FIXED: Query habit_logs through client_habits relationship using log_date
       supabase
         .from("habit_logs")
-        .select("completed_count")
-        .eq("client_id", clientId)
-        .gte("logged_at", startStr)
-        .lte("logged_at", endStr),
+        .select("completed_count, log_date, client_habits!inner(client_id, target_count)")
+        .eq("client_habits.client_id", clientId)
+        .gte("log_date", startStr)
+        .lte("log_date", endStr),
       supabase
         .from("training_logs")
         .select("duration_minutes")
@@ -124,16 +127,22 @@ serve(async (req) => {
         .limit(1),
     ]);
 
+    console.log(`Habit logs found: ${habitsRes.data?.length || 0}`);
+
     // Process weight data
     const weights = (progressRes.data || []).filter((p) => p.weight_kg);
     const weightStart = weights[0]?.weight_kg ?? null;
     const weightEnd = weights[weights.length - 1]?.weight_kg ?? null;
     const weightChange = weightStart && weightEnd ? weightEnd - weightStart : null;
 
-    // Process habits
+    // Process habits - count completed logs vs total expected
     const habitLogs = habitsRes.data || [];
-    const totalCompleted = habitLogs.filter((h) => (h.completed_count ?? 0) > 0).length;
-    const completionRate = habitLogs.length > 0 ? totalCompleted / habitLogs.length : 0;
+    const totalCompleted = habitLogs.reduce((sum, h) => sum + (h.completed_count || 0), 0);
+    const totalExpected = habitLogs.reduce((sum, h) => {
+      const habits = h.client_habits as unknown as { target_count: number };
+      return sum + (habits?.target_count || 1);
+    }, 0);
+    const completionRate = totalExpected > 0 ? (totalCompleted / totalExpected) * 100 : 0;
 
     // Process workouts
     const workouts = workoutsRes.data || [];
@@ -169,13 +178,15 @@ serve(async (req) => {
     const reviewData: MonthlyReviewData = {
       period: { start: startStr, end: endStr },
       weight: { start: weightStart, end: weightEnd, change: weightChange },
-      habits: { totalCompleted, completionRate: Math.round(completionRate * 100) },
+      habits: { totalCompleted, completionRate: Math.round(completionRate) },
       workouts: { count: workouts.length, totalMinutes },
       nutrition: { avgCalories: Math.round(avgCalories), avgProtein: Math.round(avgProtein) },
       health: { avgSteps: Math.round(avgSteps), avgSleep: Math.round(avgSleep * 10) / 10, avgActiveMinutes: Math.round(avgActiveMinutes) },
       challenges: { completed: challenges.length, xpEarned },
       streak: { current: currentStreak, best: bestStreak },
     };
+
+    console.log(`Review data: habits ${totalCompleted}/${totalExpected} (${Math.round(completionRate)}%), workouts ${workouts.length}`);
 
     // Generate AI summary if API key is available
     let aiSummary = null;
@@ -190,7 +201,7 @@ serve(async (req) => {
 Data from the past month:
 - Weight change: ${weightChange ? `${weightChange > 0 ? "+" : ""}${weightChange.toFixed(1)}kg` : "Not tracked"}
 - Workouts: ${workouts.length} sessions (${totalMinutes} total minutes)
-- Habit completion rate: ${Math.round(completionRate * 100)}%
+- Habit completion rate: ${Math.round(completionRate)}%
 - Average daily steps: ${Math.round(avgSteps).toLocaleString()}
 - Average sleep: ${avgSleep.toFixed(1)} hours
 - Challenges completed: ${challenges.length}
