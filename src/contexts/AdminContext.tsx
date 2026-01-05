@@ -230,10 +230,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       
       setIsLoadingProfiles(false);
       
-      // Schedule background fetch after render
-      requestIdleCallback(() => {
-        fetchProfiles({ immediate: true });
-      }, { timeout: 2000 });
+      // Schedule background fetch after render (guarded for Android WebView compatibility)
+      const scheduleBackgroundFetch = () => fetchProfiles({ immediate: true });
+      
+      if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+        (window as Window & { requestIdleCallback: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback(scheduleBackgroundFetch, { timeout: 2000 });
+      } else {
+        setTimeout(scheduleBackgroundFetch, 50);
+      }
       return;
     }
 
