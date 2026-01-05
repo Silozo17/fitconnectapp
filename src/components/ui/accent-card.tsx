@@ -24,15 +24,16 @@ const AccentCard = React.forwardRef<HTMLDivElement, AccentCardProps>(
         ref={ref}
         className={cn(
           "relative overflow-hidden rounded-2xl",
-          "bg-gradient-to-br from-primary/10 to-primary/5",
-          "border border-primary/20",
-          "backdrop-blur-sm",
+          "glass-card",
+          "border border-white/5",
           className
         )}
         {...props}
       >
-        {/* Top accent line - lime gradient */}
-        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary/80 to-primary/50" />
+        {/* Thin top accent line - bright left to dim right */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-primary via-primary/30 to-transparent" />
+        {/* Inner glow effect */}
+        <div className="absolute inset-0 rounded-2xl shadow-[inset_0_1px_12px_rgba(163,230,53,0.06)] pointer-events-none" />
         {children}
       </div>
     );
