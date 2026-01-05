@@ -71,9 +71,9 @@ export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
     <div className={cn("space-y-4", className)}>
       {/* AI Summary Card */}
       {aiSummary && (
-        <div className="relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50">
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50">
           {/* Top accent line */}
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent rounded-t-2xl" />
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
           
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
