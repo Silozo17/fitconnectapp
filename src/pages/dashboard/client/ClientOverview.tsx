@@ -42,22 +42,14 @@ import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 const HealthDataWidget = lazy(() => import("@/components/integrations/HealthDataWidget"));
 
 const HealthWidgetSkeleton = () => (
-  <Card variant="elevated" className="mb-6 rounded-3xl overflow-hidden">
-    <CardContent className="p-6">
-      <div className="flex items-center gap-4 mb-5">
-        <ShimmerSkeleton className="h-12 w-12 rounded-2xl" />
-        <ShimmerSkeleton className="h-5 w-36" />
-      </div>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="space-y-2">
-            <ShimmerSkeleton className="h-4 w-16" />
-            <ShimmerSkeleton className="h-7 w-24" />
-          </div>
-        ))}
-      </div>
-    </CardContent>
-  </Card>
+  <div className="space-y-4 mb-5">
+    <div className="h-80 bg-muted/20 rounded-2xl animate-pulse" />
+    <div className="grid grid-cols-2 gap-4">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="h-36 bg-muted/20 rounded-2xl animate-pulse" />
+      ))}
+    </div>
+  </div>
 );
 
 const ClientOverview = () => {
