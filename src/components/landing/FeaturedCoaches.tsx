@@ -9,7 +9,8 @@ import { useCountry } from "@/hooks/useCountry";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { BenefitCard } from "./BenefitCard";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
-import { UserAvatar } from "@/components/shared/UserAvatar";
+import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
+import fallbackCoachImage from "@/assets/fallback-coach.webp";
 
 const FeaturedCoaches = () => {
   const { t } = useTranslation('landing');
@@ -145,15 +146,11 @@ const FeaturedCoaches = () => {
                       />
                     </div>
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-cyan-400 via-emerald-400 to-lime-400 group-hover:scale-105 transition-transform duration-500">
-                      <UserAvatar 
-                        src={null} 
-                        name={coach.display_name} 
-                        variant="squircle"
-                        size="xl"
-                        className="scale-150"
-                      />
-                    </div>
+                    <img 
+                      src={fallbackCoachImage} 
+                      alt={coach.display_name || "Coach"} 
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
                   )}
                   {coach.is_verified && (
                     <div className="absolute top-3 right-3">
@@ -181,7 +178,7 @@ const FeaturedCoaches = () => {
                     {coach.display_name || "Coach"}
                   </h3>
                   <p className="text-primary text-sm font-medium mb-2">
-                    {coach.coach_types?.[0] || "Personal Trainer"}
+                    {getCoachTypeDisplayLabel(coach.coach_types?.[0] || "personal_training")}
                   </p>
 
                   <div className="flex items-center gap-1 text-muted-foreground text-sm mb-4">

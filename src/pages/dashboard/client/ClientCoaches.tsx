@@ -12,6 +12,7 @@ import { useMyCoaches } from "@/hooks/useMyCoaches";
 import { useMyShowcaseConsents } from "@/hooks/useClientShowcaseConsents";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { ShowcaseConsentCard } from "@/components/coaches/ShowcaseConsentCard";
+import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
 
 const ClientCoaches = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -122,7 +123,7 @@ const ClientCoaches = () => {
                       <div className="flex flex-wrap gap-1 mt-1 mb-2">
                         {connection.coach.coach_types?.slice(0, 2).map((type) => (
                           <Badge key={type} variant="secondary" className="text-xs">
-                            {type}
+                            {getCoachTypeDisplayLabel(type)}
                           </Badge>
                         ))}
                       </div>

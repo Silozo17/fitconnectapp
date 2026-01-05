@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { getAvatarImageUrl } from "@/hooks/useAvatars";
 import { Rarity } from "@/lib/avatar-utils";
+import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
 
 interface FriendProfileSheetProps {
   open: boolean;
@@ -410,7 +411,7 @@ export function FriendProfileSheet({
                     <div className="flex flex-wrap gap-2">
                       {profile.coach_types.map((type, index) => (
                         <Badge key={index} variant="secondary" className="text-xs capitalize">
-                          {type.replace(/_/g, " ")}
+                          {getCoachTypeDisplayLabel(type)}
                         </Badge>
                       ))}
                     </div>

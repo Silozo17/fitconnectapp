@@ -37,6 +37,7 @@ import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateE
 import { getErrorMessage, logError } from "@/lib/error-utils";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { useTranslation } from "@/hooks/useTranslation";
+import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
 
 interface CoachUser {
   id: string;
@@ -507,7 +508,7 @@ const AdminCoaches = () => {
                             <div className="flex flex-wrap gap-1">
                               {coach.coach_types?.slice(0, 2).map((type) => (
                                 <Badge key={type} variant="outline" className="text-xs">
-                                  {type}
+                                  {getCoachTypeDisplayLabel(type)}
                                 </Badge>
                               ))}
                               {(coach.coach_types?.length || 0) > 2 && (
