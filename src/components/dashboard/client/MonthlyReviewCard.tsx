@@ -1,20 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
+import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
 import { Button } from "@/components/ui/button";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import { 
-  Calendar, 
-  TrendingUp, 
-  TrendingDown, 
-  Minus,
   Dumbbell,
   Target,
   Footprints,
-  Moon,
   Trophy,
-  Flame,
   RefreshCw,
   Sparkles
 } from "lucide-react";
@@ -47,14 +41,14 @@ export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
       return data as { data: MonthlyReviewData; aiSummary: string | null };
     },
     enabled: !!user?.id,
-    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    staleTime: 24 * 60 * 60 * 1000,
     refetchOnWindowFocus: false,
   });
 
   if (isLoading) {
     return (
       <AccentCard className={cn("rounded-2xl", className)}>
-        <AccentCardContent className="p-6">
+        <AccentCardContent className="p-5">
           <ShimmerSkeleton className="h-6 w-48 mb-4" />
           <ShimmerSkeleton className="h-20 w-full" />
         </AccentCardContent>
@@ -69,16 +63,15 @@ export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
 
   return (
     <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardHeader 
-        icon={Calendar} 
-        title={`Monthly Review: ${monthName}`}
-        action={
+      <AccentCardContent className="p-5 space-y-4">
+        {/* Header with month and refresh */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground">{monthName}</p>
           <Button variant="ghost" size="icon" onClick={() => refetch()} disabled={isFetching}>
             <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
           </Button>
-        }
-      />
-      <AccentCardContent className="space-y-4">
+        </div>
+
         {/* AI Summary */}
         {aiSummary && (
           <div className="bg-muted/50 rounded-xl p-4 border border-border/50">

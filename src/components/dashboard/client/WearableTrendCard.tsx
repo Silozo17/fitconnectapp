@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
+import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
 import { useWearableTrends, TrendData } from "@/hooks/useWearableTrends";
 import {
   TrendingUp,
@@ -10,7 +10,6 @@ import {
   Moon,
   Flame,
   Heart,
-  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -100,13 +99,12 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
   }
 
   if (!hasData) {
-    return null; // Don't show if no wearable data
+    return null;
   }
 
   return (
     <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardHeader icon={Activity} title={t("client.trends.title", "Weekly Trends")} />
-      <AccentCardContent>
+      <AccentCardContent className="p-5">
         <p className="text-xs text-muted-foreground mb-4">
           {t("client.trends.subtitle", "Compared to last week")}
         </p>
