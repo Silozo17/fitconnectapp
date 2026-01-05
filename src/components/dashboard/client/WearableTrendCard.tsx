@@ -25,8 +25,18 @@ const iconMap: Record<string, React.ElementType> = {
   Heart,
 };
 
+// Color mapping for each trend type
+const colorMap: Record<string, { bg: string; text: string }> = {
+  steps: { bg: "bg-blue-500/20", text: "text-blue-400" },
+  active_minutes: { bg: "bg-green-500/20", text: "text-green-400" },
+  sleep: { bg: "bg-purple-500/20", text: "text-purple-400" },
+  calories: { bg: "bg-orange-500/20", text: "text-orange-400" },
+  heart_rate: { bg: "bg-red-500/20", text: "text-red-400" },
+};
+
 function TrendItem({ trend }: { trend: TrendData }) {
   const Icon = iconMap[trend.icon] || Footprints;
+  const colors = colorMap[trend.type] || { bg: "bg-muted/50", text: "text-muted-foreground" };
 
   const TrendIcon =
     trend.trend === "up"
@@ -44,8 +54,8 @@ function TrendItem({ trend }: { trend: TrendData }) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-border/50 last:border-0">
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-muted/50">
-          <Icon className="h-4 w-4 text-muted-foreground" />
+        <div className={cn("p-2 rounded-xl", colors.bg)}>
+          <Icon className={cn("h-4 w-4", colors.text)} />
         </div>
         <div>
           <div className="font-medium text-foreground text-sm">
@@ -99,9 +109,9 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
   }
 
   return (
-    <div className={cn("relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+    <div className={cn("relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
       {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent rounded-t-2xl" />
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
 
       <p className="text-xs text-muted-foreground mb-3">
         {t("client.trends.subtitle", "Compared to last week")}
