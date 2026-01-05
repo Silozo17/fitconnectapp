@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useQueryClient } from "@tanstack/react-query";
@@ -7,15 +7,19 @@ import { useAdminView } from "@/contexts/AdminContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Flame, Activity, Flower2, Weight, Target, Heart, Sparkles, Dumbbell, Check } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Flame, Activity, Flower2, Weight, Target, Heart, Sparkles, Dumbbell, Check, Shield, Trophy, MapPin, Info } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import WearablesOnboardingStep from "@/components/onboarding/WearablesOnboardingStep";
 import { AvatarSelectionStep } from "@/components/onboarding/AvatarSelectionStep";
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
+import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
+import type { PlaceLocationData } from "@/types/location";
 import { useTranslation } from "react-i18next";
 
-const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices", "Choose Avatar"];
+const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices", "Privacy & Location", "Choose Avatar"];
 
 const FITNESS_GOALS: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "weight_loss", label: "Weight Loss", icon: Flame },
@@ -90,6 +94,15 @@ const ClientOnboarding = () => {
     fitnessGoals: [] as string[],
     dietaryRestrictions: [] as string[],
     allergies: [] as string[],
+    // Privacy & Location fields
+    leaderboardVisible: false,
+    leaderboardDisplayName: "",
+    locationDisplay: "",
+    locationCity: "",
+    locationCounty: "",
+    locationCountry: "",
+    locationLat: null as number | null,
+    locationLng: null as number | null,
   });
 
   // Check if onboarding is already completed, restore saved step, and pre-populate names
@@ -212,7 +225,7 @@ const ClientOnboarding = () => {
     }
   }, [isNavigating]);
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
       
@@ -242,6 +255,18 @@ const ClientOnboarding = () => {
       ...prev,
       selectedAvatarId: avatarId,
       selectedAvatarSlug: avatarSlug,
+    }));
+  };
+
+  const handleLocationChange = (displayValue: string, data: PlaceLocationData | null) => {
+    setFormData(prev => ({
+      ...prev,
+      locationDisplay: displayValue,
+      locationCity: data?.city || "",
+      locationCounty: data?.county || data?.region || "",
+      locationCountry: data?.country || "",
+      locationLat: data?.lat || null,
+      locationLng: data?.lng || null,
     }));
   };
 
@@ -329,6 +354,15 @@ const ClientOnboarding = () => {
           allergies: formData.allergies,
           selected_avatar_id: formData.selectedAvatarId,
           onboarding_completed: true,
+          // Privacy & Location fields
+          leaderboard_visible: formData.leaderboardVisible,
+          leaderboard_display_name: formData.leaderboardDisplayName || null,
+          city: formData.locationCity || null,
+          county: formData.locationCounty || null,
+          country: formData.locationCountry || null,
+          location: formData.locationDisplay || null,
+          location_lat: formData.locationLat,
+          location_lng: formData.locationLng,
         }, {
           onConflict: 'user_id'
         })
@@ -395,8 +429,8 @@ const ClientOnboarding = () => {
 
   // Determine footer actions based on current step
   const getFooterActions = () => {
-    // Last step (Avatar - now step 5)
-    if (currentStep === 5) {
+    // Last step (Avatar - now step 6)
+    if (currentStep === 6) {
       return {
         primary: {
           label: "Complete Setup",
@@ -673,8 +707,118 @@ const ClientOnboarding = () => {
           />
         );
 
-      // Step 5: Choose Avatar (LAST - now has gender available)
+      // Step 5: Privacy & Location
       case 5:
+        return (
+          <div className="space-y-5">
+            <div className="mb-4">
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-foreground">
+                {t('onboarding.privacyTitle', 'Community & Privacy')}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1.5">
+                {t('onboarding.privacyDescription', 'Choose how you want to participate in the community.')}
+              </p>
+            </div>
+
+            {/* GDPR Notice */}
+            <Alert>
+              <Shield className="h-4 w-4" />
+              <AlertDescription>
+                <strong>{t('onboarding.privacyNotice', 'Your Privacy Matters')}:</strong>{' '}
+                {t('onboarding.privacyNoticeDescription', 'Leaderboards are completely opt-in. If you join, only your first name (or alias) and city are shown. No photos, last names, or profile links are ever displayed.')}
+              </AlertDescription>
+            </Alert>
+
+            {/* Leaderboard Toggle */}
+            <div className="p-4 bg-muted/50 rounded-lg border-2 border-border">
+              <div className="flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium flex items-center gap-2">
+                    <Trophy className="h-4 w-4 text-primary" />
+                    {t('onboarding.joinLeaderboards', 'Join Community Leaderboards')}
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    {t('onboarding.joinLeaderboardsDescription', 'Compete with others in your area and earn recognition for your progress.')}
+                  </p>
+                </div>
+                <Switch
+                  checked={formData.leaderboardVisible}
+                  onCheckedChange={(checked) => handleInputChange("leaderboardVisible", checked)}
+                />
+              </div>
+            </div>
+
+            {/* Location & Display Name - only shown when leaderboards enabled */}
+            {formData.leaderboardVisible && (
+              <div className="p-4 border rounded-lg border-primary/20 bg-primary/5 space-y-4">
+                <div className="flex items-center gap-2 text-sm text-primary">
+                  <Info className="h-4 w-4" />
+                  <span>{t('onboarding.howYouAppear', "How you'll appear on leaderboards:")}</span>
+                </div>
+                
+                {/* Location */}
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    {t('onboarding.setLocation', 'Set Your Location')}
+                  </Label>
+                  <LocationAutocomplete
+                    value={formData.locationDisplay}
+                    onLocationChange={handleLocationChange}
+                    placeholder={t('onboarding.searchCity', 'Search for a city...')}
+                    className="bg-background"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {t('onboarding.locationHint', 'Your city is used for local and regional leaderboards.')}
+                  </p>
+                </div>
+
+                {/* Display Name */}
+                <div className="space-y-2">
+                  <Label htmlFor="leaderboard-display-name">
+                    {t('onboarding.displayName', 'Display Name (Optional)')}
+                  </Label>
+                  <Input
+                    id="leaderboard-display-name"
+                    placeholder={t('onboarding.displayNamePlaceholder', `Leave empty to use "${formData.firstName || 'your name'}"`)}
+                    value={formData.leaderboardDisplayName}
+                    onChange={(e) => handleInputChange("leaderboardDisplayName", e.target.value)}
+                    className="bg-background"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {t('onboarding.displayNameHint', 'Use an alias for extra privacy.')}
+                  </p>
+                </div>
+
+                {/* Preview */}
+                <div className="p-3 bg-card rounded-lg border">
+                  <p className="text-sm font-medium mb-2">{t('onboarding.leaderboardPreview', 'Preview')}:</p>
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="text-muted-foreground">#5</span>
+                    <span className="font-medium">
+                      {formData.leaderboardDisplayName || formData.firstName || t('onboarding.yourName', 'Your Name')}
+                    </span>
+                    <span className="text-muted-foreground">•</span>
+                    <span className="text-muted-foreground">
+                      {formData.locationCity || t('onboarding.yourCity', 'Your City')}
+                    </span>
+                    <span className="ml-auto text-primary font-bold">0 XP</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Skip info when disabled */}
+            {!formData.leaderboardVisible && (
+              <p className="text-sm text-muted-foreground text-center">
+                {t('onboarding.skipLeaderboardsHint', 'You can always join leaderboards later from Settings.')}
+              </p>
+            )}
+          </div>
+        );
+
+      // Step 6: Choose Avatar (LAST - now has gender available)
+      case 6:
         return (
           <AvatarSelectionStep
             selectedAvatarId={formData.selectedAvatarId}
