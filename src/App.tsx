@@ -260,6 +260,53 @@ function LanguagePersistence() {
   return null;
 }
 
+// Global error capture for errors outside React lifecycle
+function GlobalErrorCapture() {
+  React.useEffect(() => {
+    const captureError = (message: string, source: string, error?: Error) => {
+      try {
+        const errorDetails = {
+          type: source,
+          message,
+          stack: error?.stack || "No stack trace",
+          route: window.location.pathname,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+        };
+        
+        // Store in sessionStorage for debugging
+        sessionStorage.setItem("fc_last_global_error", JSON.stringify(errorDetails));
+        
+        // Log in dev mode
+        if (import.meta.env.DEV) {
+          console.error(`[GlobalErrorCapture:${source}]`, errorDetails);
+        }
+      } catch { /* ignore storage errors */ }
+    };
+
+    // Catch unhandled JS errors
+    const handleError = (event: ErrorEvent) => {
+      captureError(event.message, "window.onerror", event.error);
+    };
+
+    // Catch unhandled promise rejections
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const message = event.reason?.message || String(event.reason);
+      captureError(message, "unhandledrejection", event.reason instanceof Error ? event.reason : undefined);
+    };
+
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleRejection);
+
+    return () => {
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleRejection);
+    };
+  }, []);
+
+  return null;
+}
+
 // Despia native initialization (Android status bar config + pull-to-refresh visual fix)
 function DespiaInitializer() {
   useAppInitialization();
@@ -340,6 +387,7 @@ const App = () => (
           <ReloadPrompt />
           <HydrationSignal />
           <DespiaInitializer />
+          <GlobalErrorCapture />
           <BrowserRouter>
             <InstallBanner />
             <ScrollRestoration />

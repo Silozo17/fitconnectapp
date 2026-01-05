@@ -1,6 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw, Trash2 } from "lucide-react";
+import { AlertTriangle, RefreshCw, Trash2, Copy, ChevronDown, ChevronUp, Bug } from "lucide-react";
 
 interface Props {
   children: ReactNode;
@@ -10,20 +10,53 @@ interface Props {
 interface State {
   hasError: boolean;
   error: Error | null;
+  componentStack: string | null;
+  showDetails: boolean;
+  copied: boolean;
+}
+
+// Check if debug mode is enabled via URL param or localStorage
+function isDebugMode(): boolean {
+  try {
+    if (typeof window === "undefined") return false;
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("debug") === "1") return true;
+    if (localStorage.getItem("fc_debug_errors") === "true") return true;
+  } catch { /* ignore */ }
+  return false;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
     error: null,
+    componentStack: null,
+    showDetails: false,
+    copied: false,
   };
 
-  public static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
+    
+    // Store component stack
+    this.setState({ componentStack: errorInfo.componentStack || null });
+    
+    // Persist error details to sessionStorage for debugging
+    try {
+      const errorDetails = {
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        route: window.location.pathname,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+      };
+      sessionStorage.setItem("fc_last_error", JSON.stringify(errorDetails));
+    } catch { /* ignore storage errors */ }
     
     // Check if this is an auth-related error (JWT/token corruption)
     const errorMessage = error.message?.toLowerCase() || '';
@@ -45,7 +78,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, componentStack: null });
     window.location.reload();
   };
 
@@ -56,15 +89,35 @@ export class ErrorBoundary extends Component<Props, State> {
       sessionStorage.clear();
     } catch {}
     
-    this.setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null, componentStack: null });
     window.location.href = "/auth";
   };
 
   private handleGoHome = () => {
-    this.setState({ hasError: false, error: null });
-    // FIX: Navigate to /dashboard instead of / to ensure proper state restoration
-    // RouteRestorer will handle redirecting to the correct dashboard based on role
+    this.setState({ hasError: false, error: null, componentStack: null });
+    // Navigate to /dashboard - RouteRestorer will handle redirecting
     window.location.href = "/dashboard";
+  };
+
+  private getErrorDetails = () => {
+    const { error, componentStack } = this.state;
+    return {
+      message: error?.message || "Unknown error",
+      stack: error?.stack || "No stack trace",
+      componentStack: componentStack || "No component stack",
+      route: window.location.pathname,
+      timestamp: new Date().toISOString(),
+      userAgent: navigator.userAgent,
+    };
+  };
+
+  private handleCopyError = async () => {
+    try {
+      const details = this.getErrorDetails();
+      await navigator.clipboard.writeText(JSON.stringify(details, null, 2));
+      this.setState({ copied: true });
+      setTimeout(() => this.setState({ copied: false }), 2000);
+    } catch { /* ignore */ }
   };
 
   public render() {
@@ -72,6 +125,10 @@ export class ErrorBoundary extends Component<Props, State> {
       if (this.props.fallback) {
         return this.props.fallback;
       }
+
+      const showDebugUI = isDebugMode() || import.meta.env.DEV;
+      const { showDetails, copied } = this.state;
+      const errorDetails = this.getErrorDetails();
 
       return (
         <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -87,11 +144,57 @@ export class ErrorBoundary extends Component<Props, State> {
               </p>
             </div>
 
-            {process.env.NODE_ENV === "development" && this.state.error && (
-              <div className="bg-muted/50 rounded-lg p-4 text-left">
-                <p className="text-sm font-mono text-destructive break-all">
-                  {this.state.error.message}
-                </p>
+            {/* Debug Details Section */}
+            {showDebugUI && (
+              <div className="text-left space-y-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => this.setState({ showDetails: !showDetails })}
+                  className="w-full justify-between gap-2"
+                >
+                  <span className="flex items-center gap-2 text-muted-foreground">
+                    <Bug className="w-4 h-4" />
+                    Error Details
+                  </span>
+                  {showDetails ? (
+                    <ChevronUp className="w-4 h-4" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4" />
+                  )}
+                </Button>
+
+                {showDetails && (
+                  <div className="bg-muted/50 rounded-lg p-4 space-y-3">
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Message</p>
+                      <p className="text-sm font-mono text-destructive break-all">
+                        {errorDetails.message}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Route</p>
+                      <p className="text-sm font-mono text-foreground">
+                        {errorDetails.route}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground mb-1">Stack Trace</p>
+                      <pre className="text-xs font-mono text-muted-foreground bg-background/50 rounded p-2 overflow-x-auto max-h-32 overflow-y-auto">
+                        {errorDetails.stack}
+                      </pre>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={this.handleCopyError}
+                      className="w-full gap-2"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      {copied ? "Copied!" : "Copy Error Details"}
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
 
