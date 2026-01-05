@@ -165,36 +165,36 @@ const ClientOverview = () => {
         </Alert>
       )}
 
-      {/* Section: Today's Health - 84px after */}
+      {/* Section: Today's Health - 100px after */}
       <Suspense fallback={<HealthWidgetSkeleton />}>
-        <HealthDataWidget compact className="mb-[84px]" />
+        <HealthDataWidget compact className="mb-[100px]" />
       </Suspense>
 
-      {/* Section: Daily Readiness - 12px internal, 84px after */}
+      {/* Section: Daily Readiness - 12px internal, 100px after */}
       <ReadinessScoreCard className="mb-3" />
-      <div className="grid grid-cols-3 gap-3 mb-[84px]">
+      <div className="grid grid-cols-3 gap-3 mb-[100px]">
         <ReadinessComponentCard type="sleep" />
         <ReadinessComponentCard type="recovery" />
         <ReadinessComponentCard type="activity" />
       </div>
 
-      {/* Section: Insights (Wearable Trends) - 84px after */}
-      <WearableTrendCard className="mb-[84px]" />
+      {/* Section: Insights (Wearable Trends) - 100px after */}
+      <WearableTrendCard className="mb-[100px]" />
 
-      {/* Section: Tip of the Day - 84px after */}
-      <DailyTipWidget className="mb-[84px]" />
+      {/* Section: Tip of the Day - 100px after */}
+      <DailyTipWidget className="mb-[100px]" />
 
       {/* Section: Weekly Summary */}
-      <WeeklySummaryCard className="mb-[84px]" />
+      <WeeklySummaryCard className="mb-[100px]" />
 
       {/* Section: Monthly Review */}
-      <MonthlyReviewCard className="mb-[84px]" />
+      <MonthlyReviewCard className="mb-[100px]" />
 
       {/* Section: Friend Requests */}
-      <UserConnectionRequests className="mb-[84px]" />
+      <UserConnectionRequests className="mb-[100px]" />
 
       {/* Section: Quick Actions */}
-      <div className="mb-[84px]">
+      <div className="mb-[100px]">
         {/* Mobile: 3D Carousel */}
         <div className="md:hidden -mx-5">
           <Carousel3D gap={12}>
