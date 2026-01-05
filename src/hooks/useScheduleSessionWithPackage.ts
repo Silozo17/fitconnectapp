@@ -99,6 +99,29 @@ export function useScheduleSessionWithPackage() {
 
       if (sessionError) throw sessionError;
 
+      // Create video meeting for online sessions
+      if (data.isOnline && session) {
+        try {
+          // Get coach's active video provider
+          const { data: videoSettings } = await supabase
+            .from("video_conference_settings")
+            .select("provider")
+            .eq("coach_id", coachProfile.id)
+            .eq("is_active", true)
+            .single();
+
+          if (videoSettings?.provider) {
+            await supabase.functions.invoke("video-create-meeting", {
+              body: { sessionId: session.id, provider: videoSettings.provider },
+            });
+            console.log("Video meeting created for online session");
+          }
+        } catch (videoError) {
+          console.error("Video meeting creation failed (non-blocking):", videoError);
+          // Non-blocking - session is still created
+        }
+      }
+
       // Step 4: If using package credits, deduct a token
       if (paymentMode === "use_credits" && activePackage) {
         const newUsage = (activePackage.sessions_used || 0) + 1;
