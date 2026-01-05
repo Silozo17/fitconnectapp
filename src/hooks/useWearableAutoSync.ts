@@ -4,8 +4,8 @@ import { useSyncAllWearables } from './useSyncAllWearables';
 import { useRegisterResumeHandler } from '@/contexts/ResumeManagerContext';
 import { BACKGROUND_DELAYS } from '@/hooks/useAppResumeManager';
 
-const AUTO_SYNC_INTERVAL_MS = 15 * 60 * 1000; // 15 minutes
-const MIN_SYNC_INTERVAL_MS = 60 * 1000; // 1 minute minimum between syncs
+const AUTO_SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+const MIN_SYNC_INTERVAL_MS = 30 * 1000; // 30 seconds minimum between syncs
 const RETRY_DELAY_MS = 5000; // 5 seconds delay before retry
 
 export const useWearableAutoSync = () => {

@@ -137,7 +137,7 @@ export function useAutoAwardClientBadges() {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       if (data?.badge) {
         triggerHaptic('success');
         toast.success(`🏆 Badge Earned: ${data.badge.name}!`, {
@@ -153,6 +153,27 @@ export function useAutoAwardClientBadges() {
             description: `Earned "${data.badge.name}" badge`,
             sourceId: data.badge.id,
           });
+        }
+
+        // Send push + in-app notification
+        try {
+          const { data: profile } = await supabase
+            .from("client_profiles")
+            .select("id")
+            .eq("user_id", user?.id)
+            .maybeSingle();
+
+          if (profile) {
+            await supabase.functions.invoke('notify-achievement-earned', {
+              body: {
+                client_badge_id: data.id,
+                client_id: profile.id,
+                badge_id: data.badge.id,
+              },
+            });
+          }
+        } catch (notifyError) {
+          console.error('[useAutoAwardClientBadges] Notification failed:', notifyError);
         }
       }
       queryClient.invalidateQueries({ queryKey: ["client-badges"] });
