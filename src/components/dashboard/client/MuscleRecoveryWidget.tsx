@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -28,22 +28,22 @@ export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
 
   if (isLoading) {
     return (
-      <Card variant="elevated" className={cn("rounded-3xl", className)}>
-        <CardHeader className="pb-3">
+      <AccentCard className={cn("rounded-2xl", className)}>
+        <div className="p-5 pb-3">
           <div className="flex items-center gap-3">
             <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
             <ShimmerSkeleton className="h-5 w-36" />
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        </div>
+        <AccentCardContent className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="space-y-2">
               <ShimmerSkeleton className="h-4 w-24" />
               <ShimmerSkeleton className="h-2 w-full" />
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </AccentCardContent>
+      </AccentCard>
     );
   }
 
@@ -55,25 +55,18 @@ export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
   }
 
   return (
-    <Card variant="elevated" className={cn("rounded-3xl overflow-hidden", className)}>
-      {/* Gradient accent */}
-      <div className="h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500" />
-
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-cyan-500/10">
-              <Activity className="w-4 h-4 text-cyan-500" />
-            </div>
-            Muscle Recovery
-          </CardTitle>
+    <AccentCard className={cn("rounded-2xl", className)}>
+      <AccentCardHeader 
+        icon={Activity} 
+        title="Muscle Recovery"
+        action={
           <Badge variant="outline" className="text-xs">
             {readyToTrain.filter(m => m.lastTrained).length} ready
           </Badge>
-        </div>
-      </CardHeader>
+        }
+      />
 
-      <CardContent className="space-y-4">
+      <AccentCardContent className="space-y-4">
         {/* Ready to train */}
         {readyToTrain.filter(m => m.lastTrained).length > 0 && (
           <div>
@@ -130,7 +123,7 @@ export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
 
         {/* Suggestion */}
         {readyToTrain.filter(m => m.lastTrained).length > 0 && (
-          <div className="p-3 rounded-xl bg-primary/5 border border-primary/10">
+          <div className="p-3 rounded-xl bg-muted/50 border border-primary/10">
             <div className="flex items-start gap-2">
               <Zap className="w-4 h-4 text-primary mt-0.5" />
               <p className="text-xs text-muted-foreground">
@@ -140,7 +133,7 @@ export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
             </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </AccentCardContent>
+    </AccentCard>
   );
 }

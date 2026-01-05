@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -84,14 +84,14 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
 
   if (isLoading) {
     return (
-      <Card variant="elevated" className={cn("rounded-3xl", className)}>
-        <CardHeader className="pb-3">
+      <AccentCard className={cn("rounded-2xl", className)}>
+        <div className="p-5 pb-3">
           <div className="flex items-center gap-3">
             <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
             <ShimmerSkeleton className="h-5 w-40" />
           </div>
-        </CardHeader>
-        <CardContent className="space-y-4">
+        </div>
+        <AccentCardContent className="space-y-4">
           <ShimmerSkeleton className="h-4 w-full" />
           <ShimmerSkeleton className="h-4 w-3/4" />
           <div className="grid grid-cols-3 gap-3">
@@ -102,8 +102,8 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </AccentCardContent>
+      </AccentCard>
     );
   }
 
@@ -120,18 +120,11 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
   };
 
   return (
-    <Card variant="elevated" className={cn("rounded-3xl overflow-hidden", className)}>
-      {/* Gradient accent */}
-      <div className="h-1 bg-gradient-to-r from-primary via-accent to-primary/50" />
-
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-primary/10">
-              <CalendarDays className="w-4 h-4 text-primary" />
-            </div>
-            Weekly Summary
-          </CardTitle>
+    <AccentCard className={cn("rounded-2xl", className)}>
+      <AccentCardHeader 
+        icon={CalendarDays} 
+        title="Weekly Summary"
+        action={
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-xs">
               <Sparkles className="w-3 h-3 mr-1" />
@@ -147,10 +140,10 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
               <RefreshCw className={cn("w-4 h-4", isRefetching && "animate-spin")} />
             </Button>
           </div>
-        </div>
-      </CardHeader>
+        }
+      />
 
-      <CardContent className="space-y-4">
+      <AccentCardContent className="space-y-4">
         {/* AI Summary */}
         <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
 
@@ -169,7 +162,7 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
 
           <div className="p-3 rounded-xl bg-muted/50 text-center">
             <div className="flex items-center justify-center gap-1 mb-1">
-              <Footprints className="w-4 h-4 text-accent" />
+              <Footprints className="w-4 h-4 text-primary" />
               <TrendIcon value={weeklyData.weekOverWeekChange.steps} />
             </div>
             <div className="text-lg font-bold text-foreground">
@@ -248,8 +241,8 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
             )}
           </div>
         )}
-      </CardContent>
-    </Card>
+      </AccentCardContent>
+    </AccentCard>
   );
 }
 

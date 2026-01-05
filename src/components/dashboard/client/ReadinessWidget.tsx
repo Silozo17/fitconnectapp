@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@/components/ui/card";
+import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { Progress } from "@/components/ui/progress";
@@ -24,8 +24,8 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
 
   if (isLoading) {
     return (
-      <Card variant="elevated" className={cn("rounded-3xl", className)}>
-        <CardContent className="p-5">
+      <AccentCard className={cn("rounded-2xl", className)}>
+        <AccentCardContent className="p-5">
           <div className="flex items-center gap-3 mb-4">
             <ShimmerSkeleton className="h-12 w-12 rounded-2xl" />
             <div className="space-y-2">
@@ -34,8 +34,8 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
             </div>
           </div>
           <ShimmerSkeleton className="h-3 w-full rounded-full" />
-        </CardContent>
-      </Card>
+        </AccentCardContent>
+      </AccentCard>
     );
   }
 
@@ -57,13 +57,13 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
   };
 
   return (
-    <Card variant="elevated" className={cn("rounded-3xl overflow-hidden", className)}>
-      <CardContent className="p-5">
+    <AccentCard className={cn("rounded-2xl", className)}>
+      <AccentCardContent className="p-5">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className={cn("p-3 rounded-2xl", levelColors[readiness.level] + "/15")}>
-              <Battery className={cn("h-5 w-5", readiness.color)} />
+            <div className="p-3 rounded-2xl bg-primary/15">
+              <Battery className="h-5 w-5 text-primary" />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
@@ -122,8 +122,8 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
             {readiness.recommendation}
           </p>
         </div>
-      </CardContent>
-    </Card>
+      </AccentCardContent>
+    </AccentCard>
   );
 }
 

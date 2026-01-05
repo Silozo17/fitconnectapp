@@ -1,10 +1,10 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import { usePersonalRecords } from "@/hooks/usePersonalRecords";
 import { Trophy, TrendingUp, Dumbbell, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { format, isThisWeek } from "date-fns";
+import { isThisWeek } from "date-fns";
 
 interface PersonalRecordsWidgetProps {
   className?: string;
@@ -15,22 +15,22 @@ export function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps)
 
   if (isLoading) {
     return (
-      <Card variant="elevated" className={cn("rounded-3xl", className)}>
-        <CardHeader className="pb-3">
+      <AccentCard className={cn("rounded-2xl", className)}>
+        <div className="p-5 pb-3">
           <div className="flex items-center gap-3">
             <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
             <ShimmerSkeleton className="h-5 w-32" />
           </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
+        </div>
+        <AccentCardContent className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center justify-between">
               <ShimmerSkeleton className="h-4 w-28" />
               <ShimmerSkeleton className="h-4 w-16" />
             </div>
           ))}
-        </CardContent>
-      </Card>
+        </AccentCardContent>
+      </AccentCard>
     );
   }
 
@@ -41,28 +41,21 @@ export function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps)
   const topRecords = records.slice(0, 5);
 
   return (
-    <Card variant="elevated" className={cn("rounded-3xl overflow-hidden", className)}>
-      {/* Gradient accent */}
-      <div className="h-1 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-500" />
-
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-amber-500/10">
-              <Trophy className="w-4 h-4 text-amber-500" />
-            </div>
-            Personal Records
-          </CardTitle>
-          {recentPRs.length > 0 && (
+    <AccentCard className={cn("rounded-2xl", className)}>
+      <AccentCardHeader 
+        icon={Trophy} 
+        title="Personal Records"
+        action={
+          recentPRs.length > 0 ? (
             <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/20">
               <Sparkles className="w-3 h-3 mr-1" />
               {recentPRs.length} new PR{recentPRs.length > 1 ? 's' : ''}!
             </Badge>
-          )}
-        </div>
-      </CardHeader>
+          ) : undefined
+        }
+      />
 
-      <CardContent className="space-y-3">
+      <AccentCardContent className="space-y-3">
         {topRecords.map((pr, index) => {
           const isRecent = isThisWeek(new Date(pr.achievedAt));
           
@@ -77,9 +70,9 @@ export function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps)
               <div className="flex items-center gap-3">
                 <div className={cn(
                   "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold",
-                  index === 0 ? "bg-amber-500/20 text-amber-500" :
+                  index === 0 ? "bg-primary/20 text-primary" :
                   index === 1 ? "bg-zinc-400/20 text-zinc-400" :
-                  index === 2 ? "bg-orange-600/20 text-orange-600" :
+                  index === 2 ? "bg-primary/10 text-primary/70" :
                   "bg-muted text-muted-foreground"
                 )}>
                   {index + 1}
@@ -114,7 +107,7 @@ export function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps)
             +{records.length - 5} more records
           </p>
         )}
-      </CardContent>
-    </Card>
+      </AccentCardContent>
+    </AccentCard>
   );
 }
