@@ -171,55 +171,43 @@ const ClientOverview = () => {
       )}
 
       {/* Section: Today's Health */}
-      <div className="mb-16">
-        <Suspense fallback={<HealthWidgetSkeleton />}>
-          <HealthDataWidget compact className="mb-6" />
-        </Suspense>
-        <GoalSuggestionBanner className="mb-6" />
-      </div>
+      <Suspense fallback={<HealthWidgetSkeleton />}>
+        <HealthDataWidget compact className="mb-3" />
+      </Suspense>
+      <GoalSuggestionBanner className="mb-16" />
 
       {/* Section: Daily Readiness */}
-      <div className="mb-16">
-        <ReadinessScoreCard className="mb-6" />
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <ReadinessComponentCard type="sleep" />
-          <ReadinessComponentCard type="recovery" />
-          <ReadinessComponentCard type="activity" />
-        </div>
-        <WearableTrendCard />
+      <ReadinessScoreCard className="mb-3" />
+      <div className="grid grid-cols-3 gap-3 mb-16">
+        <ReadinessComponentCard type="sleep" />
+        <ReadinessComponentCard type="recovery" />
+        <ReadinessComponentCard type="activity" />
       </div>
 
-      {/* Section: Insights */}
-      <div className="mb-16">
-        <DailyTipWidget />
-      </div>
+      {/* Section: Insights (Wearable Trends) */}
+      <WearableTrendCard className="mb-16" />
+
+      {/* Section: Tip of the Day */}
+      <DailyTipWidget className="mb-16" />
 
       {/* Section: Training Stats */}
-      <div className="mb-16">
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
-          <PersonalRecordsWidget />
-          <TrainingStreakWidget />
-        </div>
-        <div className="grid md:grid-cols-2 gap-4">
-          <MuscleRecoveryWidget />
-          <WeeklyVolumeWidget />
-        </div>
+      <div className="grid md:grid-cols-2 gap-3 mb-3">
+        <PersonalRecordsWidget />
+        <TrainingStreakWidget />
+      </div>
+      <div className="grid md:grid-cols-2 gap-3 mb-16">
+        <MuscleRecoveryWidget />
+        <WeeklyVolumeWidget />
       </div>
 
       {/* Section: Weekly Summary */}
-      <div className="mb-16">
-        <WeeklySummaryCard />
-      </div>
+      <WeeklySummaryCard className="mb-16" />
 
       {/* Section: Monthly Review */}
-      <div className="mb-16">
-        <MonthlyReviewCard />
-      </div>
+      <MonthlyReviewCard className="mb-16" />
 
       {/* Section: Friend Requests */}
-      <div className="mb-16">
-        <UserConnectionRequests />
-      </div>
+      <UserConnectionRequests className="mb-16" />
 
       {/* Section: Quick Actions */}
       <div className="mb-16">
