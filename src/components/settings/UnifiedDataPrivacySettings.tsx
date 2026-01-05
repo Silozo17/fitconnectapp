@@ -23,6 +23,8 @@ import {
   MapPin,
   Timer,
   Scale,
+  Bike,
+  Waves,
   LucideIcon,
 } from "lucide-react";
 import {
@@ -47,6 +49,9 @@ const DATA_TYPE_ICONS: Record<DataType, LucideIcon> = {
   sleep: Moon,
   calories: Flame,
   distance: MapPin,
+  distance_walking: Footprints,
+  distance_cycling: Bike,
+  distance_swimming: Waves,
   active_minutes: Timer,
   weight: Scale,
 };
@@ -85,7 +90,19 @@ const DATA_TYPE_INFO: Record<DataType, { label: string; description: string }> =
   },
   distance: {
     label: "Distance",
-    description: "Distance traveled",
+    description: "Total distance traveled",
+  },
+  distance_walking: {
+    label: "Walking Distance",
+    description: "Distance from walking/running",
+  },
+  distance_cycling: {
+    label: "Cycling Distance",
+    description: "Distance from cycling",
+  },
+  distance_swimming: {
+    label: "Swimming Distance",
+    description: "Distance from swimming",
   },
   active_minutes: {
     label: "Active Minutes",
