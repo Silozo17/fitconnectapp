@@ -10,7 +10,6 @@ interface UseSectionHeaderObserverResult {
   activeSection: ActiveSection | null;
   greetingOpacity: number;
   sectionOpacity: number;
-  showSection: boolean;
   containerRef: React.RefObject<HTMLDivElement>;
 }
 
@@ -18,7 +17,6 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
   const [activeSection, setActiveSection] = useState<ActiveSection | null>(null);
   const [greetingOpacity, setGreetingOpacity] = useState(1);
   const [sectionOpacity, setSectionOpacity] = useState(0);
-  const [showSection, setShowSection] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const activeSectionRef = useRef<string | null>(null);
 
@@ -69,7 +67,6 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
       if (visibleSentinels.size === 0) {
         setActiveSection(null);
         setSectionOpacity(0);
-        setShowSection(false);
         activeSectionRef.current = null;
         return;
       }
@@ -100,8 +97,6 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
           setActiveSection({ id, title, description });
         }
 
-        setShowSection(true);
-
         // Calculate section header opacity
         const nextElement = element.nextElementSibling;
         if (nextElement) {
@@ -123,7 +118,6 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
         }
       } else {
         // No active section from the tracked ones
-        setShowSection(false);
         setSectionOpacity(0);
         activeSectionRef.current = null;
       }
@@ -171,7 +165,7 @@ export function useSectionHeaderObserver(): UseSectionHeaderObserverResult {
     };
   }, []);
 
-  return { activeSection, greetingOpacity, sectionOpacity, showSection, containerRef };
+  return { activeSection, greetingOpacity, sectionOpacity, containerRef };
 }
 
 export default useSectionHeaderObserver;
