@@ -165,12 +165,13 @@ const Coaches = () => {
                       <SlidersHorizontal className="h-5 w-5" />
                     </Button>
                   </SheetTrigger>
-                  <SheetContent side="left" className="w-[300px] sm:w-[350px] p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
-                    <SheetHeader className="p-4 border-b border-border">
+                  <SheetContent side="left" className="w-[300px] sm:w-[350px] flex flex-col p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
+                    <SheetHeader className="p-4 border-b border-border shrink-0">
                       <SheetTitle>{t('filters.title')}</SheetTitle>
                     </SheetHeader>
-                    <div className="p-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+                    <div className="flex-1 overflow-y-auto p-4">
                       <CoachFilters
+                        variant="sheet"
                         selectedTypes={selectedTypes}
                         onTypesChange={setSelectedTypes}
                         priceRange={priceRange}
