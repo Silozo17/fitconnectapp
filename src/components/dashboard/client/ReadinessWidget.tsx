@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { Progress } from "@/components/ui/progress";
@@ -24,31 +23,22 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
 
   if (isLoading) {
     return (
-      <AccentCard className={cn("rounded-2xl", className)}>
-        <AccentCardContent className="p-5">
-          <div className="flex items-center gap-3 mb-4">
-            <ShimmerSkeleton className="h-12 w-12 rounded-2xl" />
-            <div className="space-y-2">
-              <ShimmerSkeleton className="h-5 w-32" />
-              <ShimmerSkeleton className="h-3 w-24" />
-            </div>
+      <div className={cn("relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+        <div className="flex items-center gap-3 mb-4">
+          <ShimmerSkeleton className="h-12 w-12 rounded-2xl" />
+          <div className="space-y-2">
+            <ShimmerSkeleton className="h-5 w-32" />
+            <ShimmerSkeleton className="h-3 w-24" />
           </div>
-          <ShimmerSkeleton className="h-3 w-full rounded-full" />
-        </AccentCardContent>
-      </AccentCard>
+        </div>
+        <ShimmerSkeleton className="h-3 w-full rounded-full" />
+      </div>
     );
   }
 
   if (!hasData || !readiness) {
     return null; // Don't show if no wearable data
   }
-
-  const levelColors = {
-    optimal: "bg-green-500",
-    good: "bg-lime-500",
-    moderate: "bg-amber-500",
-    low: "bg-red-500",
-  };
 
   const componentIcons = {
     sleep: Moon,
@@ -57,74 +47,74 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
   };
 
   return (
-    <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardContent className="p-5">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-primary/15">
-              <Battery className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="font-semibold text-foreground">
-                  {t("client.readiness.title", "Today's Readiness")}
-                </h3>
-                <InfoTooltip explanation={readinessExplanation} side="top" />
-              </div>
-              <p className="text-sm text-muted-foreground capitalize">
-                {readiness.level} readiness
-              </p>
-            </div>
+    <div className={cn("relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent rounded-t-2xl" />
+
+      {/* Score display */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-3 rounded-2xl bg-primary/15">
+            <Battery className="h-5 w-5 text-primary" />
           </div>
-          <div className={cn("text-3xl font-bold", readiness.color)}>
-            {readiness.score}
+          <div className="flex items-center gap-1.5">
+            <InfoTooltip explanation={readinessExplanation} side="top" />
           </div>
         </div>
-
-        {/* Progress bar */}
-        <div className="mb-4">
-          <Progress
-            value={readiness.score}
-            className="h-2.5"
-          />
+        <div className={cn("text-3xl font-bold", readiness.color)}>
+          {readiness.score}
         </div>
+      </div>
 
-        {/* Component breakdown */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          {(Object.entries(readiness.components) as [keyof typeof componentIcons, typeof readiness.components.sleep][]).map(
-            ([key, component]) => {
-              const Icon = componentIcons[key];
-              return (
-                <div
-                  key={key}
-                  className="bg-muted/50 rounded-xl p-3 text-center"
-                >
-                  <Icon className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
-                  <div className="text-xs text-muted-foreground capitalize mb-0.5">
-                    {key}
-                  </div>
-                  <div className="font-semibold text-foreground text-sm">
-                    {component.value !== null
-                      ? `${component.value}${component.unit}`
-                      : "—"}
-                  </div>
+      {/* Progress bar */}
+      <div className="mb-4">
+        <Progress
+          value={readiness.score}
+          className="h-2.5"
+        />
+      </div>
+
+      {/* Component breakdown */}
+      <div className="grid grid-cols-3 gap-3 mb-4">
+        {(Object.entries(readiness.components) as [keyof typeof componentIcons, typeof readiness.components.sleep][]).map(
+          ([key, component]) => {
+            const Icon = componentIcons[key];
+            return (
+              <div
+                key={key}
+                className="bg-muted/50 rounded-xl p-3 text-center"
+              >
+                <Icon className="h-4 w-4 text-muted-foreground mx-auto mb-1" />
+                <div className="text-xs text-muted-foreground capitalize mb-0.5">
+                  {key}
                 </div>
-              );
-            }
-          )}
-        </div>
+                <div className="font-semibold text-foreground text-sm">
+                  {component.value !== null
+                    ? `${component.value}${component.unit}`
+                    : "—"}
+                </div>
+              </div>
+            );
+          }
+        )}
+      </div>
 
-        {/* Recommendation */}
-        <div className="flex items-start gap-2 bg-muted/30 rounded-xl p-3">
-          <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-          <p className="text-sm text-muted-foreground">
-            {readiness.recommendation}
-          </p>
-        </div>
-      </AccentCardContent>
-    </AccentCard>
+      {/* Recommendation */}
+      <div className="flex items-start gap-2 bg-muted/30 rounded-xl p-3">
+        <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+        <p className="text-sm text-muted-foreground">
+          {readiness.recommendation}
+        </p>
+      </div>
+    </div>
   );
+}
+
+// Export readiness level for use in section description
+export function useReadinessLevel() {
+  const { readiness, hasData } = useReadinessScore();
+  if (!hasData || !readiness) return null;
+  return `${readiness.level.charAt(0).toUpperCase() + readiness.level.slice(1)} Readiness`;
 }
 
 export default ReadinessWidget;
