@@ -1,5 +1,6 @@
 import { useEffect, useRef, ReactNode, memo } from "react";
 import { useScrollSectionContext } from "@/contexts/ScrollSectionContext";
+import { useScrollSectionObserver } from "@/hooks/useScrollSectionObserver";
 
 interface ScrollSectionProps {
   id: string;
@@ -11,9 +12,11 @@ interface ScrollSectionProps {
 
 const ScrollSection = memo(({ id, title, description, children, className }: ScrollSectionProps) => {
   const sectionRef = useRef<HTMLElement>(null);
-  const { registerSection, unregisterSection, observeSection, unobserveSection } = useScrollSectionContext();
+  const { registerSection, unregisterSection } = useScrollSectionContext();
+  const { observeSection, unobserveSection } = useScrollSectionObserver();
 
   useEffect(() => {
+    // Register section with context
     registerSection({
       id,
       title,
@@ -21,15 +24,16 @@ const ScrollSection = memo(({ id, title, description, children, className }: Scr
       ref: sectionRef,
     });
 
-    const element = sectionRef.current;
-    if (element) {
-      observeSection(element);
+    // Start observing this section
+    if (sectionRef.current) {
+      observeSection(sectionRef.current);
     }
 
     return () => {
+      // Cleanup: unregister and stop observing
       unregisterSection(id);
-      if (element) {
-        unobserveSection(element);
+      if (sectionRef.current) {
+        unobserveSection(sectionRef.current);
       }
     };
   }, [id, title, description, registerSection, unregisterSection, observeSection, unobserveSection]);

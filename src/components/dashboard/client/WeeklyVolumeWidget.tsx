@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
-import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
+import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import { useTrainingLogs } from "@/hooks/useTrainingLogs";
-import { TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Weight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { startOfWeek, subWeeks, isWithinInterval, endOfWeek } from "date-fns";
 
@@ -18,7 +18,7 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
     if (!logs || logs.length === 0) return null;
 
     const now = new Date();
-    const thisWeekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const thisWeekStart = startOfWeek(now, { weekStartsOn: 1 }); // Monday
     const thisWeekEnd = endOfWeek(now, { weekStartsOn: 1 });
     const lastWeekStart = subWeeks(thisWeekStart, 1);
     const lastWeekEnd = subWeeks(thisWeekEnd, 1);
@@ -54,6 +54,7 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
       }
     }
 
+    // Calculate change percentage
     let changePercent = 0;
     let trend: 'up' | 'down' | 'same' = 'same';
     
@@ -76,7 +77,13 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
   if (isLoading) {
     return (
       <AccentCard className={cn("rounded-2xl", className)}>
-        <AccentCardContent className="p-5">
+        <div className="p-5 pb-3">
+          <div className="flex items-center gap-3">
+            <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
+            <ShimmerSkeleton className="h-5 w-32" />
+          </div>
+        </div>
+        <AccentCardContent>
           <ShimmerSkeleton className="h-12 w-32" />
         </AccentCardContent>
       </AccentCard>
@@ -89,6 +96,7 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
 
   const { thisWeekVolume, changePercent, trend, thisWeekSets, thisWeekReps } = volumeData;
 
+  // Format volume for display
   const formatVolume = (vol: number) => {
     if (vol >= 1000000) return `${(vol / 1000000).toFixed(1)}M`;
     if (vol >= 1000) return `${(vol / 1000).toFixed(1)}k`;
@@ -100,10 +108,11 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
 
   return (
     <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardContent className="p-5 space-y-4">
-        {/* Trend badge */}
-        {trend !== 'same' && (
-          <div className="flex justify-end">
+      <AccentCardHeader 
+        icon={Weight} 
+        title="Weekly Volume"
+        action={
+          trend !== 'same' ? (
             <Badge 
               variant="outline" 
               className={cn(
@@ -115,9 +124,11 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
               <TrendIcon className="w-3 h-3 mr-1" />
               {Math.abs(changePercent)}%
             </Badge>
-          </div>
-        )}
+          ) : undefined
+        }
+      />
 
+      <AccentCardContent className="space-y-4">
         {/* Main volume display */}
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-bold text-foreground font-display">

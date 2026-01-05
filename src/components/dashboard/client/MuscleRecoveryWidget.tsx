@@ -1,9 +1,9 @@
-import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
+import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import { useMuscleRecovery } from "@/hooks/useMuscleRecovery";
-import { CheckCircle2, Clock, Zap } from "lucide-react";
+import { Activity, CheckCircle2, Clock, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface MuscleRecoveryWidgetProps {
@@ -29,7 +29,13 @@ export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
   if (isLoading) {
     return (
       <AccentCard className={cn("rounded-2xl", className)}>
-        <AccentCardContent className="p-5 space-y-3">
+        <div className="p-5 pb-3">
+          <div className="flex items-center gap-3">
+            <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
+            <ShimmerSkeleton className="h-5 w-36" />
+          </div>
+        </div>
+        <AccentCardContent className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="space-y-2">
               <ShimmerSkeleton className="h-4 w-24" />
@@ -41,6 +47,7 @@ export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
     );
   }
 
+  // Only show muscles that have been trained
   const trainedMuscles = muscleStatus.filter(m => m.lastTrained !== null);
   
   if (trainedMuscles.length === 0) {
@@ -49,14 +56,17 @@ export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
 
   return (
     <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardContent className="p-5 space-y-4">
-        {/* Ready count badge */}
-        <div className="flex justify-end">
+      <AccentCardHeader 
+        icon={Activity} 
+        title="Muscle Recovery"
+        action={
           <Badge variant="outline" className="text-xs">
             {readyToTrain.filter(m => m.lastTrained).length} ready
           </Badge>
-        </div>
+        }
+      />
 
+      <AccentCardContent className="space-y-4">
         {/* Ready to train */}
         {readyToTrain.filter(m => m.lastTrained).length > 0 && (
           <div>

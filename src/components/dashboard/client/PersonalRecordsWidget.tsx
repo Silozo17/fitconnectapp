@@ -1,8 +1,8 @@
-import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
+import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import { usePersonalRecords } from "@/hooks/usePersonalRecords";
-import { TrendingUp, Dumbbell, Sparkles } from "lucide-react";
+import { Trophy, TrendingUp, Dumbbell, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isThisWeek } from "date-fns";
 
@@ -16,7 +16,13 @@ export function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps)
   if (isLoading) {
     return (
       <AccentCard className={cn("rounded-2xl", className)}>
-        <AccentCardContent className="p-5 space-y-3">
+        <div className="p-5 pb-3">
+          <div className="flex items-center gap-3">
+            <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
+            <ShimmerSkeleton className="h-5 w-32" />
+          </div>
+        </div>
+        <AccentCardContent className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center justify-between">
               <ShimmerSkeleton className="h-4 w-28" />
@@ -36,17 +42,20 @@ export function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps)
 
   return (
     <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardContent className="p-5 space-y-3">
-        {/* New PRs badge */}
-        {recentPRs.length > 0 && (
-          <div className="flex justify-end">
+      <AccentCardHeader 
+        icon={Trophy} 
+        title="Personal Records"
+        action={
+          recentPRs.length > 0 ? (
             <Badge variant="outline" className="text-xs bg-success/10 text-success border-success/20">
               <Sparkles className="w-3 h-3 mr-1" />
               {recentPRs.length} new PR{recentPRs.length > 1 ? 's' : ''}!
             </Badge>
-          </div>
-        )}
+          ) : undefined
+        }
+      />
 
+      <AccentCardContent className="space-y-3">
         {topRecords.map((pr, index) => {
           const isRecent = isThisWeek(new Date(pr.achievedAt));
           
