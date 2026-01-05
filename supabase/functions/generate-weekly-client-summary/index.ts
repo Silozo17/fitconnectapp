@@ -150,14 +150,14 @@ Deno.serve(async (req) => {
       .from("habit_logs")
       .select("completed_count, client_habits!inner(client_id, target_count)")
       .eq("client_habits.client_id", clientProfile.id)
-      .gte("log_date", weekStartStr);
+      .gte("logged_at", weekStartStr);
 
     const { data: prevWeekHabits } = await supabase
       .from("habit_logs")
       .select("completed_count, client_habits!inner(client_id, target_count)")
       .eq("client_habits.client_id", clientProfile.id)
-      .gte("log_date", prevWeekStartStr)
-      .lt("log_date", weekStartStr);
+      .gte("logged_at", prevWeekStartStr)
+      .lt("logged_at", weekStartStr);
 
     // Calculate habit completion
     const thisWeekCompleted = thisWeekHabits?.reduce((sum, log) => sum + (log.completed_count || 0), 0) || 0;
