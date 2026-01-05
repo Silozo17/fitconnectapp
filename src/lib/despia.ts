@@ -205,310 +205,133 @@ export const isBioAuthAvailable = (): boolean => {
 // ============================================================================
 
 /**
- * Timeout for HealthKit operations in milliseconds
- * Despia native bridge may fail silently - this ensures we don't wait forever
- */
-const HEALTHKIT_TIMEOUT_MS = 3000;
-
-/**
  * HealthKit connection result
  */
 export interface HealthKitConnectionResult {
   success: boolean;
   error?: string;
   data?: unknown;
-  timedOut?: boolean; // Indicates sync timed out (Despia limitation)
-  dataPoints?: number; // Number of data points received
+  timedOut?: boolean;
+  dataPoints?: number;
 }
 
 /**
- * Check Apple Health connection by attempting to read a small sample of data.
- * This will trigger the iOS permission dialog if not yet authorized.
+ * Supported HealthKit QUANTITY type identifiers.
+ * Per Despia docs, multiple types can be comma-separated in a single call.
+ */
+export const SUPPORTED_HEALTHKIT_TYPES = [
+  'HKQuantityTypeIdentifierStepCount',
+  'HKQuantityTypeIdentifierActiveEnergyBurned',
+  'HKQuantityTypeIdentifierDistanceWalkingRunning',
+] as const;
+
+/**
+ * Check Apple Health connection by attempting to read step data.
+ * Triggers iOS permission dialog if not yet authorized.
  * 
- * According to Despia docs, the correct pattern is:
+ * Uses exact Despia SDK format:
  * await despia('healthkit://read?types=...&days=...', ['healthkitResponse'])
- * 
- * The SDK automatically handles permission requests on first read attempt.
- * 
- * @returns Object with success status, error message, and any health data
  */
 export const checkHealthKitConnection = async (): Promise<HealthKitConnectionResult> => {
   if (!isDespia()) {
-    console.warn('[Despia HealthKit] Attempted outside of Despia environment');
     return { success: false, error: 'Not running in native app' };
   }
 
   if (!isDespiaIOS()) {
-    console.warn('[Despia HealthKit] HealthKit is only available on iOS');
     return { success: false, error: 'HealthKit is only available on iOS' };
   }
 
-  // Pre-connection delay to let native state settle (helps after permission changes)
-  await new Promise(resolve => setTimeout(resolve, 100));
-  
-  const checkType = 'HKQuantityTypeIdentifierStepCount';
-  const CONNECTION_TIMEOUT_MS = 2000;
-  const MAX_RETRIES = 1;
-  let retryCount = 0;
-  
-  while (retryCount <= MAX_RETRIES) {
-    try {
-      /**
-       * REQUEST ONLY STEPS FOR INITIAL PERMISSION CHECK
-       * This triggers the iOS permission dialog. We use only Steps to avoid
-       * the Despia SDK bug with multi-type HKStatisticsCollectionQuery.
-       * The full sync will fetch other types individually.
-       */
-      console.log(`[Despia HealthKit] Checking connection with ${checkType} (attempt ${retryCount + 1})...`);
-      
-      // Create a timeout promise (shorter timeout for connection check)
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('HEALTHKIT_TIMEOUT')), CONNECTION_TIMEOUT_MS);
-      });
-      
-      // Race between actual call and timeout
-      const response = await Promise.race([
-        despia(
-          `healthkit://read?types=${checkType}&days=1`,
-          ['healthkitResponse']
-        ),
-        timeoutPromise
-      ]);
-    
-    console.log('[Despia HealthKit] Response received:', JSON.stringify(response, null, 2));
-    
-    // Strictly check if we got actual data back
-    if (response && typeof response === 'object') {
-      const healthData = (response as Record<string, unknown>).healthkitResponse;
-      
-      // Check if healthkitResponse exists and has actual data
-      if (healthData !== undefined && healthData !== null) {
-        // If it's an array, check it's not empty
-        if (Array.isArray(healthData)) {
-          if (healthData.length > 0) {
-            console.log('[Despia HealthKit] Successfully read health data:', healthData);
-            return { success: true, data: healthData };
-          } else {
-            // Empty array means permission granted but no data recorded yet
-            console.log('[Despia HealthKit] Permission granted, but no step data recorded yet');
-            return { success: true, data: [] };
-          }
-        }
-        
-        // If it's an object with data
-        if (typeof healthData === 'object' && Object.keys(healthData as object).length > 0) {
-          console.log('[Despia HealthKit] Successfully read health data object:', healthData);
-          return { success: true, data: healthData };
-        }
-        
-        // Data exists but might be empty object
-        console.log('[Despia HealthKit] Permission granted (empty data)');
-        return { success: true, data: healthData };
-      }
+  console.log('[Despia HealthKit] Checking connection...');
+
+  try {
+    // Request just steps for 1 day to trigger permission dialog
+    const response = await despia(
+      'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=1',
+      ['healthkitResponse']
+    );
+
+    console.log('[Despia HealthKit] Connection check response:', JSON.stringify(response, null, 2));
+
+    const healthkitResponse = (response as Record<string, unknown>)?.healthkitResponse;
+
+    // If we got any response (even empty), permissions were granted
+    if (healthkitResponse !== undefined) {
+      return { success: true, data: healthkitResponse };
     }
-    
-    // If response is null/undefined, the SDK returned nothing
-    console.warn('[Despia HealthKit] No response received');
-    return { 
-      success: false, 
-      error: 'NO_RESPONSE',
-      timedOut: false
-    };
-    
-    } catch (e) {
-      // Handle timeout - retry if we have retries left
-      if (e instanceof Error && e.message === 'HEALTHKIT_TIMEOUT') {
-        if (retryCount < MAX_RETRIES) {
-          console.log(`[Despia HealthKit] Attempt ${retryCount + 1} timed out, retrying...`);
-          await new Promise(resolve => setTimeout(resolve, 500));
-          retryCount++;
-          continue;
-        }
-        console.log('[Despia HealthKit] Connection check timed out after all retries');
-        return { 
-          success: false, 
-          error: 'NO_RESPONSE',
-          timedOut: true
-        };
-      }
-      
-      // Other errors - retry once
-      if (retryCount < MAX_RETRIES) {
-        console.log(`[Despia HealthKit] Attempt ${retryCount + 1} failed, retrying...`, e);
-        await new Promise(resolve => setTimeout(resolve, 500));
-        retryCount++;
-        continue;
-      }
-      throw e;
-    }
+
+    // Undefined means no permission
+    return { success: false, error: 'NO_RESPONSE' };
+  } catch (e) {
+    console.error('[Despia HealthKit] Connection check failed:', e);
+    return { success: false, error: e instanceof Error ? e.message : String(e) };
   }
-  
-  // If we exhausted retries without success
-  console.error('[Despia HealthKit] All connection attempts failed');
-  return { success: false, error: 'Failed to connect to Apple Health after retries' };
 };
 
 /**
- * Supported HealthKit QUANTITY type identifiers for multi-metric sync.
+ * Sync health data from Apple Health via native HealthKit.
  * 
- * IMPORTANT: Only CUMULATIVE types are supported because Despia's 
- * HKStatisticsCollectionQuery uses .cumulativeSum internally.
+ * Uses exact Despia SDK format with all types in ONE comma-separated call:
+ * await despia('healthkit://read?types=Type1,Type2&days=7', ['healthkitResponse'])
  * 
- * EXCLUDED TYPES:
- * - HKQuantityTypeIdentifierHeartRate: DISCRETE type requiring .discreteAverage,
- *   causes iOS crash when mixed with cumulative types in the same query.
- * - HKCategoryTypeIdentifierSleepAnalysis: CATEGORY type requiring HKSampleQuery,
- *   not supported by Despia's HKStatisticsCollectionQuery.
- * 
- * Heart Rate and Sleep must be entered manually via ManualHealthDataModal.
- * Contact Despia support to request support for discrete/category types.
- */
-export const SUPPORTED_HEALTHKIT_TYPES = [
-  'HKQuantityTypeIdentifierStepCount',              // steps (cumulative)
-  'HKQuantityTypeIdentifierActiveEnergyBurned',     // calories (cumulative)
-  'HKQuantityTypeIdentifierDistanceWalkingRunning', // distance (cumulative)
-  // EXCLUDED: AppleExerciseTime (active_minutes) - Despia SDK crashes even with single-type query
-  // EXCLUDED: HeartRate - discrete type, causes crash with HKStatisticsCollectionQuery
-] as const;
-
-/**
- * Sync health data from Apple Health via native HealthKit
- * 
- * SEQUENTIAL SINGLE-TYPE QUERIES: Due to a bug in Despia's SDK where
- * multi-type HKStatisticsCollectionQuery causes native crashes, we now
- * sync each type individually in sequence. This is slower but crash-proof.
+ * Response format per Despia docs:
+ * { healthkitResponse: { HKQuantityTypeIdentifierStepCount: [...], ... } }
  * 
  * @param days Number of days of data to sync (default: 7)
- * @returns Object with success status and synced data
  */
 export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConnectionResult> => {
   if (!isDespia() || !isDespiaIOS()) {
     return { success: false, error: 'HealthKit is only available on iOS native app' };
   }
 
-  console.log(`[Despia HealthKit] Starting sequential sync of ${days} days for ${SUPPORTED_HEALTHKIT_TYPES.length} types...`);
-  
-  // Aggregate all data from individual type syncs
-  const allData: Record<string, unknown> = {};
-  const failedTypes: string[] = [];
-  let totalDataPoints = 0;
-  
-  // Sync each type individually to avoid Despia SDK multi-type crash
-  for (const type of SUPPORTED_HEALTHKIT_TYPES) {
-    try {
-      console.log(`[Despia HealthKit] Syncing ${type}...`);
-      
-      // Create a timeout promise for this individual call
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('HEALTHKIT_TIMEOUT')), HEALTHKIT_TIMEOUT_MS);
-      });
-      
-      // Add cache-busting timestamp
-      const timestamp = Date.now();
-      
-      // Race between actual call and timeout
-      const response = await Promise.race([
-        despia(
-          `healthkit://read?types=${type}&days=${days}&t=${timestamp}`,
-          ['healthkitResponse']
-        ),
-        timeoutPromise
-      ]);
-      
-      // DEEP DEBUG: Log raw response structure
-      console.log(`[Despia HealthKit] ${type} RAW response:`, JSON.stringify(response, null, 2));
-      
-      if (response && typeof response === 'object') {
-        let healthkitData = (response as Record<string, unknown>).healthkitResponse;
-        
-        console.log(`[Despia HealthKit] ${type} healthkitResponse type:`, typeof healthkitData);
-        console.log(`[Despia HealthKit] ${type} healthkitResponse:`, JSON.stringify(healthkitData, null, 2));
-        
-        // FIX: Handle double-nested healthkitResponse (Despia SDK quirk)
-        if (healthkitData && typeof healthkitData === 'object' && 'healthkitResponse' in (healthkitData as object)) {
-          console.log(`[Despia HealthKit] ${type} Unwrapping double-nested healthkitResponse`);
-          healthkitData = (healthkitData as Record<string, unknown>).healthkitResponse;
-        }
-        
-        // FIX: If healthkitData is directly an array, it's the type data
-        if (Array.isArray(healthkitData) && healthkitData.length > 0) {
-          console.log(`[Despia HealthKit] ${type} Response is array with ${healthkitData.length} items`);
-          allData[type] = healthkitData;
-          totalDataPoints += healthkitData.length;
-          console.log(`[Despia HealthKit] ✓ ${type}: ${healthkitData.length} data points (array format)`);
-        } else if (healthkitData && typeof healthkitData === 'object' && !Array.isArray(healthkitData)) {
-          // Standard object format: { "HKQuantityTypeIdentifier...": [...] }
-          const hkObj = healthkitData as Record<string, unknown>;
-          const typeData = hkObj[type];
-          
-          // Also try without the full type identifier (some SDKs shorten it)
-          const shortType = type.replace('HKQuantityTypeIdentifier', '');
-          const shortTypeData = hkObj[shortType];
-          
-          // Log all keys in the response object
-          console.log(`[Despia HealthKit] ${type} Response keys:`, Object.keys(hkObj));
-          
-          if (typeData && Array.isArray(typeData) && typeData.length > 0) {
-            allData[type] = typeData;
-            totalDataPoints += typeData.length;
-            console.log(`[Despia HealthKit] ✓ ${type}: ${typeData.length} data points`);
-          } else if (shortTypeData && Array.isArray(shortTypeData) && shortTypeData.length > 0) {
-            allData[type] = shortTypeData;
-            totalDataPoints += shortTypeData.length;
-            console.log(`[Despia HealthKit] ✓ ${type}: ${shortTypeData.length} data points (short key)`);
-          } else {
-            // Try first key in the object as fallback
-            const firstKey = Object.keys(hkObj)[0];
-            const firstData = firstKey ? hkObj[firstKey] : null;
-            if (firstData && Array.isArray(firstData) && firstData.length > 0) {
-              allData[type] = firstData;
-              totalDataPoints += firstData.length;
-              console.log(`[Despia HealthKit] ✓ ${type}: ${firstData.length} data points (first key: ${firstKey})`);
-            } else {
-              console.log(`[Despia HealthKit] ✓ ${type}: no data (empty or no matching key)`);
-            }
-          }
-        } else {
-          console.log(`[Despia HealthKit] ✓ ${type}: no data (null/empty response)`);
-        }
-      } else {
-        console.log(`[Despia HealthKit] ${type}: Invalid response format`);
-      }
-      
-      // 200ms delay between calls to prevent native bridge flooding
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-    } catch (e) {
-      const errorMsg = e instanceof Error ? e.message : String(e);
-      console.warn(`[Despia HealthKit] ✗ ${type} failed:`, errorMsg);
-      failedTypes.push(type);
-      // Continue with other types even if one fails
+  console.log(`[Despia HealthKit] Starting sync of ${days} days...`);
+
+  // Request ALL supported types in ONE call (per Despia docs)
+  const types = SUPPORTED_HEALTHKIT_TYPES.join(',');
+
+  try {
+    // Use exact Despia SDK format - NO custom timeout racing, NO cache-buster
+    // SDK handles timeout internally
+    const response = await despia(
+      `healthkit://read?types=${types}&days=${days}`,
+      ['healthkitResponse']
+    );
+
+    console.log('[Despia HealthKit] Response:', JSON.stringify(response, null, 2));
+
+    // Response format per Despia docs:
+    // { healthkitResponse: { HKQuantityTypeIdentifierStepCount: [...], ... } }
+    const healthkitResponse = (response as Record<string, unknown>)?.healthkitResponse;
+
+    if (!healthkitResponse) {
+      console.log('[Despia HealthKit] No healthkitResponse in response');
+      return { success: true, data: null, dataPoints: 0 };
     }
-  }
-  
-  console.log(`[Despia HealthKit] Sequential sync complete. ${Object.keys(allData).length}/${SUPPORTED_HEALTHKIT_TYPES.length} types, ${totalDataPoints} total data points`);
-  
-  if (failedTypes.length > 0) {
-    console.warn(`[Despia HealthKit] Failed types: ${failedTypes.join(', ')}`);
-  }
-  
-  // Return success if we got at least some data
-  if (Object.keys(allData).length > 0 || failedTypes.length < SUPPORTED_HEALTHKIT_TYPES.length) {
-    return { 
-      success: true, 
-      data: Object.keys(allData).length > 0 ? allData : null, 
-      timedOut: false,
-      dataPoints: totalDataPoints
+
+    // Count data points
+    let totalDataPoints = 0;
+    if (typeof healthkitResponse === 'object' && !Array.isArray(healthkitResponse)) {
+      for (const key of Object.keys(healthkitResponse as object)) {
+        const arr = (healthkitResponse as Record<string, unknown>)[key];
+        if (Array.isArray(arr)) {
+          totalDataPoints += arr.length;
+        }
+      }
+    }
+
+    console.log(`[Despia HealthKit] Synced ${totalDataPoints} total data points`);
+
+    return {
+      success: true,
+      data: healthkitResponse,
+      dataPoints: totalDataPoints,
+    };
+  } catch (e) {
+    console.error('[Despia HealthKit] Sync failed:', e);
+    return {
+      success: false,
+      error: e instanceof Error ? e.message : String(e),
     };
   }
-  
-  // All types failed
-  return { 
-    success: false, 
-    error: 'All HealthKit types failed to sync',
-    timedOut: false,
-    dataPoints: 0
-  };
 };
 
 // ============================================================================
