@@ -413,6 +413,21 @@ export function useAwardBadge(callbacks?: {
         if (data.badge.xp_reward > 0) {
           awardXP.mutate({ amount: data.badge.xp_reward, source: 'badge_earned', description: `Earned "${data.badge.name}" badge`, sourceId: data.badge.id });
         }
+
+        // Send push + in-app notification
+        try {
+          if (profile?.id) {
+            await supabase.functions.invoke('notify-achievement-earned', {
+              body: {
+                client_badge_id: data.badge.id, // Using badge.id as fallback since we don't have client_badge_id here
+                client_id: profile.id,
+                badge_id: data.badge.id,
+              },
+            });
+          }
+        } catch (notifyError) {
+          console.error('[useAwardBadge] Notification failed:', notifyError);
+        }
       }
     },
   });
