@@ -13,13 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { SmartDateInput } from "@/components/ui/smart-date-input";
-import { Footprints, Heart, Flame, Moon, Loader2, Activity, Calendar } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Footprints, Heart, Flame, Moon, Loader2, Activity, CalendarIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { cn } from "@/lib/utils";
 
 interface ManualHealthDataModalProps {
@@ -52,6 +53,7 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
   
   const [enabledMetrics, setEnabledMetrics] = useState<Record<MetricKey, boolean>>({
     steps: false,
@@ -222,15 +224,35 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
         {/* Date Selection */}
         <div className="space-y-2">
           <Label className="flex items-center gap-2">
-            <Calendar className="h-4 w-4" />
+            <CalendarIcon className="h-4 w-4" />
             {t('manualHealthModal.selectDate', 'Date to log')}
           </Label>
-          <SmartDateInput
-            value={selectedDate}
-            onChange={setSelectedDate}
-            max={format(new Date(), "yyyy-MM-dd")}
-            placeholder={t('manualHealthModal.dateHint', 'Select date')}
-          />
+          <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full justify-start text-left font-normal h-10"
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {format(parseISO(selectedDate), "dd MMM yyyy")}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={parseISO(selectedDate)}
+                onSelect={(date) => {
+                  if (date) {
+                    setSelectedDate(format(date, "yyyy-MM-dd"));
+                    setDatePickerOpen(false);
+                  }
+                }}
+                disabled={(date) => date > new Date()}
+                initialFocus
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Metrics Toggle List */}
