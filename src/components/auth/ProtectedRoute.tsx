@@ -35,9 +35,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return <TwoFactorGate>{children}</TwoFactorGate>;
   }
 
-  // If user exists but no roles could be fetched, redirect to home
+  // If user exists but roles haven't loaded yet, show spinner
+  // This handles the race condition after signup where navigation 
+  // happens before role fetch completes
   if (allRoles.length === 0) {
-    return <Navigate to="/" replace />;
+    return <PageLoadingSpinner />;
   }
 
   // Check if user has ANY of the allowed roles

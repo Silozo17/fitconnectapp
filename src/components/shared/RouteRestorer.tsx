@@ -42,10 +42,10 @@ const RouteRestorer = () => {
 
       // Paths that should trigger restoration - CONSOLIDATED logic
       // Native app: restore from /, /auth, /get-started, /dashboard
-      // Web: restore from /auth, /get-started only (/ shows landing page)
+      // Web: also restore from / to prevent authenticated users seeing landing page
       const shouldRestore = isNativeApp
         ? currentPath === "/" || currentPath === "/auth" || currentPath === "/get-started" || currentPath === "/dashboard"
-        : currentPath === "/auth" || currentPath === "/get-started";
+        : currentPath === "/" || currentPath === "/auth" || currentPath === "/get-started";
 
       if (shouldRestore) {
         // Use centralized restoration logic
