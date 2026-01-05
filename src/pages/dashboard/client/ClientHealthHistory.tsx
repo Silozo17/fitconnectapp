@@ -222,45 +222,78 @@ const ClientHealthHistory = () => {
           </CardContent>
         </Card>
 
-        {/* Selected Date Data */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {DATA_TYPES.map(({ key, label, icon: Icon, color, bgColor, unit }) => {
+        {/* Selected Date Data - Apple-inspired cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {DATA_TYPES.map(({ key, label, icon: Icon, color, bgColor }) => {
             const value = selectedDateData[key];
             const avg = averages[key];
             
+            // Map color classes to gradient colors
+            const gradientMap: Record<string, string> = {
+              "text-blue-500": "from-blue-500/10 to-blue-600/5 border-blue-500/20",
+              "text-orange-500": "from-orange-500/10 to-orange-600/5 border-orange-500/20",
+              "text-red-500": "from-red-500/10 to-pink-600/5 border-red-500/20",
+              "text-purple-500": "from-purple-500/10 to-indigo-600/5 border-purple-500/20",
+              "text-green-500": "from-green-500/10 to-green-600/5 border-green-500/20",
+              "text-cyan-500": "from-cyan-500/10 to-cyan-600/5 border-cyan-500/20",
+              "text-emerald-500": "from-emerald-500/10 to-emerald-600/5 border-emerald-500/20",
+              "text-blue-400": "from-blue-400/10 to-blue-500/5 border-blue-400/20",
+            };
+            
+            const accentMap: Record<string, string> = {
+              "text-blue-500": "from-blue-400/60",
+              "text-orange-500": "from-orange-400/60",
+              "text-red-500": "from-red-400/60",
+              "text-purple-500": "from-purple-400/60",
+              "text-green-500": "from-green-400/60",
+              "text-cyan-500": "from-cyan-400/60",
+              "text-emerald-500": "from-emerald-400/60",
+              "text-blue-400": "from-blue-300/60",
+            };
+            
             return (
-              <Card key={key} variant="glass">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <div className={cn("p-2 rounded-lg", bgColor)}>
-                      <Icon className={cn("w-4 h-4", color)} />
-                    </div>
-                    <span className="text-sm font-medium">{label}</span>
+              <div 
+                key={key} 
+                className={cn(
+                  "relative bg-gradient-to-br rounded-2xl p-4 border overflow-hidden",
+                  gradientMap[color] || "from-muted/10 to-muted/5 border-border/20"
+                )}
+              >
+                {/* Top accent line */}
+                <div className={cn(
+                  "absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r to-transparent",
+                  accentMap[color] || "from-primary/60"
+                )} />
+                
+                <div className="flex items-center gap-2 mb-3">
+                  <div className={cn("p-2 rounded-xl", bgColor)}>
+                    <Icon className={cn("w-5 h-5", color)} />
                   </div>
-                  
-                  <div className="space-y-1">
-                    <div className="flex items-baseline gap-1">
-                      <span className={cn("text-2xl font-bold", value !== null ? color : "text-muted-foreground")}>
-                        {formatValue(key, value)}
+                  <span className="text-sm font-medium text-muted-foreground">{label}</span>
+                </div>
+                
+                <div className="space-y-1">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-3xl font-bold text-foreground tracking-tight">
+                      {formatValue(key, value)}
+                    </span>
+                    {value !== null && (
+                      <span className="text-sm text-muted-foreground">
+                        {getUnit(key, value)}
                       </span>
-                      {value !== null && (
-                        <span className="text-sm text-muted-foreground">
-                          {getUnit(key, value)}
-                        </span>
-                      )}
-                    </div>
-                    
-                    {avg !== null && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <TrendingUp className="w-3 h-3" />
-                        <span>
-                          {days}d avg: {formatValue(key, avg)} {getUnit(key, avg)}
-                        </span>
-                      </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                  
+                  {avg !== null && (
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <TrendingUp className="w-3 h-3" />
+                      <span>
+                        {days}d avg: {formatValue(key, avg)} {getUnit(key, avg)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
             );
           })}
         </div>

@@ -1,35 +1,27 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { isDespia } from "@/lib/despia";
-import bgHorizontal from "@/assets/bg-horizontal.svg";
-import bgVertical from "@/assets/portrait_bg.svg";
 
 interface PlatformBackgroundProps {
   className?: string;
-  /** Intensity of the overlay darkness (0-1) */
-  overlayOpacity?: number;
-  /** Whether to show the background image */
-  showImage?: boolean;
   /** Additional ambient glow effects */
   showAmbientGlow?: boolean;
 }
 
 /**
- * Platform-wide background component with abstract fluid green/black design.
- * Uses orientation-aware SVG backgrounds for vertical and horizontal displays.
- * Provides the foundation for glassmorphism card effects.
+ * Platform-wide background component with clean dark design and subtle gradient glows.
+ * Features green and purple ambient orbs for depth behind cards.
  * 
  * PERF FIX: Animated glow orbs are disabled in Despia native to reduce GPU load.
  */
 export const PlatformBackground = React.memo(function PlatformBackground({
   className,
-  overlayOpacity = 0.4,
-  showImage = true,
   showAmbientGlow = true,
 }: PlatformBackgroundProps) {
   // PERF FIX: Disable animated glow effects in native app to reduce GPU repaints
   const isNativeApp = isDespia();
   const shouldShowAmbientGlow = showAmbientGlow && !isNativeApp;
+  
   return (
     <div 
       className={cn(
@@ -41,72 +33,55 @@ export const PlatformBackground = React.memo(function PlatformBackground({
       {/* Base dark background */}
       <div className="absolute inset-0 bg-background" />
       
-      {/* Orientation-aware background SVG layers */}
-      {showImage && (
-        <>
-          {/* Vertical (portrait) background - shown on portrait screens */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat portrait:block landscape:hidden"
-            style={{ 
-              backgroundImage: `url(${bgVertical})`,
-              opacity: 1 - overlayOpacity,
-            }}
-          />
-          {/* Horizontal (landscape) background - shown on landscape screens */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat portrait:hidden landscape:block"
-            style={{ 
-              backgroundImage: `url(${bgHorizontal})`,
-              opacity: 1 - overlayOpacity,
-            }}
-          />
-        </>
-      )}
-      
-      {/* Subtle depth overlay - no colored tints */}
-      <div 
-        className="absolute inset-0"
-        style={{
-          background: `radial-gradient(ellipse at 50% 50%, transparent 0%, hsl(var(--background) / 0.3) 100%)`,
-        }}
-      />
-      
-      {/* Ambient glow orbs for extra depth - DISABLED in native for GPU performance */}
+      {/* Ambient glow orbs - green and purple for health/wellness theme */}
       {shouldShowAmbientGlow && (
         <>
+          {/* Green glow - top right */}
           <div 
-            className="absolute rounded-full animate-pulse"
+            className="absolute rounded-full"
             style={{ 
-              width: 400,
-              height: 400,
+              width: 500,
+              height: 500,
               top: "5%", 
-              right: "-5%",
-              background: "radial-gradient(circle, hsl(var(--primary) / 0.12) 0%, transparent 70%)",
-              filter: "blur(60px)",
+              right: "-10%",
+              background: "radial-gradient(circle, hsl(142 70% 45% / 0.08) 0%, transparent 70%)",
+              filter: "blur(80px)",
             }}
           />
+          {/* Purple glow - bottom left */}
           <div 
-            className="absolute rounded-full animate-pulse"
+            className="absolute rounded-full"
+            style={{ 
+              width: 450,
+              height: 450,
+              bottom: "10%", 
+              left: "-15%",
+              background: "radial-gradient(circle, hsl(280 70% 50% / 0.06) 0%, transparent 70%)",
+              filter: "blur(70px)",
+            }}
+          />
+          {/* Cyan accent glow - center right for health cards area */}
+          <div 
+            className="absolute rounded-full"
             style={{ 
               width: 350,
               height: 350,
-              bottom: "10%", 
-              left: "-10%",
-              background: "radial-gradient(circle, hsl(var(--primary) / 0.08) 0%, transparent 70%)",
-              filter: "blur(50px)",
-              animationDelay: "1s",
+              top: "35%", 
+              right: "5%",
+              background: "radial-gradient(circle, hsl(180 60% 45% / 0.04) 0%, transparent 70%)",
+              filter: "blur(60px)",
             }}
           />
+          {/* Soft primary accent - top center */}
           <div 
-            className="absolute rounded-full animate-pulse"
+            className="absolute rounded-full"
             style={{ 
-              width: 250,
-              height: 250,
-              top: "40%", 
+              width: 300,
+              height: 300,
+              top: "-5%", 
               left: "30%",
-              background: "radial-gradient(circle, hsl(var(--primary) / 0.06) 0%, transparent 70%)",
-              filter: "blur(40px)",
-              animationDelay: "2s",
+              background: "radial-gradient(circle, hsl(var(--primary) / 0.05) 0%, transparent 70%)",
+              filter: "blur(50px)",
             }}
           />
         </>
