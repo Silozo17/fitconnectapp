@@ -161,7 +161,7 @@ export const AddCoachSessionModal = ({
       const selectedSessionType = sessionTypes.find(st => st.id === sessionTypeId);
 
       // Create the session
-      const { error: sessionError } = await supabase
+      const { data: newSession, error: sessionError } = await supabase
         .from("coaching_sessions")
         .insert({
           coach_id: coachId,
@@ -174,9 +174,34 @@ export const AddCoachSessionModal = ({
           location: !isOnline ? location : null,
           notes: notes || null,
           status: "scheduled",
-        });
+        })
+        .select("id")
+        .single();
 
       if (sessionError) throw sessionError;
+
+      // Create video meeting for online sessions
+      if (isOnline && newSession) {
+        try {
+          // Get coach's active video provider
+          const { data: videoSettings } = await supabase
+            .from("video_conference_settings")
+            .select("provider")
+            .eq("coach_id", coachId)
+            .eq("is_active", true)
+            .single();
+
+          if (videoSettings?.provider) {
+            await supabase.functions.invoke("video-create-meeting", {
+              body: { sessionId: newSession.id, provider: videoSettings.provider },
+            });
+            console.log("Video meeting created for online session");
+          }
+        } catch (videoError) {
+          console.error("Video meeting creation failed (non-blocking):", videoError);
+          // Non-blocking - session is still created
+        }
+      }
 
       // Send email confirmation to external client
       if (clientType === "external" && externalClientId) {

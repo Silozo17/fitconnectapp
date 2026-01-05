@@ -191,9 +191,19 @@ export const useSessionManagement = () => {
       // Auto-create new video meeting if online session
       if (session.is_online && updatedSession) {
         try {
-          await supabase.functions.invoke("video-create-meeting", {
-            body: { sessionId, provider: "google_meet" },
-          });
+          // Get coach's actual video provider (not hardcoded)
+          const { data: videoSettings } = await supabase
+            .from("video_conference_settings")
+            .select("provider")
+            .eq("coach_id", session.coach_id)
+            .eq("is_active", true)
+            .single();
+
+          if (videoSettings?.provider) {
+            await supabase.functions.invoke("video-create-meeting", {
+              body: { sessionId, provider: videoSettings.provider },
+            });
+          }
         } catch {
           // Video meeting creation skipped - provider not connected
         }
