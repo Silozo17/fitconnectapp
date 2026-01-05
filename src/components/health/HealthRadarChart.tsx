@@ -112,24 +112,27 @@ export const HealthRadarChart = ({
     return "text-red-400";
   };
 
-  // Build conic gradient stops for smooth color blending
-  const conicGradientStops = useMemo(() => {
-    const colors = Object.values(METRIC_COLORS);
-    const numColors = colors.length;
-    const stops: string[] = [];
-    
-    colors.forEach((color, i) => {
-      const startAngle = (i / numColors) * 360;
-      const endAngle = ((i + 1) / numColors) * 360;
-      stops.push(`${color} ${startAngle}deg ${endAngle}deg`);
-    });
-    
-    // Close the loop by blending back to first color
-    return stops.join(', ');
-  }, []);
-
   return (
     <div className={cn("relative", className)}>
+      {/* Conic gradient background overlay - positioned behind chart */}
+      <div 
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: `conic-gradient(from -60deg at 50% 50%, 
+            ${METRIC_COLORS.Steps}40 0deg, 
+            ${METRIC_COLORS.Calories}40 60deg, 
+            ${METRIC_COLORS.Exercise}40 120deg, 
+            ${METRIC_COLORS.Heart}40 180deg, 
+            ${METRIC_COLORS.Sleep}40 240deg, 
+            ${METRIC_COLORS.Distance}40 300deg, 
+            ${METRIC_COLORS.Steps}40 360deg
+          )`,
+          maskImage: 'radial-gradient(circle at 50% 50%, transparent 15%, black 50%, transparent 72%)',
+          WebkitMaskImage: 'radial-gradient(circle at 50% 50%, transparent 15%, black 50%, transparent 72%)',
+          opacity: 0.7,
+        }}
+      />
+
       {/* Central score */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
         <div className="text-center">
@@ -143,32 +146,14 @@ export const HealthRadarChart = ({
       <ResponsiveContainer width="100%" height={280}>
         <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
           <defs>
-            {/* Create gradient segments between adjacent colors */}
-            {chartData.map((item, index) => {
-              const nextIndex = (index + 1) % chartData.length;
-              const nextItem = chartData[nextIndex];
-              return (
-                <linearGradient
-                  key={`gradient-${index}`}
-                  id={`segmentGradient-${index}`}
-                  x1="0%"
-                  y1="0%"
-                  x2="100%"
-                  y2="100%"
-                >
-                  <stop offset="0%" stopColor={item.color} stopOpacity={0.7} />
-                  <stop offset="100%" stopColor={nextItem.color} stopOpacity={0.7} />
-                </linearGradient>
-              );
-            })}
-            {/* Main radar fill with multi-color conic gradient simulation */}
-            <radialGradient id="radarMultiGradient" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.1} />
-              <stop offset="50%" stopColor="#a855f7" stopOpacity={0.3} />
-              <stop offset="100%" stopColor="#06b6d4" stopOpacity={0.5} />
+            {/* Radial gradient: transparent center to visible edges */}
+            <radialGradient id="radarFillGradient" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="white" stopOpacity={0} />
+              <stop offset="60%" stopColor="white" stopOpacity={0.1} />
+              <stop offset="100%" stopColor="white" stopOpacity={0.25} />
             </radialGradient>
-            {/* Stroke gradient that blends all colors */}
-            <linearGradient id="strokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            {/* Multi-color stroke gradient */}
+            <linearGradient id="radarStrokeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor={METRIC_COLORS.Steps} />
               <stop offset="17%" stopColor={METRIC_COLORS.Calories} />
               <stop offset="33%" stopColor={METRIC_COLORS.Exercise} />
@@ -185,31 +170,20 @@ export const HealthRadarChart = ({
           />
           <PolarAngleAxis
             dataKey="metric"
-            tick={({ x, y, payload, index }) => {
-              const color = chartData[index]?.color || "hsl(var(--muted-foreground))";
-              return (
-                <text
-                  x={x}
-                  y={y}
-                  fill={color}
-                  fontSize={11}
-                  fontWeight={600}
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                >
-                  {payload.value}
-                </text>
-              );
+            tick={{ 
+              fill: "hsl(var(--muted-foreground))", 
+              fontSize: 11,
+              fontWeight: 500,
             }}
             tickLine={false}
           />
           <Radar
             name="Health"
             dataKey="value"
-            stroke="url(#strokeGradient)"
-            strokeWidth={2.5}
-            fill="url(#radarMultiGradient)"
-            fillOpacity={0.4}
+            stroke="url(#radarStrokeGradient)"
+            strokeWidth={2}
+            fill="url(#radarFillGradient)"
+            fillOpacity={0.6}
           />
         </RadarChart>
       </ResponsiveContainer>
