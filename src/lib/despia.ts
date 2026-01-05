@@ -229,7 +229,7 @@ export const SUPPORTED_HEALTHKIT_TYPES = [
  * Check Apple Health connection by attempting to read step data.
  * Triggers iOS permission dialog if not yet authorized.
  * 
- * Uses exact Despia SDK format:
+ * DIRECT Despia SDK call per docs:
  * await despia('healthkit://read?types=...&days=...', ['healthkitResponse'])
  */
 export const checkHealthKitConnection = async (): Promise<HealthKitConnectionResult> => {
@@ -241,40 +241,34 @@ export const checkHealthKitConnection = async (): Promise<HealthKitConnectionRes
     return { success: false, error: 'HealthKit is only available on iOS' };
   }
 
-  console.log('[Despia HealthKit] Checking connection...');
+  console.log('[HealthKit] Checking connection...');
 
-  try {
-    // Request just steps for 1 day to trigger permission dialog
-    const response = await despia(
-      'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=1',
-      ['healthkitResponse']
-    );
+  // DIRECT SDK call - just check steps for 1 day to trigger permission
+  const response = await despia(
+    'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=1',
+    ['healthkitResponse']
+  );
 
-    console.log('[Despia HealthKit] Connection check response:', JSON.stringify(response, null, 2));
+  console.log('[HealthKit] Connection check response:', JSON.stringify(response, null, 2));
 
-    const healthkitResponse = (response as Record<string, unknown>)?.healthkitResponse;
+  const data = (response as Record<string, unknown>)?.healthkitResponse;
 
-    // If we got any response (even empty), permissions were granted
-    if (healthkitResponse !== undefined) {
-      return { success: true, data: healthkitResponse };
-    }
-
-    // Undefined means no permission
+  // undefined = no permission granted or timeout
+  if (data === undefined) {
     return { success: false, error: 'NO_RESPONSE' };
-  } catch (e) {
-    console.error('[Despia HealthKit] Connection check failed:', e);
-    return { success: false, error: e instanceof Error ? e.message : String(e) };
   }
+
+  // Any other response (including empty {}) = permission granted
+  return { success: true, data };
 };
 
 /**
  * Sync health data from Apple Health via native HealthKit.
  * 
- * Uses exact Despia SDK format with all types in ONE comma-separated call:
+ * DIRECT Despia SDK call per docs:
  * await despia('healthkit://read?types=Type1,Type2&days=7', ['healthkitResponse'])
  * 
- * Response format per Despia docs:
- * { healthkitResponse: { HKQuantityTypeIdentifierStepCount: [...], ... } }
+ * Expected response: { healthkitResponse: { HKQuantityTypeIdentifierStepCount: [...], ... } }
  * 
  * @param days Number of days of data to sync (default: 7)
  */
@@ -283,55 +277,51 @@ export const syncHealthKitData = async (days: number = 7): Promise<HealthKitConn
     return { success: false, error: 'HealthKit is only available on iOS native app' };
   }
 
-  console.log(`[Despia HealthKit] Starting sync of ${days} days...`);
-
-  // Request ALL supported types in ONE call (per Despia docs)
   const types = SUPPORTED_HEALTHKIT_TYPES.join(',');
+  const url = `healthkit://read?types=${types}&days=${days}`;
+  
+  console.log(`[HealthKit] Calling: ${url}`);
 
+  // DIRECT SDK call - per Despia docs, no wrappers
+  const response = await despia(url, ['healthkitResponse']);
+  
+  // Store for debugging in native (can't see console logs easily)
   try {
-    // Use exact Despia SDK format - NO custom timeout racing, NO cache-buster
-    // SDK handles timeout internally
-    const response = await despia(
-      `healthkit://read?types=${types}&days=${days}`,
-      ['healthkitResponse']
-    );
-
-    console.log('[Despia HealthKit] Response:', JSON.stringify(response, null, 2));
-
-    // Response format per Despia docs:
-    // { healthkitResponse: { HKQuantityTypeIdentifierStepCount: [...], ... } }
-    const healthkitResponse = (response as Record<string, unknown>)?.healthkitResponse;
-
-    if (!healthkitResponse) {
-      console.log('[Despia HealthKit] No healthkitResponse in response');
-      return { success: true, data: null, dataPoints: 0 };
-    }
-
-    // Count data points
-    let totalDataPoints = 0;
-    if (typeof healthkitResponse === 'object' && !Array.isArray(healthkitResponse)) {
-      for (const key of Object.keys(healthkitResponse as object)) {
-        const arr = (healthkitResponse as Record<string, unknown>)[key];
-        if (Array.isArray(arr)) {
-          totalDataPoints += arr.length;
-        }
-      }
-    }
-
-    console.log(`[Despia HealthKit] Synced ${totalDataPoints} total data points`);
-
-    return {
-      success: true,
-      data: healthkitResponse,
-      dataPoints: totalDataPoints,
-    };
-  } catch (e) {
-    console.error('[Despia HealthKit] Sync failed:', e);
-    return {
-      success: false,
-      error: e instanceof Error ? e.message : String(e),
-    };
+    localStorage.setItem('lastHealthKitSync', JSON.stringify({
+      timestamp: new Date().toISOString(),
+      url,
+      response,
+    }));
+  } catch { /* ignore */ }
+  
+  console.log('[HealthKit] Raw response:', JSON.stringify(response, null, 2));
+  
+  // Access healthkitResponse from response object
+  const data = (response as Record<string, unknown>)?.healthkitResponse;
+  
+  // undefined = timeout (SDK returns undefined after 30s)
+  if (data === undefined) {
+    console.log('[HealthKit] Response was undefined (timeout or no permission)');
+    return { success: false, error: 'TIMEOUT', timedOut: true };
   }
+  
+  // Empty object {} = connected but no data
+  if (data === null || (typeof data === 'object' && Object.keys(data as object).length === 0)) {
+    console.log('[HealthKit] Response was empty (no data)');
+    return { success: true, data: {}, dataPoints: 0 };
+  }
+  
+  // Count data points
+  let dataPoints = 0;
+  if (typeof data === 'object' && !Array.isArray(data)) {
+    for (const arr of Object.values(data as Record<string, unknown>)) {
+      if (Array.isArray(arr)) dataPoints += arr.length;
+    }
+  }
+  
+  console.log(`[HealthKit] Got ${dataPoints} data points`);
+  
+  return { success: true, data, dataPoints };
 };
 
 // ============================================================================
