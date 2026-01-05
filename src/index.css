@@ -417,6 +417,11 @@
     min-height: 42px !important;
   }
 
+  /* Native iOS toast safe area - ensure toasts don't overlap the notch/Dynamic Island */
+  html.native-ios .toaster {
+    padding-top: var(--safe-area-top, 59px) !important;
+  }
+
   /* ========================================
      NATIVE PERFORMANCE OPTIMIZATIONS
      Reduce GPU load in Despia native WebView

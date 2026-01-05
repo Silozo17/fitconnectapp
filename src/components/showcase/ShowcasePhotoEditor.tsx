@@ -21,6 +21,7 @@ import { ConsentType } from "@/hooks/useOutcomeShowcase";
 interface ShowcasePhotoEditorProps {
   clientId: string;
   coachId: string;
+  coachUserId: string;
   currentBeforePhoto: string | null;
   currentAfterPhoto: string | null;
   onBeforePhotoChange: (url: string | null) => void;
@@ -38,6 +39,7 @@ const PHOTO_ALLOWED_CONSENT_TYPES: ConsentType[] = [
 export function ShowcasePhotoEditor({
   clientId,
   coachId,
+  coachUserId,
   currentBeforePhoto,
   currentAfterPhoto,
   onBeforePhotoChange,
@@ -65,7 +67,7 @@ export function ShowcasePhotoEditor({
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const url = await uploadPhoto(coachId, file, type);
+    const url = await uploadPhoto(coachId, coachUserId, file, type);
     if (url) {
       if (type === "before") {
         onBeforePhotoChange(url);

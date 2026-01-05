@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { usePlatformUrl } from "@/hooks/usePlatformUrl";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -27,7 +27,7 @@ import {
   Users, Calendar, Package, CreditCard, Star, 
   Gift, Ban, RefreshCw, DollarSign, CheckCircle,
   Trophy, Trash2, Image, Loader2, Pencil, KeyRound, Pause, Clock,
-  ShieldCheck, ShieldX, ShieldAlert, Eye, EyeOff, ExternalLink, Copy
+  ShieldCheck, ShieldX, ShieldAlert, Eye, EyeOff, ExternalLink, Copy, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -183,38 +183,45 @@ export function CoachDetailDrawer({ open, onOpenChange, coach, onAssignFreePlan,
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-[500px] overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-[500px] overflow-y-auto" showCloseButton={false}>
         <SheetHeader>
-          <div className="flex items-center gap-4 pt-6">
-            <UserAvatar
-              src={coach.profile_image_url}
-              avatarSlug={selectedAvatarData?.avatar?.slug}
-              avatarRarity={selectedAvatarData?.avatar?.rarity as any}
-              name={coach.display_name}
-              variant="squircle"
-              size="sm"
-            />
-            <div>
-              <SheetTitle className="text-xl">{coach.display_name || "Unknown Coach"}</SheetTitle>
-              <SheetDescription>{getDisplayLocation(coach)}</SheetDescription>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge className={tierColors[coach.subscription_tier] || tierColors.free}>
-                  {coach.subscription_tier || "Free"}
-                </Badge>
-                {grantedSub && (
-                  <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
-                    <Gift className="h-3 w-3 mr-1" />
-                    Gifted
+          <div className="flex items-start justify-between gap-4 pt-6">
+            <div className="flex items-center gap-4">
+              <UserAvatar
+                src={coach.profile_image_url}
+                avatarSlug={selectedAvatarData?.avatar?.slug}
+                avatarRarity={selectedAvatarData?.avatar?.rarity as any}
+                name={coach.display_name}
+                variant="squircle"
+                size="sm"
+              />
+              <div>
+                <SheetTitle className="text-xl">{coach.display_name || "Unknown Coach"}</SheetTitle>
+                <SheetDescription>{getDisplayLocation(coach)}</SheetDescription>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge className={tierColors[coach.subscription_tier] || tierColors.free}>
+                    {coach.subscription_tier || "Free"}
                   </Badge>
-                )}
-                {coach.stripe_connect_onboarded && (
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                    <CreditCard className="h-3 w-3 mr-1" />
-                    Stripe Connected
-                  </Badge>
-                )}
+                  {grantedSub && (
+                    <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                      <Gift className="h-3 w-3 mr-1" />
+                      Gifted
+                    </Badge>
+                  )}
+                  {coach.stripe_connect_onboarded && (
+                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                      <CreditCard className="h-3 w-3 mr-1" />
+                      Stripe Connected
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
+            <SheetClose asChild>
+              <Button variant="ghost" size="icon" className="shrink-0 rounded-xl">
+                <X className="h-4 w-4" />
+              </Button>
+            </SheetClose>
           </div>
         </SheetHeader>
 

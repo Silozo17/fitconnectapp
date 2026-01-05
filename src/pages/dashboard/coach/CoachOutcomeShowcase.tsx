@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -66,6 +67,7 @@ import { toast } from "sonner";
 
 export default function CoachOutcomeShowcase() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const { data: coachId } = useCoachProfileId();
   const { data: showcases = [], isLoading: showcasesLoading } = useMyShowcaseItems();
   const { data: eligibleClients = [], isLoading: clientsLoading } = useEligibleClients();
@@ -648,10 +650,11 @@ export default function CoachOutcomeShowcase() {
 
             <div className="space-y-6">
               {/* Photo Editor Section */}
-              {editingItem && coachId && (
+              {editingItem && coachId && user?.id && (
                 <ShowcasePhotoEditor
                   clientId={editingItem.clientId}
                   coachId={coachId}
+                  coachUserId={user.id}
                   currentBeforePhoto={editForm.beforePhotoUrl || null}
                   currentAfterPhoto={editForm.afterPhotoUrl || null}
                   onBeforePhotoChange={(url) => setEditForm({ ...editForm, beforePhotoUrl: url || "" })}
