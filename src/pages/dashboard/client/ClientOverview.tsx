@@ -18,6 +18,7 @@ import { WearableTrendCard } from "@/components/dashboard/client/WearableTrendCa
 import { WeeklySummaryCard } from "@/components/dashboard/client/WeeklySummaryCard";
 import MonthlyReviewCard from "@/components/dashboard/client/MonthlyReviewCard";
 import { DashboardSectionHeader } from "@/components/dashboard/client/DashboardSectionHeader";
+import { WidgetErrorBoundary } from "@/components/shared/WidgetErrorBoundary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -179,56 +180,72 @@ const ClientOverview = () => {
       )}
 
       {/* Section: Today's Health - 44px after */}
-      <Suspense fallback={<HealthWidgetSkeleton />}>
-        <HealthDataWidget compact className="mb-11" />
-      </Suspense>
+      <WidgetErrorBoundary widgetName="HealthDataWidget">
+        <Suspense fallback={<HealthWidgetSkeleton />}>
+          <HealthDataWidget compact className="mb-11" />
+        </Suspense>
+      </WidgetErrorBoundary>
 
       {/* Section: Daily Readiness */}
       <DashboardSectionHeader 
         title="Daily Readiness" 
         description={readiness?.recommendation || "How prepared you are for today"} 
       />
-      <ReadinessScoreCard className="mb-3" />
-      <div className="grid grid-cols-3 gap-3 mb-11">
-        <ReadinessComponentCard type="sleep" />
-        <ReadinessComponentCard type="recovery" />
-        <ReadinessComponentCard type="activity" />
-      </div>
+      <WidgetErrorBoundary widgetName="ReadinessScoreCard" silent>
+        <ReadinessScoreCard className="mb-3" />
+      </WidgetErrorBoundary>
+      <WidgetErrorBoundary widgetName="ReadinessComponents" silent>
+        <div className="grid grid-cols-3 gap-3 mb-11">
+          <ReadinessComponentCard type="sleep" />
+          <ReadinessComponentCard type="recovery" />
+          <ReadinessComponentCard type="activity" />
+        </div>
+      </WidgetErrorBoundary>
 
       {/* Section: Insights */}
       <DashboardSectionHeader 
         title="Your Insights" 
         description="Trends compared to last week" 
       />
-      <WearableTrendCard className="mb-11" />
+      <WidgetErrorBoundary widgetName="WearableTrendCard" silent>
+        <WearableTrendCard className="mb-11" />
+      </WidgetErrorBoundary>
 
       {/* Section: Tip of the Day */}
       <DashboardSectionHeader 
         title="Today's Tip" 
         description={dailyTip.body} 
       />
-      <DailyTipWidget className="mb-11" />
+      <WidgetErrorBoundary widgetName="DailyTipWidget" silent>
+        <DailyTipWidget className="mb-11" />
+      </WidgetErrorBoundary>
 
       {/* Section: Weekly Summary */}
       <DashboardSectionHeader 
         title="Weekly Summary" 
         description="Your week at a glance" 
       />
-      <WeeklySummaryCard className="mb-11" />
+      <WidgetErrorBoundary widgetName="WeeklySummaryCard">
+        <WeeklySummaryCard className="mb-11" />
+      </WidgetErrorBoundary>
 
       {/* Section: Monthly Review */}
       <DashboardSectionHeader 
         title="Monthly Review" 
         description="Your progress this month" 
       />
-      <MonthlyReviewCard className="mb-11" />
+      <WidgetErrorBoundary widgetName="MonthlyReviewCard">
+        <MonthlyReviewCard className="mb-11" />
+      </WidgetErrorBoundary>
 
       {/* Section: Friend Requests */}
       <DashboardSectionHeader 
         title="Friend Requests" 
         description="Pending connection requests" 
       />
-      <UserConnectionRequests className="mb-11" />
+      <WidgetErrorBoundary widgetName="UserConnectionRequests" silent>
+        <UserConnectionRequests className="mb-11" />
+      </WidgetErrorBoundary>
 
       {/* Section: Quick Actions */}
       <DashboardSectionHeader 
