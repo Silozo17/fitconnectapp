@@ -30,6 +30,7 @@ import { ClientTrainingLogs } from "@/components/coach/ClientTrainingLogs";
 import { ClientWearableData } from "@/components/coach/ClientWearableData";
 import { ClientProgressPhotos } from "@/components/coach/ClientProgressPhotos";
 import { ClientReportsTab } from "@/components/coach/ClientReportsTab";
+import { ClientTodaysHealthWidget } from "@/components/coach/ClientTodaysHealthWidget";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -487,6 +488,12 @@ const CoachClientDetail = () => {
 
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
+          {/* Today's Health Widget */}
+          <ClientTodaysHealthWidget 
+            clientId={id!} 
+            coachId={coachProfile?.id}
+          />
+          
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Goals */}
             <div className="glass-card p-6">
