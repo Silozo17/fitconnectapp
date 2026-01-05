@@ -15,6 +15,7 @@ import { ReadinessComponentCard } from "@/components/dashboard/client/ReadinessC
 import { WearableTrendCard } from "@/components/dashboard/client/WearableTrendCard";
 import { WeeklySummaryCard } from "@/components/dashboard/client/WeeklySummaryCard";
 import MonthlyReviewCard from "@/components/dashboard/client/MonthlyReviewCard";
+import { DashboardSectionHeader } from "@/components/dashboard/client/DashboardSectionHeader";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -130,8 +131,8 @@ const ClientOverview = () => {
     >
       {/* Static Greeting Header */}
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground font-display tracking-tight">
-          {getGreeting()}, {displayName || "there"}
+        <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground tracking-tight">
+          {getGreeting()}, <span className="gradient-text">{displayName || "there"}</span>
         </h1>
         <p className="text-muted-foreground mt-1">
           {t('client.overview.welcomeBack', "Let's crush your goals today")}
@@ -170,7 +171,11 @@ const ClientOverview = () => {
         <HealthDataWidget compact className="mb-[100px]" />
       </Suspense>
 
-      {/* Section: Daily Readiness - 12px internal, 100px after */}
+      {/* Section: Daily Readiness */}
+      <DashboardSectionHeader 
+        title="Daily Readiness" 
+        description="How prepared you are for today" 
+      />
       <ReadinessScoreCard className="mb-3" />
       <div className="grid grid-cols-3 gap-3 mb-[100px]">
         <ReadinessComponentCard type="sleep" />
@@ -178,22 +183,46 @@ const ClientOverview = () => {
         <ReadinessComponentCard type="activity" />
       </div>
 
-      {/* Section: Insights (Wearable Trends) - 100px after */}
+      {/* Section: Insights */}
+      <DashboardSectionHeader 
+        title="Insights" 
+        description="Trends compared to last week" 
+      />
       <WearableTrendCard className="mb-[100px]" />
 
-      {/* Section: Tip of the Day - 100px after */}
+      {/* Section: Tip of the Day */}
+      <DashboardSectionHeader 
+        title="Tip of the Day" 
+        description="Daily motivation and advice" 
+      />
       <DailyTipWidget className="mb-[100px]" />
 
       {/* Section: Weekly Summary */}
+      <DashboardSectionHeader 
+        title="Weekly Summary" 
+        description="Your week at a glance" 
+      />
       <WeeklySummaryCard className="mb-[100px]" />
 
       {/* Section: Monthly Review */}
+      <DashboardSectionHeader 
+        title="Monthly Review" 
+        description="Your progress this month" 
+      />
       <MonthlyReviewCard className="mb-[100px]" />
 
       {/* Section: Friend Requests */}
+      <DashboardSectionHeader 
+        title="Friend Requests" 
+        description="Pending connection requests" 
+      />
       <UserConnectionRequests className="mb-[100px]" />
 
       {/* Section: Quick Actions */}
+      <DashboardSectionHeader 
+        title="Quick Actions" 
+        description="Fast access to key features" 
+      />
       <div className="mb-[100px]">
         {/* Mobile: 3D Carousel */}
         <div className="md:hidden -mx-5">
@@ -273,7 +302,11 @@ const ClientOverview = () => {
         </div>
       </div>
 
-      {/* CTA Section - Find a Coach */}
+      {/* Section: Find Coaches */}
+      <DashboardSectionHeader 
+        title="Find Coaches" 
+        description="Discover your perfect match" 
+      />
       {!isLoading && (
         <Card variant="floating" className="relative overflow-hidden rounded-3xl mb-24">
           {/* Background gradient */}
