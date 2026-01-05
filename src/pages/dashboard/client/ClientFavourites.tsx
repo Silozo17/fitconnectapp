@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
 
 // Batch fetch reviews for all coaches at once
 const useBatchCoachReviews = (coachIds: string[]) => {
@@ -131,7 +132,7 @@ const FavouriteCoachCard = React.memo(({ coach, reviewData, linkPrefix }: Favour
             <div className="flex flex-wrap gap-1.5 mb-3">
               {coach.coach_types.slice(0, 2).map((type: string) => (
                 <Badge key={type} variant="outline" className="text-xs rounded-full">
-                  {type}
+                  {getCoachTypeDisplayLabel(type)}
                 </Badge>
               ))}
               {coach.coach_types.length > 2 && (

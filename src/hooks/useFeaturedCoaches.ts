@@ -44,7 +44,8 @@ function getMatchLevelFromTier(locationTier: number): LocationMatchLevel {
 
 export function useFeaturedCoaches({ userLocation, countryCode, enabled = true }: UseFeaturedCoachesOptions): UseFeaturedCoachesResult {
   const query = useQuery({
-    queryKey: ['featured-coaches-rpc', userLocation?.city, userLocation?.region, userLocation?.countryCode, userLocation?.lat, userLocation?.lng, countryCode],
+    // Stabilized query key - only use country code to avoid reshuffling on location refinement
+    queryKey: ['featured-coaches-rpc', countryCode || userLocation?.countryCode || 'global'],
     enabled, // Defer query until location is ready
     queryFn: async () => {
       // Call the SQL ranking function with a limit of 4 for featured
@@ -134,10 +135,12 @@ export function useFeaturedCoaches({ userLocation, countryCode, enabled = true }
 
       return coaches;
     },
-    staleTime: 1000 * 60 * 2, // 2 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutes - prevents reshuffling
     // OPTIMIZED: Reduce refetching in native apps
     refetchOnWindowFocus: !isDespia(),
     placeholderData: EMPTY_COACHES, // Prevents loading flash
+    // Keep previous data during refetches to prevent visual flickering
+    refetchOnMount: false,
   });
 
   // Location label: prefer country name from countryCode when filtering by country
