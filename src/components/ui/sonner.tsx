@@ -3,6 +3,9 @@ import { Toaster as Sonner, toast } from "sonner";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
+// Safe area offset expression that works in both web/PWA and native iOS
+const SAFE_AREA_TOP_OFFSET = "calc(max(env(safe-area-inset-top, 0px), var(--safe-area-top, 0px)) + 16px)";
+
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = "system" } = useTheme();
 
@@ -11,10 +14,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       position="top-center"
-      style={{ 
-        zIndex: 9999,
-        paddingTop: 'env(safe-area-inset-top, 0px)',
-      }}
+      offset={SAFE_AREA_TOP_OFFSET}
+      mobileOffset={SAFE_AREA_TOP_OFFSET}
+      style={{ zIndex: 9999 }}
       toastOptions={{
         classNames: {
           toast:

@@ -65,8 +65,6 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
         className={cn(
           sheetVariants({ side }),
           "p-6 pb-safe-bottom overflow-hidden",
-          // Add top safe area for left/right side sheets (navigation sidebars)
-          (side === "left" || side === "right") && "pt-safe-status",
           // Inner highlight for depth
           "before:absolute before:inset-0 before:rounded-[inherit] before:pointer-events-none",
           "before:shadow-[inset_0_1px_0_hsl(0_0%_100%/0.1),inset_0_-1px_0_hsl(0_0%_0%/0.15)]",
@@ -79,10 +77,25 @@ const SheetContent = React.forwardRef<React.ElementRef<typeof SheetPrimitive.Con
           <div className="mx-auto mb-4 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/30" />
         )}
         
-        {children}
+        {/* Safe area wrapper for side sheets content */}
+        {(side === "left" || side === "right") ? (
+          <div className="pt-safe-status h-full overflow-y-auto">
+            {children}
+          </div>
+        ) : (
+          children
+        )}
         
         {showCloseButton && (
-          <SheetPrimitive.Close className="absolute right-5 top-5 z-10 rounded-xl p-2 bg-muted/50 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none active:scale-95 modal-close-safe">
+          <SheetPrimitive.Close 
+            className="absolute right-5 z-10 rounded-xl p-2 bg-muted/50 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none active:scale-95"
+            style={{
+              // For side sheets, position close button respecting safe area
+              top: (side === "left" || side === "right") 
+                ? "calc(1.25rem + max(env(safe-area-inset-top, 0px), var(--safe-area-top, 0px)))" 
+                : "1.25rem"
+            }}
+          >
             <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>

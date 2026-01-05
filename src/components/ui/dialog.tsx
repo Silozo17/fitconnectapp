@@ -40,7 +40,7 @@ const DialogContent = React.forwardRef<
       className={cn(
         // Positioning - fixed centered, no horizontal overflow
         "fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-2rem)] max-w-lg translate-x-[-50%] translate-y-[-50%]",
-        // Premium glass styling with safe-area aware padding
+        // Premium glass styling with safe-area aware max-height
         "gap-4 p-6 modal-content-safe",
         "glass-floating",
         // Overflow containment - prevent horizontal scroll and touch shifting
@@ -59,7 +59,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-xl p-2 bg-muted/50 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none active:scale-95 modal-close-safe z-10">
+      <DialogPrimitive.Close className="absolute right-4 top-4 rounded-xl p-2 bg-muted/50 opacity-70 ring-offset-background transition-all hover:opacity-100 hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none active:scale-95 z-10">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
