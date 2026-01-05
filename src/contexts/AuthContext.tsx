@@ -311,11 +311,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = useCallback(async (email: string, password: string, selectedRole: AppRole, firstName: string, lastName?: string) => {
-    // CRITICAL FIX: Clear stale onboarding cache before signup
-    // This ensures new users don't inherit cache from a previous session
+    // CRITICAL FIX: Clear stale caches before signup
+    // This ensures new users don't inherit cache/state from a previous session
     try {
       localStorage.removeItem('fitconnect_coach_onboarded');
       localStorage.removeItem('fitconnect_client_onboarded');
+      // Clear view restoration state to prevent inheriting previous user's dashboard preference
+      localStorage.removeItem('admin_active_role');
+      localStorage.removeItem('fitconnect_last_route');
     } catch {}
     
     const redirectUrl = `${window.location.origin}/`;
@@ -346,11 +349,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    // CRITICAL FIX: Clear stale onboarding cache before login
-    // This ensures we don't inherit cache from a previous user
+    // CRITICAL FIX: Clear stale caches before login
+    // This ensures we don't inherit cache/state from a previous user
     try {
       localStorage.removeItem('fitconnect_coach_onboarded');
       localStorage.removeItem('fitconnect_client_onboarded');
+      // Clear view restoration state to prevent inheriting previous user's dashboard preference
+      localStorage.removeItem('admin_active_role');
+      localStorage.removeItem('fitconnect_last_route');
     } catch {}
     
     const { data, error } = await supabase.auth.signInWithPassword({
