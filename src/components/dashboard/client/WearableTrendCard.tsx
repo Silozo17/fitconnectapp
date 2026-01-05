@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { useWearableTrends, TrendData } from "@/hooks/useWearableTrends";
 import {
   TrendingUp,
@@ -10,7 +9,6 @@ import {
   Moon,
   Flame,
   Heart,
-  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -77,25 +75,22 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
 
   if (isLoading) {
     return (
-      <AccentCard className={cn("rounded-2xl", className)}>
-        <AccentCardContent className="p-5">
-          <ShimmerSkeleton className="h-5 w-32 mb-4" />
-          <div className="space-y-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex items-center justify-between py-3">
-                <div className="flex items-center gap-3">
-                  <ShimmerSkeleton className="h-9 w-9 rounded-xl" />
-                  <div className="space-y-1">
-                    <ShimmerSkeleton className="h-4 w-24" />
-                    <ShimmerSkeleton className="h-3 w-16" />
-                  </div>
+      <div className={cn("relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex items-center justify-between py-3">
+              <div className="flex items-center gap-3">
+                <ShimmerSkeleton className="h-9 w-9 rounded-xl" />
+                <div className="space-y-1">
+                  <ShimmerSkeleton className="h-4 w-24" />
+                  <ShimmerSkeleton className="h-3 w-16" />
                 </div>
-                <ShimmerSkeleton className="h-4 w-12" />
               </div>
-            ))}
-          </div>
-        </AccentCardContent>
-      </AccentCard>
+              <ShimmerSkeleton className="h-4 w-12" />
+            </div>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -104,19 +99,19 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
   }
 
   return (
-    <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardHeader icon={Activity} title={t("client.trends.title", "Weekly Trends")} />
-      <AccentCardContent>
-        <p className="text-xs text-muted-foreground mb-4">
-          {t("client.trends.subtitle", "Compared to last week")}
-        </p>
-        <div>
-          {trends.map((trend) => (
-            <TrendItem key={trend.type} trend={trend} />
-          ))}
-        </div>
-      </AccentCardContent>
-    </AccentCard>
+    <div className={cn("relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent rounded-t-2xl" />
+
+      <p className="text-xs text-muted-foreground mb-3">
+        {t("client.trends.subtitle", "Compared to last week")}
+      </p>
+      <div>
+        {trends.map((trend) => (
+          <TrendItem key={trend.type} trend={trend} />
+        ))}
+      </div>
+    </div>
   );
 }
 

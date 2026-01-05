@@ -2,12 +2,10 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import {
-  CalendarDays,
   TrendingUp,
   TrendingDown,
   Target,
@@ -16,6 +14,7 @@ import {
   Sparkles,
   ChevronDown,
   ChevronUp,
+  Dumbbell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -84,26 +83,16 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
 
   if (isLoading) {
     return (
-      <AccentCard className={cn("rounded-2xl", className)}>
-        <div className="p-5 pb-3">
-          <div className="flex items-center gap-3">
-            <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
-            <ShimmerSkeleton className="h-5 w-40" />
-          </div>
+      <div className={cn("space-y-4", className)}>
+        <div className="grid grid-cols-4 gap-3">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-muted/30 rounded-2xl p-4">
+              <ShimmerSkeleton className="h-4 w-8 mb-2" />
+              <ShimmerSkeleton className="h-6 w-12" />
+            </div>
+          ))}
         </div>
-        <AccentCardContent className="space-y-4">
-          <ShimmerSkeleton className="h-4 w-full" />
-          <ShimmerSkeleton className="h-4 w-3/4" />
-          <div className="grid grid-cols-3 gap-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="space-y-2">
-                <ShimmerSkeleton className="h-4 w-16" />
-                <ShimmerSkeleton className="h-6 w-12" />
-              </div>
-            ))}
-          </div>
-        </AccentCardContent>
-      </AccentCard>
+      </div>
     );
   }
 
@@ -120,76 +109,34 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
   };
 
   return (
-    <AccentCard className={cn("rounded-2xl", className)}>
-      <AccentCardHeader 
-        icon={CalendarDays} 
-        title="Weekly Summary"
-        action={
+    <div className={cn("space-y-4", className)}>
+      {/* Main AI Summary Card */}
+      <div className="relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50">
+        {/* Top accent line */}
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent rounded-t-2xl" />
+        
+        <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs">
-              <Sparkles className="w-3 h-3 mr-1" />
-              AI
-            </Badge>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={() => refetch()}
-              disabled={isRefetching}
-            >
-              <RefreshCw className={cn("w-4 h-4", isRefetching && "animate-spin")} />
-            </Button>
+            <Sparkles className="w-4 h-4 text-primary" />
+            <Badge variant="outline" className="text-xs">AI Summary</Badge>
           </div>
-        }
-      />
-
-      <AccentCardContent className="space-y-4">
-        {/* AI Summary */}
-        <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
-
-        {/* Key Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="p-3 rounded-xl bg-muted/50 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Target className="w-4 h-4 text-primary" />
-              <TrendIcon value={weeklyData.weekOverWeekChange.habits} />
-            </div>
-            <div className="text-lg font-bold text-foreground">
-              {weeklyData.habitCompletionRate}%
-            </div>
-            <div className="text-xs text-muted-foreground">Habits</div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-muted/50 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <Footprints className="w-4 h-4 text-primary" />
-              <TrendIcon value={weeklyData.weekOverWeekChange.steps} />
-            </div>
-            <div className="text-lg font-bold text-foreground">
-              {weeklyData.avgSteps >= 1000
-                ? `${(weeklyData.avgSteps / 1000).toFixed(1)}k`
-                : weeklyData.avgSteps}
-            </div>
-            <div className="text-xs text-muted-foreground">Avg Steps</div>
-          </div>
-
-          <div className="p-3 rounded-xl bg-muted/50 text-center">
-            <div className="flex items-center justify-center gap-1 mb-1">
-              <TrendingUp className="w-4 h-4 text-success" />
-              <TrendIcon value={weeklyData.weekOverWeekChange.workouts} />
-            </div>
-            <div className="text-lg font-bold text-foreground">
-              {weeklyData.workoutsLogged}
-            </div>
-            <div className="text-xs text-muted-foreground">Workouts</div>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            onClick={() => refetch()}
+            disabled={isRefetching}
+          >
+            <RefreshCw className={cn("w-4 h-4", isRefetching && "animate-spin")} />
+          </Button>
         </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
 
         {/* Expandable section */}
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-between"
+          className="w-full justify-between mt-3"
           onClick={() => setIsExpanded(!isExpanded)}
         >
           <span className="text-xs text-muted-foreground">
@@ -203,7 +150,7 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
         </Button>
 
         {isExpanded && (
-          <div className="space-y-3 animate-fade-in">
+          <div className="space-y-3 animate-fade-in mt-3 pt-3 border-t border-border/50">
             {/* Highlights */}
             {highlights.length > 0 && (
               <div>
@@ -241,9 +188,81 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
             )}
           </div>
         )}
-      </AccentCardContent>
-    </AccentCard>
+      </div>
+
+      {/* Stats Cards - 4 separate small cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Habits */}
+        <div className="bg-muted/30 rounded-2xl p-4 border border-border/30">
+          <div className="flex items-center justify-between mb-2">
+            <Target className="w-4 h-4 text-primary" />
+            <TrendIcon value={weeklyData.weekOverWeekChange.habits} />
+          </div>
+          <div className="text-2xl font-bold text-foreground">
+            {weeklyData.habitCompletionRate}%
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">Habits</div>
+        </div>
+
+        {/* Avg Steps */}
+        <div className="bg-muted/30 rounded-2xl p-4 border border-border/30">
+          <div className="flex items-center justify-between mb-2">
+            <Footprints className="w-4 h-4 text-blue-500" />
+            <TrendIcon value={weeklyData.weekOverWeekChange.steps} />
+          </div>
+          <div className="text-2xl font-bold text-foreground">
+            {weeklyData.avgSteps >= 1000
+              ? `${(weeklyData.avgSteps / 1000).toFixed(1)}k`
+              : weeklyData.avgSteps}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">Avg Steps</div>
+        </div>
+
+        {/* Workouts */}
+        <div className="bg-muted/30 rounded-2xl p-4 border border-border/30">
+          <div className="flex items-center justify-between mb-2">
+            <Dumbbell className="w-4 h-4 text-green-500" />
+            <TrendIcon value={weeklyData.weekOverWeekChange.workouts} />
+          </div>
+          <div className="text-2xl font-bold text-foreground">
+            {weeklyData.workoutsLogged}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">Workouts</div>
+        </div>
+
+        {/* Nutrition Entries */}
+        <div className="bg-muted/30 rounded-2xl p-4 border border-border/30">
+          <div className="flex items-center justify-between mb-2">
+            <TrendingUp className="w-4 h-4 text-orange-500" />
+          </div>
+          <div className="text-2xl font-bold text-foreground">
+            {weeklyData.nutritionEntries || 0}
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">Meals Logged</div>
+        </div>
+      </div>
+    </div>
   );
+}
+
+// Export summary for sentinel description
+export function useWeeklySummary() {
+  const { user } = useAuth();
+  const cacheKey = `weekly-summary-${user?.id}`;
+  
+  const { data } = useQuery({
+    queryKey: ["weekly-client-summary", user?.id],
+    queryFn: async (): Promise<WeeklySummaryData | null> => {
+      const { data, error } = await supabase.functions.invoke("generate-weekly-client-summary");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+    staleTime: 24 * 60 * 60 * 1000,
+    refetchOnWindowFocus: false,
+  });
+
+  return data?.summary || null;
 }
 
 export default WeeklySummaryCard;
