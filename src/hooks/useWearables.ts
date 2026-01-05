@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { isDespia, triggerHaptic } from "@/lib/despia";
-import { isHealthKitAvailable, connectHealthKit, syncHealthKit } from "@/lib/healthkit";
+import { isHealthKitAvailable, connectAndSyncHealthKit, syncHealthKit } from "@/lib/healthkit";
 import { useCallback } from "react";
 
 export type WearableProvider = "health_connect" | "fitbit" | "garmin" | "apple_health";
@@ -64,8 +64,8 @@ export const useWearables = () => {
       throw new Error("Client profile not found");
     }
 
-    // Connect using clean module - triggers iOS permission dialog
-    const connected = await connectHealthKit();
+    // ONE call - triggers SINGLE permission dialog and syncs data
+    const { connected, dataPoints } = await connectAndSyncHealthKit(clientProfile.id, 7);
 
     if (!connected) {
       triggerHaptic('error');
@@ -100,11 +100,8 @@ export const useWearables = () => {
         });
     }
 
-    // Sync 7 days of data using clean module
-    const count = await syncHealthKit(clientProfile.id, 7);
-    
-    if (count > 0) {
-      toast.success(`Apple Health connected! Synced ${count} data points.`);
+    if (dataPoints > 0) {
+      toast.success(`Apple Health connected! Synced ${dataPoints} data points.`);
     } else {
       toast.success("Apple Health connected!");
     }
