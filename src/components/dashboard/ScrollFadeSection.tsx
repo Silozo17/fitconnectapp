@@ -14,26 +14,37 @@ const ScrollFadeSection = memo(({ title, description, children, className = "" }
 
   useEffect(() => {
     const cardsElement = cardsRef.current;
-    if (!cardsElement) return;
+    const headerElement = headerRef.current;
+    if (!cardsElement || !headerElement) return;
 
-    // Create observer that detects when cards enter the header zone
+    const headerHeight = headerElement.offsetHeight;
+
+    // Create observer that detects when cards collide with the sticky header
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          // Calculate opacity: fade out as cards overlap header
-          // When ratio is 0, header is fully visible (opacity 1)
-          // When ratio increases, header fades out
-          const ratio = entry.intersectionRatio;
-          const newOpacity = Math.max(0, 1 - ratio * 2);
-          setHeaderOpacity(newOpacity);
+          if (entry.isIntersecting) {
+            // Cards are in the intersection zone
+            // boundingClientRect.top tells us how far cards are from viewport top
+            const rect = entry.boundingClientRect;
+            
+            // Calculate how much the cards have "entered" the header zone
+            const overlap = Math.max(0, headerHeight - rect.top);
+            const overlapRatio = Math.min(1, overlap / headerHeight);
+            
+            // Inverse: more overlap = less opacity
+            setHeaderOpacity(1 - overlapRatio);
+          } else {
+            // Cards not in intersection zone - header fully visible
+            setHeaderOpacity(1);
+          }
         });
       },
       {
         root: null,
-        // Target the top 15% of the viewport where headers live
-        rootMargin: "0px 0px -85% 0px",
-        // Fine-grained thresholds for smooth fading
-        threshold: Array.from({ length: 21 }, (_, i) => i * 0.05),
+        // Detect when cards reach the very top of viewport
+        rootMargin: "0px 0px -90% 0px",
+        threshold: Array.from({ length: 11 }, (_, i) => i * 0.1),
       }
     );
 
@@ -46,10 +57,10 @@ const ScrollFadeSection = memo(({ title, description, children, className = "" }
 
   return (
     <section className={className}>
-      {/* Header - fades based on card overlap */}
+      {/* Sticky Header - sticks at top of scroll container, fades on card collision */}
       <div
         ref={headerRef}
-        className="transition-opacity duration-200 ease-out mb-4"
+        className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm transition-opacity duration-200 ease-out pb-4 pt-2 -mx-4 px-4 lg:-mx-6 lg:px-6"
         style={{ opacity: headerOpacity }}
       >
         <h2 className="text-xl md:text-2xl font-bold text-foreground font-display tracking-tight">
@@ -60,7 +71,7 @@ const ScrollFadeSection = memo(({ title, description, children, className = "" }
         </p>
       </div>
 
-      {/* Cards container - observed for intersection */}
+      {/* Cards container - scrolls underneath sticky header */}
       <div ref={cardsRef}>
         {children}
       </div>
