@@ -2,8 +2,11 @@ import { useState } from 'react';
 import despia from 'despia-native';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Copy, Check } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 
 export default function Debug() {
+  const [copied, setCopied] = useState(false);
   const [response, setResponse] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
@@ -26,15 +29,15 @@ export default function Debug() {
     
     logs.push('1. Calling Despia SDK...');
     
-    const response = await despia(
+    const res = await despia(
       'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=7',
       ['healthkitResponse']
     );
     
-    logs.push(`2. Raw response type: ${typeof response}`);
-    logs.push(`3. Raw response: ${JSON.stringify(response, null, 2)}`);
+    logs.push(`2. Raw response type: ${typeof res}`);
+    logs.push(`3. Raw response: ${JSON.stringify(res, null, 2)}`);
     
-    const data = (response as Record<string, unknown>)?.healthkitResponse;
+    const data = (res as Record<string, unknown>)?.healthkitResponse;
     logs.push(`4. data = response.healthkitResponse: ${typeof data}`);
     logs.push(`5. data value: ${JSON.stringify(data, null, 2)}`);
     
@@ -67,6 +70,13 @@ export default function Debug() {
     setLoading(false);
   };
 
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(response);
+    setCopied(true);
+    toast({ title: 'Copied to clipboard' });
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div className="p-4 space-y-4 min-h-screen bg-background">
       <h1 className="text-xl font-bold text-foreground">HealthKit Debug</h1>
@@ -77,6 +87,9 @@ export default function Debug() {
         </Button>
         <Button onClick={testParsing} disabled={loading} variant="secondary">
           Test Parsing
+        </Button>
+        <Button onClick={copyToClipboard} disabled={!response} variant="outline" size="icon">
+          {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
         </Button>
       </div>
       
