@@ -245,6 +245,9 @@ const DocsAppleHealth = lazy(() => import('@/pages/docs/integrations/AppleHealth
 const DocsHealthConnect = lazy(() => import('@/pages/docs/integrations/HealthConnectIntegration'));
 const DocsGarmin = lazy(() => import('@/pages/docs/integrations/GarminIntegration'));
 
+// Debug page
+const Debug = lazy(() => import('@/pages/Debug'));
+
 // Subscribe pages
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
 const SubscribeSuccess = lazy(() => import('@/pages/SubscribeSuccess'));
@@ -352,6 +355,9 @@ const App = () => (
                           <Routes>
                             {/* Zoom OAuth redirect - must be outside wrappers for isolation */}
                             <Route path="/api/zoom/oauth" element={<ZoomOAuth />} />
+                            
+                            {/* Debug page - direct SDK testing */}
+                            <Route path="/debug" element={<Suspense fallback={<PageLoadingSpinner />}><Debug /></Suspense>} />
                             
                             {/* Public routes - wrapped with WebsiteLocaleWrapper (simple spinner fallback) */}
                             <Route element={<WebsiteLocaleWrapper />}>
