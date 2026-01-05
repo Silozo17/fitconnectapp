@@ -46,14 +46,11 @@ const ScrollFadeSection = memo(({ title, description, children, className = "" }
 
   return (
     <section className={className}>
-      {/* Sticky Header - pins at top, fades as cards scroll under */}
+      {/* Header - fades based on card overlap */}
       <div
         ref={headerRef}
-        className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm transition-opacity duration-200 ease-out py-4 -mx-4 px-4 md:-mx-6 md:px-6"
-        style={{ 
-          opacity: headerOpacity,
-          pointerEvents: headerOpacity < 0.1 ? 'none' : 'auto'
-        }}
+        className="transition-opacity duration-200 ease-out mb-4"
+        style={{ opacity: headerOpacity }}
       >
         <h2 className="text-xl md:text-2xl font-bold text-foreground font-display tracking-tight">
           {title}
@@ -63,7 +60,7 @@ const ScrollFadeSection = memo(({ title, description, children, className = "" }
         </p>
       </div>
 
-      {/* Cards container - scrolls under the sticky header */}
+      {/* Cards container - observed for intersection */}
       <div ref={cardsRef}>
         {children}
       </div>
