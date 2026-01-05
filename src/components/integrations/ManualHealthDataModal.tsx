@@ -11,24 +11,55 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Footprints, Heart, Flame, Moon, Loader2, Activity } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SmartDateInput } from "@/components/ui/smart-date-input";
+import { Footprints, Heart, Flame, Moon, Loader2, Activity, Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface ManualHealthDataModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+type MetricKey = "steps" | "heartRate" | "calories" | "sleep" | "activeMinutes";
+
+interface MetricConfig {
+  key: MetricKey;
+  icon: typeof Footprints;
+  colorClass: string;
+  bgClass: string;
+  borderClass: string;
+}
+
+const METRICS: MetricConfig[] = [
+  { key: "steps", icon: Footprints, colorClass: "text-blue-500", bgClass: "bg-blue-500/10", borderClass: "border-blue-500/20" },
+  { key: "heartRate", icon: Heart, colorClass: "text-red-500", bgClass: "bg-red-500/10", borderClass: "border-red-500/20" },
+  { key: "calories", icon: Flame, colorClass: "text-orange-500", bgClass: "bg-orange-500/10", borderClass: "border-orange-500/20" },
+  { key: "sleep", icon: Moon, colorClass: "text-purple-500", bgClass: "bg-purple-500/10", borderClass: "border-purple-500/20" },
+  { key: "activeMinutes", icon: Activity, colorClass: "text-green-500", bgClass: "bg-green-500/10", borderClass: "border-green-500/20" },
+];
+
 const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProps) => {
   const { t } = useTranslation('settings');
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("steps");
+  
+  const [selectedDate, setSelectedDate] = useState<string>(format(new Date(), "yyyy-MM-dd"));
+  
+  const [enabledMetrics, setEnabledMetrics] = useState<Record<MetricKey, boolean>>({
+    steps: false,
+    heartRate: false,
+    calories: false,
+    sleep: false,
+    activeMinutes: false,
+  });
   
   const [formData, setFormData] = useState({
     steps: "",
@@ -39,12 +70,34 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
     activeMinutes: "",
   });
 
+  const toggleMetric = (key: MetricKey) => {
+    setEnabledMetrics(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const resetForm = () => {
+    setSelectedDate(format(new Date(), "yyyy-MM-dd"));
+    setEnabledMetrics({
+      steps: false,
+      heartRate: false,
+      calories: false,
+      sleep: false,
+      activeMinutes: false,
+    });
+    setFormData({
+      steps: "",
+      heartRate: "",
+      calories: "",
+      sleepHours: "",
+      sleepMinutes: "",
+      activeMinutes: "",
+    });
+  };
+
   const handleSubmit = async () => {
     if (!user) return;
 
     setIsSubmitting(true);
     try {
-      // Get client profile
       const { data: clientProfile } = await supabase
         .from("client_profiles")
         .select("id")
@@ -56,42 +109,43 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
       }
 
       const entries = [];
-      const now = new Date().toISOString();
+      // Use selected date at noon to avoid timezone issues
+      const recordedAt = new Date(`${selectedDate}T12:00:00`).toISOString();
 
-      if (formData.steps && parseInt(formData.steps) > 0) {
+      if (enabledMetrics.steps && formData.steps && parseInt(formData.steps) > 0) {
         entries.push({
           client_id: clientProfile.id,
           data_type: "steps",
           value: parseInt(formData.steps),
           unit: "count",
-          recorded_at: now,
+          recorded_at: recordedAt,
           source: "manual",
         });
       }
 
-      if (formData.heartRate && parseInt(formData.heartRate) > 0) {
+      if (enabledMetrics.heartRate && formData.heartRate && parseInt(formData.heartRate) > 0) {
         entries.push({
           client_id: clientProfile.id,
           data_type: "heart_rate",
           value: parseInt(formData.heartRate),
           unit: "bpm",
-          recorded_at: now,
+          recorded_at: recordedAt,
           source: "manual",
         });
       }
 
-      if (formData.calories && parseInt(formData.calories) > 0) {
+      if (enabledMetrics.calories && formData.calories && parseInt(formData.calories) > 0) {
         entries.push({
           client_id: clientProfile.id,
           data_type: "calories",
           value: parseInt(formData.calories),
           unit: "kcal",
-          recorded_at: now,
+          recorded_at: recordedAt,
           source: "manual",
         });
       }
 
-      if (formData.sleepHours || formData.sleepMinutes) {
+      if (enabledMetrics.sleep && (formData.sleepHours || formData.sleepMinutes)) {
         const totalMinutes = (parseInt(formData.sleepHours) || 0) * 60 + (parseInt(formData.sleepMinutes) || 0);
         if (totalMinutes > 0) {
           entries.push({
@@ -99,19 +153,19 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
             data_type: "sleep",
             value: totalMinutes,
             unit: "minutes",
-            recorded_at: now,
+            recorded_at: recordedAt,
             source: "manual",
           });
         }
       }
 
-      if (formData.activeMinutes && parseInt(formData.activeMinutes) > 0) {
+      if (enabledMetrics.activeMinutes && formData.activeMinutes && parseInt(formData.activeMinutes) > 0) {
         entries.push({
           client_id: clientProfile.id,
           data_type: "active_minutes",
           value: parseInt(formData.activeMinutes),
           unit: "minutes",
-          recorded_at: now,
+          recorded_at: recordedAt,
           source: "manual",
         });
       }
@@ -134,14 +188,7 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
       toast.success(successMessage);
       queryClient.invalidateQueries({ queryKey: ["health-data"] });
       onOpenChange(false);
-      setFormData({
-        steps: "",
-        heartRate: "",
-        calories: "",
-        sleepHours: "",
-        sleepMinutes: "",
-        activeMinutes: "",
-      });
+      resetForm();
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Failed to log data";
       toast.error(errorMessage);
@@ -150,9 +197,18 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      resetForm();
+    }
+    onOpenChange(newOpen);
+  };
+
+  const enabledCount = Object.values(enabledMetrics).filter(Boolean).length;
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
@@ -163,149 +219,124 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-5 w-full">
-            <TabsTrigger value="steps" className="px-2">
-              <Footprints className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="heart" className="px-2">
-              <Heart className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="calories" className="px-2">
-              <Flame className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="sleep" className="px-2">
-              <Moon className="h-4 w-4" />
-            </TabsTrigger>
-            <TabsTrigger value="active" className="px-2">
-              <Activity className="h-4 w-4" />
-            </TabsTrigger>
-          </TabsList>
+        {/* Date Selection */}
+        <div className="space-y-2">
+          <Label className="flex items-center gap-2">
+            <Calendar className="h-4 w-4" />
+            {t('manualHealthModal.selectDate', 'Date to log')}
+          </Label>
+          <SmartDateInput
+            value={selectedDate}
+            onChange={setSelectedDate}
+            max={format(new Date(), "yyyy-MM-dd")}
+            placeholder={t('manualHealthModal.dateHint', 'Select date')}
+          />
+        </div>
 
-          <div className="mt-4">
-            <TabsContent value="steps" className="space-y-4">
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-blue-500/10 border border-blue-500/20">
-                <Footprints className="h-8 w-8 text-blue-500" />
-                <div>
-                  <h4 className="font-medium">{t('manualHealthModal.steps.title')}</h4>
-                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.steps.desc')}</p>
+        {/* Metrics Toggle List */}
+        <ScrollArea className="flex-1 -mx-6 px-6">
+          <div className="space-y-3 py-2">
+            {METRICS.map((metric) => {
+              const Icon = metric.icon;
+              const isEnabled = enabledMetrics[metric.key];
+              
+              return (
+                <div
+                  key={metric.key}
+                  className={cn(
+                    "rounded-lg border transition-all",
+                    isEnabled ? `${metric.bgClass} ${metric.borderClass}` : "bg-muted/30 border-border"
+                  )}
+                >
+                  {/* Header with toggle */}
+                  <div 
+                    className="flex items-center justify-between p-3 cursor-pointer"
+                    onClick={() => toggleMetric(metric.key)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className={cn("h-5 w-5", isEnabled ? metric.colorClass : "text-muted-foreground")} />
+                      <div>
+                        <h4 className={cn("font-medium text-sm", !isEnabled && "text-muted-foreground")}>
+                          {t(`manualHealthModal.${metric.key}.title`)}
+                        </h4>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={isEnabled}
+                      onCheckedChange={() => toggleMetric(metric.key)}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  </div>
+                  
+                  {/* Expandable input area */}
+                  {isEnabled && (
+                    <div className="px-3 pb-3 pt-1">
+                      {metric.key === "sleep" ? (
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <Label htmlFor="sleepHours" className="text-xs">
+                              {t('manualHealthModal.sleep.hours')}
+                            </Label>
+                            <Input
+                              id="sleepHours"
+                              type="number"
+                              placeholder="7"
+                              min="0"
+                              max="24"
+                              value={formData.sleepHours}
+                              onChange={(e) => setFormData({ ...formData, sleepHours: e.target.value })}
+                              className="h-9"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <Label htmlFor="sleepMinutes" className="text-xs">
+                              {t('manualHealthModal.sleep.minutes')}
+                            </Label>
+                            <Input
+                              id="sleepMinutes"
+                              type="number"
+                              placeholder="30"
+                              min="0"
+                              max="59"
+                              value={formData.sleepMinutes}
+                              onChange={(e) => setFormData({ ...formData, sleepMinutes: e.target.value })}
+                              className="h-9"
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <Label htmlFor={metric.key} className="text-xs">
+                            {t(`manualHealthModal.${metric.key}.label`)}
+                          </Label>
+                          <Input
+                            id={metric.key}
+                            type="number"
+                            placeholder={
+                              metric.key === "steps" ? "10,000" :
+                              metric.key === "heartRate" ? "72" :
+                              metric.key === "calories" ? "500" :
+                              "45"
+                            }
+                            value={formData[metric.key]}
+                            onChange={(e) => setFormData({ ...formData, [metric.key]: e.target.value })}
+                            className="h-9"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="steps">{t('manualHealthModal.steps.label')}</Label>
-                <Input
-                  id="steps"
-                  type="number"
-                  placeholder="10,000"
-                  value={formData.steps}
-                  onChange={(e) => setFormData({ ...formData, steps: e.target.value })}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="heart" className="space-y-4">
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-red-500/10 border border-red-500/20">
-                <Heart className="h-8 w-8 text-red-500" />
-                <div>
-                  <h4 className="font-medium">{t('manualHealthModal.heartRate.title')}</h4>
-                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.heartRate.desc')}</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="heartRate">{t('manualHealthModal.heartRate.label')}</Label>
-                <Input
-                  id="heartRate"
-                  type="number"
-                  placeholder="72"
-                  value={formData.heartRate}
-                  onChange={(e) => setFormData({ ...formData, heartRate: e.target.value })}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="calories" className="space-y-4">
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-orange-500/10 border border-orange-500/20">
-                <Flame className="h-8 w-8 text-orange-500" />
-                <div>
-                  <h4 className="font-medium">{t('manualHealthModal.calories.title')}</h4>
-                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.calories.desc')}</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="calories">{t('manualHealthModal.calories.label')}</Label>
-                <Input
-                  id="calories"
-                  type="number"
-                  placeholder="500"
-                  value={formData.calories}
-                  onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
-                />
-              </div>
-            </TabsContent>
-
-            <TabsContent value="sleep" className="space-y-4">
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-purple-500/10 border border-purple-500/20">
-                <Moon className="h-8 w-8 text-purple-500" />
-                <div>
-                  <h4 className="font-medium">{t('manualHealthModal.sleep.title')}</h4>
-                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.sleep.desc')}</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="sleepHours">{t('manualHealthModal.sleep.hours')}</Label>
-                  <Input
-                    id="sleepHours"
-                    type="number"
-                    placeholder="7"
-                    min="0"
-                    max="24"
-                    value={formData.sleepHours}
-                    onChange={(e) => setFormData({ ...formData, sleepHours: e.target.value })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="sleepMinutes">{t('manualHealthModal.sleep.minutes')}</Label>
-                  <Input
-                    id="sleepMinutes"
-                    type="number"
-                    placeholder="30"
-                    min="0"
-                    max="59"
-                    value={formData.sleepMinutes}
-                    onChange={(e) => setFormData({ ...formData, sleepMinutes: e.target.value })}
-                  />
-                </div>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="active" className="space-y-4">
-              <div className="flex items-center gap-3 p-4 rounded-lg bg-green-500/10 border border-green-500/20">
-                <Activity className="h-8 w-8 text-green-500" />
-                <div>
-                  <h4 className="font-medium">{t('manualHealthModal.activeMinutes.title')}</h4>
-                  <p className="text-sm text-muted-foreground">{t('manualHealthModal.activeMinutes.desc')}</p>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="activeMinutes">{t('manualHealthModal.activeMinutes.label')}</Label>
-                <Input
-                  id="activeMinutes"
-                  type="number"
-                  placeholder="45"
-                  value={formData.activeMinutes}
-                  onChange={(e) => setFormData({ ...formData, activeMinutes: e.target.value })}
-                />
-              </div>
-            </TabsContent>
+              );
+            })}
           </div>
-        </Tabs>
+        </ScrollArea>
 
-        <DialogFooter className="gap-2 sm:gap-0">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+        <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t">
+          <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>
             {t('manualHealthModal.cancel')}
           </Button>
-          <Button onClick={handleSubmit} disabled={isSubmitting}>
+          <Button onClick={handleSubmit} disabled={isSubmitting || enabledCount === 0}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
