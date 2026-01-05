@@ -13,12 +13,7 @@ import { DailyTipWidget } from "@/components/dashboard/client/DailyTipWidget";
 import { ReadinessScoreCard } from "@/components/dashboard/client/ReadinessScoreCard";
 import { ReadinessComponentCard } from "@/components/dashboard/client/ReadinessComponentCard";
 import { WearableTrendCard } from "@/components/dashboard/client/WearableTrendCard";
-import { GoalSuggestionBanner } from "@/components/dashboard/client/GoalSuggestionBanner";
 import { WeeklySummaryCard } from "@/components/dashboard/client/WeeklySummaryCard";
-import { PersonalRecordsWidget } from "@/components/dashboard/client/PersonalRecordsWidget";
-import { TrainingStreakWidget } from "@/components/dashboard/client/TrainingStreakWidget";
-import { MuscleRecoveryWidget } from "@/components/dashboard/client/MuscleRecoveryWidget";
-import { WeeklyVolumeWidget } from "@/components/dashboard/client/WeeklyVolumeWidget";
 import MonthlyReviewCard from "@/components/dashboard/client/MonthlyReviewCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -170,13 +165,12 @@ const ClientOverview = () => {
         </Alert>
       )}
 
-      {/* Section: Today's Health */}
+      {/* Section: Today's Health - 64px after */}
       <Suspense fallback={<HealthWidgetSkeleton />}>
-        <HealthDataWidget compact className="mb-3" />
+        <HealthDataWidget compact className="mb-16" />
       </Suspense>
-      <GoalSuggestionBanner className="mb-16" />
 
-      {/* Section: Daily Readiness */}
+      {/* Section: Daily Readiness - 12px internal, 64px after */}
       <ReadinessScoreCard className="mb-3" />
       <div className="grid grid-cols-3 gap-3 mb-16">
         <ReadinessComponentCard type="sleep" />
@@ -184,21 +178,11 @@ const ClientOverview = () => {
         <ReadinessComponentCard type="activity" />
       </div>
 
-      {/* Section: Insights (Wearable Trends) */}
+      {/* Section: Insights (Wearable Trends) - 64px after */}
       <WearableTrendCard className="mb-16" />
 
-      {/* Section: Tip of the Day */}
+      {/* Section: Tip of the Day - 64px after */}
       <DailyTipWidget className="mb-16" />
-
-      {/* Section: Training Stats */}
-      <div className="grid md:grid-cols-2 gap-3 mb-3">
-        <PersonalRecordsWidget />
-        <TrainingStreakWidget />
-      </div>
-      <div className="grid md:grid-cols-2 gap-3 mb-16">
-        <MuscleRecoveryWidget />
-        <WeeklyVolumeWidget />
-      </div>
 
       {/* Section: Weekly Summary */}
       <WeeklySummaryCard className="mb-16" />
