@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
-import { Battery, Sparkles } from "lucide-react";
+import { Battery } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 
@@ -159,14 +159,6 @@ export function ReadinessScoreCard({ className }: ReadinessScoreCardProps) {
           )}
           style={{ width: `${score}%` }}
         />
-      </div>
-
-      {/* Recommendation */}
-      <div className="flex items-start gap-2 mt-4 bg-muted/30 rounded-xl p-3">
-        <Sparkles className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-        <p className="text-sm text-muted-foreground">
-          {readiness.recommendation}
-        </p>
       </div>
     </div>
   );

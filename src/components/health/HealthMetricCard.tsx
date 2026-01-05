@@ -11,6 +11,7 @@ interface HealthMetricCardProps {
   color: "blue" | "orange" | "green" | "red" | "purple" | "cyan";
   weeklyData?: { day: string; value: number }[];
   trend?: number; // Percentage change
+  showTrend?: boolean; // Whether to show trend indicator (default true)
   className?: string;
 }
 
@@ -67,11 +68,12 @@ export const HealthMetricCard = ({
   color,
   weeklyData = [],
   trend,
+  showTrend = true,
   className,
 }: HealthMetricCardProps) => {
   const styles = colorStyles[color];
   
-  const showTrend = trend !== undefined && trend !== 0;
+  const shouldShowTrend = showTrend && trend !== undefined && trend !== 0;
   const trendPositive = trend && trend > 0;
 
   return (
@@ -94,7 +96,7 @@ export const HealthMetricCard = ({
           </div>
           <span className="text-sm text-muted-foreground">{label}</span>
         </div>
-        {showTrend && (
+        {shouldShowTrend && (
           <div className={cn(
             "flex items-center gap-0.5 text-xs font-medium",
             trendPositive ? "text-green-500" : "text-red-500"
