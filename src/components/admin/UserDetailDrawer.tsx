@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -28,7 +28,7 @@ import {
   User, Heart, Target, MapPin, Calendar, Dumbbell,
   Save, Loader2, AlertTriangle, Apple, Activity,
   Trophy, Zap, Flame, Award, Star, TrendingUp, Gift, Trash2, Image,
-  Pencil, KeyRound, Pause, Clock
+  Pencil, KeyRound, Pause, Clock, X
 } from "lucide-react";
 import {
   Tooltip,
@@ -212,38 +212,45 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto" showCloseButton={false}>
         <SheetHeader>
-          <div className="flex items-center gap-4 pt-6">
-            <UserAvatar
-              src={user.avatar_url}
-              avatarSlug={selectedAvatarData?.avatar?.slug}
-              avatarRarity={selectedAvatarData?.avatar?.rarity as any}
-              name={`${user.first_name || ""} ${user.last_name || ""}`.trim()}
-              variant="squircle"
-              size="sm"
-            />
-            <div>
-              <SheetTitle className="text-xl">
-                {user.first_name || ""} {user.last_name || "Unnamed User"}
-              </SheetTitle>
-              <SheetDescription>
-                {user.city && user.country ? `${user.city}, ${user.country}` : "No location set"}
-              </SheetDescription>
-              <div className="flex items-center gap-2 mt-1">
-                <Badge variant={user.onboarding_completed ? "default" : "secondary"}>
-                  {user.onboarding_completed ? "Active" : "Onboarding"}
-                </Badge>
-                {user.leaderboard_visible && (
-                  <Badge variant="outline">Leaderboard</Badge>
-                )}
-                {stats && stats.xp.level > 1 && (
-                  <Badge variant="outline" className="gap-1">
-                    <Zap className="h-3 w-3" /> Level {stats.xp.level}
+          <div className="flex items-start justify-between gap-4 pt-6">
+            <div className="flex items-center gap-4">
+              <UserAvatar
+                src={user.avatar_url}
+                avatarSlug={selectedAvatarData?.avatar?.slug}
+                avatarRarity={selectedAvatarData?.avatar?.rarity as any}
+                name={`${user.first_name || ""} ${user.last_name || ""}`.trim()}
+                variant="squircle"
+                size="sm"
+              />
+              <div>
+                <SheetTitle className="text-xl">
+                  {user.first_name || ""} {user.last_name || "Unnamed User"}
+                </SheetTitle>
+                <SheetDescription>
+                  {user.city && user.country ? `${user.city}, ${user.country}` : "No location set"}
+                </SheetDescription>
+                <div className="flex items-center gap-2 mt-1">
+                  <Badge variant={user.onboarding_completed ? "default" : "secondary"}>
+                    {user.onboarding_completed ? "Active" : "Onboarding"}
                   </Badge>
-                )}
+                  {user.leaderboard_visible && (
+                    <Badge variant="outline">Leaderboard</Badge>
+                  )}
+                  {stats && stats.xp.level > 1 && (
+                    <Badge variant="outline" className="gap-1">
+                      <Zap className="h-3 w-3" /> Level {stats.xp.level}
+                    </Badge>
+                  )}
+                </div>
               </div>
             </div>
+            <SheetClose asChild>
+              <Button variant="ghost" size="icon" className="shrink-0 rounded-xl">
+                <X className="h-4 w-4" />
+              </Button>
+            </SheetClose>
           </div>
         </SheetHeader>
 

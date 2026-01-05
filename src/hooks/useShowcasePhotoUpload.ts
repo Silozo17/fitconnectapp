@@ -7,6 +7,7 @@ export function useShowcasePhotoUpload() {
 
   const uploadPhoto = async (
     coachId: string,
+    coachUserId: string,
     file: File,
     type: "before" | "after"
   ): Promise<string | null> => {
@@ -28,7 +29,8 @@ export function useShowcasePhotoUpload() {
 
     try {
       const fileExt = file.name.split(".").pop();
-      const fileName = `${coachId}/${type}-${Date.now()}.${fileExt}`;
+      // Use coach-uploads/{coachUserId}/{coachId}/... path for RLS compatibility
+      const fileName = `coach-uploads/${coachUserId}/${coachId}/${type}-${Date.now()}.${fileExt}`;
 
       const { error: uploadError } = await supabase.storage
         .from("transformation-photos")
@@ -37,19 +39,27 @@ export function useShowcasePhotoUpload() {
           upsert: false,
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        toast.error(uploadError.message || "Failed to upload photo");
+        return null;
+      }
 
       // Get signed URL since bucket is private
       const { data: signedData, error: signedError } = await supabase.storage
         .from("transformation-photos")
         .createSignedUrl(fileName, 60 * 60 * 24 * 365); // 1 year
 
-      if (signedError) throw signedError;
+      if (signedError) {
+        console.error("Signed URL error:", signedError);
+        toast.error(signedError.message || "Failed to generate photo URL");
+        return null;
+      }
 
       return signedData.signedUrl;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload photo");
+      toast.error(error?.message || "Failed to upload photo");
       return null;
     } finally {
       setIsUploading(false);

@@ -1,10 +1,10 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Edit, KeyRound, Pause, Shield, UserCog, Clock, Loader2 } from "lucide-react";
+import { Edit, KeyRound, Pause, Shield, UserCog, Clock, Loader2, X } from "lucide-react";
 import { StatusBadge } from "./StatusBadge";
 import { FeaturePermissionsSection } from "./FeaturePermissionsSection";
 import { useUserLastLogin } from "@/hooks/useUserLastLogin";
@@ -85,9 +85,16 @@ export const TeamMemberDetailDrawer = ({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="w-full sm:max-w-md overflow-y-auto">
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto" showCloseButton={false}>
         <SheetHeader>
-          <SheetTitle>Team Member Details</SheetTitle>
+          <div className="flex items-start justify-between gap-4">
+            <SheetTitle>Team Member Details</SheetTitle>
+            <SheetClose asChild>
+              <Button variant="ghost" size="icon" className="shrink-0 rounded-xl">
+                <X className="h-4 w-4" />
+              </Button>
+            </SheetClose>
+          </div>
         </SheetHeader>
 
         <div className="mt-6 space-y-6">
