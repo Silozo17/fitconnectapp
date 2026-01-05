@@ -31,6 +31,7 @@ import {
   User,
   Plug,
   Receipt,
+  Bug,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -142,6 +143,7 @@ const menuGroupsConfig: MenuGroup[] = [
       { titleKey: "navigation.client.receipts", icon: Receipt, path: "/dashboard/client/receipts" },
       { titleKey: "navigation.client.integrations", icon: Plug, path: "/dashboard/client/integrations" },
       { titleKey: "navigation.client.favourites", icon: Heart, path: "/dashboard/client/favourites" },
+      { titleKey: "Debug", icon: Bug, path: "/debug" },
     ],
   },
 ];
