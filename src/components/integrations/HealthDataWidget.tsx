@@ -183,7 +183,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   }
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-3", className)}>
       {/* Alerts - NO outer card wrapper */}
       {needsIOSSync && isSyncStale && (
         <div className="flex items-center gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
@@ -229,7 +229,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
       />
 
       {/* Metric Cards Grid - STANDALONE cards, not nested */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-3">
         <HealthMetricCard
           icon={Footprints}
           label="Steps"

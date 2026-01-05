@@ -68,7 +68,7 @@ export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
   const { data: review, aiSummary } = data;
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-3", className)}>
       {/* AI Summary Card */}
       {aiSummary && (
         <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50">
