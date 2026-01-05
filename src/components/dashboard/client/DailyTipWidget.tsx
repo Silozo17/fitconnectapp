@@ -1,7 +1,7 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@/components/ui/card";
-import { getDailyTip, DailyTip } from "@/lib/daily-tips";
+import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
+import { getDailyTip } from "@/lib/daily-tips";
 import {
   Utensils,
   Dumbbell,
@@ -17,7 +17,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { useState } from "react";
 
 const iconMap = {
   utensils: Utensils,
@@ -28,11 +27,11 @@ const iconMap = {
 } as const;
 
 const categoryColors = {
-  nutrition: "text-green-500 bg-green-500/15",
-  training: "text-blue-500 bg-blue-500/15",
-  recovery: "text-purple-500 bg-purple-500/15",
-  motivation: "text-amber-500 bg-amber-500/15",
-  habit: "text-cyan-500 bg-cyan-500/15",
+  nutrition: "text-primary bg-primary/15",
+  training: "text-primary bg-primary/15",
+  recovery: "text-primary bg-primary/15",
+  motivation: "text-primary bg-primary/15",
+  habit: "text-primary bg-primary/15",
 } as const;
 
 interface DailyTipWidgetProps {
@@ -63,10 +62,10 @@ export function DailyTipWidget({ className, context }: DailyTipWidgetProps) {
   const colorClass = categoryColors[tip.category] || categoryColors.motivation;
 
   return (
-    <Card variant="elevated" className={cn("rounded-3xl overflow-hidden", className)}>
+    <AccentCard className={cn("rounded-2xl", className)}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardContent className="p-5 cursor-pointer hover:bg-muted/30 transition-colors">
+          <AccentCardContent className="p-5 cursor-pointer hover:bg-muted/30 transition-colors">
             <div className="flex items-start gap-4">
               {/* Icon */}
               <div className={cn("p-3 rounded-2xl shrink-0", colorClass)}>
@@ -97,7 +96,7 @@ export function DailyTipWidget({ className, context }: DailyTipWidgetProps) {
                 )}
               />
             </div>
-          </CardContent>
+          </AccentCardContent>
         </CollapsibleTrigger>
 
         <CollapsibleContent>
@@ -118,7 +117,7 @@ export function DailyTipWidget({ className, context }: DailyTipWidgetProps) {
           </div>
         </CollapsibleContent>
       </Collapsible>
-    </Card>
+    </AccentCard>
   );
 }
 

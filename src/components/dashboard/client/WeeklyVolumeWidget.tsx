@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
 import { useTrainingLogs } from "@/hooks/useTrainingLogs";
@@ -76,17 +76,17 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
 
   if (isLoading) {
     return (
-      <Card variant="elevated" className={cn("rounded-3xl", className)}>
-        <CardHeader className="pb-3">
+      <AccentCard className={cn("rounded-2xl", className)}>
+        <div className="p-5 pb-3">
           <div className="flex items-center gap-3">
             <ShimmerSkeleton className="h-10 w-10 rounded-2xl" />
             <ShimmerSkeleton className="h-5 w-32" />
           </div>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <AccentCardContent>
           <ShimmerSkeleton className="h-12 w-32" />
-        </CardContent>
-      </Card>
+        </AccentCardContent>
+      </AccentCard>
     );
   }
 
@@ -107,19 +107,12 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
   const trendColor = trend === 'up' ? 'text-success' : trend === 'down' ? 'text-destructive' : 'text-muted-foreground';
 
   return (
-    <Card variant="elevated" className={cn("rounded-3xl overflow-hidden", className)}>
-      {/* Gradient accent */}
-      <div className="h-1 bg-gradient-to-r from-violet-500 via-purple-500 to-violet-500" />
-
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-base flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-violet-500/10">
-              <Weight className="w-4 h-4 text-violet-500" />
-            </div>
-            Weekly Volume
-          </CardTitle>
-          {trend !== 'same' && (
+    <AccentCard className={cn("rounded-2xl", className)}>
+      <AccentCardHeader 
+        icon={Weight} 
+        title="Weekly Volume"
+        action={
+          trend !== 'same' ? (
             <Badge 
               variant="outline" 
               className={cn(
@@ -131,11 +124,11 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
               <TrendIcon className="w-3 h-3 mr-1" />
               {Math.abs(changePercent)}%
             </Badge>
-          )}
-        </div>
-      </CardHeader>
+          ) : undefined
+        }
+      />
 
-      <CardContent className="space-y-4">
+      <AccentCardContent className="space-y-4">
         {/* Main volume display */}
         <div className="flex items-baseline gap-2">
           <span className="text-4xl font-bold text-foreground font-display">
@@ -165,7 +158,7 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
              'Same as last week'}
           </span>
         </div>
-      </CardContent>
-    </Card>
+      </AccentCardContent>
+    </AccentCard>
   );
 }

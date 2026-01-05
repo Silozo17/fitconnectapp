@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent } from "@/components/ui/card";
+import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { useWearableTrends, TrendData } from "@/hooks/useWearableTrends";
 import {
   TrendingUp,
@@ -10,6 +10,7 @@ import {
   Moon,
   Flame,
   Heart,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -76,8 +77,8 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
 
   if (isLoading) {
     return (
-      <Card variant="elevated" className={cn("rounded-3xl", className)}>
-        <CardContent className="p-5">
+      <AccentCard className={cn("rounded-2xl", className)}>
+        <AccentCardContent className="p-5">
           <ShimmerSkeleton className="h-5 w-32 mb-4" />
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -93,8 +94,8 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </AccentCardContent>
+      </AccentCard>
     );
   }
 
@@ -103,11 +104,9 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
   }
 
   return (
-    <Card variant="elevated" className={cn("rounded-3xl", className)}>
-      <CardContent className="p-5">
-        <h3 className="font-semibold text-foreground mb-3">
-          {t("client.trends.title", "Weekly Trends")}
-        </h3>
+    <AccentCard className={cn("rounded-2xl", className)}>
+      <AccentCardHeader icon={Activity} title={t("client.trends.title", "Weekly Trends")} />
+      <AccentCardContent>
         <p className="text-xs text-muted-foreground mb-4">
           {t("client.trends.subtitle", "Compared to last week")}
         </p>
@@ -116,8 +115,8 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
             <TrendItem key={trend.type} trend={trend} />
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </AccentCardContent>
+    </AccentCard>
   );
 }
 
