@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,9 @@ import {
   Smartphone,
   Bike,
   Waves,
-  TrendingUp
+  TrendingUp,
+  Plus,
+  History
 } from "lucide-react";
 import { useHealthData, HealthDataType } from "@/hooks/useHealthData";
 import { useWearables } from "@/hooks/useWearables";
@@ -21,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow, differenceInHours } from "date-fns";
 import { isDespia } from "@/lib/despia";
+import ManualHealthDataModal from "./ManualHealthDataModal";
 
 interface HealthDataWidgetProps {
   className?: string;
@@ -32,6 +36,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   const { getTodayValue, getTodaySource, isLoading, data, refetch } = useHealthData();
   const { connections, isLoading: wearablesLoading, error: wearablesError } = useWearables();
   const { syncAll, isSyncing, appleHealthStatus, lastSyncedAt } = useSyncAllWearables();
+  const [showManualEntry, setShowManualEntry] = useState(false);
   
   // Enable auto-sync every 15 minutes (excludes Apple Health due to Despia limitations)
   useWearableAutoSync();
@@ -178,15 +183,35 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             {lastSyncedAt && (
               <span className={cn(
-                "text-xs",
+                "text-xs mr-1",
                 isSyncStale ? "text-amber-500" : "text-muted-foreground"
               )}>
                 {formatDistanceToNow(lastSyncedAt, { addSuffix: true })}
               </span>
             )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowManualEntry(true)}
+              className="h-8 w-8"
+              title="Add health data manually"
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="h-8 w-8"
+              title="View health history"
+            >
+              <Link to="/dashboard/client/health-history">
+                <History className="w-4 h-4" />
+              </Link>
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -328,6 +353,12 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
             </div>
           </div>
         </div>
+        
+        {/* Manual Entry Modal */}
+        <ManualHealthDataModal 
+          open={showManualEntry} 
+          onOpenChange={setShowManualEntry} 
+        />
       </CardContent>
     </Card>
   );

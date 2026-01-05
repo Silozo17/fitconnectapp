@@ -95,6 +95,7 @@ const ClientMarketplaceBundle = lazy(() => import('@/pages/dashboard/client/Clie
 const ClientPlanDetail = lazy(() => import('@/pages/dashboard/client/ClientPlanDetail'));
 const ClientFoodDiary = lazy(() => import('@/pages/dashboard/client/ClientFoodDiary'));
 const ClientTrainingLogs = lazy(() => import('@/pages/dashboard/client/ClientTrainingLogs'));
+const ClientHealthHistory = lazy(() => import('@/pages/dashboard/client/ClientHealthHistory'));
 
 // Coach Dashboard Pages
 const CoachOverview = lazy(() => import('@/pages/dashboard/coach/CoachOverview'));
@@ -684,6 +685,11 @@ const App = () => (
                               <Route path="/dashboard/client/integrations" element={
                                 <ProtectedRoute allowedRoles={["client", "admin"]}>
                                   <ClientIntegrations />
+                                </ProtectedRoute>
+                              } />
+                              <Route path="/dashboard/client/health-history" element={
+                                <ProtectedRoute allowedRoles={["client", "admin"]}>
+                                  <ClientHealthHistory />
                                 </ProtectedRoute>
                               } />
                               <Route path="/dashboard/client/grocery" element={
