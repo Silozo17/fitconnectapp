@@ -178,9 +178,9 @@ const ClientOverview = () => {
         </Alert>
       )}
 
-      {/* Section: Today's Health - 64px after */}
+      {/* Section: Today's Health - 44px after */}
       <Suspense fallback={<HealthWidgetSkeleton />}>
-        <HealthDataWidget compact className="mb-16" />
+        <HealthDataWidget compact className="mb-11" />
       </Suspense>
 
       {/* Section: Daily Readiness */}
@@ -189,7 +189,7 @@ const ClientOverview = () => {
         description={readiness?.recommendation || "How prepared you are for today"} 
       />
       <ReadinessScoreCard className="mb-3" />
-      <div className="grid grid-cols-3 gap-3 mb-16">
+      <div className="grid grid-cols-3 gap-3 mb-11">
         <ReadinessComponentCard type="sleep" />
         <ReadinessComponentCard type="recovery" />
         <ReadinessComponentCard type="activity" />
@@ -200,42 +200,42 @@ const ClientOverview = () => {
         title="Your Insights" 
         description="Trends compared to last week" 
       />
-      <WearableTrendCard className="mb-16" />
+      <WearableTrendCard className="mb-11" />
 
       {/* Section: Tip of the Day */}
       <DashboardSectionHeader 
         title="Today's Tip" 
         description={dailyTip.body} 
       />
-      <DailyTipWidget className="mb-16" />
+      <DailyTipWidget className="mb-11" />
 
       {/* Section: Weekly Summary */}
       <DashboardSectionHeader 
         title="Weekly Summary" 
         description="Your week at a glance" 
       />
-      <WeeklySummaryCard className="mb-16" />
+      <WeeklySummaryCard className="mb-11" />
 
       {/* Section: Monthly Review */}
       <DashboardSectionHeader 
         title="Monthly Review" 
         description="Your progress this month" 
       />
-      <MonthlyReviewCard className="mb-16" />
+      <MonthlyReviewCard className="mb-11" />
 
       {/* Section: Friend Requests */}
       <DashboardSectionHeader 
         title="Friend Requests" 
         description="Pending connection requests" 
       />
-      <UserConnectionRequests className="mb-16" />
+      <UserConnectionRequests className="mb-11" />
 
       {/* Section: Quick Actions */}
       <DashboardSectionHeader 
         title="Quick Actions" 
         description="Fast access to key features" 
       />
-      <div className="mb-16">
+      <div className="mb-11">
         {/* Mobile: 3D Carousel */}
         <div className="md:hidden -mx-5">
           <Carousel3D gap={12}>
