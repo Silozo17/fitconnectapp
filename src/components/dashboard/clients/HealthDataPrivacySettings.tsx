@@ -17,6 +17,9 @@ const DATA_TYPE_ICONS: Record<HealthDataType, React.ReactNode> = {
   sleep: <Moon className="w-4 h-4" />,
   calories: <Flame className="w-4 h-4" />,
   distance: <MapPin className="w-4 h-4" />,
+  distance_walking: <Footprints className="w-4 h-4" />,
+  distance_cycling: <MapPin className="w-4 h-4" />,
+  distance_swimming: <MapPin className="w-4 h-4" />,
   active_minutes: <Timer className="w-4 h-4" />,
   weight: <Scale className="w-4 h-4" />,
 };

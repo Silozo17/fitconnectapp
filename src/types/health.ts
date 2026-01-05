@@ -14,7 +14,10 @@ export type CoreHealthDataType =
   | "heart_rate" 
   | "sleep" 
   | "calories" 
-  | "distance" 
+  | "distance"
+  | "distance_walking"
+  | "distance_cycling"
+  | "distance_swimming"
   | "active_minutes";
 
 /**
@@ -59,6 +62,9 @@ export const CORE_HEALTH_DATA_TYPES: CoreHealthDataType[] = [
   "sleep",
   "calories",
   "distance",
+  "distance_walking",
+  "distance_cycling",
+  "distance_swimming",
   "active_minutes",
 ];
 

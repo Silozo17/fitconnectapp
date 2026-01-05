@@ -1,7 +1,18 @@
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Footprints, Heart, Moon, Flame, Activity, Clock, Watch, RefreshCw, Smartphone } from "lucide-react";
+import { 
+  Footprints, 
+  Flame, 
+  Timer, 
+  Activity, 
+  Watch, 
+  RefreshCw, 
+  Smartphone,
+  Bike,
+  Waves,
+  TrendingUp
+} from "lucide-react";
 import { useHealthData, HealthDataType } from "@/hooks/useHealthData";
 import { useWearables } from "@/hooks/useWearables";
 import { useSyncAllWearables } from "@/hooks/useSyncAllWearables";
@@ -10,57 +21,6 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow, differenceInHours } from "date-fns";
 import { isDespia } from "@/lib/despia";
-
-const metrics: {
-  type: HealthDataType;
-  labelKey: string;
-  icon: React.ReactNode;
-  color: string;
-  format: (value: number) => string;
-}[] = [
-  {
-    type: "steps",
-    labelKey: "Steps",
-    icon: <Footprints className="w-5 h-5" />,
-    color: "text-blue-400",
-    format: (v) => v.toLocaleString(),
-  },
-  {
-    type: "heart_rate",
-    labelKey: "Avg Heart Rate",
-    icon: <Heart className="w-5 h-5" />,
-    color: "text-red-400",
-    format: (v) => `${Math.round(v)} bpm`,
-  },
-  {
-    type: "sleep",
-    labelKey: "Sleep",
-    icon: <Moon className="w-5 h-5" />,
-    color: "text-purple-400",
-    format: (v) => `${(v / 60).toFixed(1)} hrs`,
-  },
-  {
-    type: "calories",
-    labelKey: "Calories Burned",
-    icon: <Flame className="w-5 h-5" />,
-    color: "text-orange-400",
-    format: (v) => v.toLocaleString(),
-  },
-  {
-    type: "active_minutes",
-    labelKey: "Active Minutes",
-    icon: <Clock className="w-5 h-5" />,
-    color: "text-green-400",
-    format: (v) => `${Math.round(v)} min`,
-  },
-  {
-    type: "distance",
-    labelKey: "Distance",
-    icon: <Activity className="w-5 h-5" />,
-    color: "text-cyan-400",
-    format: (v) => `${(v / 1000).toFixed(1)} km`,
-  },
-];
 
 interface HealthDataWidgetProps {
   className?: string;
@@ -78,15 +38,6 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
 
   const hasConnectedDevice = connections && connections.length > 0;
   const hasData = data && data.length > 0;
-  
-  // Debug: log data state for troubleshooting
-  console.log('[HealthDataWidget] Data state:', {
-    hasConnectedDevice,
-    hasData,
-    dataCount: data?.length || 0,
-    connections: connections?.map(c => c.provider),
-    lastSyncedAt: lastSyncedAt?.toISOString(),
-  });
 
   // Check if Apple Health is connected but has no data today
   const hasAppleHealth = connections?.some(c => c.provider === 'apple_health');
@@ -101,13 +52,42 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   // Check if sync is stale (more than 1 hour old)
   const isSyncStale = lastSyncedAt ? differenceInHours(new Date(), lastSyncedAt) >= 1 : true;
 
+  // Get values
+  const steps = getTodayValue('steps');
+  const calories = getTodayValue('calories');
+  const activeMinutes = getTodayValue('active_minutes');
+  const distanceWalking = getTodayValue('distance_walking');
+  const distanceCycling = getTodayValue('distance_cycling');
+  const distanceSwimming = getTodayValue('distance_swimming');
+  const totalDistance = distanceWalking + distanceCycling + distanceSwimming;
+
+  // Format helpers
+  const formatDistance = (meters: number) => {
+    if (meters >= 1000) {
+      return `${(meters / 1000).toFixed(1)} km`;
+    }
+    return `${Math.round(meters)} m`;
+  };
+
+  const formatTime = (minutes: number) => {
+    if (minutes >= 60) {
+      const hrs = Math.floor(minutes / 60);
+      const mins = Math.round(minutes % 60);
+      return mins > 0 ? `${hrs}h ${mins}m` : `${hrs}h`;
+    }
+    return `${Math.round(minutes)} min`;
+  };
+
+  // Get distance percentage for progress bars
+  const getDistancePercentage = (distance: number) => {
+    if (totalDistance === 0) return 0;
+    return Math.round((distance / totalDistance) * 100);
+  };
+
   const handleSync = async () => {
     try {
       await syncAll();
-      // Explicitly refetch health data after sync completes
-      console.log('[HealthDataWidget] Sync complete, triggering explicit refetch...');
       await refetch();
-      console.log('[HealthDataWidget] Refetch complete');
     } catch (error) {
       // Error handled in hook
     }
@@ -127,13 +107,7 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
   };
 
   // Determine the primary data source for display
-  const primarySource = (() => {
-    for (const metric of metrics) {
-      const source = getTodaySource(metric.type);
-      if (source) return source;
-    }
-    return null;
-  })();
+  const primarySource = getTodaySource('steps') || getTodaySource('calories');
 
   if (isLoading && !wearablesError && wearablesLoading) {
     return (
@@ -145,10 +119,13 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-14 sm:h-16 bg-muted/50 rounded-lg animate-pulse" />
-            ))}
+          <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-24 bg-muted/50 rounded-xl animate-pulse" />
+              ))}
+            </div>
+            <div className="h-32 bg-muted/50 rounded-xl animate-pulse" />
           </div>
         </CardContent>
       </Card>
@@ -186,17 +163,14 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
     );
   }
 
-  // Always show all 6 metrics for consistency
-  const displayMetrics = metrics;
-
   return (
     <Card variant="glass" className={cn(className)}>
-      <CardHeader className="pb-2">
+      <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <CardTitle className="text-lg flex items-center gap-2">
               <Activity className="w-5 h-5 text-primary" />
-              {t('integrations.todaysHealth')}
+              Today's Activity
             </CardTitle>
             {primarySource && (
               <span className="text-xs text-muted-foreground mt-0.5">
@@ -226,10 +200,10 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           </div>
         </div>
       </CardHeader>
-      <CardContent>
-        {/* Apple Health connected but not on iOS - needs native app */}
+      <CardContent className="space-y-4">
+        {/* Alerts */}
         {needsIOSSync && isSyncStale && (
-          <div className="flex items-center gap-2 p-2 mb-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
             <Smartphone className="w-4 h-4 text-amber-500 shrink-0" />
             <p className="text-xs text-amber-600 dark:text-amber-400">
               Open the app on your iPhone to sync Apple Health data
@@ -237,9 +211,8 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           </div>
         )}
         
-        {/* Apple Health connected on iOS but no data available */}
         {appleHealthConnectedNoData && isIOSNative && appleHealthStatus !== 'syncing' && (
-          <div className="flex items-center gap-2 p-2 mb-3 rounded-lg bg-muted/50 border border-border/50">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 border border-border/50">
             <Smartphone className="w-4 h-4 text-muted-foreground shrink-0" />
             <p className="text-xs text-muted-foreground">
               Apple Health connected — tap sync to pull today's data
@@ -247,36 +220,113 @@ const HealthDataWidget = ({ className, compact = false }: HealthDataWidgetProps)
           </div>
         )}
         
-        {/* No data from any source */}
         {hasConnectedDevice && !hasData && !isSyncing && !isLoading && (
-          <div className="flex items-center gap-2 p-2 mb-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <div className="flex items-center gap-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
             <RefreshCw className="w-4 h-4 text-amber-500 shrink-0" />
             <p className="text-xs text-amber-600 dark:text-amber-400">
               No data yet — tap sync to pull from your device
             </p>
           </div>
         )}
-        <div className={cn(
-          "grid gap-2 sm:gap-3",
-          compact ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2 sm:grid-cols-3"
-        )}>
-          {displayMetrics.map((metric) => {
-            const value = getTodayValue(metric.type);
-            return (
-              <div
-                key={metric.type}
-                className="bg-muted/30 rounded-lg p-2 sm:p-3 flex items-center gap-2 sm:gap-3 min-h-[56px]"
-              >
-                <div className={cn("p-1.5 sm:p-2 rounded-lg bg-muted/50 shrink-0", metric.color)}>
-                  {metric.icon}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{metric.labelKey}</p>
-                  <p className="font-semibold text-sm sm:text-base truncate">{metric.format(value)}</p>
-                </div>
+
+        {/* Hero Stats - Steps, Calories, Exercise Time */}
+        <div className="grid grid-cols-3 gap-3">
+          {/* Steps */}
+          <div className="bg-gradient-to-br from-blue-500/10 to-blue-600/5 rounded-xl p-3 border border-blue-500/20">
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="p-1.5 rounded-lg bg-blue-500/20">
+                <Footprints className="w-4 h-4 text-blue-400" />
               </div>
-            );
-          })}
+            </div>
+            <p className="text-2xl font-bold text-foreground">{steps.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">steps</p>
+          </div>
+
+          {/* Active Calories */}
+          <div className="bg-gradient-to-br from-orange-500/10 to-orange-600/5 rounded-xl p-3 border border-orange-500/20">
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="p-1.5 rounded-lg bg-orange-500/20">
+                <Flame className="w-4 h-4 text-orange-400" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{calories.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground">kcal</p>
+          </div>
+
+          {/* Exercise Time */}
+          <div className="bg-gradient-to-br from-green-500/10 to-green-600/5 rounded-xl p-3 border border-green-500/20">
+            <div className="flex items-center gap-1.5 mb-2">
+              <div className="p-1.5 rounded-lg bg-green-500/20">
+                <Timer className="w-4 h-4 text-green-400" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{formatTime(activeMinutes)}</p>
+            <p className="text-xs text-muted-foreground">exercise</p>
+          </div>
+        </div>
+
+        {/* Distance Breakdown */}
+        <div className="bg-muted/30 rounded-xl p-4 border border-border/50">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium">Distance</span>
+            </div>
+            <span className="text-lg font-bold">{formatDistance(totalDistance)}</span>
+          </div>
+          
+          <div className="space-y-3">
+            {/* Walking/Running */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Footprints className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="text-muted-foreground">Walking</span>
+                </div>
+                <span className="font-medium">{formatDistance(distanceWalking)}</span>
+              </div>
+              <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full transition-all duration-500"
+                  style={{ width: `${getDistancePercentage(distanceWalking)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Cycling */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Bike className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="text-muted-foreground">Cycling</span>
+                </div>
+                <span className="font-medium">{formatDistance(distanceCycling)}</span>
+              </div>
+              <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500"
+                  style={{ width: `${getDistancePercentage(distanceCycling)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Swimming */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center gap-2">
+                  <Waves className="w-3.5 h-3.5 text-blue-400" />
+                  <span className="text-muted-foreground">Swimming</span>
+                </div>
+                <span className="font-medium">{formatDistance(distanceSwimming)}</span>
+              </div>
+              <div className="h-2 bg-muted/50 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all duration-500"
+                  style={{ width: `${getDistancePercentage(distanceSwimming)}%` }}
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>

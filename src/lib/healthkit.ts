@@ -11,8 +11,11 @@ import { supabase } from '@/integrations/supabase/client';
 // All HealthKit types we need - request together for single permission dialog
 const HEALTHKIT_TYPES = [
   'HKQuantityTypeIdentifierStepCount',
-  'HKQuantityTypeIdentifierActiveEnergyBurned',
   'HKQuantityTypeIdentifierDistanceWalkingRunning',
+  'HKQuantityTypeIdentifierDistanceCycling',
+  'HKQuantityTypeIdentifierDistanceSwimming',
+  'HKQuantityTypeIdentifierActiveEnergyBurned',
+  'HKQuantityTypeIdentifierAppleExerciseTime',
 ].join(',');
 
 /**
@@ -54,14 +57,20 @@ export const connectAndSyncHealthKit = async (
   // Permission granted - process and save data
   const typeMap: Record<string, string> = {
     'HKQuantityTypeIdentifierStepCount': 'steps',
+    'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance_walking',
+    'HKQuantityTypeIdentifierDistanceCycling': 'distance_cycling',
+    'HKQuantityTypeIdentifierDistanceSwimming': 'distance_swimming',
     'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories',
-    'HKQuantityTypeIdentifierDistanceWalkingRunning': 'distance',
+    'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
   };
 
   const unitMap: Record<string, string> = {
     'steps': 'count',
+    'distance_walking': 'meters',
+    'distance_cycling': 'meters',
+    'distance_swimming': 'meters',
     'calories': 'kcal',
-    'distance': 'meters',
+    'active_minutes': 'minutes',
   };
 
   // Aggregate by date (HealthKit returns multiple readings per day)
@@ -86,7 +95,9 @@ export const connectAndSyncHealthKit = async (
   const entries = [];
   for (const [dateStr, types] of Object.entries(aggregated)) {
     for (const [dataType, value] of Object.entries(types)) {
-      const finalValue = dataType === 'distance'
+      // Round distance types to 1 decimal, others to whole numbers
+      const isDistance = dataType.startsWith('distance_');
+      const finalValue = isDistance
         ? Math.round(value * 10) / 10
         : Math.round(value);
 
