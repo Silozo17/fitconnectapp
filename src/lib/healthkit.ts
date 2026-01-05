@@ -9,13 +9,14 @@ import despia from 'despia-native';
 import { supabase } from '@/integrations/supabase/client';
 
 // All HealthKit types we need - request together for single permission dialog
+// NOTE: HKQuantityTypeIdentifierAppleExerciseTime excluded - returns time units 
+// that may not be supported by Despia SDK's healthkit://read endpoint
 const HEALTHKIT_TYPES = [
   'HKQuantityTypeIdentifierStepCount',
   'HKQuantityTypeIdentifierDistanceWalkingRunning',
   'HKQuantityTypeIdentifierDistanceCycling',
   'HKQuantityTypeIdentifierDistanceSwimming',
   'HKQuantityTypeIdentifierActiveEnergyBurned',
-  'HKQuantityTypeIdentifierAppleExerciseTime',
 ].join(',');
 
 /**
@@ -61,7 +62,6 @@ export const connectAndSyncHealthKit = async (
     'HKQuantityTypeIdentifierDistanceCycling': 'distance_cycling',
     'HKQuantityTypeIdentifierDistanceSwimming': 'distance_swimming',
     'HKQuantityTypeIdentifierActiveEnergyBurned': 'calories',
-    'HKQuantityTypeIdentifierAppleExerciseTime': 'active_minutes',
   };
 
   const unitMap: Record<string, string> = {
@@ -70,7 +70,6 @@ export const connectAndSyncHealthKit = async (
     'distance_cycling': 'meters',
     'distance_swimming': 'meters',
     'calories': 'kcal',
-    'active_minutes': 'minutes',
   };
 
   // Aggregate by date (HealthKit returns multiple readings per day)
