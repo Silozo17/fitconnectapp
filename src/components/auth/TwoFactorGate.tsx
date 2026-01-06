@@ -6,12 +6,13 @@ import { Loader2, Shield, Dumbbell } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 interface TwoFactorGateProps {
   children: React.ReactNode;
 }
 
-const SESSION_STORAGE_KEY = "fitconnect_2fa_verified";
+const SESSION_STORAGE_KEY = STORAGE_KEYS.TWO_FACTOR_VERIFIED;
 const VERIFICATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
