@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useFoodDiary, useAddFoodDiaryEntry, useDeleteFoodDiaryEntry, useUpdateFoodDiaryEntry, calculateDailyMacros, groupEntriesByMeal, FoodDiaryInsert, FoodDiaryEntry } from "@/hooks/useFoodDiary";
 import { useNutritionTargets } from "@/hooks/useNutritionTargets";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { ChevronLeft, ChevronRight, Plus, Utensils, Trash2, ScanBarcode, Search, Loader2 } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -17,7 +16,7 @@ import { FoodSearchModal } from "@/components/nutrition/FoodSearchModal";
 import { EditFoodEntryModal } from "@/components/nutrition/EditFoodEntryModal";
 import { InfoTooltip } from "@/components/shared/InfoTooltip";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
+import { DashboardSectionHeader, ContentSection } from "@/components/shared";
 
 const MEAL_TYPES = [
   { id: 'breakfast', label: 'Breakfast', icon: '🌅', time: '6am - 10am' },
@@ -84,7 +83,6 @@ const ClientFoodDiary = () => {
     };
 
     addEntry.mutate(entry);
-    // Clear scanned food after adding
     setScannedFood(null);
   };
 
@@ -132,18 +130,19 @@ const ClientFoodDiary = () => {
           description="Log your meals and track calories & macros against your targets"
         />
 
-        <div className="space-y-6">
+        <div className="space-y-11">
           {/* Date Navigation */}
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setSelectedDate(subDays(selectedDate, 1))}
+              className="rounded-xl"
             >
               <ChevronLeft className="w-5 h-5" />
             </Button>
             <div className="text-center">
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-lg font-semibold font-display text-foreground">
                 {isToday ? "Today" : format(selectedDate, "EEEE")}
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -155,74 +154,72 @@ const ClientFoodDiary = () => {
               size="icon"
               onClick={() => setSelectedDate(addDays(selectedDate, 1))}
               disabled={isToday}
+              className="rounded-xl"
             >
               <ChevronRight className="w-5 h-5" />
             </Button>
           </div>
 
           {/* Daily Summary */}
-          <Card className="rounded-2xl">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-1">
-                <CardTitle className="text-base">Daily Summary</CardTitle>
-                <TooltipProvider>
-                  <InfoTooltip 
-                    content={getTargetSourceLabel() || "Your daily nutrition targets"} 
-                  />
-                </TooltipProvider>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Calories */}
-              <div>
-                <div className="flex justify-between text-sm mb-1">
-                  <div className="flex items-center gap-1">
-                    <span>Calories</span>
-                    <TooltipProvider>
-                      <InfoTooltip content="Your daily calorie target based on your goals and activity level" />
-                    </TooltipProvider>
-                  </div>
-                  <span className="font-medium">
-                    {Math.round(dailyMacros.calories)} / {targets.calories} kcal
-                  </span>
-                </div>
-                <Progress 
-                  value={Math.min((dailyMacros.calories / targets.calories) * 100, 100)} 
-                  className="h-2"
+          <ContentSection colorTheme="primary" className="p-5">
+            <div className="flex items-center gap-1 mb-4">
+              <h3 className="text-base font-bold text-foreground font-display">Daily Summary</h3>
+              <TooltipProvider>
+                <InfoTooltip 
+                  content={getTargetSourceLabel() || "Your daily nutrition targets"} 
                 />
+              </TooltipProvider>
+            </div>
+            
+            {/* Calories */}
+            <div className="mb-5">
+              <div className="flex justify-between text-sm mb-1">
+                <div className="flex items-center gap-1">
+                  <span className="text-muted-foreground">Calories</span>
+                  <TooltipProvider>
+                    <InfoTooltip content="Your daily calorie target based on your goals and activity level" />
+                  </TooltipProvider>
+                </div>
+                <span className="font-medium text-foreground">
+                  {Math.round(dailyMacros.calories)} / {targets.calories} kcal
+                </span>
               </div>
+              <Progress 
+                value={Math.min((dailyMacros.calories / targets.calories) * 100, 100)} 
+                className="h-2"
+              />
+            </div>
 
-              {/* Macros */}
-              <div className="grid grid-cols-3 gap-4">
-                <TooltipProvider>
-                  <div className="text-center p-3 rounded-xl bg-blue-500/10">
-                    <div className="flex items-center justify-center gap-0.5">
-                      <p className="text-xs text-muted-foreground">Protein</p>
-                      <InfoTooltip content="Protein supports muscle growth and repair" />
-                    </div>
-                    <p className="text-lg font-bold text-blue-500">{Math.round(dailyMacros.protein_g)}g</p>
-                    <p className="text-xs text-muted-foreground">/ {targets.protein}g</p>
+            {/* Macros */}
+            <div className="grid grid-cols-3 gap-4">
+              <TooltipProvider>
+                <div className="text-center p-3 rounded-xl bg-blue-500/20">
+                  <div className="flex items-center justify-center gap-0.5">
+                    <p className="text-xs text-muted-foreground">Protein</p>
+                    <InfoTooltip content="Protein supports muscle growth and repair" />
                   </div>
-                  <div className="text-center p-3 rounded-xl bg-amber-500/10">
-                    <div className="flex items-center justify-center gap-0.5">
-                      <p className="text-xs text-muted-foreground">Carbs</p>
-                      <InfoTooltip content="Carbohydrates provide energy for workouts" />
-                    </div>
-                    <p className="text-lg font-bold text-amber-500">{Math.round(dailyMacros.carbs_g)}g</p>
-                    <p className="text-xs text-muted-foreground">/ {targets.carbs}g</p>
+                  <p className="text-lg font-bold text-blue-400">{Math.round(dailyMacros.protein_g)}g</p>
+                  <p className="text-xs text-muted-foreground">/ {targets.protein}g</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-amber-500/20">
+                  <div className="flex items-center justify-center gap-0.5">
+                    <p className="text-xs text-muted-foreground">Carbs</p>
+                    <InfoTooltip content="Carbohydrates provide energy for workouts" />
                   </div>
-                  <div className="text-center p-3 rounded-xl bg-rose-500/10">
-                    <div className="flex items-center justify-center gap-0.5">
-                      <p className="text-xs text-muted-foreground">Fat</p>
-                      <InfoTooltip content="Healthy fats support hormone function" />
-                    </div>
-                    <p className="text-lg font-bold text-rose-500">{Math.round(dailyMacros.fat_g)}g</p>
-                    <p className="text-xs text-muted-foreground">/ {targets.fat}g</p>
+                  <p className="text-lg font-bold text-amber-400">{Math.round(dailyMacros.carbs_g)}g</p>
+                  <p className="text-xs text-muted-foreground">/ {targets.carbs}g</p>
+                </div>
+                <div className="text-center p-3 rounded-xl bg-rose-500/20">
+                  <div className="flex items-center justify-center gap-0.5">
+                    <p className="text-xs text-muted-foreground">Fat</p>
+                    <InfoTooltip content="Healthy fats support hormone function" />
                   </div>
-                </TooltipProvider>
-              </div>
-            </CardContent>
-          </Card>
+                  <p className="text-lg font-bold text-rose-400">{Math.round(dailyMacros.fat_g)}g</p>
+                  <p className="text-xs text-muted-foreground">/ {targets.fat}g</p>
+                </div>
+              </TooltipProvider>
+            </div>
+          </ContentSection>
 
           {/* Quick Add Buttons - Inline */}
           <div className="flex items-center justify-center gap-3">
@@ -259,81 +256,79 @@ const ClientFoodDiary = () => {
                 const mealCalories = mealEntries.reduce((sum, e) => sum + (e.calories || 0) * (e.servings || 1), 0);
 
                 return (
-                  <Card key={meal.id} className="rounded-2xl">
-                    <CardHeader className="pb-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xl">{meal.icon}</span>
-                          <div>
-                            <CardTitle className="text-base">{meal.label}</CardTitle>
-                            <p className="text-xs text-muted-foreground">{meal.time}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium text-muted-foreground">
-                            {Math.round(mealCalories)} kcal
-                          </span>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => {
-                              setActiveMealType(meal.id);
-                              setScannedFood(null);
-                              setShowFoodSearch(true);
-                            }}
-                          >
-                            <Plus className="w-4 h-4" />
-                          </Button>
+                  <ContentSection key={meal.id} colorTheme="primary" className="p-5">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{meal.icon}</span>
+                        <div>
+                          <h3 className="text-base font-bold text-foreground font-display">{meal.label}</h3>
+                          <p className="text-xs text-muted-foreground">{meal.time}</p>
                         </div>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      {mealEntries.length > 0 ? (
-                        <div className="space-y-2">
-                          {mealEntries.map((entry) => (
-                            <div
-                              key={entry.id}
-                              onClick={() => setEditingEntry(entry)}
-                              className="flex items-center justify-between p-3 rounded-xl bg-muted/50 group cursor-pointer hover:bg-muted/70 transition-colors"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <p className="font-medium truncate">{entry.food_name}</p>
-                                <p className="text-xs text-muted-foreground">
-                                  {entry.servings && entry.servings > 1 ? `${entry.servings}x ` : ''}
-                                  {entry.serving_size_g}g • {Math.round((entry.calories || 0) * (entry.servings || 1))} kcal
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <div className="text-xs text-right hidden sm:block">
-                                  <span className="text-blue-500">{Math.round((entry.protein_g || 0) * (entry.servings || 1))}p</span>
-                                  {" • "}
-                                  <span className="text-amber-500">{Math.round((entry.carbs_g || 0) * (entry.servings || 1))}c</span>
-                                  {" • "}
-                                  <span className="text-rose-500">{Math.round((entry.fat_g || 0) * (entry.servings || 1))}f</span>
-                                </div>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    deleteEntry.mutate(entry.id);
-                                  }}
-                                >
-                                  <Trash2 className="w-4 h-4 text-destructive" />
-                                </Button>
-                              </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">
+                          {Math.round(mealCalories)} kcal
+                        </span>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="rounded-xl"
+                          onClick={() => {
+                            setActiveMealType(meal.id);
+                            setScannedFood(null);
+                            setShowFoodSearch(true);
+                          }}
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    {mealEntries.length > 0 ? (
+                      <div className="space-y-2">
+                        {mealEntries.map((entry) => (
+                          <div
+                            key={entry.id}
+                            onClick={() => setEditingEntry(entry)}
+                            className="flex items-center justify-between p-3 rounded-xl bg-secondary/50 group cursor-pointer hover:bg-secondary/70 transition-colors"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate text-foreground">{entry.food_name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {entry.servings && entry.servings > 1 ? `${entry.servings}x ` : ''}
+                                {entry.serving_size_g}g • {Math.round((entry.calories || 0) * (entry.servings || 1))} kcal
+                              </p>
                             </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center py-6 text-muted-foreground">
-                          <Utensils className="w-4 h-4 mr-2" />
-                          <span className="text-sm">No foods logged</span>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
+                            <div className="flex items-center gap-3">
+                              <div className="text-xs text-right hidden sm:block">
+                                <span className="text-blue-400">{Math.round((entry.protein_g || 0) * (entry.servings || 1))}p</span>
+                                {" • "}
+                                <span className="text-amber-400">{Math.round((entry.carbs_g || 0) * (entry.servings || 1))}c</span>
+                                {" • "}
+                                <span className="text-rose-400">{Math.round((entry.fat_g || 0) * (entry.servings || 1))}f</span>
+                              </div>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                className="opacity-0 group-hover:opacity-100 transition-opacity h-8 w-8 rounded-xl"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteEntry.mutate(entry.id);
+                                }}
+                              >
+                                <Trash2 className="w-4 h-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center py-6 text-muted-foreground">
+                        <Utensils className="w-4 h-4 mr-2" />
+                        <span className="text-sm">No foods logged</span>
+                      </div>
+                    )}
+                  </ContentSection>
                 );
               })}
             </div>
@@ -346,10 +341,9 @@ const ClientFoodDiary = () => {
           open={showBarcodeScanner}
           onOpenChange={setShowBarcodeScanner}
           onFoodFound={(food) => {
-            // Store scanned food and open quantity modal instead of adding directly
             setScannedFood(food);
             setShowBarcodeScanner(false);
-            setActiveMealType('snack'); // Default to snack for scanned items
+            setActiveMealType('snack');
             setShowFoodSearch(true);
           }}
         />

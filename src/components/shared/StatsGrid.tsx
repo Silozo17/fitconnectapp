@@ -4,8 +4,8 @@ import { cn } from "@/lib/utils";
 interface StatsGridProps {
   children: ReactNode;
   className?: string;
-  /** Number of columns on different breakpoints */
-  columns?: {
+  /** Number of columns - can be a simple number or responsive config */
+  columns?: number | {
     default?: 1 | 2 | 3 | 4;
     sm?: 1 | 2 | 3 | 4;
     md?: 2 | 3 | 4 | 5 | 6;
@@ -50,6 +50,16 @@ const gapClasses = {
   lg: "gap-4",
 };
 
+// Simple number to responsive config mapping
+const simpleColumnDefaults: Record<number, { default: 1 | 2 | 3 | 4; md: 2 | 3 | 4 | 5 | 6 }> = {
+  1: { default: 1, md: 2 },
+  2: { default: 2, md: 2 },
+  3: { default: 2, md: 3 },
+  4: { default: 2, md: 4 },
+  5: { default: 2, md: 5 },
+  6: { default: 3, md: 6 },
+};
+
 /**
  * StatsGrid - Responsive grid for MetricCards and similar widgets
  * 
@@ -57,6 +67,7 @@ const gapClasses = {
  * - Responsive column configuration
  * - Consistent gap spacing
  * - Common defaults: 2 cols mobile, 4 cols desktop
+ * - Accepts simple number or responsive config
  */
 export const StatsGrid = memo(({
   children,
@@ -64,11 +75,21 @@ export const StatsGrid = memo(({
   columns = { default: 2, md: 4 },
   gap = "default",
 }: StatsGridProps) => {
+  // Convert simple number to responsive config
+  const responsiveColumns: {
+    default?: 1 | 2 | 3 | 4;
+    sm?: 1 | 2 | 3 | 4;
+    md?: 2 | 3 | 4 | 5 | 6;
+    lg?: 2 | 3 | 4 | 5 | 6;
+  } = typeof columns === "number" 
+    ? simpleColumnDefaults[columns] || { default: 2, md: columns as 2 | 3 | 4 | 5 | 6 }
+    : columns;
+
   const gridClasses = [
-    columns.default && columnClasses.default[columns.default],
-    columns.sm && columnClasses.sm[columns.sm],
-    columns.md && columnClasses.md[columns.md],
-    columns.lg && columnClasses.lg[columns.lg],
+    responsiveColumns.default && columnClasses.default[responsiveColumns.default],
+    responsiveColumns.sm && columnClasses.sm[responsiveColumns.sm],
+    responsiveColumns.md && columnClasses.md[responsiveColumns.md],
+    responsiveColumns.lg && columnClasses.lg[responsiveColumns.lg],
   ].filter(Boolean).join(" ");
 
   return (

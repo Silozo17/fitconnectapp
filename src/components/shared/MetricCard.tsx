@@ -12,18 +12,30 @@ export type MetricCardColor =
   | "cyan" 
   | "pink" 
   | "amber" 
-  | "emerald";
+  | "emerald"
+  | "yellow";
+
+interface TrendInfo {
+  value: number;
+  direction: "up" | "down";
+  suffix?: string;
+}
 
 interface MetricCardProps {
   icon: LucideIcon;
   label: string;
   value: string | number;
   unit?: string;
+  /** Color theme - use colorTheme or color (alias) */
   color?: MetricCardColor;
-  trend?: number; // Percentage change
+  colorTheme?: MetricCardColor;
+  /** Trend indicator - can be number (percentage) or TrendInfo object */
+  trend?: number | TrendInfo;
   trendLabel?: string;
   showTrend?: boolean;
   subtext?: string;
+  /** Description below the label */
+  description?: string;
   action?: ReactNode;
   className?: string;
   size?: "sm" | "default" | "lg";
@@ -106,6 +118,13 @@ const colorStyles: Record<MetricCardColor, {
     iconColor: "text-emerald-400",
     accent: "from-emerald-400/60",
   },
+  yellow: {
+    bg: "from-yellow-500/10 to-amber-600/5",
+    border: "border-yellow-500/20",
+    iconBg: "bg-yellow-500/20",
+    iconColor: "text-yellow-400",
+    accent: "from-yellow-400/60",
+  },
 };
 
 const sizeStyles = {
@@ -147,20 +166,39 @@ export const MetricCard = memo(({
   label,
   value,
   unit,
-  color = "primary",
+  color,
+  colorTheme,
   trend,
   trendLabel,
   showTrend = true,
   subtext,
+  description,
   action,
   className,
   size = "default",
 }: MetricCardProps) => {
-  const styles = colorStyles[color];
+  // Support both color and colorTheme props
+  const resolvedColor = colorTheme || color || "primary";
+  const styles = colorStyles[resolvedColor];
   const sizes = sizeStyles[size];
   
-  const shouldShowTrend = showTrend && trend !== undefined && trend !== 0;
-  const trendPositive = trend && trend > 0;
+  // Normalize trend to handle both number and TrendInfo
+  let trendValue: number | undefined;
+  let trendDirection: "up" | "down" | undefined;
+  let trendSuffix: string | undefined;
+  
+  if (typeof trend === "number") {
+    trendValue = trend;
+    trendDirection = trend > 0 ? "up" : "down";
+    trendSuffix = "%";
+  } else if (trend && typeof trend === "object") {
+    trendValue = trend.value;
+    trendDirection = trend.direction;
+    trendSuffix = trend.suffix || "%";
+  }
+  
+  const shouldShowTrend = showTrend && trendValue !== undefined && trendValue !== 0;
+  const trendPositive = trendDirection === "up";
 
   return (
     <div
@@ -190,7 +228,7 @@ export const MetricCard = memo(({
             ) : (
               <TrendingDown className="w-3 h-3" />
             )}
-            {Math.abs(trend)}%
+            {trendValue > 0 ? "+" : ""}{trendValue}{trendSuffix}
             {trendLabel && <span className="ml-1 text-muted-foreground">{trendLabel}</span>}
           </div>
         )}
@@ -208,8 +246,13 @@ export const MetricCard = memo(({
       {/* Label */}
       <div className={cn("text-muted-foreground mt-1", sizes.labelSize)}>{label}</div>
 
-      {/* Optional subtext */}
-      {subtext && (
+      {/* Optional description */}
+      {description && (
+        <div className="text-xs text-muted-foreground/70 mt-1">{description}</div>
+      )}
+
+      {/* Optional subtext (legacy, same as description) */}
+      {subtext && !description && (
         <div className="text-xs text-muted-foreground/70 mt-1">{subtext}</div>
       )}
     </div>
