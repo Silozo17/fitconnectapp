@@ -55,7 +55,7 @@ const TIER_BENEFITS = {
   ],
   enterprise: [
     { icon: Infinity, text: "Unlimited clients" },
-    { icon: Headphones, text: "Priority support & account manager" },
+    { icon: Headphones, text: "Case study generator" },
     { icon: Cog, text: "Automations & AI insights" },
   ],
 };
