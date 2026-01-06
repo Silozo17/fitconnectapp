@@ -391,8 +391,8 @@
   }
 
   .mt-header-safe {
-    /* 4rem header + 0.3125rem (5px) additional gap + safe-area */
-    margin-top: calc(4rem + 0.3125rem + env(safe-area-inset-top, 0px));
+    /* 4rem header + safe-area - content sits directly under header */
+    margin-top: calc(4rem + env(safe-area-inset-top, 0px));
   }
 
   /* Native iOS fallback - use Despia's runtime CSS variable */
@@ -404,8 +404,8 @@
   }
 
   html.native-ios .mt-header-safe {
-    /* 2.625rem (42px) base + 0.3125rem (5px) additional gap + Despia safe area */
-    margin-top: calc(2.625rem + 0.3125rem + var(--safe-area-top, 59px));
+    /* 2.625rem (42px) base + Despia safe area */
+    margin-top: calc(2.625rem + var(--safe-area-top, 59px));
   }
 
   /* Native iOS header content - reduced height for native app only */
