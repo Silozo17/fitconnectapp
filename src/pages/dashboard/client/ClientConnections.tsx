@@ -42,7 +42,7 @@ const ClientConnections = () => {
           title="Connections"
           description="Connect with friends and other fitness enthusiasts"
           action={
-            <Button onClick={() => setAddModalOpen(true)} className="gap-2">
+            <Button onClick={() => setAddModalOpen(true)} className="gap-2 rounded-xl">
               <UserPlus className="w-4 h-4" />
               Add Connection
             </Button>
@@ -51,7 +51,7 @@ const ClientConnections = () => {
 
         {/* Error Alert */}
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="rounded-2xl">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription className="flex items-center justify-between">
               <span>{error}</span>
@@ -59,7 +59,7 @@ const ClientConnections = () => {
                 variant="outline" 
                 size="sm" 
                 onClick={refreshConnections}
-                className="ml-4"
+                className="ml-4 rounded-xl"
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Retry
@@ -70,8 +70,8 @@ const ClientConnections = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="friends" className="space-y-4">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
-            <TabsTrigger value="friends" className="gap-2">
+          <TabsList className="bg-secondary/50 rounded-2xl p-1.5 h-auto max-w-md">
+            <TabsTrigger value="friends" className="gap-2 rounded-xl px-4 py-2.5">
               <Users className="w-4 h-4" />
               Friends
               {connections.length > 0 && (
@@ -80,7 +80,7 @@ const ClientConnections = () => {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="pending" className="gap-2">
+            <TabsTrigger value="pending" className="gap-2 rounded-xl px-4 py-2.5">
               <Clock className="w-4 h-4" />
               Pending
               {pendingRequests.length > 0 && (
@@ -89,7 +89,7 @@ const ClientConnections = () => {
                 </Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="sent" className="gap-2">
+            <TabsTrigger value="sent" className="gap-2 rounded-xl px-4 py-2.5">
               <Send className="w-4 h-4" />
               Sent
               {sentRequests.length > 0 && (
@@ -107,13 +107,17 @@ const ClientConnections = () => {
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : connections.length === 0 ? (
-              <ContentSection colorTheme="muted" className="py-12 text-center border-dashed">
-                <Users className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="text-muted-foreground mb-4">
+              <ContentSection colorTheme="muted" className="py-16 text-center border-dashed">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-muted/50 flex items-center justify-center">
+                  <Users className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-bold mb-2 font-display">No friends yet</h3>
+                <p className="text-muted-foreground text-lg max-w-sm mx-auto mb-6">
                   You haven't connected with anyone yet
                 </p>
                 <Button
                   variant="outline"
+                  className="rounded-xl"
                   onClick={() => setAddModalOpen(true)}
                 >
                   <UserPlus className="w-4 h-4 mr-2" />
@@ -141,9 +145,12 @@ const ClientConnections = () => {
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : pendingRequests.length === 0 ? (
-              <ContentSection colorTheme="muted" className="py-12 text-center border-dashed">
-                <Clock className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="text-muted-foreground">
+              <ContentSection colorTheme="muted" className="py-16 text-center border-dashed">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-muted/50 flex items-center justify-center">
+                  <Clock className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-bold mb-2 font-display">No pending requests</h3>
+                <p className="text-muted-foreground text-lg max-w-sm mx-auto">
                   No pending connection requests
                 </p>
               </ContentSection>
@@ -169,9 +176,12 @@ const ClientConnections = () => {
                 <Loader2 className="w-6 h-6 animate-spin text-primary" />
               </div>
             ) : sentRequests.length === 0 ? (
-              <ContentSection colorTheme="muted" className="py-12 text-center border-dashed">
-                <Send className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="text-muted-foreground">
+              <ContentSection colorTheme="muted" className="py-16 text-center border-dashed">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-muted/50 flex items-center justify-center">
+                  <Send className="w-10 h-10 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-bold mb-2 font-display">No sent requests</h3>
+                <p className="text-muted-foreground text-lg max-w-sm mx-auto">
                   You haven't sent any requests
                 </p>
               </ContentSection>

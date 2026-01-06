@@ -286,12 +286,12 @@ const ClientSettings = () => {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar Navigation */}
           <div className="lg:w-64 shrink-0">
-            <div className="card-elevated p-2 space-y-1">
+            <Card variant="elevated" className="rounded-3xl p-2 space-y-1">
               {settingsTabs.map((item) => (
                 <button
                   key={item.id}
                   onClick={() => setSelectedTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left transition-colors ${
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
                     selectedTab === item.id
                       ? "bg-primary text-primary-foreground"
                       : "text-muted-foreground hover:bg-secondary hover:text-foreground"
@@ -301,7 +301,7 @@ const ClientSettings = () => {
                   <span className="font-medium">{item.label}</span>
                 </button>
               ))}
-            </div>
+            </Card>
           </div>
 
           {/* Content */}
@@ -310,7 +310,7 @@ const ClientSettings = () => {
             {selectedTab === "profile" && (
               <>
                 {/* Link to My Profile */}
-                <Card>
+                <Card className="rounded-3xl">
                   <CardContent className="pt-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -319,7 +319,7 @@ const ClientSettings = () => {
                           {t('profile.personalInfoDesc')}
                         </p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")}>
+                      <Button variant="outline" className="rounded-xl" onClick={() => navigate("/dashboard/profile")}>
                         <User className="w-4 h-4 mr-2" />
                         {t('profile.myProfile')}
                       </Button>
@@ -328,7 +328,7 @@ const ClientSettings = () => {
                 </Card>
 
                 {/* Avatar Selection */}
-                <Card>
+                <Card className="rounded-3xl">
                   <CardHeader>
                     <CardTitle>{t('avatar.title')}</CardTitle>
                     <CardDescription>{t('avatar.description')}</CardDescription>
@@ -340,7 +340,7 @@ const ClientSettings = () => {
                 </Card>
 
                 {/* Gender & Activity Level */}
-                <Card>
+                <Card className="rounded-3xl">
                   <CardHeader>
                     <CardTitle>Personal Details</CardTitle>
                     <CardDescription>Your gender, age and activity level are used for accurate macro calculations</CardDescription>
@@ -357,8 +357,8 @@ const ClientSettings = () => {
                           className="w-44"
                           max={new Date().toISOString().split('T')[0]}
                         />
-{profile?.age != null && (
-  <span className="text-sm text-muted-foreground">Age: {profile.age} years</span>
+                        {profile?.age != null && (
+                          <span className="text-sm text-muted-foreground">Age: {profile.age} years</span>
                         )}
                       </div>
                     </div>
@@ -370,7 +370,7 @@ const ClientSettings = () => {
                             key={option.id}
                             type="button"
                             onClick={() => updateField("gender", option.id)}
-                            className={`px-3 py-1.5 rounded-lg border-2 text-sm transition-colors ${
+                            className={`px-3 py-1.5 rounded-xl border-2 text-sm transition-colors ${
                               profile?.gender === option.id
                                 ? "border-primary bg-primary/10 text-foreground"
                                 : "border-border hover:border-muted-foreground text-muted-foreground"
@@ -389,7 +389,7 @@ const ClientSettings = () => {
                             key={level.id}
                             type="button"
                             onClick={() => updateField("activity_level", level.id)}
-                            className={`flex items-center justify-between px-4 py-3 rounded-lg border-2 text-left transition-colors ${
+                            className={`flex items-center justify-between px-4 py-3 rounded-xl border-2 text-left transition-colors ${
                               profile?.activity_level === level.id
                                 ? "border-primary bg-primary/10"
                                 : "border-border hover:border-muted-foreground"
@@ -407,7 +407,7 @@ const ClientSettings = () => {
                 </Card>
 
                 {/* Body Metrics */}
-                <Card>
+                <Card className="rounded-3xl">
                   <CardHeader>
                     <CardTitle>{t('bodyMetrics.title')}</CardTitle>
                     <CardDescription>{t('bodyMetrics.description')}</CardDescription>
@@ -438,7 +438,7 @@ const ClientSettings = () => {
                 </Card>
 
                 {/* Fitness Goals */}
-                <Card>
+                <Card className="rounded-3xl">
                   <CardHeader>
                     <CardTitle>{t('fitnessGoals.title')}</CardTitle>
                     <CardDescription>{t('fitnessGoals.description')}</CardDescription>
@@ -476,7 +476,7 @@ const ClientSettings = () => {
                   <Button 
                     onClick={handleSave} 
                     disabled={saving || !checkIsDirty()} 
-                    className={checkIsDirty() ? "bg-primary text-primary-foreground" : ""}
+                    className={`rounded-xl ${checkIsDirty() ? "bg-primary text-primary-foreground" : ""}`}
                   >
                     {saving ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -493,7 +493,7 @@ const ClientSettings = () => {
             {selectedTab === "health" && (
               <>
                 {/* Dietary Restrictions */}
-                <Card>
+                <Card className="rounded-3xl">
                   <CardHeader>
                     <CardTitle>{t('health.dietary.title')}</CardTitle>
                     <CardDescription>{t('health.dietary.description')}</CardDescription>
@@ -510,7 +510,7 @@ const ClientSettings = () => {
                 </Card>
 
                 {/* Allergies */}
-                <Card className="border-warning/30">
+                <Card className="rounded-3xl border-warning/30">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <AlertTriangle className="w-5 h-5 text-warning" />
@@ -534,7 +534,7 @@ const ClientSettings = () => {
                 </Card>
 
                 {/* Medical Conditions */}
-                <Card className="border-destructive/30">
+                <Card className="rounded-3xl border-destructive/30">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Info className="w-5 h-5 text-destructive" />
@@ -564,7 +564,7 @@ const ClientSettings = () => {
                   <Button 
                     onClick={handleSave} 
                     disabled={saving || !checkIsDirty()} 
-                    className={checkIsDirty() ? "bg-primary text-primary-foreground" : ""}
+                    className={`rounded-xl ${checkIsDirty() ? "bg-primary text-primary-foreground" : ""}`}
                   >
                     {saving ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -585,7 +585,7 @@ const ClientSettings = () => {
             {/* Preferences Tab */}
             {selectedTab === "preferences" && (
               <>
-                <Card>
+                <Card className="rounded-3xl">
                   <CardHeader>
                     <CardTitle>{t('preferences.title')}</CardTitle>
                     <CardDescription>{t('preferences.languageDescription')}</CardDescription>
@@ -618,7 +618,7 @@ const ClientSettings = () => {
                 />
 
                 {/* Reset Discovery */}
-                <Card>
+                <Card className="rounded-3xl">
                   <CardHeader>
                     <CardTitle>{t('preferences.discovery.title')}</CardTitle>
                     <CardDescription>{t('preferences.discovery.description')}</CardDescription>
@@ -626,6 +626,7 @@ const ClientSettings = () => {
                   <CardContent>
                     <Button 
                       variant="outline" 
+                      className="rounded-xl"
                       onClick={async () => {
                         const { data: { user } } = await supabase.auth.getUser();
                         if (user) {
@@ -648,7 +649,7 @@ const ClientSettings = () => {
                   <Button 
                     onClick={handleSave} 
                     disabled={saving || !checkIsDirty()} 
-                    className={checkIsDirty() ? "bg-primary text-primary-foreground" : ""}
+                    className={`rounded-xl ${checkIsDirty() ? "bg-primary text-primary-foreground" : ""}`}
                   >
                     {saving ? (
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -720,7 +721,7 @@ const ClientSettings = () => {
                 <Separator />
 
                 {/* Data & Privacy */}
-                <Card className="bg-muted/50 border-muted">
+                <Card className="rounded-3xl bg-muted/50 border-muted">
                   <CardContent className="pt-4">
                     <div className="flex items-start gap-3">
                       <Shield className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
@@ -772,7 +773,7 @@ const ClientSettings = () => {
                 
                 {/* Become a Coach Section */}
                 {!hasCoachProfile && (
-                  <Card className="border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
+                  <Card className="rounded-3xl border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Briefcase className="w-5 h-5 text-orange-500" />
@@ -785,7 +786,7 @@ const ClientSettings = () => {
                     <CardContent>
                       <Button 
                         onClick={() => setShowBecomeCoachModal(true)}
-                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                        className="rounded-xl bg-orange-500 hover:bg-orange-600 text-white"
                       >
                         <Briefcase className="w-4 h-4 mr-2" />
                         Register as Coach
@@ -794,13 +795,13 @@ const ClientSettings = () => {
                   </Card>
                 )}
                 
-                <Card>
+                <Card className="rounded-3xl">
                   <CardHeader>
                     <CardTitle>{t('account.title')}</CardTitle>
                     <CardDescription>{t('account.signOutDescription')}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button variant="outline" onClick={signOut}>
+                    <Button variant="outline" className="rounded-xl" onClick={signOut}>
                       <LogOut className="w-4 h-4 mr-2" />
                       {t('account.signOut')}
                     </Button>

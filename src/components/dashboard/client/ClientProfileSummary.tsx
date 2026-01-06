@@ -107,7 +107,7 @@ const ClientProfileSummary = () => {
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 glass-interactive border-border/30 hover:border-primary/40 text-xs"
+          className="flex-1 rounded-xl border-border/30 hover:border-primary/40 text-xs"
           onClick={() => handleNavigate("/dashboard/client/settings")}
         >
           {t("profile.viewProfile", "View Profile")}
@@ -116,7 +116,7 @@ const ClientProfileSummary = () => {
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 glass-interactive border-border/30 hover:border-primary/40 text-xs"
+          className="flex-1 rounded-xl border-border/30 hover:border-primary/40 text-xs"
           onClick={() => handleNavigate("/dashboard/client/achievements")}
         >
           {t("profile.achievements", "Achievements")}
