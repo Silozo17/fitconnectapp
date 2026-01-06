@@ -42,6 +42,8 @@ import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { format } from "date-fns";
 import { useTranslation } from "@/hooks/useTranslation";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
 
 const CoachPlans = () => {
   const { t } = useTranslation('coach');
@@ -114,7 +116,9 @@ const CoachPlans = () => {
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">{t("plansPage.title")}</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">
+            Training <span className="gradient-text">Plans</span>
+          </h1>
           <p className="text-muted-foreground">{t("plansPage.subtitle")}</p>
         </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
@@ -136,41 +140,29 @@ const CoachPlans = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Card variant="glass" className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Dumbbell className="w-5 h-5 text-primary" />
-            </div>
-            <div>
-              <p className="text-2xl font-display font-bold text-foreground">{workoutPlans.length}</p>
-              <p className="text-sm text-muted-foreground">{t("plansPage.workoutPlans")}</p>
-            </div>
-          </div>
-        </Card>
-        <Card variant="glass" className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-              <Apple className="w-5 h-5 text-success" />
-            </div>
-            <div>
-              <p className="text-2xl font-display font-bold text-foreground">{nutritionPlans.length}</p>
-              <p className="text-sm text-muted-foreground">{t("plansPage.nutritionPlans")}</p>
-            </div>
-          </div>
-        </Card>
-        <Card variant="glass" className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Users className="w-5 h-5 text-accent" />
-            </div>
-            <div>
-              <p className="text-2xl font-display font-bold text-foreground">0</p>
-              <p className="text-sm text-muted-foreground">{t("plansPage.activeAssignments")}</p>
-            </div>
-          </div>
-        </Card>
-      </div>
+      <StatsGrid columns={3} gap="default" className="mb-6">
+        <MetricCard
+          icon={Dumbbell}
+          label={t("plansPage.workoutPlans")}
+          value={workoutPlans.length}
+          color="primary"
+          size="sm"
+        />
+        <MetricCard
+          icon={Apple}
+          label={t("plansPage.nutritionPlans")}
+          value={nutritionPlans.length}
+          color="green"
+          size="sm"
+        />
+        <MetricCard
+          icon={Users}
+          label={t("plansPage.activeAssignments")}
+          value={0}
+          color="blue"
+          size="sm"
+        />
+      </StatsGrid>
 
       {/* Tabs */}
       <Tabs defaultValue="workout" className="space-y-6">

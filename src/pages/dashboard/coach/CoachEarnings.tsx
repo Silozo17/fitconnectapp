@@ -85,7 +85,9 @@ const CoachEarnings = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">{t("earnings.title")}</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">
+            Revenue <span className="gradient-text">Dashboard</span>
+          </h1>
           <p className="text-muted-foreground">{t("earnings.pageSubtitle")}</p>
         </div>
         <div className="flex gap-3">

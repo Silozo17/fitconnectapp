@@ -44,6 +44,9 @@ import ClientRequests from "@/components/dashboard/coach/ClientRequests";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { BatchOperationsToolbar } from "@/components/coach/clients/BatchOperationsToolbar";
 import { isFeatureEnabled } from "@/lib/coach-feature-flags";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
+
 const CoachClients = () => {
   const { t } = useTranslation("coach");
   const [searchQuery, setSearchQuery] = useState("");
@@ -147,7 +150,9 @@ const CoachClients = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="font-display text-2xl font-bold text-foreground">{t("clients.pageTitle")}</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">
+            Client <span className="gradient-text">Roster</span>
+          </h1>
           <p className="text-muted-foreground">{t("clients.pageDescription")}</p>
         </div>
         <Button onClick={() => setIsAddClientOpen(true)} className="bg-primary text-primary-foreground">
@@ -162,51 +167,41 @@ const CoachClients = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <Card variant="glass" className="p-5 overflow-hidden">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Users className="w-5 h-5 text-primary shrink-0" />
-            </div>
-          </div>
-          <p className="text-2xl font-display font-bold text-foreground truncate">{stats.total}</p>
-          <p className="text-sm text-muted-foreground truncate">{t("stats.totalClients")}</p>
-        </Card>
-        <Card variant="glass" className="p-5 overflow-hidden">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
-              <UserCheck className="w-5 h-5 text-success shrink-0" />
-            </div>
-          </div>
-          <p className="text-2xl font-display font-bold text-success truncate">{stats.active}</p>
-          <p className="text-sm text-muted-foreground truncate">{t("clients.active")}</p>
-        </Card>
-        <Card variant="glass" className="p-5 overflow-hidden">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-warning shrink-0" />
-            </div>
-          </div>
-          <p className="text-2xl font-display font-bold text-warning truncate">{stats.pending}</p>
-          <p className="text-sm text-muted-foreground truncate">{t("clients.pending")}</p>
-        </Card>
-        <Card variant="glass" className="p-5 overflow-hidden">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-accent shrink-0" />
-            </div>
-          </div>
-          <p className="text-2xl font-display font-bold text-accent truncate">
-            {clients.filter(c => {
-              const startDate = c.start_date ? new Date(c.start_date) : null;
-              if (!startDate) return false;
-              const now = new Date();
-              return startDate.getMonth() === now.getMonth() && startDate.getFullYear() === now.getFullYear();
-            }).length}
-          </p>
-          <p className="text-sm text-muted-foreground truncate">{t("stats.thisMonth")}</p>
-        </Card>
-      </div>
+      <StatsGrid columns={{ default: 2, md: 4 }} gap="default" className="mb-6">
+        <MetricCard
+          icon={Users}
+          label={t("stats.totalClients")}
+          value={stats.total}
+          color="primary"
+          size="sm"
+        />
+        <MetricCard
+          icon={UserCheck}
+          label={t("clients.active")}
+          value={stats.active}
+          color="green"
+          size="sm"
+        />
+        <MetricCard
+          icon={Clock}
+          label={t("clients.pending")}
+          value={stats.pending}
+          color="orange"
+          size="sm"
+        />
+        <MetricCard
+          icon={TrendingUp}
+          label={t("stats.thisMonth")}
+          value={clients.filter(c => {
+            const startDate = c.start_date ? new Date(c.start_date) : null;
+            if (!startDate) return false;
+            const now = new Date();
+            return startDate.getMonth() === now.getMonth() && startDate.getFullYear() === now.getFullYear();
+          }).length}
+          color="purple"
+          size="sm"
+        />
+      </StatsGrid>
 
       {/* Filters */}
       <Card variant="glass" className="p-4 mb-6">

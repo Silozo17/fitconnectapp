@@ -144,7 +144,7 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
 
           <main
             id="main-content" 
-            className={`flex-1 p-4 lg:p-6 overflow-y-auto pb-mobile-nav mt-header-safe xl:mt-0 ${profilePanelOpen ? 'pointer-events-none' : ''}`}
+            className={`flex-1 p-4 lg:p-6 overflow-y-auto overflow-x-hidden pb-mobile-nav mt-header-safe xl:mt-0 ${profilePanelOpen ? 'pointer-events-none' : ''}`}
             role="main"
             aria-label={title}
             tabIndex={-1}

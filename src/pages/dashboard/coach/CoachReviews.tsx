@@ -23,6 +23,8 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { cn } from "@/lib/utils";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { FeatureGate } from "@/components/FeatureGate";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
 
 interface Review {
   id: string;
@@ -169,47 +171,29 @@ const CoachReviews = () => {
         description="View and respond to reviews from your clients"
       />
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center">
-                <Star className="w-7 h-7 text-amber-500" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{averageRating}</p>
-                <p className="text-sm text-muted-foreground">{t("reviewsPage.averageRating")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
-                <MessageSquareText className="w-7 h-7 text-primary" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{reviews.length}</p>
-                <p className="text-sm text-muted-foreground">{t("reviewsPage.totalReviews")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-2xl">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
-                <Flag className="w-7 h-7 text-warning" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{disputes.filter((d) => d.status === "pending").length}</p>
-                <p className="text-sm text-muted-foreground">{t("reviewsPage.pendingDisputes")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <StatsGrid columns={3} gap="default" className="mb-6">
+        <MetricCard
+          icon={Star}
+          label={t("reviewsPage.averageRating")}
+          value={averageRating}
+          color="amber"
+          size="sm"
+        />
+        <MetricCard
+          icon={MessageSquareText}
+          label={t("reviewsPage.totalReviews")}
+          value={reviews.length}
+          color="primary"
+          size="sm"
+        />
+        <MetricCard
+          icon={Flag}
+          label={t("reviewsPage.pendingDisputes")}
+          value={disputes.filter((d) => d.status === "pending").length}
+          color="orange"
+          size="sm"
+        />
+      </StatsGrid>
 
       {/* Reviews List */}
       <Card variant="glass" className="glass-card rounded-3xl">
