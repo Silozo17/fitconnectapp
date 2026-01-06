@@ -7,6 +7,7 @@ import { STORAGE_KEYS } from "@/lib/storage-keys";
 interface OnboardingStatus {
   isOnboarded: boolean;
   subscriptionTier?: string | null;
+  coachId?: string | null;
   onboardingProgress?: {
     current_step?: number;
     form_data?: Record<string, unknown>;
@@ -110,7 +111,7 @@ export const useCoachOnboardingStatus = () => {
       try {
         const { data, error } = await supabase
           .from("coach_profiles")
-          .select("onboarding_completed, subscription_tier, onboarding_progress")
+          .select("id, onboarding_completed, subscription_tier, onboarding_progress")
           .eq("user_id", user.id)
           .maybeSingle();
 
@@ -127,6 +128,7 @@ export const useCoachOnboardingStatus = () => {
         return {
           isOnboarded: data?.onboarding_completed ?? false,
           subscriptionTier: data?.subscription_tier ?? null,
+          coachId: data?.id ?? null,
           onboardingProgress: data?.onboarding_progress as OnboardingStatus['onboardingProgress'] ?? null,
         };
       } catch (err) {

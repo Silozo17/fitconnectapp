@@ -35,6 +35,20 @@
   animation: circular-stat-pulse 2s ease-in-out infinite;
 }
 
+/* Gold glow animation for upgrade icon */
+@keyframes gold-glow {
+  0%, 100% {
+    filter: drop-shadow(0 0 4px hsl(43 96% 56% / 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 10px hsl(43 96% 56% / 0.8));
+  }
+}
+
+.animate-gold-glow {
+  animation: gold-glow 2s ease-in-out infinite;
+}
+
 /* Respect reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   .circular-stat-pulse,

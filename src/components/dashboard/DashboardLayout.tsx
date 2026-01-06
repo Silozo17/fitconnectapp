@@ -130,7 +130,8 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
 
         <div className={`transition-all duration-300 h-full flex flex-col overflow-hidden ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}>
           <DashboardHeader 
-            subscriptionTier={onboardingStatus?.subscriptionTier} 
+            subscriptionTier={onboardingStatus?.subscriptionTier}
+            coachId={onboardingStatus?.coachId}
             onMenuToggle={handleOpenMobile} 
           />
           
