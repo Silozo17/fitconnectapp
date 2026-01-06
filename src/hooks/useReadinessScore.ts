@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useHealthAggregation } from './useHealthAggregation';
-import { subDays, format } from 'date-fns';
+import { format } from 'date-fns';
 
 export interface ReadinessScore {
   score: number; // 0-100
@@ -25,25 +25,26 @@ export function useReadinessScore() {
     if (!data || data.length === 0) return null;
 
     const today = format(new Date(), 'yyyy-MM-dd');
-    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
 
-    // Get today's or yesterday's data for each metric
-    const getLatestValue = (type: string): number | null => {
+    // Get TODAY's data only - no fallback to previous days
+    const getTodayValue = (type: string): number | null => {
       const todayEntry = data.find(d => d.data_type === type && d.recorded_at.startsWith(today));
-      if (todayEntry) return todayEntry.value;
-      const yesterdayEntry = data.find(d => d.data_type === type && d.recorded_at.startsWith(yesterday));
-      return yesterdayEntry?.value ?? null;
+      return todayEntry?.value ?? null;
     };
 
-    // Get baseline averages (7-day)
+    // Get current values for TODAY only
+    const currentSleep = getTodayValue('sleep');
+    const currentRestingHR = getTodayValue('heart_rate');
+    const currentActiveMinutes = getTodayValue('active_minutes');
+
+    // If no data for today at all, return null to show empty state
+    const hasTodayData = currentSleep !== null || currentRestingHR !== null || currentActiveMinutes !== null;
+    if (!hasTodayData) return null;
+
+    // Get baseline averages (7-day) for comparison calculations
     const avgSleep = getDailyAverage('sleep', 7);
     const avgRestingHR = getDailyAverage('heart_rate', 7);
     const avgActiveMinutes = getDailyAverage('active_minutes', 7);
-
-    // Get current values
-    const currentSleep = getLatestValue('sleep');
-    const currentRestingHR = getLatestValue('heart_rate');
-    const currentActiveMinutes = getLatestValue('active_minutes');
     
     // Track which components have data for weighted calculation
     let hasRecoveryData = currentRestingHR !== null && avgRestingHR > 0;

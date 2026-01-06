@@ -37,7 +37,26 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
   }
 
   if (!hasData || !readiness) {
-    return null; // Don't show if no wearable data
+    return (
+      <div className={cn("relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
+        <div className="flex items-center gap-3 mb-4">
+          <div className="p-3 rounded-2xl bg-muted/50">
+            <Battery className="h-5 w-5 text-muted-foreground" />
+          </div>
+          <div>
+            <h3 className="font-semibold text-foreground">Daily Readiness</h3>
+            <p className="text-xs text-muted-foreground">Waiting for today's data</p>
+          </div>
+        </div>
+        <div className="bg-muted/30 rounded-xl p-4 text-center">
+          <Sparkles className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+          <p className="text-sm text-muted-foreground">
+            Sync your wearable to see your readiness score
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const componentIcons = {
