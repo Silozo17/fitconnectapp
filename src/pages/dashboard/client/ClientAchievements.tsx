@@ -100,25 +100,6 @@ function AchievementsContent() {
         {/* XP Progress */}
         <div className="flex-1 w-full">
           <XPProgressBar />
-          
-          {/* Quick Share Card for Current Level */}
-          {xpData && (() => {
-            const { level, xpInLevel, xpForNextLevel } = calculateLevelFromXP(xpData.total_xp);
-            const xpToNext = xpForNextLevel - xpInLevel;
-            return (
-              <div className="mt-4">
-                <AchievementShareCard
-                  achievement={{
-                    type: 'level',
-                    title: `Level ${level} - ${getLevelTitle(level)}`,
-                    description: `Total XP: ${xpData.total_xp.toLocaleString()} • Next level in ${xpToNext.toLocaleString()} XP`,
-                    value: level,
-                    icon: '⬆️',
-                  }}
-                />
-              </div>
-            );
-          })()}
         </div>
       </div>
       
