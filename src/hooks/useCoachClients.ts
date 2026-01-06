@@ -15,6 +15,7 @@ export interface CoachClient {
     id: string;
     first_name: string | null;
     last_name: string | null;
+    avatar_url: string | null;
     user_id: string;
     fitness_goals: string[] | null;
     weight_kg: number | null;
@@ -75,6 +76,7 @@ export function useCoachClients() {
             id,
             first_name,
             last_name,
+            avatar_url,
             user_id,
             fitness_goals,
             weight_kg,
