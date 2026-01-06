@@ -91,12 +91,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         recordBootStage(BOOT_STAGES.AUTH_STATE_RECEIVED);
         
         // Basic JWT validation - check for corrupted tokens
+        // Clear state directly without calling signOut() to avoid state loops
         if (session?.access_token) {
           try {
             const payload = JSON.parse(atob(session.access_token.split('.')[1]));
             if (!payload.sub) {
-              console.warn('[Auth] Invalid JWT - missing sub claim');
-              supabase.auth.signOut().catch(() => {});
+              console.warn('[Auth] Invalid JWT - missing sub claim, clearing state');
               setSession(null);
               setUser(null);
               setRole(null);
@@ -105,8 +105,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               return;
             }
           } catch {
-            console.warn('[Auth] Failed to decode JWT');
-            supabase.auth.signOut().catch(() => {});
+            console.warn('[Auth] Failed to decode JWT, clearing state');
             setSession(null);
             setUser(null);
             setRole(null);
