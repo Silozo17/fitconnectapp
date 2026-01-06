@@ -205,7 +205,9 @@
     "description": "Connect third-party services",
     "video": {
       "title": "Video Conferencing",
-      "description": "Automatically create video meeting links for your online sessions"
+      "description": "Automatically create video meeting links for your online sessions",
+      "blockedByOther": "Disconnect {{provider}} first to use this provider",
+      "onlyOneProvider": "Only one video provider can be connected at a time"
     },
     "calendar": {
       "title": "Calendar Sync",
