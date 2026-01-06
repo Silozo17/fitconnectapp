@@ -14,6 +14,8 @@ import { useCoachProducts, useCoachBundles, useDeleteProduct, useDeleteBundle, u
 import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "@/hooks/useTranslation";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
 
 export default function CoachProducts() {
   const { t } = useTranslation('coach');
@@ -53,9 +55,9 @@ export default function CoachProducts() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Package className="h-8 w-8 text-primary" />
-              {t('productsPage.title')}
+            <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
+              <Package className="h-6 w-6 text-primary" />
+              Digital <span className="gradient-text">Products</span>
             </h1>
             <p className="text-muted-foreground mt-1">
               {t('productsPage.subtitle')}
@@ -80,32 +82,36 @@ export default function CoachProducts() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-3xl font-bold text-primary">{products?.length || 0}</p>
-              <p className="text-sm text-muted-foreground">{t('productsPage.totalProducts')}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-3xl font-bold text-green-500">{publishedProducts.length}</p>
-              <p className="text-sm text-muted-foreground">{t('productsPage.published')}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-3xl font-bold text-yellow-500">{draftProducts.length}</p>
-              <p className="text-sm text-muted-foreground">{t('productsPage.drafts')}</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-3xl font-bold text-accent">{bundles?.length || 0}</p>
-              <p className="text-sm text-muted-foreground">{t('productsPage.bundles')}</p>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsGrid columns={{ default: 2, md: 4 }} gap="default">
+          <MetricCard
+            icon={Package}
+            label={t('productsPage.totalProducts')}
+            value={products?.length || 0}
+            color="primary"
+            size="sm"
+          />
+          <MetricCard
+            icon={Eye}
+            label={t('productsPage.published')}
+            value={publishedProducts.length}
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={EyeOff}
+            label={t('productsPage.drafts')}
+            value={draftProducts.length}
+            color="orange"
+            size="sm"
+          />
+          <MetricCard
+            icon={Package}
+            label={t('productsPage.bundles')}
+            value={bundles?.length || 0}
+            color="purple"
+            size="sm"
+          />
+        </StatsGrid>
 
         <Tabs defaultValue="products" className="space-y-6">
           <TabsList>
