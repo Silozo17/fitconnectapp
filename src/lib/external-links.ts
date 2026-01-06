@@ -19,7 +19,7 @@ export const openLegalPage = (page: 'terms' | 'privacy' | 'eula'): void => {
   const paths: Record<string, string> = {
     terms: '/terms',
     privacy: '/privacy',
-    eula: '/terms#eula',
+    eula: '/eula',
   };
   
   const path = paths[page];
