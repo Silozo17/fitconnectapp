@@ -151,38 +151,33 @@ function AchievementsContent() {
         </TabsContent>
         
         <TabsContent value="history">
-          <ContentSection colorTheme="primary">
-            <div className="p-4 pb-2">
-              <h3 className="text-lg font-semibold text-foreground">{t('achievements.xpHistory.title')}</h3>
-            </div>
-            <div className="px-4 pb-4">
-              {transactionsLoading ? (
-                <div className="space-y-3">
-                  {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 rounded-2xl" />)}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-foreground">{t('achievements.xpHistory.title')}</h3>
+            
+            {transactionsLoading ? (
+              <div className="space-y-3">
+                {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-16 rounded-2xl" />)}
+              </div>
+            ) : transactionsError ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="w-16 h-16 rounded-3xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+                  <AlertTriangle className="h-8 w-8 text-destructive/70" />
                 </div>
-              ) : transactionsError ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <div className="w-16 h-16 rounded-3xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-                    <AlertTriangle className="h-8 w-8 text-destructive/70" />
-                  </div>
-                  <p className="font-medium">Unable to load XP history</p>
+                <p className="font-medium">Unable to load XP history</p>
+              </div>
+            ) : !transactions || transactions.length === 0 ? (
+              <div className="text-center py-12 text-muted-foreground">
+                <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <Zap className="h-8 w-8 text-primary/70" />
                 </div>
-              ) : !transactions || transactions.length === 0 ? (
-                <div className="text-center py-12 text-muted-foreground">
-                  <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
-                    <Zap className="h-8 w-8 text-primary/70" />
-                  </div>
-                  <p className="font-medium mb-1">{t('achievements.xpHistory.noXpYet')}</p>
-                  <p className="text-sm">{t('achievements.xpHistory.earnXp')}</p>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {transactions.map((tx) => (
-                    <div key={tx.id} className={cn(
-                      "flex items-center justify-between p-4 rounded-2xl",
-                      "bg-gradient-to-br from-card/60 via-card/40 to-card/30",
-                      "border border-border/30 hover:border-primary/20 transition-colors"
-                    )}>
+                <p className="font-medium mb-1">{t('achievements.xpHistory.noXpYet')}</p>
+                <p className="text-sm">{t('achievements.xpHistory.earnXp')}</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {transactions.map((tx) => (
+                  <ContentSection key={tx.id} colorTheme={tx.amount > 0 ? 'primary' : 'muted'} className="p-4">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className={`p-2.5 rounded-xl ${tx.amount > 0 ? 'bg-primary/20' : 'bg-destructive/20'}`}>
                           {tx.amount > 0 ? <TrendingUp className="h-4 w-4 text-primary" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
@@ -196,11 +191,11 @@ function AchievementsContent() {
                         {tx.amount > 0 ? '+' : ''}{tx.amount} XP
                       </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </ContentSection>
+                  </ContentSection>
+                ))}
+              </div>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>
