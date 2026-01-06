@@ -143,7 +143,7 @@ const menuGroupsConfig: MenuGroup[] = [
       { titleKey: "navigation.client.receipts", icon: Receipt, path: "/dashboard/client/receipts" },
       { titleKey: "navigation.client.integrations", icon: Plug, path: "/dashboard/client/integrations" },
       { titleKey: "navigation.client.favourites", icon: Heart, path: "/dashboard/client/favourites" },
-      { titleKey: "Debug", icon: Bug, path: "/debug" },
+      // Hidden for now - uncomment to restore: { titleKey: "Debug", icon: Bug, path: "/debug" },
     ],
   },
 ];
