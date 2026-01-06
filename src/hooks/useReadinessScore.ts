@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useHealthAggregation } from './useHealthAggregation';
-import { format } from 'date-fns';
+import { format, subDays, differenceInDays } from 'date-fns';
 
 export interface ReadinessScore {
   score: number; // 0-100
@@ -12,131 +12,250 @@ export interface ReadinessScore {
     activity: { score: number; value: number | null; unit: string };
   };
   recommendation: string;
+  dataConfidence: 'high' | 'medium' | 'low';
 }
 
 /**
- * Calculates a daily readiness score based on wearable data.
- * Score is calculated from sleep quality, heart rate variability/resting HR, and previous day activity.
+ * Industry-standard readiness score calculation based on WHOOP, Oura, and Garmin methodologies.
+ * 
+ * Key principles:
+ * - Uses LAST NIGHT's sleep (recorded today)
+ * - Uses YESTERDAY's activity for strain calculation
+ * - Compares against personal baselines (14-day weighted average)
+ * - Activity balance matters: both too much AND too little activity reduce readiness
  */
 export function useReadinessScore() {
-  const { data, isLoading, getDailyAverage } = useHealthAggregation({ days: 14 });
+  // Fetch 30 days for robust baseline calculations
+  const { data, isLoading } = useHealthAggregation({ days: 30 });
 
   const readiness = useMemo((): ReadinessScore | null => {
     if (!data || data.length === 0) return null;
 
     const today = format(new Date(), 'yyyy-MM-dd');
+    const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
 
-    // Get TODAY's data only - no fallback to previous days
-    const getTodayValue = (type: string): number | null => {
-      const todayEntry = data.find(d => d.data_type === type && d.recorded_at.startsWith(today));
-      return todayEntry?.value ?? null;
+    // === DATA EXTRACTION ===
+    
+    // Get LAST NIGHT's sleep (recorded today - represents sleep that ended this morning)
+    const lastNightSleep = data.find(d => 
+      d.data_type === 'sleep' && d.recorded_at.startsWith(today)
+    );
+
+    // Get YESTERDAY's activity/strain metrics (key insight from research)
+    const yesterdayActiveMinutes = data.find(d => 
+      d.data_type === 'active_minutes' && d.recorded_at.startsWith(yesterday)
+    );
+    const yesterdaySteps = data.find(d => 
+      d.data_type === 'steps' && d.recorded_at.startsWith(yesterday)
+    );
+
+    // Get TODAY's morning resting HR (best indicator of overnight recovery)
+    const todayRestingHR = data.find(d => 
+      d.data_type === 'heart_rate' && d.recorded_at.startsWith(today)
+    );
+
+    // === PERSONAL BASELINE CALCULATIONS (Oura-style weighted averages) ===
+    
+    const getWeightedAverage = (type: string): number => {
+      const entries = data.filter(d => d.data_type === type);
+      if (entries.length === 0) return 0;
+      
+      let weightedSum = 0;
+      let totalWeight = 0;
+      
+      entries.forEach(entry => {
+        const daysAgo = differenceInDays(new Date(), new Date(entry.recorded_at));
+        if (daysAgo <= 0) return; // Exclude today from baseline
+        
+        // Exponential decay: recent days weighted more heavily (7-day half-life)
+        const weight = Math.exp(-daysAgo / 7);
+        weightedSum += entry.value * weight;
+        totalWeight += weight;
+      });
+      
+      return totalWeight > 0 ? weightedSum / totalWeight : 0;
     };
 
-    // Get current values for TODAY only
-    const currentSleep = getTodayValue('sleep');
-    const currentRestingHR = getTodayValue('heart_rate');
-    const currentActiveMinutes = getTodayValue('active_minutes');
+    // Personal baselines (14-day weighted averages)
+    const baselineRestingHR = getWeightedAverage('heart_rate');
+    const baselineSleep = getWeightedAverage('sleep');
+    const baselineActiveMinutes = getWeightedAverage('active_minutes');
 
-    // If no data for today at all, return null to show empty state
-    const hasTodayData = currentSleep !== null || currentRestingHR !== null || currentActiveMinutes !== null;
-    if (!hasTodayData) return null;
+    // Track data availability
+    const hasSleepData = lastNightSleep !== undefined;
+    const hasRecoveryData = todayRestingHR !== undefined && baselineRestingHR > 0;
+    const hasActivityData = yesterdayActiveMinutes !== undefined || yesterdaySteps !== undefined;
 
-    // Get baseline averages (7-day) for comparison calculations
-    const avgSleep = getDailyAverage('sleep', 7);
-    const avgRestingHR = getDailyAverage('heart_rate', 7);
-    const avgActiveMinutes = getDailyAverage('active_minutes', 7);
+    // If no relevant data at all, return null
+    if (!hasSleepData && !hasRecoveryData && !hasActivityData) return null;
+
+    // === COMPONENT SCORE CALCULATIONS ===
+
+    // SLEEP SCORE (40% weight - most important for next-day readiness)
+    const calculateSleepScore = (): number => {
+      if (!lastNightSleep) return 50; // Neutral if no data
+      
+      const sleepMinutes = lastNightSleep.value;
+      const sleepHours = sleepMinutes / 60;
+      
+      // Duration score: Optimal 7-9 hours
+      let durationScore = 0;
+      if (sleepHours >= 7 && sleepHours <= 9) {
+        durationScore = 100;
+      } else if (sleepHours >= 6) {
+        durationScore = 60 + ((sleepHours - 6) * 40); // 60-100
+      } else if (sleepHours >= 5) {
+        durationScore = 30 + ((sleepHours - 5) * 30); // 30-60
+      } else {
+        durationScore = Math.max(10, sleepHours * 6); // 0-30
+      }
+      
+      // Sleep Balance comparison (Oura concept)
+      const balanceScore = baselineSleep > 0 
+        ? Math.min(100, (sleepMinutes / baselineSleep) * 80 + 20)
+        : 70;
+      
+      // Weight: 70% absolute duration, 30% vs personal baseline
+      return Math.round(durationScore * 0.7 + balanceScore * 0.3);
+    };
+
+    // RECOVERY SCORE (30% weight - based on morning resting HR vs baseline)
+    const calculateRecoveryScore = (): number => {
+      if (!todayRestingHR || baselineRestingHR === 0) return 50;
+      
+      const currentHR = todayRestingHR.value;
+      const ratio = currentHR / baselineRestingHR;
+      
+      // Oura-style deviation interpretation:
+      // - Slightly below baseline = optimal recovery
+      // - At baseline = normal
+      // - Above baseline = stress/incomplete recovery
+      if (ratio >= 0.90 && ratio <= 0.98) {
+        return 100; // Slightly below baseline = optimal
+      } else if (ratio >= 0.85 && ratio < 0.90) {
+        return 85; // Significantly lower - could indicate low arousal
+      } else if (ratio > 0.98 && ratio <= 1.02) {
+        return 80; // At baseline - normal recovery
+      } else if (ratio > 1.02 && ratio <= 1.05) {
+        return 60; // Slightly elevated - mild stress
+      } else if (ratio > 1.05 && ratio <= 1.10) {
+        return 40; // Elevated - significant stress
+      } else if (ratio > 1.10) {
+        return Math.max(15, 40 - (ratio - 1.10) * 250); // Very elevated
+      } else {
+        return 70; // Very low HR - unusual but not alarming
+      }
+    };
+
+    // ACTIVITY BALANCE SCORE (30% weight - yesterday's strain affects today's readiness)
+    const calculateActivityScore = (): number => {
+      const yesterdayActive = yesterdayActiveMinutes?.value || 0;
+      const yesterdayStepsVal = yesterdaySteps?.value || 0;
+      
+      if (yesterdayActive === 0 && yesterdayStepsVal === 0 && !hasActivityData) return 50;
+      
+      // Calculate strain relative to personal baseline
+      const activeRatio = baselineActiveMinutes > 0 
+        ? yesterdayActive / baselineActiveMinutes 
+        : 1;
+      
+      // Key insight from research: Both too much AND too little activity hurt readiness
+      // Sweet spot is 80-120% of normal activity
+      if (activeRatio >= 0.8 && activeRatio <= 1.2) {
+        // Optimal range - balanced activity
+        return 90 + ((1 - Math.abs(activeRatio - 1)) * 10); // 90-100
+      } else if (activeRatio > 1.2 && activeRatio <= 1.5) {
+        // Moderately high activity yesterday = slightly reduced readiness today
+        return 70 + ((1.5 - activeRatio) * 66); // 70-90
+      } else if (activeRatio > 1.5 && activeRatio <= 2.0) {
+        // High activity = reduced readiness (recovery needed)
+        return 50 + ((2.0 - activeRatio) * 40); // 50-70
+      } else if (activeRatio > 2.0) {
+        // Very high activity = significantly reduced readiness
+        return Math.max(30, 50 - (activeRatio - 2.0) * 20);
+      } else if (activeRatio < 0.8 && activeRatio >= 0.5) {
+        // Low activity = slightly reduced (movement is good for recovery)
+        return 70 + ((activeRatio - 0.5) * 66); // 70-90
+      } else {
+        // Very low activity
+        return 50 + (activeRatio * 40); // 50-70
+      }
+    };
+
+    // Calculate individual component scores
+    const sleepScore = calculateSleepScore();
+    const recoveryScore = calculateRecoveryScore();
+    const activityScore = calculateActivityScore();
+
+    // === DYNAMIC WEIGHTING BASED ON DATA AVAILABILITY ===
     
-    // Track which components have data for weighted calculation
-    let hasRecoveryData = currentRestingHR !== null && avgRestingHR > 0;
-    let hasSleepData = currentSleep !== null;
-    let hasActivityData = currentActiveMinutes !== null;
+    let weights = { sleep: 0.40, recovery: 0.30, activity: 0.30 };
+    let dataConfidence: 'high' | 'medium' | 'low' = 'high';
 
-    // Calculate component scores (0-100)
-    let sleepScore = 50;
-    if (currentSleep !== null) {
-      // Sleep in minutes, 7-9 hours (420-540 min) is optimal
-      if (currentSleep >= 420 && currentSleep <= 540) {
-        sleepScore = 100;
-      } else if (currentSleep >= 360) {
-        sleepScore = 70 + ((currentSleep - 360) / 60) * 30;
-      } else if (currentSleep >= 300) {
-        sleepScore = 40 + ((currentSleep - 300) / 60) * 30;
-      } else {
-        sleepScore = Math.max(10, (currentSleep / 300) * 40);
-      }
-    }
-
-    let recoveryScore = 50;
-    if (hasRecoveryData) {
-      // Lower resting HR relative to average = better recovery
-      const hrRatio = currentRestingHR! / avgRestingHR;
-      if (hrRatio <= 0.95) {
-        recoveryScore = 100;
-      } else if (hrRatio <= 1.0) {
-        recoveryScore = 80 + (1.0 - hrRatio) * 400;
-      } else if (hrRatio <= 1.1) {
-        recoveryScore = 50 + (1.1 - hrRatio) * 300;
-      } else {
-        recoveryScore = Math.max(20, 50 - (hrRatio - 1.1) * 200);
-      }
-    }
-
-    let activityScore = 50;
-    if (currentActiveMinutes !== null) {
-      // 30-60 active minutes is optimal for recovery
-      if (currentActiveMinutes >= 30 && currentActiveMinutes <= 90) {
-        activityScore = 100;
-      } else if (currentActiveMinutes > 90) {
-        // High activity yesterday might mean lower readiness today
-        activityScore = Math.max(40, 100 - (currentActiveMinutes - 90) * 0.5);
-      } else {
-        activityScore = 50 + (currentActiveMinutes / 30) * 50;
-      }
-    }
-
-    // Dynamic weighting based on available data
-    let weights = { sleep: 0.5, recovery: 0.3, activity: 0.2 };
+    const availableComponents = [hasSleepData, hasRecoveryData, hasActivityData].filter(Boolean).length;
     
-    // If no recovery data, redistribute weights
-    if (!hasRecoveryData) {
-      weights = { sleep: 0.65, recovery: 0, activity: 0.35 };
-    }
-    // If only sleep data available
-    if (!hasRecoveryData && !hasActivityData) {
-      weights = { sleep: 1.0, recovery: 0, activity: 0 };
-    }
-    // If only activity data available
-    if (!hasSleepData && !hasRecoveryData) {
-      weights = { sleep: 0, recovery: 0, activity: 1.0 };
+    if (availableComponents === 3) {
+      // All data available - use standard weights
+      weights = { sleep: 0.40, recovery: 0.30, activity: 0.30 };
+      dataConfidence = 'high';
+    } else if (availableComponents === 2) {
+      dataConfidence = 'medium';
+      if (!hasRecoveryData) {
+        weights = { sleep: 0.55, recovery: 0, activity: 0.45 };
+      } else if (!hasActivityData) {
+        weights = { sleep: 0.55, recovery: 0.45, activity: 0 };
+      } else if (!hasSleepData) {
+        weights = { sleep: 0, recovery: 0.55, activity: 0.45 };
+      }
+    } else {
+      dataConfidence = 'low';
+      if (hasSleepData) {
+        weights = { sleep: 1.0, recovery: 0, activity: 0 };
+      } else if (hasRecoveryData) {
+        weights = { sleep: 0, recovery: 1.0, activity: 0 };
+      } else {
+        weights = { sleep: 0, recovery: 0, activity: 1.0 };
+      }
     }
 
+    // Calculate final score
     const totalScore = Math.round(
       sleepScore * weights.sleep +
       recoveryScore * weights.recovery +
       activityScore * weights.activity
     );
 
-    // Determine level and recommendation
+    // === SCORE INTERPRETATION (Oura-aligned thresholds) ===
+    
     let level: ReadinessScore['level'];
     let color: string;
     let recommendation: string;
 
-    if (totalScore >= 80) {
+    if (totalScore >= 85) {
       level = 'optimal';
       color = 'text-green-500';
-      recommendation = 'Great recovery! You\'re ready for high-intensity training today.';
-    } else if (totalScore >= 60) {
+      recommendation = dataConfidence === 'high'
+        ? 'Excellent recovery! You\'re primed for high-intensity training or challenging activities.'
+        : 'Looking good! Consider syncing more health data for better accuracy.';
+    } else if (totalScore >= 70) {
       level = 'good';
       color = 'text-lime-500';
-      recommendation = 'Good readiness. A moderate workout would be ideal.';
-    } else if (totalScore >= 40) {
+      recommendation = 'Good readiness. A moderate workout would be ideal today.';
+    } else if (totalScore >= 60) {
       level = 'moderate';
       color = 'text-amber-500';
-      recommendation = 'Consider a lighter session today. Focus on mobility or technique.';
+      recommendation = 'Fair recovery. Consider lighter activity—focus on technique or mobility work.';
     } else {
       level = 'low';
       color = 'text-red-500';
-      recommendation = 'Your body needs rest. Prioritize recovery activities today.';
+      // Context-specific recommendations based on which score is lowest
+      if (activityScore < sleepScore && activityScore < recoveryScore) {
+        recommendation = 'Yesterday\'s training was demanding. Prioritize active recovery and rest.';
+      } else if (sleepScore < recoveryScore) {
+        recommendation = 'Sleep quality was below optimal. Focus on recovery and earlier bedtime tonight.';
+      } else {
+        recommendation = 'Your body signals indicate a need for rest. Light movement only recommended.';
+      }
     }
 
     return {
@@ -146,23 +265,24 @@ export function useReadinessScore() {
       components: {
         sleep: { 
           score: Math.round(sleepScore), 
-          value: currentSleep ? Math.round(currentSleep / 60 * 10) / 10 : null, 
+          value: lastNightSleep ? Math.round(lastNightSleep.value / 60 * 10) / 10 : null, 
           unit: 'hrs' 
         },
         recovery: { 
           score: Math.round(recoveryScore), 
-          value: currentRestingHR, 
+          value: todayRestingHR?.value ?? null, 
           unit: 'bpm' 
         },
         activity: { 
           score: Math.round(activityScore), 
-          value: currentActiveMinutes, 
+          value: yesterdayActiveMinutes?.value ?? null, 
           unit: 'min' 
         },
       },
       recommendation,
+      dataConfidence,
     };
-  }, [data, getDailyAverage]);
+  }, [data]);
 
   return {
     readiness,
