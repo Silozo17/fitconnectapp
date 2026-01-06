@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format, subDays, startOfDay, differenceInDays, isWithinInterval } from "date-fns";
-import { useMemo, useCallback } from "react";
+import { useMemo, useCallback, useEffect } from "react";
 import type { CoreHealthDataType } from "@/types/health";
 
 // Re-export for backward compatibility
@@ -40,6 +40,7 @@ const getHighestPriorityEntry = (entries: HealthDataPoint[]): HealthDataPoint | 
 
 export const useHealthAggregation = (options: UseHealthAggregationOptions = {}) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const { clientId, days = 30 } = options;
 
   // Fetch data for the specified period - calculate fresh each render to ensure midnight reset
@@ -47,8 +48,10 @@ export const useHealthAggregation = (options: UseHealthAggregationOptions = {}) 
   const startDateKey = format(startOfDay(subDays(new Date(), days)), "yyyy-MM-dd");
   const endDateKey = todayKey;
 
+  const queryKey = ["health-aggregation", user?.id, clientId, days, startDateKey, endDateKey];
+
   const { data: rawData, isLoading, error, refetch } = useQuery({
-    queryKey: ["health-aggregation", user?.id, clientId, days, startDateKey, endDateKey],
+    queryKey,
     queryFn: async () => {
       let targetClientId = clientId;
 
@@ -75,8 +78,34 @@ export const useHealthAggregation = (options: UseHealthAggregationOptions = {}) 
       return data as HealthDataPoint[];
     },
     enabled: !!user,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60, // Reduce to 1 minute for fresher readiness data
+    refetchOnMount: true, // Always refetch when component mounts
   });
+
+  // Subscribe to realtime updates on health_data_sync table
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('health-data-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen to INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'health_data_sync',
+        },
+        () => {
+          // Invalidate and refetch when new health data arrives
+          queryClient.invalidateQueries({ queryKey: ["health-aggregation"] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   // Deduplicate data by date and type (highest priority source wins)
   const deduplicatedData = useMemo(() => {
