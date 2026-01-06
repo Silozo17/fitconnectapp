@@ -14,7 +14,7 @@ interface GuestOnlyRouteProps {
 const GUEST_ROUTE_TIMEOUT_MS = 3000;
 
 const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
-  const { user, role, loading } = useAuth();
+  const { user, role, loading, pending2FA } = useAuth();
   const hasRenderedContent = useRef(false);
   const [guestTimeoutReached, setGuestTimeoutReached] = useState(false);
   const mountTimeRef = useRef(Date.now());
@@ -40,9 +40,9 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
     return () => clearTimeout(timer);
   }, [loading]);
 
-  // If user is authenticated, redirect to their role-based dashboard
-  // This check must come first to ensure authenticated users are always redirected
-  if (user) {
+  // If user is authenticated AND 2FA is not pending, redirect to their role-based dashboard
+  // Users with pending 2FA should NOT be treated as fully logged in
+  if (user && !pending2FA) {
     hasRenderedContent.current = true;
     
     if (isAdminRole(role)) {

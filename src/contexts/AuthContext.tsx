@@ -14,8 +14,10 @@ interface AuthContextType {
   role: AppRole | null;
   allRoles: AppRole[];
   loading: boolean;
+  pending2FA: boolean; // True when user is logged in but hasn't completed 2FA
+  setPending2FA: (pending: boolean) => void;
   signUp: (email: string, password: string, role: AppRole, firstName: string, lastName?: string) => Promise<{ error: Error | null }>;
-  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null; requires2FA?: boolean }>;
   signOut: () => Promise<void>;
   refreshRole: () => Promise<void>;
 }
@@ -28,6 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<AppRole | null>(null);
   const [allRoles, setAllRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
+  const [pending2FA, setPending2FA] = useState(false);
 
   const fetchUserRole = useCallback(async (userId: string) => {
     console.log('[Auth] Fetching roles from database for user:', userId);
@@ -256,6 +259,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = useCallback(async () => {
     if (user?.id) clearUserNativeCache(user.id);
     clearSessionStorage();
+    setPending2FA(false);
     
     try {
       await supabase.auth.signOut();
@@ -279,11 +283,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     role,
     allRoles,
     loading,
+    pending2FA,
+    setPending2FA,
     signUp,
     signIn,
     signOut,
     refreshRole,
-  }), [user, session, role, allRoles, loading, signUp, signIn, signOut, refreshRole]);
+  }), [user, session, role, allRoles, loading, pending2FA, signUp, signIn, signOut, refreshRole]);
 
   return (
     <AuthContext.Provider value={value}>
