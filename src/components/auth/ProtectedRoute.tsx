@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { TwoFactorGate } from "./TwoFactorGate";
@@ -10,17 +11,32 @@ interface ProtectedRouteProps {
   allowedRoles?: AppRole[];
 }
 
+const ROLE_LOADING_TIMEOUT_MS = 5000;
+
 const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, allRoles, loading } = useAuth();
   const location = useLocation();
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+
+  // Timeout protection: if roles don't load in 5s, proceed anyway
+  useEffect(() => {
+    if (!user || allRoles.length > 0 || hasTimedOut) return;
+    
+    const timeout = setTimeout(() => {
+      console.warn('[ProtectedRoute] Role loading timed out after 5s, proceeding with navigation');
+      setHasTimedOut(true);
+    }, ROLE_LOADING_TIMEOUT_MS);
+    
+    return () => clearTimeout(timeout);
+  }, [user, allRoles.length, hasTimedOut]);
 
   // Show spinner during initial auth loading
   if (loading) {
     return <PageLoadingSpinner />;
   }
   
-  // If user exists but roles haven't loaded yet, wait briefly
-  if (user && allRoles.length === 0) {
+  // If user exists but roles haven't loaded yet, wait (with timeout protection)
+  if (user && allRoles.length === 0 && !hasTimedOut) {
     return <PageLoadingSpinner />;
   }
 

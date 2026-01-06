@@ -85,6 +85,18 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [hasInitializedFromRole, setHasInitializedFromRole] = useState(false);
   const hasRestoredFromStorageRef = useRef(!!getSavedViewState());
   
+  // Timeout protection: ensure isLoadingProfiles always resolves
+  useEffect(() => {
+    if (!isLoadingProfiles) return;
+    
+    const timeout = setTimeout(() => {
+      console.warn('[AdminContext] Profile loading timed out after 8s, forcing completion');
+      setIsLoadingProfiles(false);
+    }, 8000);
+    
+    return () => clearTimeout(timeout);
+  }, [isLoadingProfiles]);
+  
   // Reset state when user logs out
   useEffect(() => {
     if (!user) {
