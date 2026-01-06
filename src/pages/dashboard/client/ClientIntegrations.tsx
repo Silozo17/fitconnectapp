@@ -58,10 +58,12 @@ const ClientIntegrations = () => {
         title="Connect Your Devices"
         description="Sync health data from Apple Health, Google Fit, and wearables"
       />
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Integrations</h1>
-          <p className="text-muted-foreground">
+      <div className="space-y-11">
+        <div className="min-w-0">
+          <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
+            Device <span className="gradient-text">Integrations</span>
+          </h2>
+          <p className="text-muted-foreground text-sm mt-1">
             Connect your fitness devices and calendars to sync your health data
           </p>
         </div>

@@ -201,19 +201,23 @@ export default function ClientLibrary() {
         title="Your Content Library"
         description="Access all digital content you've purchased"
       />
-      <div className="space-y-6">
+      <div className="space-y-11">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Library className="h-8 w-8 text-primary" />
-              My Library
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              Access your purchased content
-            </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Library className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
+                My <span className="gradient-text">Library</span>
+              </h2>
+              <p className="text-muted-foreground text-sm mt-1">
+                Access your purchased content
+              </p>
+            </div>
           </div>
-          <Button onClick={handleMarketplaceClick}>
+          <Button onClick={handleMarketplaceClick} className="shrink-0">
             Browse Marketplace
           </Button>
         </div>

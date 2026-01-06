@@ -101,16 +101,18 @@ const ClientFindCoaches = () => {
         description="Find fitness professionals that match your goals and preferences"
       />
       {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">{t('findCoaches.title')}</h1>
-            <p className="text-muted-foreground">
+      <div className="mb-11">
+        <div className="flex items-start justify-between gap-4 mb-6">
+          <div className="min-w-0">
+            <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
+              Find <span className="gradient-text">Coaches</span>
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
               {t('findCoaches.description')}
             </p>
           </div>
           {locationDisplay && (
-            <Badge variant="secondary" className="gap-1.5">
+            <Badge variant="secondary" className="gap-1.5 shrink-0">
               <MapPin className="w-3.5 h-3.5" />
               {isManualSelection ? t('findCoaches.filtered') : t('findCoaches.near')} {locationDisplay}
             </Badge>

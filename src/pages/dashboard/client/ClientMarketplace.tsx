@@ -36,21 +36,25 @@ export default function ClientMarketplace() {
         title="Digital Fitness Content"
         description="Browse and purchase guides, programs, and resources from coaches"
       />
-      <div className="space-y-6">
+      <div className="space-y-11">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Store className="h-8 w-8 text-primary" />
-              {t('marketplace.title')}
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {t('marketplace.subtitle')}
-            </p>
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+          <div className="min-w-0 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+              <Store className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
+                Digital <span className="gradient-text">Marketplace</span>
+              </h2>
+              <p className="text-muted-foreground text-sm mt-1">
+                {t('marketplace.subtitle')}
+              </p>
+            </div>
           </div>
           
           {/* Search Bar */}
-          <div className="relative w-full sm:w-80">
+          <div className="relative w-full sm:w-80 shrink-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder={t('marketplace.searchPlaceholder')}

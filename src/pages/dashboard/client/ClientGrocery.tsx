@@ -75,12 +75,14 @@ const ClientGrocery = () => {
           title="Shopping Lists"
           description="Generate grocery lists from meal plans or create your own"
         />
-        <div className="space-y-6">
+        <div className="space-y-11">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold">Shopping Lists</h1>
-              <p className="text-muted-foreground">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
+                Shopping <span className="gradient-text">Lists</span>
+              </h2>
+              <p className="text-muted-foreground text-sm mt-1">
                 Create and manage your grocery lists
               </p>
             </div>

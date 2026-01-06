@@ -7,6 +7,7 @@ import { MessageSquare, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useParticipantName } from "@/hooks/useParticipantName";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 
 const ClientMessages = () => {
   const { t } = useTranslation('messaging');
@@ -23,7 +24,7 @@ const ClientMessages = () => {
       />
       <div className="flex flex-col h-full min-h-0">
         {/* Header */}
-        <div className="flex items-center gap-3 mb-5">
+        <div className="flex items-center gap-3 mb-6">
           {participantId && (
             <Button
               variant="ghost"
@@ -34,10 +35,8 @@ const ClientMessages = () => {
               <ArrowLeft className="w-5 h-5" />
             </Button>
           )}
-          <h1 className="text-2xl font-bold text-foreground font-display">{t('title')}</h1>
+          <DashboardSectionHeader title={t('title')} className="mb-0" />
         </div>
-
-        {/* Chat Container */}
         <div className="flex-1 glass-card rounded-3xl overflow-hidden flex shadow-float">
           {/* Conversations List */}
           <div

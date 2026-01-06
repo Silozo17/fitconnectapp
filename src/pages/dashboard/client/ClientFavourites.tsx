@@ -188,9 +188,11 @@ const ClientFavourites = () => {
         title="Saved Coaches"
         description="Quick access to coaches you've bookmarked"
       />
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">Favourite Coaches</h1>
-        <p className="text-muted-foreground">
+      <div className="mb-11">
+        <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
+          Favourite <span className="gradient-text">Coaches</span>
+        </h2>
+        <p className="text-muted-foreground text-sm mt-1">
           Quick access to coaches you've saved
         </p>
       </div>
