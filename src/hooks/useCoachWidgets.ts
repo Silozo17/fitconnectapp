@@ -62,16 +62,13 @@ export const COACH_WIDGET_CATEGORIES = [
   { key: "actions", label: "Quick Actions", icon: "Zap" },
 ] as const;
 
-// Default widget configuration
+// Default widget configuration - using stats_overview for compact mobile layout
 const DEFAULT_WIDGETS: Omit<CoachDashboardWidget, "id" | "coach_id">[] = [
-  { widget_type: "stats_clients", title: "Active Clients", position: 0, size: "small", is_visible: true, config: {} },
-  { widget_type: "stats_sessions", title: "Sessions This Week", position: 1, size: "small", is_visible: true, config: {} },
-  { widget_type: "stats_messages", title: "Unread Messages", position: 2, size: "small", is_visible: true, config: {} },
-  { widget_type: "stats_rating", title: "Average Rating", position: 3, size: "small", is_visible: true, config: {} },
-  { widget_type: "quick_actions", title: "Quick Actions", position: 4, size: "full", is_visible: true, config: {} },
-  { widget_type: "engagement_connection_requests", title: "Connection Requests", position: 5, size: "full", is_visible: true, config: {} },
-  { widget_type: "list_upcoming", title: "Upcoming Sessions", position: 6, size: "medium", is_visible: true, config: {} },
-  { widget_type: "engagement_reviews", title: "Your Reviews", position: 7, size: "medium", is_visible: true, config: {} },
+  { widget_type: "stats_overview", title: "Stats Overview", position: 0, size: "full", is_visible: true, config: {} },
+  { widget_type: "quick_actions", title: "Quick Actions", position: 1, size: "full", is_visible: true, config: {} },
+  { widget_type: "engagement_connection_requests", title: "Connection Requests", position: 2, size: "full", is_visible: true, config: {} },
+  { widget_type: "list_upcoming", title: "Upcoming Sessions", position: 3, size: "medium", is_visible: true, config: {} },
+  { widget_type: "engagement_reviews", title: "Your Reviews", position: 4, size: "medium", is_visible: true, config: {} },
 ];
 
 const getDefaultWidgets = (): CoachDashboardWidget[] => 

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Calendar, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { ContentSection } from "@/components/shared/ContentSection";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface UpcomingSession {
@@ -22,7 +22,7 @@ export function UpcomingSessionsWidget({ sessions, isLoading }: UpcomingSessions
   const { t } = useTranslation("coach");
 
   return (
-    <Card variant="glass" className="overflow-hidden h-full">
+    <ContentSection colorTheme="blue" padding="none" className="overflow-hidden h-full rounded-3xl">
       <div className="p-5 border-b border-border/50 flex items-center justify-between">
         <h2 className="font-display font-bold text-foreground">{t("clients.upcomingSessions")}</h2>
         <Link to="/dashboard/coach/schedule">
@@ -45,7 +45,7 @@ export function UpcomingSessionsWidget({ sessions, isLoading }: UpcomingSessions
         ) : (
           sessions.map((session) => (
             <div key={session.id} className="p-4 flex items-center gap-4 hover:bg-muted/30 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary font-bold text-sm">
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
                 {session.avatar}
               </div>
               <div className="flex-1 min-w-0">
@@ -67,6 +67,6 @@ export function UpcomingSessionsWidget({ sessions, isLoading }: UpcomingSessions
           <p className="text-muted-foreground">{t("dashboard.noUpcomingSessions")}</p>
         </div>
       )}
-    </Card>
+    </ContentSection>
   );
 }

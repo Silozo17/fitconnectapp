@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Star, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { ContentSection } from "@/components/shared/ContentSection";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface ReviewsWidgetProps {
@@ -15,7 +15,7 @@ export function ReviewsWidget({ averageRating, totalReviews, isLoading }: Review
   const { t } = useTranslation("coach");
 
   return (
-    <Card variant="glass" className="overflow-hidden h-full">
+    <ContentSection colorTheme="green" padding="none" className="overflow-hidden h-full rounded-3xl">
       <div className="p-5 border-b border-border/50 flex items-center justify-between">
         <h2 className="font-display font-bold text-foreground">{t("dashboard.yourReviews")}</h2>
         <Link to="/dashboard/coach/reviews">
@@ -27,7 +27,7 @@ export function ReviewsWidget({ averageRating, totalReviews, isLoading }: Review
       <div className="p-6">
         <div className="flex items-center gap-4 mb-6">
           <div className="flex items-center gap-2">
-            <Star className="w-8 h-8 text-warning fill-warning" />
+            <Star className="w-8 h-8 text-yellow-400 fill-yellow-400" />
             {isLoading ? (
               <Skeleton className="h-10 w-12 rounded-xl" />
             ) : (
@@ -50,6 +50,6 @@ export function ReviewsWidget({ averageRating, totalReviews, isLoading }: Review
           </p>
         )}
       </div>
-    </Card>
+    </ContentSection>
   );
 }

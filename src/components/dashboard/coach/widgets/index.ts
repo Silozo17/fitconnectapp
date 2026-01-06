@@ -1,3 +1,4 @@
+export { CoachStatsGrid } from "./CoachStatsGrid";
 export { StatsClientsWidget } from "./StatsClientsWidget";
 export { StatsSessionsWidget } from "./StatsSessionsWidget";
 export { StatsMessagesWidget } from "./StatsMessagesWidget";
