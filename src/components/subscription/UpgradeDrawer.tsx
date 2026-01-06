@@ -155,19 +155,22 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh] pb-safe-bottom">
-          {/* Hero Image */}
-          <div className="w-full aspect-[16/9] relative overflow-hidden">
+        <DrawerContent className="h-[95vh] pb-safe-bottom overflow-hidden">
+          {/* Full-screen background image */}
+          <div className="absolute inset-0 z-0">
             <img 
               src="https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/iap_image.webp"
-              alt="Upgrade to Pro"
+              alt="Upgrade background"
               className="w-full h-full object-cover"
             />
+            {/* Gradient overlay for readability */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/95 to-background/60" />
           </div>
           
-          <div className="px-4 pt-3 pb-2 flex flex-col overflow-y-auto">
+          {/* Content overlaid on background */}
+          <div className="relative z-10 h-full flex flex-col px-4 pt-8">
             {/* Logo */}
-            <div className="flex items-center justify-center gap-2 pb-2">
+            <div className="flex items-center justify-center gap-2 pb-3">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <Dumbbell className="w-5 h-5 text-primary-foreground" />
               </div>
@@ -175,7 +178,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
             </div>
 
             {/* Title */}
-            <DrawerHeader className="p-0 text-center mb-2">
+            <DrawerHeader className="p-0 text-center mb-3">
               <DrawerTitle className="font-display text-xl font-bold">
                 Unlock all coaching features
               </DrawerTitle>
@@ -184,16 +187,14 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
               </DrawerDescription>
             </DrawerHeader>
 
-            {/* Dynamic benefits list */}
-            <div className="space-y-2 mb-3">
+            {/* Dynamic benefits list - compact */}
+            <div className="flex flex-wrap justify-center gap-x-4 gap-y-1.5 mb-4">
               {benefits.map((benefit, idx) => {
                 const Icon = benefit.icon;
                 return (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                      <Icon className="h-3.5 w-3.5 text-primary" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">{benefit.text}</p>
+                  <div key={idx} className="flex items-center gap-1.5">
+                    <Icon className="h-3.5 w-3.5 text-primary" />
+                    <p className="text-xs text-muted-foreground">{benefit.text}</p>
                   </div>
                 );
               })}
@@ -219,8 +220,8 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
               </Badge>
             </div>
 
-            {/* Tier cards */}
-            <div className="space-y-2 flex-1 min-h-0 overflow-y-auto">
+            {/* Tier cards - compact grid, no scroll */}
+            <div className="space-y-2 flex-shrink-0">
               {paidTiers.map((tier) => {
                 const Icon = tier.icon;
                 const isSelected = selectedTier === tier.id;
@@ -236,35 +237,35 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
                     key={tier.id}
                     type="button"
                     onClick={() => setSelectedTier(tier.id as TierKey)}
-                    className={`w-full p-3 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
+                    className={`w-full p-2.5 rounded-xl border-2 transition-all text-left flex items-center gap-2.5 backdrop-blur-sm ${
                       isSelected 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-muted-foreground"
+                        ? "border-primary bg-primary/10" 
+                        : "border-border/50 bg-background/50 hover:border-muted-foreground"
                     }`}
                   >
                     {/* Radio-style indicator */}
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                    <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
                       isSelected ? "border-primary bg-primary" : "border-muted-foreground"
                     }`}>
-                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
+                      {isSelected && <Check className="w-2.5 h-2.5 text-primary-foreground" />}
                     </div>
                     
                     {/* Tier icon */}
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                    <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
                       isSelected ? "bg-primary" : "bg-secondary"
                     }`}>
-                      <Icon className={`w-4 h-4 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
+                      <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
                     </div>
                     
                     {/* Tier info */}
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <h3 className="font-semibold text-foreground text-sm">{tier.name}</h3>
                         {tier.popular && (
-                          <Badge variant="secondary" className="text-xs py-0">Popular</Badge>
+                          <Badge variant="secondary" className="text-[10px] py-0 px-1.5">Popular</Badge>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1">{tier.description}</p>
+                      <p className="text-[11px] text-muted-foreground line-clamp-1">{tier.description}</p>
                     </div>
                     
                     {/* Price */}
@@ -272,7 +273,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
                       <span className="font-bold text-primary text-sm">
                         {nativePricing.formatPrice(monthlyEquivalent)}
                       </span>
-                      <span className="text-xs text-muted-foreground">/mo</span>
+                      <span className="text-[10px] text-muted-foreground">/mo</span>
                     </div>
                   </button>
                 );
@@ -281,15 +282,18 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
 
             {/* Purchase cancelled alert */}
             {iapState.purchaseStatus === 'cancelled' && (
-              <Alert className="mt-2 border-muted bg-muted/50">
+              <Alert className="mt-2 border-muted bg-muted/50 backdrop-blur-sm">
                 <AlertDescription className="text-sm text-muted-foreground text-center">
                   Purchase cancelled. Select a plan to try again.
                 </AlertDescription>
               </Alert>
             )}
 
-            {/* CTA Section */}
-            <div className="mt-3 space-y-2">
+            {/* Spacer to push CTA to bottom */}
+            <div className="flex-1 min-h-2" />
+
+            {/* CTA Section - fixed at bottom */}
+            <div className="space-y-2 pb-2">
               <Button 
                 className="w-full py-5 text-base font-semibold"
                 onClick={handlePurchase}
@@ -305,7 +309,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
             </div>
 
             {/* Legal footer */}
-            <p className="text-xs text-muted-foreground text-center mt-3 pb-1">
+            <p className="text-[10px] text-muted-foreground text-center pb-2">
               {isNativeMobile && (
                 <>
                   <button 
