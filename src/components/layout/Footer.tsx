@@ -72,6 +72,7 @@ const Footer = () => {
       { name: t("website.footer.links.aboutUs"), href: "/about" },
       { name: t("website.footer.links.privacyPolicy"), href: "/privacy" },
       { name: t("website.footer.links.termsOfService"), href: "/terms" },
+      { name: t("website.footer.links.eula", "EULA"), href: "/eula" },
       { name: "Sitemap", href: "/sitemap.xml" },
     ],
   };
@@ -148,7 +149,7 @@ const Footer = () => {
                 <ul className="space-y-3">
                   {links.map((link) => {
                     // Legal links on native should open externally
-                    const isLegalLink = isLegalSection && (link.href === '/privacy' || link.href === '/terms');
+                    const isLegalLink = isLegalSection && (link.href === '/privacy' || link.href === '/terms' || link.href === '/eula');
                     
                     if (isNative && isLegalLink) {
                       return (

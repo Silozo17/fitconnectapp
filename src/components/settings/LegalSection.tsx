@@ -33,7 +33,7 @@ export const LegalSection = () => {
       icon: ScrollText,
       title: t('legal.eula', 'End User License Agreement'),
       description: t('legal.eulaDesc', 'License terms for using the FitConnect mobile app'),
-      href: '/terms#eula',
+      href: '/eula',
     },
   ];
 

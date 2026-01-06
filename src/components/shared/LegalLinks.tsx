@@ -89,7 +89,7 @@ export const LegalLinks = ({
             <ExternalLink className="h-3 w-3 opacity-50" />
           </LegalLink>
           <LegalLink 
-            to="/terms#eula" 
+            to="/eula" 
             linkClassName="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             {showIcons && <FileText className="h-4 w-4" />}
@@ -134,7 +134,7 @@ export const LegalDisclosure = ({ className = "" }: { className?: string }) => {
       {t("legal.agreementDisclosure", "By continuing, you agree to our")}{" "}
       {isNative ? (
         <>
-          <button onClick={() => handleLegalClick('/terms')} className="text-primary hover:underline">
+          <button onClick={() => handleLegalClick('/eula')} className="text-primary hover:underline">
             {t("legal.termsEula", "Terms of Use (EULA)")}
           </button>
           {" "}{t("common.and", "and")}{" "}
@@ -144,7 +144,7 @@ export const LegalDisclosure = ({ className = "" }: { className?: string }) => {
         </>
       ) : (
         <>
-          <Link to="/terms" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+          <Link to="/eula" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
             {t("legal.termsEula", "Terms of Use (EULA)")}
           </Link>
           {" "}{t("common.and", "and")}{" "}

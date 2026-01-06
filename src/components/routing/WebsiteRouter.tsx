@@ -24,6 +24,7 @@ const ForCoaches = lazy(() => import('@/pages/ForCoaches'));
 const HowItWorks = lazy(() => import('@/pages/HowItWorks'));
 const Privacy = lazy(() => import('@/pages/Privacy'));
 const Terms = lazy(() => import('@/pages/Terms'));
+const Eula = lazy(() => import('@/pages/Eula'));
 const SuccessStories = lazy(() => import('@/pages/SuccessStories'));
 const Contact = lazy(() => import('@/pages/Contact'));
 const Community = lazy(() => import('@/pages/Community'));
@@ -66,6 +67,7 @@ function PageRoutes() {
       <Route path="how-it-works" element={<HowItWorks />} />
       <Route path="privacy" element={<Privacy />} />
       <Route path="terms" element={<Terms />} />
+      <Route path="eula" element={<Eula />} />
       <Route path="success-stories" element={<SuccessStories />} />
       <Route path="contact" element={<Contact />} />
       <Route path="community" element={<Community />} />
@@ -139,6 +141,7 @@ export function WebsiteRouter() {
           <Route path="how-it-works" element={<HowItWorks />} />
           <Route path="privacy" element={<Privacy />} />
           <Route path="terms" element={<Terms />} />
+          <Route path="eula" element={<Eula />} />
           <Route path="success-stories" element={<SuccessStories />} />
           <Route path="contact" element={<Contact />} />
           <Route path="community" element={<Community />} />
