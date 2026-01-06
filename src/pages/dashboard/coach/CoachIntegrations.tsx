@@ -97,7 +97,9 @@ const CoachIntegrations = () => {
       />
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Integrations</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">
+            App <span className="gradient-text">Integrations</span>
+          </h1>
           <p className="text-muted-foreground">
             Connect your video conferencing and calendar apps to streamline sessions
           </p>
@@ -191,7 +193,7 @@ const CoachIntegrations = () => {
         <Separator />
 
         {/* Data & Privacy */}
-        <Card className="p-4 bg-muted/50 border-muted">
+        <div className="p-4 rounded-xl border border-border bg-muted/30">
           <div className="flex items-start gap-3">
             <Shield className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
             <div className="space-y-2">
@@ -211,7 +213,7 @@ const CoachIntegrations = () => {
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       </div>
       </FeatureGate>
     </DashboardLayout>

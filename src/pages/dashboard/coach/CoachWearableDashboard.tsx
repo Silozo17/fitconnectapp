@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -61,73 +63,45 @@ const CoachWearableDashboard = () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4 mb-6">
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
-                <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-base sm:text-xl font-bold">{aggregates.avgSteps?.toLocaleString() || "—"}</p>
-                <p className="text-xs text-muted-foreground">{t("wearableDashboard.avgSteps")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-rose-500/10 flex items-center justify-center">
-                <Heart className="w-5 h-5 sm:w-6 sm:h-6 text-rose-500" />
-              </div>
-              <div>
-                <p className="text-base sm:text-xl font-bold">{aggregates.avgHeartRate || "—"}</p>
-                <p className="text-xs text-muted-foreground">{t("wearableDashboard.avgHeartRate")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                <Moon className="w-5 h-5 sm:w-6 sm:h-6 text-indigo-500" />
-              </div>
-              <div>
-                <p className="text-base sm:text-xl font-bold">{aggregates.avgSleep ? `${aggregates.avgSleep}h` : "—"}</p>
-                <p className="text-xs text-muted-foreground">{t("wearableDashboard.avgSleep")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-orange-500/10 flex items-center justify-center">
-                <Flame className="w-5 h-5 sm:w-6 sm:h-6 text-orange-500" />
-              </div>
-              <div>
-                <p className="text-base sm:text-xl font-bold">{aggregates.avgCalories?.toLocaleString() || "—"}</p>
-                <p className="text-xs text-muted-foreground">{t("wearableDashboard.avgCalories")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl col-span-2 sm:col-span-1">
-          <CardContent className="p-3 sm:p-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-success/10 flex items-center justify-center">
-                <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-success" />
-              </div>
-              <div>
-                <p className="text-base sm:text-xl font-bold">{aggregates.connectedClients || 0}</p>
-                <p className="text-xs text-muted-foreground">{t("wearableDashboard.clientsConnected")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <StatsGrid columns={{ default: 2, sm: 3, lg: 5 }} gap="sm" className="mb-6">
+        <MetricCard
+          icon={Activity}
+          label={t("wearableDashboard.avgSteps")}
+          value={aggregates.avgSteps?.toLocaleString() || "—"}
+          color="primary"
+          size="sm"
+        />
+        <MetricCard
+          icon={Heart}
+          label={t("wearableDashboard.avgHeartRate")}
+          value={aggregates.avgHeartRate || "—"}
+          unit="bpm"
+          color="red"
+          size="sm"
+        />
+        <MetricCard
+          icon={Moon}
+          label={t("wearableDashboard.avgSleep")}
+          value={aggregates.avgSleep ? `${aggregates.avgSleep}` : "—"}
+          unit="h"
+          color="purple"
+          size="sm"
+        />
+        <MetricCard
+          icon={Flame}
+          label={t("wearableDashboard.avgCalories")}
+          value={aggregates.avgCalories?.toLocaleString() || "—"}
+          color="orange"
+          size="sm"
+        />
+        <MetricCard
+          icon={Activity}
+          label={t("wearableDashboard.clientsConnected")}
+          value={aggregates.connectedClients || 0}
+          color="green"
+          size="sm"
+        />
+      </StatsGrid>
 
       {/* Alerts Section */}
       {alerts.length > 0 && (

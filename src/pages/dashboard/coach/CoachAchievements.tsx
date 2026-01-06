@@ -8,6 +8,8 @@ import { useFeaturedBadges } from "@/hooks/useFeaturedBadges";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -331,32 +333,36 @@ const CoachAchievements = () => {
         description="View badges and achievements from your coaching journey"
       />
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <Card variant="glass" className="p-4 text-center">
-          <Trophy className="w-8 h-8 text-primary mx-auto mb-2" />
-          <p className="text-2xl font-bold text-foreground">{totalEarned}/{totalAvailable}</p>
-          <p className="text-sm text-muted-foreground">{t("achievementsPage.badgesEarned")}</p>
-        </Card>
-        <Card variant="glass" className="p-4 text-center">
-          <Star className="w-8 h-8 text-warning mx-auto mb-2" />
-          <p className="text-2xl font-bold text-foreground">{featuredCount}/{MAX_FEATURED_BADGES}</p>
-          <p className="text-sm text-muted-foreground">{t("achievementsPage.featuredOnProfile")}</p>
-        </Card>
-        <Card variant="glass" className="p-4 text-center">
-          <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-2">
-            <Check className="w-5 h-5 text-success" />
-          </div>
-          <p className="text-2xl font-bold text-foreground">{stats?.clientCount || 0}</p>
-          <p className="text-sm text-muted-foreground">{t("achievementsPage.activeClients")}</p>
-        </Card>
-        <Card variant="glass" className="p-4 text-center">
-          <div className="w-8 h-8 rounded-full bg-accent/20 flex items-center justify-center mx-auto mb-2">
-            <Dumbbell className="w-5 h-5 text-accent" />
-          </div>
-          <p className="text-2xl font-bold text-foreground">{stats?.sessionCount || 0}</p>
-          <p className="text-sm text-muted-foreground">{t("achievementsPage.sessionsCompleted")}</p>
-        </Card>
-      </div>
+      <StatsGrid columns={{ default: 2, md: 4 }} gap="default" className="mb-8">
+        <MetricCard
+          icon={Trophy}
+          label={t("achievementsPage.badgesEarned")}
+          value={`${totalEarned}/${totalAvailable}`}
+          color="primary"
+          size="sm"
+        />
+        <MetricCard
+          icon={Star}
+          label={t("achievementsPage.featuredOnProfile")}
+          value={`${featuredCount}/${MAX_FEATURED_BADGES}`}
+          color="amber"
+          size="sm"
+        />
+        <MetricCard
+          icon={Check}
+          label={t("achievementsPage.activeClients")}
+          value={stats?.clientCount || 0}
+          color="green"
+          size="sm"
+        />
+        <MetricCard
+          icon={Dumbbell}
+          label={t("achievementsPage.sessionsCompleted")}
+          value={stats?.sessionCount || 0}
+          color="purple"
+          size="sm"
+        />
+      </StatsGrid>
 
       {/* Profile Badges */}
       {profileBadges.length > 0 && (
