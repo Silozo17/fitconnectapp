@@ -1,9 +1,12 @@
 import { useState, useCallback } from "react";
-import { Check, X, Loader2, Dumbbell } from "lucide-react";
+import { Check, X, Loader2, Dumbbell, Users, Brain, TrendingUp, Infinity, Headphones, Cog, MessageSquare, Sparkles, Crown, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { useNativeIAP, SubscriptionTier, BillingInterval } from "@/hooks/useNativeIAP";
+import { Switch } from "@/components/ui/switch";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useNativeIAP } from "@/hooks/useNativeIAP";
 import { useNativePricing } from "@/hooks/useNativePricing";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
@@ -14,14 +17,50 @@ import { triggerHaptic } from "@/lib/despia";
 import { useQueryClient } from "@tanstack/react-query";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 import { supabase } from "@/integrations/supabase/client";
-import { TierKey } from "@/lib/stripe-config";
+import { TierKey, SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
+import { SubscriptionTier, BillingInterval } from "@/lib/pricing-config";
+import { cn } from "@/lib/utils";
 
-const FEATURES = [
-  "Manage unlimited clients",
-  "AI-powered workout & meal plans",
-  "Advanced analytics & insights",
-  "Priority support & custom branding",
-];
+// Tier configuration for display
+const TIER_CONFIG: Record<SubscriptionTier, { icon: typeof Rocket; name: string; description: string; popular?: boolean }> = {
+  starter: {
+    icon: Rocket,
+    name: "Starter",
+    description: "Perfect for new coaches",
+  },
+  pro: {
+    icon: Crown,
+    name: "Pro",
+    description: "For established coaches",
+    popular: true,
+  },
+  enterprise: {
+    icon: Sparkles,
+    name: "Enterprise",
+    description: "For elite coaches & gyms",
+  },
+};
+
+// Dynamic benefits based on selected tier
+const TIER_BENEFITS = {
+  starter: [
+    { icon: Users, text: "Manage up to 10 clients" },
+    { icon: Dumbbell, text: "Workout plan builder" },
+    { icon: MessageSquare, text: "Client messaging & scheduling" },
+  ],
+  pro: [
+    { icon: Users, text: "Manage up to 50 clients" },
+    { icon: Brain, text: "AI workout & meal planners" },
+    { icon: TrendingUp, text: "Advanced analytics & insights" },
+  ],
+  enterprise: [
+    { icon: Infinity, text: "Unlimited clients" },
+    { icon: Headphones, text: "Priority support & account manager" },
+    { icon: Cog, text: "Custom integrations & white-label" },
+  ],
+};
+
+const DISPLAYABLE_TIERS: SubscriptionTier[] = ['starter', 'pro', 'enterprise'];
 
 interface UpgradeDrawerProps {
   open: boolean;
@@ -30,6 +69,8 @@ interface UpgradeDrawerProps {
 }
 
 export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProps) => {
+  const [selectedTier, setSelectedTier] = useState<SubscriptionTier>('pro');
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [purchasedTier, setPurchasedTier] = useState<TierKey | null>(null);
@@ -38,11 +79,8 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
   const nativePricing = useNativePricing();
   const queryClient = useQueryClient();
   
-  // Default to Pro tier, monthly billing
-  const selectedTier: SubscriptionTier = 'pro';
-  const billingInterval: BillingInterval = 'monthly';
-  const monthlyPrice = nativePricing.getSubscriptionPrice(selectedTier, billingInterval);
-  const formattedPrice = nativePricing.formatPrice(monthlyPrice);
+  // Get dynamic benefits for selected tier
+  const benefits = TIER_BENEFITS[selectedTier] || TIER_BENEFITS.pro;
   
   // Handle successful IAP purchase
   const handleIAPSuccess = useCallback(async (tier: SubscriptionTier) => {
@@ -72,7 +110,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
     await reconcileSubscription();
   }, [reconcileSubscription]);
   
-  const handleContinue = async () => {
+  const handlePurchase = async () => {
     if (!coachId) return;
     
     setIsSubmitting(true);
@@ -108,7 +146,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
     }
   };
 
-  const handleSkip = () => {
+  const handleClose = () => {
     onOpenChange(false);
   };
   
@@ -123,13 +161,13 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
               alt=""
               className="h-full w-full object-cover object-top"
             />
-            {/* Gradient overlay - starts at ~55% to show hero image at top */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/98 via-[55%] to-transparent" />
+            {/* Gradient overlay - starts at ~45% to show hero image at top */}
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/98 via-[45%] to-transparent" />
           </div>
 
           {/* Close button - top right */}
           <button
-            onClick={handleSkip}
+            onClick={handleClose}
             className="absolute right-4 top-4 z-20 rounded-full bg-background/50 p-2 backdrop-blur-sm transition-colors hover:bg-background/70"
             aria-label="Close"
           >
@@ -146,10 +184,10 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
             </button>
           )}
 
-          {/* Content - positioned in lower portion */}
-          <div className="relative z-10 flex h-full flex-col justify-end px-6 pb-8 pt-[45vh]">
+          {/* Content - positioned in lower portion with scroll */}
+          <div className="relative z-10 flex h-full flex-col overflow-y-auto px-6 pb-6 pt-[35vh]">
             {/* Logo/Brand */}
-            <div className="mb-4 flex items-center gap-2">
+            <div className="mb-3 flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Dumbbell className="h-4 w-4 text-primary-foreground" />
               </div>
@@ -157,70 +195,173 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
             </div>
 
             {/* Main headline */}
-            <h2 className="mb-1 text-3xl font-bold">
-              <span className="text-primary">Unlimited Access</span>
+            <h2 className="mb-1 text-2xl font-bold">
+              <span className="text-primary">Unlock all coaching features</span>
             </h2>
-            <p className="mb-6 text-2xl font-semibold text-foreground">
-              to All Features
+            <p className="mb-4 text-base text-muted-foreground">
+              Start your 7-day free trial
             </p>
 
-            {/* Feature list */}
-            <div className="mb-6 space-y-3">
-              {FEATURES.map((feature) => (
-                <div key={feature} className="flex items-center gap-3">
+            {/* Dynamic feature list based on selected tier */}
+            <div className="mb-5 space-y-2.5">
+              {benefits.map((benefit, index) => (
+                <div key={index} className="flex items-center gap-3">
                   <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/20">
-                    <Check className="h-3 w-3 text-primary" />
+                    <benefit.icon className="h-3 w-3 text-primary" />
                   </div>
-                  <span className="text-base text-foreground/90">{feature}</span>
+                  <span className="text-sm text-foreground/90">{benefit.text}</span>
                 </div>
               ))}
             </div>
 
-            {/* Pricing text */}
-            <p className="mb-4 text-center text-sm text-muted-foreground">
-              7-day free trial, then {formattedPrice}/month
-            </p>
+            {/* Billing toggle */}
+            <div className="mb-4 flex items-center justify-center gap-3">
+              <span className={cn(
+                "text-sm font-medium transition-colors",
+                billingInterval === 'monthly' ? "text-foreground" : "text-muted-foreground"
+              )}>
+                Monthly
+              </span>
+              <Switch
+                checked={billingInterval === 'yearly'}
+                onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
+              />
+              <span className={cn(
+                "text-sm font-medium transition-colors",
+                billingInterval === 'yearly' ? "text-foreground" : "text-muted-foreground"
+              )}>
+                Yearly
+              </span>
+              {billingInterval === 'yearly' && (
+                <Badge variant="secondary" className="bg-primary/20 text-primary text-xs">
+                  Save ~17%
+                </Badge>
+              )}
+            </div>
+
+            {/* Tier selection cards */}
+            <div className="mb-4 space-y-2">
+              {DISPLAYABLE_TIERS.map((tier) => {
+                const config = TIER_CONFIG[tier];
+                const TierIcon = config.icon;
+                const price = nativePricing.getSubscriptionPrice(tier, billingInterval);
+                const formattedPrice = nativePricing.formatPrice(price);
+                const isSelected = selectedTier === tier;
+                
+                return (
+                  <button
+                    key={tier}
+                    onClick={() => setSelectedTier(tier)}
+                    className={cn(
+                      "w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left",
+                      isSelected 
+                        ? "border-primary bg-primary/10" 
+                        : "border-border/50 bg-background/50 hover:border-border"
+                    )}
+                  >
+                    {/* Radio indicator */}
+                    <div className={cn(
+                      "flex h-5 w-5 items-center justify-center rounded-full border-2 transition-colors",
+                      isSelected ? "border-primary bg-primary" : "border-muted-foreground/40"
+                    )}>
+                      {isSelected && <Check className="h-3 w-3 text-primary-foreground" />}
+                    </div>
+                    
+                    {/* Icon */}
+                    <div className={cn(
+                      "flex h-9 w-9 items-center justify-center rounded-lg",
+                      isSelected ? "bg-primary" : "bg-muted"
+                    )}>
+                      <TierIcon className={cn(
+                        "h-4 w-4",
+                        isSelected ? "text-primary-foreground" : "text-muted-foreground"
+                      )} />
+                    </div>
+                    
+                    {/* Text content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-foreground">{config.name}</span>
+                        {config.popular && (
+                          <Badge variant="secondary" className="bg-primary/20 text-primary text-[10px] px-1.5 py-0">
+                            Popular
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">{config.description}</p>
+                    </div>
+                    
+                    {/* Price */}
+                    <div className="text-right">
+                      <span className="font-bold text-foreground">{formattedPrice}</span>
+                      <span className="text-xs text-muted-foreground">/{billingInterval === 'yearly' ? 'yr' : 'mo'}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* IAP Cancelled Alert */}
+            {iapState.purchaseStatus === 'cancelled' && (
+              <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
+                <AlertDescription className="text-sm text-amber-200">
+                  Purchase was cancelled. Tap below to try again.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Primary CTA */}
             <Button
-              onClick={handleContinue}
+              onClick={handlePurchase}
               disabled={isSubmitting || isProcessingIAP}
-              className="mb-3 h-14 w-full rounded-full bg-foreground text-lg font-semibold text-background hover:bg-foreground/90"
+              className="mb-2 h-12 w-full rounded-full bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90"
             >
               {(isSubmitting || isProcessingIAP) ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Loading...
+                  Processing...
                 </>
               ) : (
-                "Continue"
+                "Start 7-day free trial"
               )}
             </Button>
 
-            {/* Secondary action */}
-            <button
-              onClick={handleSkip}
-              className="mb-4 py-2 text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Skip for now
-            </button>
+            {/* Cancel anytime text */}
+            <p className="mb-4 text-center text-xs text-muted-foreground">
+              Cancel anytime. After 7 days, charged {billingInterval === 'yearly' ? 'yearly' : 'monthly'}.
+            </p>
 
             {/* Legal footer */}
-            <p className="text-center text-[10px] text-muted-foreground/70">
-              {shouldOpenExternally() ? (
-                <>
-                  <button onClick={() => openExternalUrl(`${window.location.origin}/privacy`)} className="hover:underline">Privacy Policy</button>
-                  {" · "}
-                  <button onClick={() => openExternalUrl(`${window.location.origin}/terms`)} className="hover:underline">Terms of Use</button>
-                </>
-              ) : (
-                <>
-                  <Link to="/privacy" className="hover:underline">Privacy Policy</Link>
-                  {" · "}
-                  <Link to="/terms" className="hover:underline">Terms of Use</Link>
-                </>
+            <div className="mt-auto space-y-2 text-center">
+              {isNativeMobile && (
+                <button
+                  onClick={handleRestorePurchases}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Restore Purchases
+                </button>
               )}
-            </p>
+              <p className="text-[10px] text-muted-foreground/70">
+                By continuing, you agree to our{" "}
+                {shouldOpenExternally() ? (
+                  <>
+                    <button onClick={() => openExternalUrl(`${window.location.origin}/terms`)} className="underline hover:text-foreground/70">Terms</button>
+                    {", "}
+                    <button onClick={() => openExternalUrl(`${window.location.origin}/privacy`)} className="underline hover:text-foreground/70">Privacy</button>
+                    {" & "}
+                    <button onClick={() => openExternalUrl(`${window.location.origin}/eula`)} className="underline hover:text-foreground/70">EULA</button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/terms" className="underline hover:text-foreground/70">Terms</Link>
+                    {", "}
+                    <Link to="/privacy" className="underline hover:text-foreground/70">Privacy</Link>
+                    {" & "}
+                    <Link to="/eula" className="underline hover:text-foreground/70">EULA</Link>
+                  </>
+                )}
+              </p>
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
