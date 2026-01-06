@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
-import { STORAGE_KEYS, getStorage, setStorage } from "@/lib/storage-keys";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 interface OnboardingStatus {
   isOnboarded: boolean;
@@ -20,9 +20,24 @@ const DEFAULT_ONBOARDING_STATUS: OnboardingStatus = {
   onboardingProgress: null,
 };
 
+/**
+ * Safely read onboarding status from localStorage (handles both old JSON and new string formats)
+ */
+const readOnboardingFlag = (key: string): boolean => {
+  try {
+    const value = localStorage.getItem(key);
+    if (!value) return false;
+    if (value === 'true') return true;
+    // Handle legacy JSON format
+    const parsed = JSON.parse(value);
+    return parsed?.isOnboarded === true;
+  } catch {
+    return false;
+  }
+};
+
 const getClientOnboardingFromStorage = (): OnboardingStatus | undefined => {
-  const data = getStorage<{ isOnboarded: boolean }>(STORAGE_KEYS.CLIENT_ONBOARDED);
-  if (data?.isOnboarded) {
+  if (readOnboardingFlag(STORAGE_KEYS.CLIENT_ONBOARDED)) {
     return { isOnboarded: true, onboardingProgress: null };
   }
   return undefined;
@@ -51,9 +66,9 @@ export const useClientOnboardingStatus = () => {
           return { isOnboarded: false, error: true };
         }
 
-        // Cache the result
+        // Cache the result (use simple string format)
         if (data?.onboarding_completed) {
-          setStorage(STORAGE_KEYS.CLIENT_ONBOARDED, { isOnboarded: true });
+          localStorage.setItem(STORAGE_KEYS.CLIENT_ONBOARDED, 'true');
         }
 
         return {
@@ -78,8 +93,7 @@ export const useClientOnboardingStatus = () => {
 };
 
 const getCoachOnboardingFromStorage = (): OnboardingStatus | undefined => {
-  const data = getStorage<{ isOnboarded: boolean }>(STORAGE_KEYS.COACH_ONBOARDED);
-  if (data?.isOnboarded) {
+  if (readOnboardingFlag(STORAGE_KEYS.COACH_ONBOARDED)) {
     return { isOnboarded: true, onboardingProgress: null };
   }
   return undefined;
@@ -105,9 +119,9 @@ export const useCoachOnboardingStatus = () => {
           return { isOnboarded: false, error: true };
         }
 
-        // Cache the result
+        // Cache the result (use simple string format)
         if (data?.onboarding_completed) {
-          setStorage(STORAGE_KEYS.COACH_ONBOARDED, { isOnboarded: true });
+          localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
         }
 
         return {

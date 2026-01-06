@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
 import { isDespia } from "@/lib/despia";
 import { getBestDashboardRoute, getViewModeFromPath, saveRoute } from "@/lib/view-restoration";
-import { STORAGE_KEYS, getStorage } from "@/lib/storage-keys";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 /**
  * Simplified RouteRestorer
@@ -47,10 +47,11 @@ const RouteRestorer = () => {
       : ["/", "/auth", "/get-started"].includes(currentPath);
 
     if (shouldRestore) {
-      // For clients, check onboarding status
+      // For clients, check onboarding status (handle both formats)
       if (role === "client") {
-        const onboardingData = getStorage<{ isOnboarded: boolean }>(STORAGE_KEYS.CLIENT_ONBOARDED);
-        if (onboardingData?.isOnboarded === false) {
+        const cachedValue = localStorage.getItem(STORAGE_KEYS.CLIENT_ONBOARDED);
+        // Only redirect if explicitly false (not just missing)
+        if (cachedValue === 'false') {
           navigate("/onboarding/client", { replace: true });
           hasRestored.current = true;
           return;
