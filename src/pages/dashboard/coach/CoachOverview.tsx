@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Settings2, AlertCircle, RefreshCw, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -9,13 +9,35 @@ import { CoachDashboardCustomizer } from "@/components/dashboard/coach/CoachDash
 import { CoachWidgetRenderer } from "@/components/dashboard/coach/CoachWidgetRenderer";
 import { DraggableWidgetGrid, WidgetItem } from "@/components/dashboard/DraggableWidgetGrid";
 import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
+import { ContentSection } from "@/components/shared/ContentSection";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { useAutoAwardCoachBadges } from "@/hooks/useAutoAwardCoachBadges";
 import { useCoachWidgets, useUpdateCoachWidget, useReorderCoachWidgets } from "@/hooks/useCoachWidgets";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
-import { cn } from "@/lib/utils";
+
+// Widget section definitions for grouping
+const WIDGET_SECTIONS = {
+  stats: { key: "stats", title: "overview", description: "Your key metrics at a glance" },
+  actions: { key: "actions", title: "quickActions", description: "Common tasks" },
+  activity: { key: "activity", title: "activity", description: "Client activity and sessions" },
+  engagement: { key: "engagement", title: "engagement", description: "Reviews and connections" },
+  intelligence: { key: "intelligence", title: "intelligence", description: "AI-powered insights" },
+  business: { key: "business", title: "business", description: "Revenue and analytics" },
+} as const;
+
+// Map widget types to sections
+const getWidgetSection = (widgetType: string): string => {
+  if (widgetType.startsWith("stats_") || widgetType === "stats_overview") return "stats";
+  if (widgetType === "quick_actions") return "actions";
+  if (widgetType.startsWith("list_") || widgetType === "engagement_connection_requests") return "activity";
+  if (widgetType.startsWith("engagement_")) return "engagement";
+  if (widgetType.startsWith("intelligence_")) return "intelligence";
+  if (widgetType.startsWith("business_")) return "business";
+  return "activity";
+};
 
 const getSizeClasses = (size: string | null | undefined): string => {
   switch (size) {
@@ -67,6 +89,23 @@ const CoachOverview = () => {
       is_visible: w.is_visible,
       config: w.config || {},
     }));
+
+  // Group widgets by section for organized rendering
+  const groupedWidgets = useMemo(() => {
+    const groups: Record<string, WidgetItem[]> = {};
+    const sectionOrder = ["stats", "actions", "activity", "engagement", "intelligence", "business"];
+    
+    visibleWidgets.forEach((widget) => {
+      const section = getWidgetSection(widget.widget_type);
+      if (!groups[section]) groups[section] = [];
+      groups[section].push(widget);
+    });
+
+    // Return sections in order, filtering out empty ones
+    return sectionOrder
+      .filter((key) => groups[key]?.length > 0)
+      .map((key) => ({ key, widgets: groups[key] }));
+  }, [visibleWidgets]);
 
   const handleReorder = (reorderedWidgets: WidgetItem[]) => {
     reorderWidgets.mutate(
@@ -145,12 +184,13 @@ const CoachOverview = () => {
           <Button
             variant={editMode ? "default" : "outline"}
             size="sm"
+            className="rounded-xl"
             onClick={() => setEditMode(!editMode)}
           >
             <Pencil className="w-4 h-4 mr-2" />
             {editMode ? t("dashboard.done", "Done") : t("dashboard.edit", "Edit")}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setCustomizerOpen(true)}>
+          <Button variant="outline" size="sm" className="rounded-xl" onClick={() => setCustomizerOpen(true)}>
             <Settings2 className="w-4 h-4 mr-2" />
             {t("dashboard.customize")}
           </Button>
@@ -158,32 +198,46 @@ const CoachOverview = () => {
       </div>
 
       {/* Profile Completion */}
-      <ProfileCompletionCard />
+      <div className="mb-11">
+        <ProfileCompletionCard />
+      </div>
 
-      {/* Dynamic Widget Grid */}
-      {visibleWidgets.length > 0 ? (
-        <DraggableWidgetGrid
-          widgets={visibleWidgets}
-          editMode={editMode}
-          onReorder={handleReorder}
-          onResize={handleResize}
-          renderWidget={renderWidget}
-          getSizeClasses={getSizeClasses}
-        />
+      {/* Sectioned Widget Grid */}
+      {groupedWidgets.length > 0 ? (
+        <div className="space-y-11">
+          {groupedWidgets.map(({ key, widgets: sectionWidgets }) => (
+            <div key={key}>
+              <DashboardSectionHeader
+                title={t(`sections.${WIDGET_SECTIONS[key as keyof typeof WIDGET_SECTIONS]?.title || key}`, key)}
+                description={WIDGET_SECTIONS[key as keyof typeof WIDGET_SECTIONS]?.description}
+              />
+              <DraggableWidgetGrid
+                widgets={sectionWidgets}
+                editMode={editMode}
+                onReorder={handleReorder}
+                onResize={handleResize}
+                renderWidget={renderWidget}
+                getSizeClasses={getSizeClasses}
+              />
+            </div>
+          ))}
+        </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 px-4 border border-dashed border-border rounded-xl bg-muted/20">
-          <Settings2 className="w-12 h-12 text-muted-foreground mb-4" />
+        <ContentSection colorTheme="muted" className="py-16 text-center border-dashed rounded-3xl">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-3xl bg-muted/50 flex items-center justify-center">
+            <Settings2 className="w-8 h-8 text-muted-foreground" />
+          </div>
           <h3 className="text-lg font-semibold text-foreground mb-2">
             {t("dashboard.noWidgets", "No widgets enabled")}
           </h3>
           <p className="text-muted-foreground text-center mb-4">
             {t("dashboard.customizePrompt", "Customize your dashboard to add widgets")}
           </p>
-          <Button onClick={() => setCustomizerOpen(true)}>
+          <Button className="rounded-xl" onClick={() => setCustomizerOpen(true)}>
             <Settings2 className="w-4 h-4 mr-2" />
             {t("dashboard.customize")}
           </Button>
-        </div>
+        </ContentSection>
       )}
 
       {/* Modals */}

@@ -3,8 +3,9 @@ import { useTranslation } from "react-i18next";
 import { CoachDashboardWidget } from "@/hooks/useCoachWidgets";
 import { Wallet, Package, CreditCard, Users } from "lucide-react";
 import { EmptyState } from "@/components/shared/EmptyState";
-import { Card } from "@/components/ui/card";
+import { ContentSection } from "@/components/shared/ContentSection";
 import {
+  CoachStatsGrid,
   StatsClientsWidget,
   StatsSessionsWidget,
   StatsMessagesWidget,
@@ -77,6 +78,19 @@ export const CoachWidgetRenderer = memo(function CoachWidgetRenderer({
   }), [stats?.activeClients, stats?.sessionsThisWeek, stats?.averageRating, stats?.totalReviews]);
 
   switch (widget.widget_type) {
+    // New: Combined stats overview for compact mobile layout
+    case "stats_overview":
+      return (
+        <CoachStatsGrid
+          activeClients={memoizedStats.activeClients}
+          sessionsThisWeek={memoizedStats.sessionsThisWeek}
+          unreadMessages={unreadMessages}
+          averageRating={memoizedStats.averageRating}
+          totalReviews={memoizedStats.totalReviews}
+          isLoading={isLoading}
+        />
+      );
+
     case "stats_clients":
       return (
         <StatsClientsWidget
@@ -168,50 +182,50 @@ export const CoachWidgetRenderer = memo(function CoachWidgetRenderer({
 
     case "business_earnings":
       return (
-        <Card variant="glass" className="h-full flex items-center justify-center p-6">
+        <ContentSection colorTheme="green" className="h-full flex items-center justify-center p-6 rounded-3xl">
           <EmptyState
             icon={Wallet}
             title={t("widgets.emptyStates.earnings.title")}
             description={t("widgets.emptyStates.earnings.description")}
             variant="compact"
           />
-        </Card>
+        </ContentSection>
       );
 
     case "business_packages":
       return (
-        <Card variant="glass" className="h-full flex items-center justify-center p-6">
+        <ContentSection colorTheme="purple" className="h-full flex items-center justify-center p-6 rounded-3xl">
           <EmptyState
             icon={Package}
             title={t("widgets.emptyStates.packages.title")}
             description={t("widgets.emptyStates.packages.description")}
             variant="compact"
           />
-        </Card>
+        </ContentSection>
       );
 
     case "business_subscriptions":
       return (
-        <Card variant="glass" className="h-full flex items-center justify-center p-6">
+        <ContentSection colorTheme="cyan" className="h-full flex items-center justify-center p-6 rounded-3xl">
           <EmptyState
             icon={CreditCard}
             title={t("widgets.emptyStates.subscriptions.title")}
             description={t("widgets.emptyStates.subscriptions.description")}
             variant="compact"
           />
-        </Card>
+        </ContentSection>
       );
 
     case "list_recent_clients":
       return (
-        <Card variant="glass" className="h-full flex items-center justify-center p-6">
+        <ContentSection colorTheme="primary" className="h-full flex items-center justify-center p-6 rounded-3xl">
           <EmptyState
             icon={Users}
             title={t("widgets.emptyStates.recentClients.title")}
             description={t("widgets.emptyStates.recentClients.description")}
             variant="compact"
           />
-        </Card>
+        </ContentSection>
       );
 
     default:
