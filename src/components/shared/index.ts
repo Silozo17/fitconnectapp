@@ -2,7 +2,14 @@
 export { EmptyState } from "./EmptyState";
 export { ErrorState } from "./ErrorState";
 
-// Layout components
+// Layout components - NEW DESIGN SYSTEM
+export { DashboardSectionHeader } from "./DashboardSectionHeader";
+export { MetricCard } from "./MetricCard";
+export type { MetricCardColor } from "./MetricCard";
+export { ContentSection, ContentSectionHeader } from "./ContentSection";
+export { StatsGrid } from "./StatsGrid";
+
+// Layout components - Legacy (for gradual migration)
 export { SectionHeader } from "./SectionHeader";
 export { ContentCard } from "./ContentCard";
 export { StatCard, StatCardGrid } from "./StatCard";
@@ -42,9 +49,12 @@ export { DateRangeFilter } from "./DateRangeFilter";
 export { UnsavedChangesDialog } from "./UnsavedChangesDialog";
 export { DeleteAccountModal } from "./DeleteAccountModal";
 
+// Error handling
+export { ErrorBoundary } from "./ErrorBoundary";
+export { WidgetErrorBoundary } from "./WidgetErrorBoundary";
+
 // Misc
 export { SEOHead } from "./SEOHead";
 export { ShareButton } from "./ShareButton";
 export { SocialLinks } from "./SocialLinks";
-export { ErrorBoundary } from "./ErrorBoundary";
 export { ComparisonStatCard } from "./ComparisonStatCard";
