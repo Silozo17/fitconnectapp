@@ -214,39 +214,48 @@ const CoachOverview = () => {
         <ProfileCompletionCard />
       </div>
 
-      {/* Client Quickview Section - Always show if has clients */}
-      {activeClients.length > 0 && (
-        <div className="mb-11">
-          <DashboardSectionHeader
-            title={WIDGET_SECTIONS.clients.title}
-            description={WIDGET_SECTIONS.clients.description}
-          />
-          <ClientQuickViewCarousel
-            clients={activeClients}
-            onClientClick={(clientId) => setQuickViewClientId(clientId)}
-          />
-        </div>
-      )}
-
-      {/* Sectioned Widget Grid */}
-      {groupedWidgets.length > 0 ? (
+      {/* Sectioned Widget Grid with Client Quickview integrated */}
+      {groupedWidgets.length > 0 || activeClients.length > 0 ? (
         <div className="space-y-11">
-          {groupedWidgets.map(({ key, widgets: sectionWidgets }) => (
-            <div key={key}>
-              <DashboardSectionHeader
-                title={WIDGET_SECTIONS[key as keyof typeof WIDGET_SECTIONS]?.title || key}
-                description={WIDGET_SECTIONS[key as keyof typeof WIDGET_SECTIONS]?.description}
-              />
-              <DraggableWidgetGrid
-                widgets={sectionWidgets}
-                editMode={editMode}
-                onReorder={handleReorder}
-                onResize={handleResize}
-                renderWidget={renderWidget}
-                getSizeClasses={getSizeClasses}
-              />
-            </div>
-          ))}
+          {/* Render sections in order from sectionOrder */}
+          {["stats", "clients", "activity", "actions", "engagement", "intelligence", "business"].map((sectionKey) => {
+            // Special handling for clients section - render carousel
+            if (sectionKey === "clients" && activeClients.length > 0) {
+              return (
+                <div key={sectionKey}>
+                  <DashboardSectionHeader
+                    title={WIDGET_SECTIONS.clients.title}
+                    description={WIDGET_SECTIONS.clients.description}
+                  />
+                  <ClientQuickViewCarousel
+                    clients={activeClients}
+                    onClientClick={(clientId) => setQuickViewClientId(clientId)}
+                  />
+                </div>
+              );
+            }
+            
+            // Regular widget sections
+            const sectionWidgets = groupedWidgets.find(g => g.key === sectionKey)?.widgets;
+            if (!sectionWidgets || sectionWidgets.length === 0) return null;
+            
+            return (
+              <div key={sectionKey}>
+                <DashboardSectionHeader
+                  title={WIDGET_SECTIONS[sectionKey as keyof typeof WIDGET_SECTIONS]?.title || sectionKey}
+                  description={WIDGET_SECTIONS[sectionKey as keyof typeof WIDGET_SECTIONS]?.description}
+                />
+                <DraggableWidgetGrid
+                  widgets={sectionWidgets}
+                  editMode={editMode}
+                  onReorder={handleReorder}
+                  onResize={handleResize}
+                  renderWidget={renderWidget}
+                  getSizeClasses={getSizeClasses}
+                />
+              </div>
+            );
+          })}
         </div>
       ) : (
         <ContentSection colorTheme="muted" className="py-16 text-center border-dashed rounded-3xl">
