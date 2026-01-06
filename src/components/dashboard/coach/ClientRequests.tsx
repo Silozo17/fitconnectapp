@@ -3,10 +3,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
 import { Check, X, Loader2, UserPlus, MessageSquare, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ContentSection } from "@/components/shared/ContentSection";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
@@ -214,167 +214,164 @@ const ClientRequests = memo(() => {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            {t("widgets.connectionRequests.title")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
+      <ContentSection colorTheme="cyan" className="p-5 rounded-3xl">
+        <div className="flex items-center gap-2 mb-4">
+          <UserPlus className="h-5 w-5 text-cyan-400" />
+          <h3 className="font-display font-bold text-foreground">{t("widgets.connectionRequests.title")}</h3>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+      </ContentSection>
     );
   }
 
   return (
-    <Card>
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <UserPlus className="h-5 w-5" />
-            {t("widgets.connectionRequests.title")}
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            {clientLimit !== null && (
-              <Badge variant={atLimit ? "destructive" : isApproachingLimit() ? "secondary" : "outline"}>
-                {activeClientCount}/{clientLimit} {t("widgets.connectionRequests.clients")}
-              </Badge>
-            )}
-            {requests && requests.length > 0 && (
-              <Badge variant="secondary">{requests.length} {t("widgets.connectionRequests.pending")}</Badge>
-            )}
-          </div>
+    <ContentSection colorTheme="cyan" className="p-5 rounded-3xl">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <UserPlus className="h-5 w-5 text-cyan-400" />
+          <h3 className="font-display font-bold text-foreground">{t("widgets.connectionRequests.title")}</h3>
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          </span>
         </div>
-      </CardHeader>
-      <CardContent>
-        {/* Client limit warning */}
-        {atLimit && (
-          <Alert variant="destructive" className="mb-4">
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription className="flex items-center justify-between">
-              <span>
-                {t("widgets.connectionRequests.limitReached", { limit: clientLimit, tier: currentTier })}
-              </span>
-              <Link to="/subscribe">
-                <Button size="sm" variant="outline" className="ml-2">
-                  {t("widgets.connectionRequests.upgrade")}
-                </Button>
-              </Link>
-            </AlertDescription>
-          </Alert>
-        )}
+        <div className="flex items-center gap-2">
+          {clientLimit !== null && (
+            <Badge variant={atLimit ? "destructive" : isApproachingLimit() ? "secondary" : "outline"} className="rounded-lg">
+              {activeClientCount}/{clientLimit} {t("widgets.connectionRequests.clients")}
+            </Badge>
+          )}
+          {requests && requests.length > 0 && (
+            <Badge variant="secondary" className="rounded-lg">{requests.length} {t("widgets.connectionRequests.pending")}</Badge>
+          )}
+        </div>
+      </div>
 
-        {isApproachingLimit() && !atLimit && (
-          <Alert className="mb-4 border-amber-500/50 bg-amber-500/10">
-            <AlertTriangle className="h-4 w-4 text-amber-500" />
-            <AlertDescription className="flex items-center justify-between text-amber-600">
-              <span>
-                {t("widgets.connectionRequests.approachingLimit", { current: activeClientCount, limit: clientLimit })}
-              </span>
-              <Link to="/subscribe">
-                <Button size="sm" variant="outline" className="ml-2">
-                  {t("widgets.connectionRequests.upgrade")}
-                </Button>
-              </Link>
-            </AlertDescription>
-          </Alert>
-        )}
+      {/* Client limit warning */}
+      {atLimit && (
+        <Alert variant="destructive" className="mb-4 rounded-2xl">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>
+              {t("widgets.connectionRequests.limitReached", { limit: clientLimit, tier: currentTier })}
+            </span>
+            <Link to="/subscribe">
+              <Button size="sm" variant="outline" className="ml-2 rounded-xl">
+                {t("widgets.connectionRequests.upgrade")}
+              </Button>
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {requests && requests.length > 0 ? (
-          <div className="space-y-4">
-            {requests.map((request) => (
-              <div
-                key={request.id}
-                className="flex items-start gap-4 p-4 rounded-lg bg-secondary/30 border border-border/50 animate-fade-in"
-              >
-                <Avatar className="h-12 w-12">
-                  <AvatarFallback className="bg-primary/10 text-primary font-semibold">
-                    {getClientInitials(request.client_profile)}
-                  </AvatarFallback>
-                </Avatar>
+      {isApproachingLimit() && !atLimit && (
+        <Alert className="mb-4 border-amber-500/50 bg-amber-500/10 rounded-2xl">
+          <AlertTriangle className="h-4 w-4 text-amber-500" />
+          <AlertDescription className="flex items-center justify-between text-amber-600">
+            <span>
+              {t("widgets.connectionRequests.approachingLimit", { current: activeClientCount, limit: clientLimit })}
+            </span>
+            <Link to="/subscribe">
+              <Button size="sm" variant="outline" className="ml-2 rounded-xl">
+                {t("widgets.connectionRequests.upgrade")}
+              </Button>
+            </Link>
+          </AlertDescription>
+        </Alert>
+      )}
 
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-semibold text-foreground">
-                      {getClientName(request.client_profile)}
-                    </h4>
-                    <span className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(request.created_at), { addSuffix: true })}
-                    </span>
-                  </div>
+      {requests && requests.length > 0 ? (
+        <div className="space-y-3">
+          {requests.map((request) => (
+            <div
+              key={request.id}
+              className="flex items-start gap-4 p-4 rounded-2xl bg-secondary/30 border border-border/50 animate-fade-in"
+            >
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                  {getClientInitials(request.client_profile)}
+                </AvatarFallback>
+              </Avatar>
 
-                  {request.client_profile?.fitness_goals &&
-                    request.client_profile.fitness_goals.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-2">
-                        {request.client_profile.fitness_goals.slice(0, 3).map((goal) => (
-                          <Badge key={goal} variant="outline" className="text-xs">
-                            {goal}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <h4 className="font-semibold text-foreground">
+                    {getClientName(request.client_profile)}
+                  </h4>
+                  <span className="text-xs text-muted-foreground">
+                    {formatDistanceToNow(new Date(request.created_at), { addSuffix: true })}
+                  </span>
+                </div>
 
-                  {request.message && (
-                    <div className="flex items-start gap-2 p-2 bg-background rounded-md mt-2">
-                      <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {request.message}
-                      </p>
+                {request.client_profile?.fitness_goals &&
+                  request.client_profile.fitness_goals.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {request.client_profile.fitness_goals.slice(0, 3).map((goal) => (
+                        <Badge key={goal} variant="outline" className="text-xs rounded-lg">
+                          {goal}
+                        </Badge>
+                      ))}
                     </div>
                   )}
-                </div>
 
-                <div className="flex gap-2 flex-shrink-0">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => rejectMutation.mutate(request.id)}
-                    disabled={rejectMutation.isPending || acceptMutation.isPending}
-                  >
-                    {rejectMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <X className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => acceptMutation.mutate(request)}
-                    disabled={acceptMutation.isPending || rejectMutation.isPending || atLimit}
-                    title={atLimit ? t("widgets.connectionRequests.limitTooltipDisabled") : t("widgets.connectionRequests.acceptTooltip")}
-                  >
-                    {acceptMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <>
-                        <Check className="h-4 w-4 mr-1" />
-                        {t("widgets.connectionRequests.accept")}
-                      </>
-                    )}
-                  </Button>
-                </div>
+                {request.message && (
+                  <div className="flex items-start gap-2 p-2 bg-background/50 rounded-xl mt-2">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {request.message}
+                    </p>
+                  </div>
+                )}
               </div>
-            ))}
+
+              <div className="flex gap-2 flex-shrink-0">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="rounded-xl"
+                  onClick={() => rejectMutation.mutate(request.id)}
+                  disabled={rejectMutation.isPending || acceptMutation.isPending}
+                >
+                  {rejectMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <X className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={() => acceptMutation.mutate(request)}
+                  disabled={acceptMutation.isPending || rejectMutation.isPending || atLimit}
+                  title={atLimit ? t("widgets.connectionRequests.limitTooltipDisabled") : t("widgets.connectionRequests.acceptTooltip")}
+                >
+                  {acceptMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Check className="h-4 w-4 mr-1" />
+                      {t("widgets.connectionRequests.accept")}
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-8">
+          <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center mx-auto mb-3">
+            <UserPlus className="h-6 w-6 text-cyan-400" />
           </div>
-        ) : (
-          <div className="text-center py-8">
-            <UserPlus className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">{t("widgets.connectionRequests.emptyTitle")}</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              {t("widgets.connectionRequests.emptyDescription")}
-            </p>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          <p className="text-muted-foreground font-medium">{t("widgets.connectionRequests.emptyTitle")}</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {t("widgets.connectionRequests.emptyDescription")}
+          </p>
+        </div>
+      )}
+    </ContentSection>
   );
 });
 
