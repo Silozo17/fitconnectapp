@@ -5,6 +5,7 @@ import { useSelectedAvatar, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { useUserStats } from '@/hooks/useUserStats';
 import { RARITY_CONFIG } from '@/lib/avatar-utils';
 import { AvatarPicker } from '@/components/avatars/AvatarPicker';
+import { getLevelBadgeUrl } from '@/hooks/useGamification';
 import { calculateLevelFromXP } from '@/hooks/useGamification';
 import { 
   Zap, 
@@ -210,9 +211,11 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
             <div className="space-y-2 animate-fade-in">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-primary/20">
-                    <Zap className="h-4 w-4 text-primary" />
-                  </div>
+                  <img
+                    src={getLevelBadgeUrl(currentLevel)}
+                    alt={`Level ${currentLevel}`}
+                    className="h-8 w-8 rounded-lg object-cover"
+                  />
                   <span className="font-semibold">Level {currentLevel}</span>
                 </div>
                 <span className="text-sm text-muted-foreground">
