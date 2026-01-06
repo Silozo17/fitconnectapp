@@ -18,6 +18,7 @@ import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
 import type { PlaceLocationData } from "@/types/location";
 import { useTranslation } from "react-i18next";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices", "Privacy & Location", "Choose Avatar"];
 
@@ -397,7 +398,7 @@ const ClientOnboarding = () => {
       }
 
       // Set flag so ClientDashboardLayout doesn't redirect back during cache update
-      sessionStorage.setItem('fitconnect_onboarding_just_completed', 'client');
+      sessionStorage.setItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED, 'client');
       
       // Post-save operations (non-critical) - wrap separately so errors don't show "save failed"
       try {

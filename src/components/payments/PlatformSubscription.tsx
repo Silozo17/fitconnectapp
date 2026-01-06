@@ -18,6 +18,7 @@ import { useNativePricing } from "@/hooks/useNativePricing";
 import { useNativeIAP, SubscriptionTier } from "@/hooks/useNativeIAP";
 import { isDespia } from "@/lib/despia";
 import { triggerHaptic } from "@/lib/despia";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { FeaturesActivatedModal } from "@/components/subscription/FeaturesActivatedModal";
@@ -109,8 +110,8 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
     setShowFeaturesModal(true);
     
     // 3. Clear tier cache and force refetch for immediate UI update
-    localStorage.removeItem('fitconnect_cached_tier');
-    localStorage.removeItem('fitconnect_tier_timestamp');
+    localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
+    localStorage.removeItem(STORAGE_KEYS.TIER_TIMESTAMP);
     
     await Promise.all([
       queryClient.resetQueries({ queryKey: ['subscription-status'] }),

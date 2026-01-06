@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
+import { isUserPrivileged } from "@/lib/role-utils";
 
 interface TwoFactorGateProps {
   children: React.ReactNode;
@@ -16,7 +17,7 @@ const SESSION_STORAGE_KEY = STORAGE_KEYS.TWO_FACTOR_VERIFIED;
 const VERIFICATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
-  const { user, role, allRoles } = useAuth();
+  const { user, allRoles } = useAuth();
   const { t } = useTranslation();
   const [isChecking, setIsChecking] = useState(true);
   const [requires2FA, setRequires2FA] = useState(false);
@@ -24,10 +25,8 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
   const [isSendingOTP, setIsSendingOTP] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
 
-  // Check if user is coach/admin/manager/staff
-  const isPrivilegedUser = allRoles.some(r => 
-    ['admin', 'manager', 'staff', 'coach'].includes(r)
-  );
+  // Check if user is privileged using centralized utility
+  const isPrivilegedUser = isUserPrivileged(allRoles);
 
   useEffect(() => {
     const check2FAStatus = async () => {

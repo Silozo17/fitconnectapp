@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 // OPTIMIZED: Moved useAutoAwardClientBadges to specific pages (ClientOverview, ClientAchievements)
 // to prevent 3 database queries on every navigation
 import ClientSidebar from "./ClientSidebar";
@@ -43,7 +44,7 @@ const ClientDashboardLayoutInner = memo(({
   // PERFORMANCE: Check localStorage for known-onboarded users to skip DB check
   const isKnownOnboarded = useMemo(() => {
     if (typeof localStorage === 'undefined') return false;
-    return localStorage.getItem('fitconnect_client_onboarded') === 'true';
+    return localStorage.getItem(STORAGE_KEYS.CLIENT_ONBOARDED) === 'true';
   }, []);
 
   // FIX: Guard against race condition during native pull-to-refresh
@@ -56,11 +57,11 @@ const ClientDashboardLayoutInner = memo(({
   // Check if user just completed onboarding - prevents flash of redirect
   const justCompletedOnboarding = useMemo(() => {
     if (typeof sessionStorage === 'undefined') return false;
-    const flag = sessionStorage.getItem('fitconnect_onboarding_just_completed');
+    const flag = sessionStorage.getItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED);
     if (flag === 'client') {
-      sessionStorage.removeItem('fitconnect_onboarding_just_completed');
+      sessionStorage.removeItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED);
       // Set the permanent flag for future visits
-      localStorage.setItem('fitconnect_client_onboarded', 'true');
+      localStorage.setItem(STORAGE_KEYS.CLIENT_ONBOARDED, 'true');
       return true;
     }
     return false;
@@ -69,7 +70,7 @@ const ClientDashboardLayoutInner = memo(({
   // When onboarding status confirms user is onboarded, cache it
   useEffect(() => {
     if (onboardingStatus?.isOnboarded && !isKnownOnboarded) {
-      localStorage.setItem('fitconnect_client_onboarded', 'true');
+      localStorage.setItem(STORAGE_KEYS.CLIENT_ONBOARDED, 'true');
     }
   }, [onboardingStatus?.isOnboarded, isKnownOnboarded]);
 

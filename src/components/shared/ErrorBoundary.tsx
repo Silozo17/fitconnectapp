@@ -1,6 +1,7 @@
 import { Component, ErrorInfo, ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw, Trash2, Copy, ChevronDown, ChevronUp, Bug } from "lucide-react";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 interface Props {
   children: ReactNode;
@@ -70,9 +71,9 @@ export class ErrorBoundary extends Component<Props, State> {
     if (isAuthError) {
       console.warn('[ErrorBoundary] Auth error detected, clearing potentially corrupted tokens');
       try {
-        localStorage.removeItem('sb-ntgfihgneyoxxbwmtceq-auth-token');
-        localStorage.removeItem('fitconnect_cached_tier');
-        localStorage.removeItem('fitconnect_tier_timestamp');
+        localStorage.removeItem(STORAGE_KEYS.SUPABASE_AUTH);
+        localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
+        localStorage.removeItem(STORAGE_KEYS.TIER_TIMESTAMP);
       } catch {}
     }
   }

@@ -3,13 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { CONSENT_STORAGE_KEY, CookieConsent } from "@/types/consent";
 import { LocationAccuracyLevel } from "@/types/location";
 import { useAuthSafe } from "@/contexts/AuthContext";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
-const MANUAL_LOCATION_KEY = "fitconnect_manual_location";
-const SESSION_PRECISE_KEY = "fitconnect_session_precise_location";
-const PROMPT_DISMISSED_KEY = "fitconnect_location_prompt_dismissed";
-const IP_LOCATION_CACHE_KEY = "fitconnect_ip_location_cache";
+const MANUAL_LOCATION_KEY = STORAGE_KEYS.MANUAL_LOCATION;
+const SESSION_PRECISE_KEY = STORAGE_KEYS.SESSION_PRECISE_LOCATION;
+const PROMPT_DISMISSED_KEY = STORAGE_KEYS.LOCATION_PROMPT_DISMISSED;
+const IP_LOCATION_CACHE_KEY = STORAGE_KEYS.IP_LOCATION_CACHE;
 const LOCATION_EXPIRY_DAYS = 7;
-const IP_CACHE_MINUTES = 30; // Cache IP-based location for 30 minutes (was 5)
+const IP_CACHE_MINUTES = 30; // Cache IP-based location for 30 minutes
 const GEO_TIMEOUT_MS = 10000; // 10 seconds for precise location
 
 interface LocationData {

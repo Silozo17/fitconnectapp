@@ -4,15 +4,15 @@ import { useCoachClients } from "./useCoachClients";
 import { SUBSCRIPTION_TIERS, TierKey, normalizeTier } from "@/lib/stripe-config";
 import { FEATURE_ACCESS, FeatureKey, getMinimumTierForFeature } from "@/lib/feature-config";
 import { useSubscriptionStatus } from "./useSubscriptionStatus";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 // Upgrade protection - set by useNativeIAP on purchase success
 // Provides instant tier access while webhooks process
-const UPGRADE_PROTECTION_KEY = 'fitconnect_upgrade_protection';
 const UPGRADE_PROTECTION_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 const getUpgradeProtection = (): TierKey | null => {
   try {
-    const protection = localStorage.getItem(UPGRADE_PROTECTION_KEY);
+    const protection = localStorage.getItem(STORAGE_KEYS.UPGRADE_PROTECTION);
     if (protection) {
       const { tier, timestamp } = JSON.parse(protection);
       // Valid for 5 minutes after purchase
@@ -21,7 +21,7 @@ const getUpgradeProtection = (): TierKey | null => {
         return tier as TierKey;
       }
       // Expired - clean up
-      localStorage.removeItem(UPGRADE_PROTECTION_KEY);
+      localStorage.removeItem(STORAGE_KEYS.UPGRADE_PROTECTION);
     }
   } catch {
     // Ignore parse errors
@@ -29,18 +29,13 @@ const getUpgradeProtection = (): TierKey | null => {
   return null;
 };
 
-// CRITICAL: Persistent storage key for subscription tier
-// This prevents tier resets on page reload, session refresh, or profile loading delays
-const TIER_STORAGE_KEY = 'fitconnect_cached_tier';
-const TIER_TIMESTAMP_KEY = 'fitconnect_tier_timestamp';
-
 // Cache TTL - 5 minutes (300000ms) - after this, cache is considered stale
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 // Check if cached tier is still valid (not expired)
 const isCacheValid = (): boolean => {
   try {
-    const timestamp = localStorage.getItem(TIER_TIMESTAMP_KEY);
+    const timestamp = localStorage.getItem(STORAGE_KEYS.TIER_TIMESTAMP);
     if (!timestamp) return false;
     
     const cachedTime = parseInt(timestamp, 10);
@@ -61,7 +56,7 @@ const isCacheValid = (): boolean => {
 // Only returns cached value if it's still within TTL
 const getCachedTier = (): TierKey | null => {
   try {
-    const cached = localStorage.getItem(TIER_STORAGE_KEY);
+    const cached = localStorage.getItem(STORAGE_KEYS.CACHED_TIER);
     if (cached && cached in SUBSCRIPTION_TIERS) {
       // Only use cache if it's still valid (within TTL)
       if (isCacheValid()) {
@@ -69,8 +64,8 @@ const getCachedTier = (): TierKey | null => {
       }
       // Cache expired - clear it
       console.log('[useFeatureAccess] Clearing expired tier cache');
-      localStorage.removeItem(TIER_STORAGE_KEY);
-      localStorage.removeItem(TIER_TIMESTAMP_KEY);
+      localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
+      localStorage.removeItem(STORAGE_KEYS.TIER_TIMESTAMP);
     }
   } catch {
     // localStorage may be unavailable
@@ -81,8 +76,8 @@ const getCachedTier = (): TierKey | null => {
 // Persist tier to localStorage with timestamp
 const persistTier = (tier: TierKey): void => {
   try {
-    localStorage.setItem(TIER_STORAGE_KEY, tier);
-    localStorage.setItem(TIER_TIMESTAMP_KEY, Date.now().toString());
+    localStorage.setItem(STORAGE_KEYS.CACHED_TIER, tier);
+    localStorage.setItem(STORAGE_KEYS.TIER_TIMESTAMP, Date.now().toString());
   } catch {
     // localStorage may be unavailable
   }

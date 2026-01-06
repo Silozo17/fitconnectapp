@@ -2,6 +2,8 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 import { useRef, useEffect, useState } from "react";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
+import { isAdminRole } from "@/lib/role-utils";
 
 interface GuestOnlyRouteProps {
   children: React.ReactNode;
@@ -14,7 +16,7 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
 
   // Check if signup is in progress (set by Auth.tsx before signUp call)
   // This prevents the home page flash after OTP verification
-  const isSignupInProgress = sessionStorage.getItem('fitconnect_signup_in_progress') === 'true';
+  const isSignupInProgress = sessionStorage.getItem(STORAGE_KEYS.SIGNUP_IN_PROGRESS) === 'true';
 
   // Prevent flash by ensuring minimum loading time on first render
   useEffect(() => {
@@ -38,7 +40,7 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
     // Mark that we've rendered content before redirect
     hasRenderedContent.current = true;
     
-    if (role === "admin" || role === "manager" || role === "staff") {
+    if (isAdminRole(role)) {
       return <Navigate to="/dashboard/admin" replace />;
     } else if (role === "coach") {
       return <Navigate to="/dashboard/coach" replace />;

@@ -34,6 +34,7 @@ import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { FeaturesActivatedModal } from "@/components/subscription/FeaturesActivatedModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 // Full steps array (for new users without client profile)
 const FULL_STEPS = [
@@ -136,8 +137,8 @@ const CoachOnboarding = () => {
     triggerHaptic('success');
     
     // Clear stale caches BEFORE any queries
-    localStorage.removeItem('fitconnect_cached_tier');
-    localStorage.setItem('fitconnect_coach_onboarded', 'true');
+    localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
+    localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
     
     // Invalidate and refetch critical queries (non-blocking)
     queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'] });
@@ -527,11 +528,11 @@ const CoachOnboarding = () => {
         if (isNativeMobile && (tier === 'starter' || tier === 'pro' || tier === 'enterprise')) {
           // PHASE 1 FIX: Profile is already saved with onboarding_completed: true above
           // Set session/localStorage flags for additional safety
-          sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
-          localStorage.setItem('fitconnect_coach_onboarded', 'true');
+          sessionStorage.setItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED, 'coach');
+          localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
           
           // Clear cached tier to ensure fresh data after purchase
-          localStorage.removeItem('fitconnect_cached_tier');
+          localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
           
           console.log('[CoachOnboarding] Profile saved with onboarding_completed: true. Starting native IAP for tier:', tier);
           
@@ -552,7 +553,7 @@ const CoachOnboarding = () => {
         navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}&from=onboarding`);
       } else if (formData.alsoClient) {
         // Set completion flag BEFORE navigation - dashboard will check this
-        sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
+        sessionStorage.setItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED, 'coach');
         
         // Post-save operations (non-critical) - wrap separately so errors don't show "save failed"
         try {
@@ -570,7 +571,7 @@ const CoachOnboarding = () => {
         navigate("/onboarding/client", { replace: true });
       } else {
         // Set completion flag BEFORE navigation - dashboard will check this to prevent flicker
-        sessionStorage.setItem('fitconnect_onboarding_just_completed', 'coach');
+        sessionStorage.setItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED, 'coach');
         
         // Post-save operations (non-critical) - wrap separately so errors don't show "save failed"
         try {
