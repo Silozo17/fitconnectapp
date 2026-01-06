@@ -120,7 +120,13 @@ export const CoachWidgetRenderer = memo(function CoachWidgetRenderer({
       );
 
     case "quick_actions":
-      return <QuickActionsWidget onAddClient={onAddClient || (() => {})} />;
+      return (
+        <QuickActionsWidget 
+          onAddClient={onAddClient || (() => {})} 
+          activeClients={memoizedStats.activeClients}
+          unreadMessages={unreadMessages}
+        />
+      );
 
     case "list_upcoming":
       return (
