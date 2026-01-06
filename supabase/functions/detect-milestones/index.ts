@@ -208,33 +208,48 @@ serve(async (req) => {
           if (milestoneAchieved) {
             console.log(`Milestone ${config.milestone_type} achieved for client ${clientId}`);
 
-            // Award XP
+            // Award XP via xp_transactions (source of truth)
             if (actions.award_xp > 0) {
-              const { data: existingXp } = await supabase
-                .from("client_xp")
-                .select("id, total_xp, current_level")
-                .eq("client_id", clientId)
-                .maybeSingle();
-
-              if (existingXp) {
-                await supabase
-                  .from("client_xp")
-                  .update({ 
-                    total_xp: existingXp.total_xp + actions.award_xp,
-                    updated_at: now.toISOString()
-                  })
-                  .eq("id", existingXp.id);
+              // Insert into xp_transactions - this is the source of truth
+              const { error: txError } = await supabase
+                .from("xp_transactions")
+                .insert({
+                  client_id: clientId,
+                  amount: actions.award_xp,
+                  source: "milestone",
+                  description: `Milestone: ${config.milestone_type}`,
+                });
+              
+              if (txError) {
+                console.error(`Error inserting xp_transaction:`, txError);
               } else {
-                await supabase
+                // Update client_xp cache
+                const { data: existingXp } = await supabase
                   .from("client_xp")
-                  .insert({
-                    client_id: clientId,
-                    total_xp: actions.award_xp,
-                    current_level: 1,
-                    xp_to_next_level: 100,
-                  });
+                  .select("id, total_xp")
+                  .eq("client_id", clientId)
+                  .maybeSingle();
+
+                if (existingXp) {
+                  await supabase
+                    .from("client_xp")
+                    .update({ 
+                      total_xp: existingXp.total_xp + actions.award_xp,
+                      updated_at: now.toISOString()
+                    })
+                    .eq("id", existingXp.id);
+                } else {
+                  await supabase
+                    .from("client_xp")
+                    .insert({
+                      client_id: clientId,
+                      total_xp: actions.award_xp,
+                      current_level: 1,
+                      xp_to_next_level: 100,
+                    });
+                }
+                xpAwarded += actions.award_xp;
               }
-              xpAwarded += actions.award_xp;
             }
 
             // Award badge

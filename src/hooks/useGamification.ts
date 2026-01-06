@@ -268,7 +268,17 @@ export function useAwardXP(callbacks?: {
     mutationFn: async ({ amount, source, description, sourceId }: { amount: number; source: string; description: string; sourceId?: string; }) => {
       if (!profile?.id) throw new Error('No client profile');
       
-      // Insert transaction first
+      // Get current XP to detect level up
+      const { data: currentXP } = await supabase
+        .from('client_xp')
+        .select('total_xp, current_level')
+        .eq('client_id', profile.id)
+        .maybeSingle();
+      
+      const previousTotalXP = currentXP?.total_xp || 0;
+      const previousLevel = currentXP?.current_level || 1;
+      
+      // Insert transaction - the trigger will automatically update client_xp
       const { error: txError } = await supabase.from('xp_transactions').insert({
         client_id: profile.id,
         amount,
@@ -279,72 +289,17 @@ export function useAwardXP(callbacks?: {
       
       if (txError) throw txError;
       
-      // RACE CONDITION FIX: Use upsert with atomic increment approach
-      // First try to get current XP
-      const { data: currentXP, error: fetchError } = await supabase
-        .from('client_xp')
-        .select('*')
-        .eq('client_id', profile.id)
-        .maybeSingle();
+      // Calculate new level based on new total
+      const newTotalXP = previousTotalXP + amount;
+      const { level } = calculateLevelFromXP(newTotalXP);
       
-      if (fetchError) throw fetchError;
-      
-      const newTotalXP = (currentXP?.total_xp || 0) + amount;
-      const { level, xpForNextLevel } = calculateLevelFromXP(newTotalXP);
-      const previousLevel = currentXP?.current_level || 1;
-      
-      if (currentXP) {
-        // Update existing record
-        const { error: updateError } = await supabase
-          .from('client_xp')
-          .update({ 
-            total_xp: newTotalXP, 
-            current_level: level, 
-            xp_to_next_level: xpForNextLevel,
-            updated_at: new Date().toISOString()
-          })
-          .eq('client_id', profile.id)
-          .eq('total_xp', currentXP.total_xp); // Optimistic lock
-        
-        // If update failed due to concurrent modification, retry with fresh data
-        if (updateError) {
-          const { data: freshXP } = await supabase
-            .from('client_xp')
-            .select('*')
-            .eq('client_id', profile.id)
-            .single();
-          
-          if (freshXP) {
-            const retryTotalXP = freshXP.total_xp + amount;
-            const retryLevel = calculateLevelFromXP(retryTotalXP);
-            await supabase
-              .from('client_xp')
-              .update({ 
-                total_xp: retryTotalXP, 
-                current_level: retryLevel.level, 
-                xp_to_next_level: retryLevel.xpForNextLevel 
-              })
-              .eq('client_id', profile.id);
-            
-            return { 
-              newTotalXP: retryTotalXP, 
-              level: retryLevel.level, 
-              leveledUp: retryLevel.level > freshXP.current_level, 
-              previousLevel: freshXP.current_level 
-            };
-          }
-        }
-      } else {
-        // Insert new record
-        await supabase.from('client_xp').insert({ 
-          client_id: profile.id, 
-          total_xp: newTotalXP, 
-          current_level: level, 
-          xp_to_next_level: xpForNextLevel 
-        });
-      }
-      
-      return { newTotalXP, level, leveledUp: level > previousLevel, previousLevel, amount };
+      return { 
+        newTotalXP, 
+        level, 
+        leveledUp: level > previousLevel, 
+        previousLevel, 
+        amount 
+      };
     },
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ['client-xp'] });

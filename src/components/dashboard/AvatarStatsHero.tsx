@@ -5,6 +5,7 @@ import { useSelectedAvatar, getAvatarImageUrl } from '@/hooks/useAvatars';
 import { useUserStats } from '@/hooks/useUserStats';
 import { RARITY_CONFIG } from '@/lib/avatar-utils';
 import { AvatarPicker } from '@/components/avatars/AvatarPicker';
+import { calculateLevelFromXP } from '@/hooks/useGamification';
 import { 
   Zap, 
   Trophy, 
@@ -109,10 +110,9 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
   const rarityConfig = selectedAvatar ? RARITY_CONFIG[selectedAvatar.rarity] : RARITY_CONFIG.common;
   const imageUrl = selectedAvatar ? getAvatarImageUrl(selectedAvatar.slug) : '/placeholder.svg';
   
-  // Calculate XP to next level (Level * 100 XP per level)
-  const currentLevel = stats?.currentLevel || 1;
-  const xpForNextLevel = currentLevel * 100;
-  const xpInCurrentLevel = (stats?.xpTotal || 0) % xpForNextLevel;
+  // Calculate XP using the same formula as everywhere else
+  const totalXP = stats?.xpTotal || 0;
+  const { level: currentLevel, xpInLevel: xpInCurrentLevel, xpForNextLevel } = calculateLevelFromXP(totalXP);
   const xpPercentage = Math.min(100, (xpInCurrentLevel / xpForNextLevel) * 100);
   
   // Animate XP bar
@@ -216,7 +216,7 @@ export function AvatarStatsHero({ firstName }: AvatarStatsHeroProps) {
                   <span className="font-semibold">Level {currentLevel}</span>
                 </div>
                 <span className="text-sm text-muted-foreground">
-                  {xpInCurrentLevel.toLocaleString()} / {xpForNextLevel.toLocaleString()} XP
+                  {(xpForNextLevel - xpInCurrentLevel).toLocaleString()} XP to next
                 </span>
               </div>
               <Progress 

@@ -64,7 +64,7 @@ export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgres
             <div className="font-bold text-foreground text-lg">{title}</div>
             <div className="text-2xl font-bold text-primary">{totalXP.toLocaleString()} XP</div>
             <div className="text-xs text-muted-foreground mt-1">
-              {xpInLevel.toLocaleString()} / {xpForNextLevel.toLocaleString()} to Level {level + 1}
+              {(xpForNextLevel - xpInLevel).toLocaleString()} XP to Level {level + 1}
             </div>
           </div>
         </div>
@@ -104,7 +104,7 @@ export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgres
         />
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>{xpInLevel.toLocaleString()} XP</span>
-          <span>{t('xp.xpToNextLevel', { xp: xpForNextLevel.toLocaleString(), level: level + 1 })}</span>
+          <span>{t('xp.xpToNextLevel', { xp: (xpForNextLevel - xpInLevel).toLocaleString(), level: level + 1 })}</span>
         </div>
       </div>
     </div>
