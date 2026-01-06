@@ -172,7 +172,7 @@ const ClientFoodDiary = () => {
             </div>
             
             {/* Calories Card */}
-            <ContentSection colorTheme="primary" className="p-5">
+            <ContentSection colorTheme="orange" className="p-5">
               <div className="flex justify-between text-sm mb-2">
                 <div className="flex items-center gap-1">
                   <span className="font-medium text-foreground">Calories</span>
@@ -193,7 +193,7 @@ const ClientFoodDiary = () => {
             {/* Macro Cards */}
             <div className="grid grid-cols-3 gap-3">
               <TooltipProvider>
-                <ContentSection colorTheme="primary" className="p-4 text-center">
+                <ContentSection colorTheme="blue" className="p-4 text-center">
                   <div className="flex items-center justify-center gap-0.5 mb-1">
                     <p className="text-xs text-muted-foreground">Protein</p>
                     <InfoTooltip content="Protein supports muscle growth and repair" />
@@ -201,7 +201,7 @@ const ClientFoodDiary = () => {
                   <p className="text-xl font-bold text-blue-400">{Math.round(dailyMacros.protein_g)}g</p>
                   <p className="text-xs text-muted-foreground">/ {targets.protein}g</p>
                 </ContentSection>
-                <ContentSection colorTheme="primary" className="p-4 text-center">
+                <ContentSection colorTheme="yellow" className="p-4 text-center">
                   <div className="flex items-center justify-center gap-0.5 mb-1">
                     <p className="text-xs text-muted-foreground">Carbs</p>
                     <InfoTooltip content="Carbohydrates provide energy for workouts" />
@@ -209,7 +209,7 @@ const ClientFoodDiary = () => {
                   <p className="text-xl font-bold text-amber-400">{Math.round(dailyMacros.carbs_g)}g</p>
                   <p className="text-xs text-muted-foreground">/ {targets.carbs}g</p>
                 </ContentSection>
-                <ContentSection colorTheme="primary" className="p-4 text-center">
+                <ContentSection colorTheme="red" className="p-4 text-center">
                   <div className="flex items-center justify-center gap-0.5 mb-1">
                     <p className="text-xs text-muted-foreground">Fat</p>
                     <InfoTooltip content="Healthy fats support hormone function" />
