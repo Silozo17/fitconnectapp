@@ -145,27 +145,40 @@ Deno.serve(async (req) => {
 
     console.log(`Generating weekly summary for client ${clientProfile.id}, week starting ${weekStartStr}`);
 
-    // Get habit logs for this week
+    // Get active habits count for this client
+    const { count: activeHabitsCount } = await supabase
+      .from("client_habits")
+      .select("*", { count: "exact", head: true })
+      .eq("client_id", clientProfile.id)
+      .eq("is_active", true);
+
+    const totalActiveHabits = activeHabitsCount || 0;
+
+    // Get habit logs for this week - count unique days with completions
     const { data: thisWeekHabits } = await supabase
       .from("habit_logs")
-      .select("completed_count, client_habits!inner(client_id, target_count)")
+      .select("logged_at, completed_count, client_habits!inner(client_id)")
       .eq("client_habits.client_id", clientProfile.id)
       .gte("logged_at", weekStartStr);
 
     const { data: prevWeekHabits } = await supabase
       .from("habit_logs")
-      .select("completed_count, client_habits!inner(client_id, target_count)")
+      .select("logged_at, completed_count, client_habits!inner(client_id)")
       .eq("client_habits.client_id", clientProfile.id)
       .gte("logged_at", prevWeekStartStr)
       .lt("logged_at", weekStartStr);
 
-    // Calculate habit completion
-    const thisWeekCompleted = thisWeekHabits?.reduce((sum, log) => sum + (log.completed_count || 0), 0) || 0;
-    const thisWeekTotal = thisWeekHabits?.reduce((sum, log) => {
-      const habits = log.client_habits as unknown as { target_count: number };
-      return sum + (habits?.target_count || 1);
-    }, 0) || 0;
-    const prevWeekCompleted = prevWeekHabits?.reduce((sum, log) => sum + (log.completed_count || 0), 0) || 0;
+    // Calculate habit completion - count actual completions vs expected (habits * days)
+    // Count unique habit completions this week
+    const thisWeekCompleted = thisWeekHabits?.filter(log => (log.completed_count || 0) >= 1).length || 0;
+    
+    // Calculate days elapsed in current week (1-7)
+    const daysElapsed = Math.min(7, Math.ceil((now.getTime() - weekStart.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+    
+    // Expected completions = active habits * days elapsed
+    const thisWeekTotal = totalActiveHabits * daysElapsed;
+    
+    const prevWeekCompleted = prevWeekHabits?.filter(log => (log.completed_count || 0) >= 1).length || 0;
 
     // Get workouts
     const { count: thisWeekWorkouts } = await supabase

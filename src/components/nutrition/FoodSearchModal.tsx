@@ -28,7 +28,7 @@ interface FoodSearchModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack';
-  onFoodSelected: (food: FoodResult, quantity: number) => void;
+  onFoodSelected: (food: FoodResult, quantity: number, mealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack') => void;
   clientAllergens?: string[];
   initialFood?: {
     external_id: string;
@@ -59,6 +59,7 @@ export const FoodSearchModal = ({
   const [query, setQuery] = useState("");
   const [selectedFood, setSelectedFood] = useState<UnifiedFoodResult | null>(null);
   const [quantity, setQuantity] = useState(100);
+  const [selectedMealType, setSelectedMealType] = useState<'breakfast' | 'lunch' | 'dinner' | 'snack'>(mealType);
   const { countryPreference } = useUserLocalePreference();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -112,14 +113,17 @@ export const FoodSearchModal = ({
 
   const hasSearched = query.length >= 2;
 
-  // Reset state when modal closes
+  // Reset state when modal opens/closes
   useEffect(() => {
     if (!open) {
       setQuery("");
       setSelectedFood(null);
       setQuantity(100);
+    } else {
+      // Sync meal type when modal opens
+      setSelectedMealType(mealType);
     }
-  }, [open]);
+  }, [open, mealType]);
 
   // Pre-populate with scanned food when provided
   useEffect(() => {
@@ -163,7 +167,7 @@ export const FoodSearchModal = ({
       allergens: selectedFood.allergens,
       source: selectedFood.source,
       food_type: selectedFood.food_type,
-    }, quantity);
+    }, quantity, selectedMealType);
     onOpenChange(false);
   };
 
@@ -215,11 +219,27 @@ export const FoodSearchModal = ({
         {/* Sticky Header */}
         <DialogHeader className="px-4 pt-4 pb-3 shrink-0 border-b border-border/50">
           <DialogTitle className="text-base">
-            {selectedFood ? 'Set Quantity' : `Add to ${MEAL_LABELS[mealType]}`}
+            {selectedFood ? 'Set Quantity' : 'Add Food'}
           </DialogTitle>
           <DialogDescription className="sr-only">
             Search for foods to add to your meal
           </DialogDescription>
+          
+          {/* Meal Type Selector */}
+          <div className="flex gap-2 mt-3 flex-wrap">
+            {Object.entries(MEAL_LABELS).map(([key, label]) => (
+              <Button
+                key={key}
+                type="button"
+                variant={selectedMealType === key ? "default" : "outline"}
+                size="sm"
+                className="flex-1 min-w-[70px] text-xs"
+                onClick={() => setSelectedMealType(key as 'breakfast' | 'lunch' | 'dinner' | 'snack')}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
         </DialogHeader>
 
         {selectedFood ? (

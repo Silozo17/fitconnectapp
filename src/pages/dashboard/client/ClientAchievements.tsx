@@ -1,7 +1,7 @@
 import ClientDashboardLayout from '@/components/dashboard/ClientDashboardLayout';
 import { XPProgressBar } from '@/components/gamification/XPProgressBar';
 import { BadgeGrid } from '@/components/gamification/BadgeGrid';
-import { useXPTransactions, useClientXP, getLevelTitle } from '@/hooks/useGamification';
+import { useXPTransactions, useClientXP, getLevelTitle, calculateLevelFromXP } from '@/hooks/useGamification';
 import { ShareAchievementButton } from '@/components/gamification/ShareAchievementButton';
 import { AchievementShareCard } from '@/components/gamification/AchievementShareCard';
 import { AvatarShowcase } from '@/components/avatars/AvatarShowcase';
@@ -65,16 +65,19 @@ function AchievementsContent() {
       <DashboardSectionHeader
         title={t('achievements.title')}
         description={t('achievements.subtitle')}
-        action={xpData && (
-          <ShareAchievementButton
-            achievement={{
-              type: 'level',
-              title: `Level ${xpData.current_level}`,
-              description: `${getLevelTitle(xpData.current_level)} with ${xpData.total_xp.toLocaleString()} XP earned!`,
-              value: xpData.current_level,
-            }}
-          />
-        )}
+        action={xpData && (() => {
+          const { level } = calculateLevelFromXP(xpData.total_xp);
+          return (
+            <ShareAchievementButton
+              achievement={{
+                type: 'level',
+                title: `Level ${level}`,
+                description: `${getLevelTitle(level)} with ${xpData.total_xp.toLocaleString()} XP earned!`,
+                value: level,
+              }}
+            />
+          );
+        })()}
       />
       
       {/* Avatar and XP Progress Section */}
@@ -99,19 +102,23 @@ function AchievementsContent() {
           <XPProgressBar />
           
           {/* Quick Share Card for Current Level */}
-          {xpData && (
-            <div className="mt-4">
-              <AchievementShareCard
-                achievement={{
-                  type: 'level',
-                  title: `Level ${xpData.current_level} - ${getLevelTitle(xpData.current_level)}`,
-                  description: `Total XP: ${xpData.total_xp.toLocaleString()} • Next level in ${xpData.xp_to_next_level - (xpData.total_xp % xpData.xp_to_next_level)} XP`,
-                  value: xpData.current_level,
-                  icon: '⬆️',
-                }}
-              />
-            </div>
-          )}
+          {xpData && (() => {
+            const { level, xpInLevel, xpForNextLevel } = calculateLevelFromXP(xpData.total_xp);
+            const xpToNext = xpForNextLevel - xpInLevel;
+            return (
+              <div className="mt-4">
+                <AchievementShareCard
+                  achievement={{
+                    type: 'level',
+                    title: `Level ${level} - ${getLevelTitle(level)}`,
+                    description: `Total XP: ${xpData.total_xp.toLocaleString()} • Next level in ${xpToNext.toLocaleString()} XP`,
+                    value: level,
+                    icon: '⬆️',
+                  }}
+                />
+              </div>
+            );
+          })()}
         </div>
       </div>
       

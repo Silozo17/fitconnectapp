@@ -77,24 +77,20 @@ export const useFoodDiary = (clientId: string | undefined, date: Date) => {
 };
 
 // Fetch food diary entries for a date range (for coach viewing)
+// Food logs are ALWAYS accessible to connected coaches (no sharing preference check needed)
 export const useFoodDiaryRange = (
   clientId: string | undefined, 
   startDate: Date, 
   endDate: Date,
-  coachId?: string
+  _coachId?: string // Kept for API compatibility but not used - food logs always accessible
 ) => {
   return useQuery({
-    queryKey: ['food-diary-range', clientId, format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd'), coachId],
+    queryKey: ['food-diary-range', clientId, format(startDate, 'yyyy-MM-dd'), format(endDate, 'yyyy-MM-dd')],
     queryFn: async () => {
       if (!clientId) return [];
       
-      // If coach is viewing, check permission first
-      if (coachId) {
-        const { allowed } = await checkCoachDataAccess(clientId, coachId, "meal_logs");
-        if (!allowed) {
-          throw new Error("Access denied: Client has restricted meal logs access");
-        }
-      }
+      // Food logs are always accessible to connected coaches
+      // RLS policies on food_diary table handle actual authorization
       
       const { data, error } = await supabase
         .from('food_diary')
@@ -108,6 +104,7 @@ export const useFoodDiaryRange = (
       return data as FoodDiaryEntry[];
     },
     enabled: !!clientId,
+    staleTime: 2 * 60 * 1000,
   });
 };
 

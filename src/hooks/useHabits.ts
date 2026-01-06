@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { triggerHaptic } from "@/lib/despia";
 import { useCelebration, StreakMilestone } from "@/contexts/CelebrationContext";
 import { checkIsFirstHabitLog } from "@/hooks/useFirstTimeTracker";
+import { format, startOfDay } from "date-fns";
 
 // Streak milestones that trigger celebrations
 const STREAK_MILESTONES = [7, 30, 100] as const;
@@ -128,9 +129,10 @@ export const useClientHabits = (clientId: string | undefined) => {
 // Hook for clients to get their own habits with streaks
 export const useMyHabits = () => {
   const { user } = useAuth();
+  const todayStr = format(startOfDay(new Date()), 'yyyy-MM-dd');
   
   return useQuery({
-    queryKey: ['my-habits', user?.id],
+    queryKey: ['my-habits', user?.id, todayStr], // Include date to bust cache at midnight
     queryFn: async () => {
       if (!user) return [];
       
@@ -157,8 +159,8 @@ export const useMyHabits = () => {
       // EMPTY ARRAY GUARD: Only query if we have habit IDs
       const habitIds = habits.map(h => h.id);
       
-      // Get streaks and today's logs in parallel
-      const today = new Date().toISOString().split('T')[0];
+      // Get streaks and today's logs in parallel - use local date for consistency
+      const today = todayStr;
       const [streaksResult, todayLogsResult] = await Promise.all([
         supabase.from('habit_streaks').select('*').in('habit_id', habitIds),
         supabase.from('habit_logs').select('*').in('habit_id', habitIds).eq('logged_at', today),
@@ -175,6 +177,8 @@ export const useMyHabits = () => {
       })) as HabitWithStreak[];
     },
     enabled: !!user,
+    refetchOnMount: 'always', // Always refetch when component mounts
+    staleTime: 30 * 1000, // 30 seconds
   });
 };
 

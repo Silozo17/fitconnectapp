@@ -97,7 +97,7 @@ const ClientHabits = () => {
           </TabsList>
           
           {/* Today's Habits */}
-          <TabsContent value="today" className="space-y-4">
+          <TabsContent value="today" className="space-y-4 max-h-[60vh] overflow-y-auto">
             {isLoading ? (
               <>
                 <ShimmerSkeleton className="h-24 w-full rounded-2xl" />
@@ -122,7 +122,7 @@ const ClientHabits = () => {
           </TabsContent>
           
           {/* Streaks */}
-          <TabsContent value="streaks" className="space-y-4">
+          <TabsContent value="streaks" className="space-y-4 max-h-[60vh] overflow-y-auto">
             {isLoading ? (
               <div className="grid gap-5 md:grid-cols-2">
                 <ShimmerSkeleton className="h-48 w-full rounded-2xl" />
@@ -148,7 +148,7 @@ const ClientHabits = () => {
           </TabsContent>
           
           {/* History */}
-          <TabsContent value="history" className="space-y-4">
+          <TabsContent value="history" className="space-y-4 max-h-[60vh] overflow-y-auto">
             {isLoading ? (
               <>
                 <ShimmerSkeleton className="h-32 w-full rounded-2xl" />
