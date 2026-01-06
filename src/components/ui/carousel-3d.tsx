@@ -91,6 +91,20 @@ export function Carousel3D({
     // Return dim amount (0 = no dim, 0.6 = max dim)
     return clampedAbsDistance * 0.3;
   };
+
+  // Calculate scale for 3D effect - center card is larger, others shrink
+  const getScale = (index: number): number => {
+    if (!emblaApi) return 1;
+    
+    const snapList = emblaApi.scrollSnapList();
+    const scrollSnap = snapList[index] || 0;
+    const distance = (scrollSnap - scrollProgress) * snapList.length;
+    const absDistance = Math.abs(distance);
+    
+    // Scale from 1 (center) to 0.85 (edges)
+    const scale = 1 - Math.min(absDistance * 0.075, 0.15);
+    return scale;
+  };
   
   const getZIndex = (index: number): number => {
     if (!emblaApi) return 10;
@@ -123,12 +137,16 @@ export function Carousel3D({
             
             const dimAmount = getDimAmount(index);
             const zIndex = getZIndex(index);
+            const scale = getScale(index);
             
             return (
               <div
                 key={index}
-                className="flex-shrink-0"
-                style={{ zIndex }}
+                className="flex-shrink-0 transition-transform duration-150 ease-out"
+                style={{ 
+                  zIndex,
+                  transform: `scale(${scale})`,
+                }}
               >
                 {cloneElement(child as React.ReactElement<any>, {
                   'data-dim-amount': dimAmount,
