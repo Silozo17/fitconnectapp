@@ -319,7 +319,8 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
               <div className="mb-4">
                 <TierSelector 
                   selectedTier={selectedTier} 
-                  onTierChange={setSelectedTier} 
+                  onTierChange={setSelectedTier}
+                  billingInterval={billingInterval}
                 />
               </div>
 

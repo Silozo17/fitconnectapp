@@ -143,6 +143,7 @@ export default function Subscribe() {
           <TierSelector
             selectedTier={selectedTier}
             onTierChange={handleTierChange}
+            billingInterval={billingInterval}
             includeFreeTier={true}
           />
         </div>
