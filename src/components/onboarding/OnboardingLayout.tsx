@@ -129,7 +129,7 @@ export function OnboardingLayout({
 
   return (
     <div 
-      className="fixed inset-0 bg-background flex flex-col"
+      className="fixed inset-0 bg-background flex flex-col overflow-hidden"
       style={{
         // iOS safe area padding on sides
         paddingLeft: 'env(safe-area-inset-left)',
@@ -226,7 +226,7 @@ export function OnboardingLayout({
       {/* Scrollable Content Area - takes remaining space */}
       <main 
         className={cn(
-          "flex-1 overflow-y-auto overscroll-contain",
+          "flex-1 overflow-y-auto overflow-x-hidden overscroll-contain",
           "px-4 py-6",
           contentClassName
         )}

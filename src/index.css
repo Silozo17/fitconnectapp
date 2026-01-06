@@ -171,6 +171,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Scrollbar hide utility - for any element */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Documentation prose overrides - remove link underscoring */
 .prose-docs a:not([class*="bg-primary"]) {
   @apply text-primary no-underline transition-colors;

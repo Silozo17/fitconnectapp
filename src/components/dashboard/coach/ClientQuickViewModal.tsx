@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { MetricCard } from "@/components/shared/MetricCard";
 import { ContentSection } from "@/components/shared/ContentSection";
 import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
@@ -115,7 +114,7 @@ export const ClientQuickViewModal = memo(({
         </DrawerHeader>
 
         {/* Scrollable content */}
-        <ScrollArea className="flex-1 min-h-0 overflow-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden scrollbar-hide">
           <div className="p-4 pb-8 space-y-6">
             {isLoading ? (
               <LoadingSkeleton />
@@ -306,7 +305,7 @@ export const ClientQuickViewModal = memo(({
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         {/* Fixed action buttons at bottom */}
         <div className="sticky bottom-0 p-4 border-t border-border/50 bg-background/95 backdrop-blur-sm">

@@ -212,7 +212,7 @@ export function UserDetailDrawer({ open, onOpenChange, user, onSaved, onEdit, on
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto" showCloseButton={false}>
+      <SheetContent className="w-full sm:max-w-[600px] overflow-y-auto overflow-x-hidden" showCloseButton={false}>
         <SheetHeader>
           <div className="flex items-start justify-between gap-4 pt-6">
             <div className="flex items-center gap-4">
