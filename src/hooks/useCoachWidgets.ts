@@ -74,8 +74,12 @@ const DEFAULT_WIDGETS: Omit<CoachDashboardWidget, "id" | "coach_id">[] = [
 const getDefaultWidgets = (): CoachDashboardWidget[] => 
   DEFAULT_WIDGETS.map((w, i) => ({ ...w, id: `default-${i}`, coach_id: null }));
 
+// Old individual stat widget types that should be migrated to stats_overview
+const OLD_STAT_WIDGETS = ['stats_clients', 'stats_sessions', 'stats_messages', 'stats_rating'];
+
 export function useCoachWidgets() {
   const { data: coachProfile } = useCoachProfile();
+  const queryClient = useQueryClient();
 
   return useQuery({
     queryKey: ["coach-widgets", coachProfile?.id],
@@ -93,6 +97,43 @@ export function useCoachWidgets() {
       // If no custom widgets exist, return defaults
       if (!data || data.length === 0) {
         return getDefaultWidgets();
+      }
+
+      // Check if migration is needed (old individual stats → stats_overview)
+      const hasOldStats = data.some(w => OLD_STAT_WIDGETS.includes(w.widget_type));
+      const hasNewStats = data.some(w => w.widget_type === 'stats_overview');
+
+      if (hasOldStats && !hasNewStats) {
+        // Migrate: Remove old stat widgets and add stats_overview
+        const oldStatIds = data.filter(w => OLD_STAT_WIDGETS.includes(w.widget_type)).map(w => w.id);
+        
+        // Delete old stat widgets
+        await supabase
+          .from("coach_dashboard_widgets")
+          .delete()
+          .in("id", oldStatIds);
+
+        // Add new stats_overview widget at position 0
+        await supabase
+          .from("coach_dashboard_widgets")
+          .insert({
+            coach_id: coachProfile.id,
+            widget_type: "stats_overview",
+            title: "Stats Overview",
+            position: 0,
+            size: "full",
+            is_visible: true,
+            config: {},
+          });
+
+        // Refetch after migration
+        const { data: refreshedData } = await supabase
+          .from("coach_dashboard_widgets")
+          .select("*")
+          .eq("coach_id", coachProfile.id)
+          .order("position");
+
+        return (refreshedData || []) as CoachDashboardWidget[];
       }
 
       return data as CoachDashboardWidget[];

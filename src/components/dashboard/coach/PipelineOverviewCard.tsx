@@ -2,8 +2,8 @@ import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ArrowRight, UserPlus, MessageCircle, Send, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ContentSection } from "@/components/shared/ContentSection";
 import { useCoachPipeline } from "@/hooks/useCoachPipeline";
 
 const STAGE_KEYS = ['new_lead', 'conversation_started', 'offer_sent', 'deal_closed'] as const;
@@ -31,7 +31,7 @@ export function PipelineOverviewCard() {
 
   if (isLoading) {
     return (
-      <Card variant="glass" className="p-6 mb-6">
+      <ContentSection colorTheme="purple" className="p-5 rounded-3xl">
         <div className="flex items-center justify-between mb-4">
           <Skeleton className="h-6 w-32" />
           <Skeleton className="h-8 w-24" />
@@ -44,12 +44,12 @@ export function PipelineOverviewCard() {
             </div>
           ))}
         </div>
-      </Card>
+      </ContentSection>
     );
   }
 
   return (
-    <Card variant="glass" className="p-6 mb-6">
+    <ContentSection colorTheme="purple" className="p-5 rounded-3xl">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="font-display font-bold text-foreground">{t("widgets.pipeline.title")}</h2>
@@ -58,7 +58,7 @@ export function PipelineOverviewCard() {
           </p>
         </div>
         <Link to="/dashboard/coach/pipeline">
-          <Button variant="ghost" size="sm" className="text-primary">
+          <Button variant="ghost" size="sm" className="text-primary rounded-xl">
             {t("widgets.pipeline.viewPipeline")} <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </Link>
@@ -66,7 +66,7 @@ export function PipelineOverviewCard() {
 
       {/* Funnel Visualization */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        {STAGE_KEYS.map((stageKey, index) => {
+        {STAGE_KEYS.map((stageKey) => {
           const config = STAGE_CONFIG[stageKey];
           const count = leadsByStage[stageKey]?.length || 0;
           const Icon = config.icon;
@@ -94,13 +94,6 @@ export function PipelineOverviewCard() {
               <p className="text-xs text-muted-foreground line-clamp-1">
                 {t(`widgets.pipeline.stages.${config.labelKey}`)}
               </p>
-
-              {/* Arrow connector (hidden on mobile, shown between items) */}
-              {index < STAGE_KEYS.length - 1 && (
-                <div className="hidden sm:block absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 text-muted-foreground/30">
-                  →
-                </div>
-              )}
             </div>
           );
         })}
@@ -108,12 +101,12 @@ export function PipelineOverviewCard() {
 
       {/* Empty State */}
       {totalLeads === 0 && (
-        <div className="text-center pt-4 border-t border-border mt-4">
+        <div className="text-center pt-4 border-t border-border/50 mt-4">
           <p className="text-sm text-muted-foreground">
             {t("widgets.pipeline.noLeadsYet")}
           </p>
         </div>
       )}
-    </Card>
+    </ContentSection>
   );
 }
