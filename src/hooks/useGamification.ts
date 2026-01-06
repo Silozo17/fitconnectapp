@@ -80,41 +80,108 @@ export const XP_ACTIONS = {
 };
 
 export const LEVEL_TITLES: Record<string, string> = {
-  '1-5': 'Beginner',
-  '6-10': 'Apprentice',
-  '11-20': 'Warrior',
-  '21-35': 'Champion',
-  '36-50': 'Elite',
-  '51+': 'Legend',
+  '1-10': 'Beginner',
+  '11-20': 'Apprentice',
+  '21-30': 'Warrior',
+  '31-40': 'Veteran',
+  '41-50': 'Champion',
+  '51-60': 'Elite',
+  '61-70': 'Master',
+  '71-80': 'Grandmaster',
+  '81-90': 'Legend',
+  '91-99': 'Mythic',
+  '100': 'Immortal',
 };
 
 export function getLevelTitle(level: number): string {
-  if (level <= 5) return 'Beginner';
-  if (level <= 10) return 'Apprentice';
-  if (level <= 20) return 'Warrior';
-  if (level <= 35) return 'Champion';
-  if (level <= 50) return 'Elite';
-  return 'Legend';
+  if (level <= 10) return 'Beginner';
+  if (level <= 20) return 'Apprentice';
+  if (level <= 30) return 'Warrior';
+  if (level <= 40) return 'Veteran';
+  if (level <= 50) return 'Champion';
+  if (level <= 60) return 'Elite';
+  if (level <= 70) return 'Master';
+  if (level <= 80) return 'Grandmaster';
+  if (level <= 90) return 'Legend';
+  if (level < 100) return 'Mythic';
+  return 'Immortal';
 }
 
-export function calculateXPForLevel(level: number): number {
-  return Math.floor(100 * Math.pow(1.5, level - 1));
+/**
+ * Progressive level system:
+ * - Levels 2-10: Each level requires 50 more XP than the previous (100, 150, 200, 250, 300, 350, 400, 450, 500)
+ * - Levels 11-20: Each level requires 100 more XP than the previous (600, 700, 800, ...)
+ * - Levels 21-30: Each level requires 150 more XP than the previous
+ * - And so on, with increment increasing by 50 every 10 levels
+ */
+export function getXPRequiredForLevel(level: number): number {
+  if (level <= 1) return 0; // Level 1 is the starting level, no XP needed
+  
+  // Tier determines the increment: tier 1 (levels 2-10) = +50, tier 2 (levels 11-20) = +100, etc.
+  const tier = Math.ceil((level - 1) / 10);
+  const increment = tier * 50;
+  
+  // Position within the tier (1-10)
+  const positionInTier = ((level - 2) % 10) + 1;
+  
+  // Calculate base XP for this tier's first level
+  let baseXP = 100; // Level 2 starts at 100 XP
+  for (let t = 1; t < tier; t++) {
+    // Add all XP from previous tiers
+    const tierIncrement = t * 50;
+    // Each tier has 10 levels, first level of tier starts where previous ended
+    // Level at end of tier t: baseXP + 9 * tierIncrement
+    baseXP = baseXP + 9 * tierIncrement + (t + 1) * 50;
+  }
+  
+  // XP for this specific level
+  return baseXP + (positionInTier - 1) * increment;
 }
 
+/**
+ * Get cumulative XP needed to reach a specific level
+ */
+export function getCumulativeXPForLevel(level: number): number {
+  let total = 0;
+  for (let l = 2; l <= level; l++) {
+    total += getXPRequiredForLevel(l);
+  }
+  return total;
+}
+
+/**
+ * Calculate current level from total XP using progressive thresholds
+ */
 export function calculateLevelFromXP(totalXP: number): { level: number; xpInLevel: number; xpForNextLevel: number } {
   let level = 1;
   let xpRemaining = totalXP;
   
-  while (xpRemaining >= calculateXPForLevel(level)) {
-    xpRemaining -= calculateXPForLevel(level);
+  while (level < 100) {
+    const xpNeeded = getXPRequiredForLevel(level + 1);
+    if (xpRemaining < xpNeeded) break;
+    xpRemaining -= xpNeeded;
     level++;
+  }
+  
+  // Cap at level 100
+  if (level >= 100) {
+    return {
+      level: 100,
+      xpInLevel: xpRemaining,
+      xpForNextLevel: 0, // Max level reached
+    };
   }
   
   return {
     level,
     xpInLevel: xpRemaining,
-    xpForNextLevel: calculateXPForLevel(level),
+    xpForNextLevel: getXPRequiredForLevel(level + 1),
   };
+}
+
+// Legacy alias for backwards compatibility
+export function calculateXPForLevel(level: number): number {
+  return getXPRequiredForLevel(level + 1);
 }
 
 export const RARITY_COLORS: Record<string, { bg: string; border: string; text: string }> = {
