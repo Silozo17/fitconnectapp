@@ -59,13 +59,14 @@ const Auth = () => {
   const [passwordValue, setPasswordValue] = useState("");
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string; firstName: string; lastName: string } | null>(null);
+  const [pendingLogin2FA, setPendingLogin2FA] = useState<{ email: string } | null>(null);
   const [hasNavigated, setHasNavigated] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [resetLinkSent, setResetLinkSent] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [termsError, setTermsError] = useState("");
-  const { signIn, signUp, user, role } = useAuth();
+  const { signIn, signUp, user, role, allRoles, pending2FA, setPending2FA } = useAuth();
   
   // Get return URL from query params or location state
   const rawReturnUrl = searchParams.get("returnUrl") || (location.state?.from?.pathname ? `${location.state.from.pathname}${location.state.from.search || ''}` : null);
@@ -132,6 +133,8 @@ const Auth = () => {
       // Skip if we already navigated directly after signup (prevents duplicate navigation)
       if (hasNavigated) return;
       if (!user || !role) return;
+      // Don't redirect if 2FA is pending
+      if (pending2FA || pendingLogin2FA) return;
       
       // If there's a return URL, redirect there instead of default dashboard
       if (returnUrl) {
@@ -174,7 +177,7 @@ const Auth = () => {
     };
     
     handleRedirect();
-  }, [user, role, navigate, returnUrl, hasNavigated]);
+  }, [user, role, navigate, returnUrl, hasNavigated, pending2FA, pendingLogin2FA]);
 
   // Send OTP email
   const sendOTPEmail = async (email: string) => {
@@ -285,6 +288,50 @@ const Auth = () => {
           toast.error(t("auth.unexpectedError"));
         }
       } else {
+        // Login successful - check if user needs 2FA
+        // Get user's 2FA settings from database
+        const { data: settings } = await supabase
+          .from("user_security_settings")
+          .select("two_factor_enabled, two_factor_verified_at")
+          .maybeSingle();
+        
+        // Also check if user is privileged (coaches, admins require 2FA by default)
+        const { data: rolesData } = await supabase
+          .from("user_roles")
+          .select("role");
+        
+        const userRoles = rolesData?.map(r => r.role) || [];
+        const isPrivileged = userRoles.some(r => ['admin', 'manager', 'staff', 'coach'].includes(r));
+        
+        // Determine if 2FA is required
+        const needs2FA = settings?.two_factor_enabled || (isPrivileged && settings?.two_factor_enabled !== false);
+        
+        if (needs2FA) {
+          // Check if already verified in this session window (24 hours)
+          const verificationDuration = 24 * 60 * 60 * 1000;
+          const recentlyVerified = settings?.two_factor_verified_at && 
+            (Date.now() - new Date(settings.two_factor_verified_at).getTime() < verificationDuration);
+          
+          if (!recentlyVerified) {
+            // Mark as pending 2FA and show OTP screen
+            setPending2FA(true);
+            setPendingLogin2FA({ email: data.email });
+            
+            // Send OTP email
+            const { error: otpError } = await supabase.functions.invoke("send-otp-email", {
+              body: { email: data.email, purpose: "2fa" },
+            });
+            
+            if (otpError) {
+              console.error("Failed to send 2FA OTP:", otpError);
+              toast.error(t("otp.failedSendCode"));
+            } else {
+              toast.success(t("otp.verificationSent"));
+            }
+            return; // Don't show welcome message yet
+          }
+        }
+        
         toast.success(t("auth.welcomeBack") + "!");
       }
     } catch (error) {
@@ -356,13 +403,100 @@ const Auth = () => {
     }
   };
 
-  // Handle going back from OTP screen
+  // Handle going back from OTP screen (signup)
   const handleOTPBack = () => {
     setShowOTPVerification(false);
     setPendingSignupData(null);
   };
 
-  // Show OTP verification screen
+  // Handle login 2FA OTP verification success
+  const handleLogin2FAVerified = async () => {
+    if (!user) return;
+    
+    // Update database with verification timestamp
+    await supabase
+      .from("user_security_settings")
+      .update({ two_factor_verified_at: new Date().toISOString() })
+      .eq("user_id", user.id);
+    
+    // Store in session for faster checks
+    sessionStorage.setItem(STORAGE_KEYS.TWO_FACTOR_VERIFIED, JSON.stringify({
+      timestamp: Date.now(),
+      userId: user.id,
+    }));
+    
+    // Clear pending states
+    setPending2FA(false);
+    setPendingLogin2FA(null);
+    
+    toast.success(t("auth.welcomeBack") + "!");
+  };
+
+  // Handle going back from login 2FA screen (sign out and return to login)
+  const handleLogin2FABack = async () => {
+    // User wants to cancel - sign them out
+    const { signOut } = await import("@/contexts/AuthContext").then(() => ({ signOut: async () => {
+      await supabase.auth.signOut();
+    }}));
+    await supabase.auth.signOut();
+    setPending2FA(false);
+    setPendingLogin2FA(null);
+  };
+
+  // Show login 2FA OTP verification screen
+  if (pendingLogin2FA && pending2FA) {
+    return (
+      <>
+        <Helmet>
+          <title>{t("twoFactor.verificationRequired")} | FitConnect</title>
+        </Helmet>
+
+        <div className="min-h-screen bg-background flex">
+          {/* Left side - OTP Form */}
+          <div className="flex-1 flex items-center justify-center p-8">
+            <div className="w-full max-w-md">
+              {/* Logo */}
+              <Link to="/" className="flex items-center gap-2 mb-8">
+                <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-display font-bold text-xl text-foreground">
+                  FitConnect
+                </span>
+              </Link>
+
+              <OTPVerification
+                email={pendingLogin2FA.email}
+                purpose="2fa"
+                onVerified={handleLogin2FAVerified}
+                onBack={handleLogin2FABack}
+              />
+            </div>
+          </div>
+
+          {/* Right side - Visual */}
+          <div className="hidden lg:flex flex-1 gradient-bg-primary items-center justify-center p-12 relative overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+
+            <div className="text-center max-w-lg relative z-10">
+              <div className="w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-xl flex items-center justify-center mx-auto mb-8">
+                <Dumbbell className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="font-display text-4xl font-bold text-white mb-4">
+                {t("twoFactor.securityFirst")}
+              </h2>
+              <p className="text-white/80 text-lg">
+                {t("twoFactor.additionalLayer")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Show signup OTP verification screen
   if (showOTPVerification && pendingSignupData) {
     return (
       <>

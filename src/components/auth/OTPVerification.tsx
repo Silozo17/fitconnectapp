@@ -139,7 +139,7 @@ export function OTPVerification({ email, purpose = "signup", onVerified, onBack 
         <button
           type="button"
           onClick={onBack}
-          className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1"
+          className="text-sm font-medium text-foreground hover:text-primary flex items-center gap-1.5 py-2 px-3 rounded-lg hover:bg-muted transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           {t('otp.back')}
