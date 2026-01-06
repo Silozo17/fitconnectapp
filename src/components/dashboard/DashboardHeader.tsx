@@ -1,6 +1,8 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, User, LogOut, Menu } from "lucide-react";
+import UpgradeIconButton from "./UpgradeIconButton";
+import { UpgradeDrawer } from "@/components/subscription/UpgradeDrawer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -22,15 +24,17 @@ import {
 
 interface DashboardHeaderProps {
   subscriptionTier?: string | null;
+  coachId?: string;
   onMenuToggle: () => void;
 }
 
-const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeaderProps) => {
+const DashboardHeader = memo(({ subscriptionTier, coachId, onMenuToggle }: DashboardHeaderProps) => {
   const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
   const { displayName, avatarUrl } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('coach');
+  const [upgradeDrawerOpen, setUpgradeDrawerOpen] = useState(false);
 
   const tierLabel = useMemo(() => {
     const normalizedTier = normalizeTier(subscriptionTier);
@@ -118,11 +122,19 @@ const DashboardHeader = memo(({ subscriptionTier, onMenuToggle }: DashboardHeade
               />
             </div>
           </TooltipProvider>
+          <UpgradeIconButton onClick={() => setUpgradeDrawerOpen(true)} />
           <Button variant="ghost" size="icon" className="xl:hidden" onClick={onMenuToggle}>
             <Menu className="w-5 h-5" />
           </Button>
         </div>
       </div>
+      
+      {/* Upgrade Drawer */}
+      <UpgradeDrawer 
+        open={upgradeDrawerOpen} 
+        onOpenChange={setUpgradeDrawerOpen}
+        coachId={coachId}
+      />
     </header>
   );
 });

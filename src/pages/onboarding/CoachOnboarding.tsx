@@ -1030,8 +1030,17 @@ const CoachOnboarding = () => {
         
         return (
           <div className="flex flex-col h-full">
+            {/* Hero Image */}
+            <div className="w-full aspect-[16/9] relative overflow-hidden rounded-xl mb-3 -mt-1">
+              <img 
+                src="https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/iap_image.webp"
+                alt="Start your fitness coaching journey"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
             {/* Logo - compact */}
-            <div className="flex items-center justify-center gap-2 pt-2 pb-3">
+            <div className="flex items-center justify-center gap-2 pb-3">
               <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
                 <Dumbbell className="w-5 h-5 text-primary-foreground" />
               </div>
