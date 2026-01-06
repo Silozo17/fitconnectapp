@@ -77,7 +77,7 @@ export const ClientQuickViewModal = memo(({
 
   return (
     <Drawer open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DrawerContent className="max-h-[95vh] outline-none">
+      <DrawerContent className="max-h-[95vh] h-[95vh] flex flex-col outline-none">
         {/* Header with gradient */}
         <DrawerHeader className="relative pb-4 border-b border-border/50">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
@@ -115,7 +115,7 @@ export const ClientQuickViewModal = memo(({
         </DrawerHeader>
 
         {/* Scrollable content */}
-        <ScrollArea className="flex-1 max-h-[calc(95vh-180px)]">
+        <ScrollArea className="flex-1 min-h-0 overflow-auto">
           <div className="p-4 pb-8 space-y-6">
             {isLoading ? (
               <LoadingSkeleton />
