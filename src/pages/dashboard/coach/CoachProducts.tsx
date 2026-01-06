@@ -14,8 +14,7 @@ import { useCoachProducts, useCoachBundles, useDeleteProduct, useDeleteBundle, u
 import { formatCurrency } from "@/lib/currency";
 import { useTranslation } from "@/hooks/useTranslation";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
-import { MetricCard } from "@/components/shared/MetricCard";
-import { StatsGrid } from "@/components/shared/StatsGrid";
+import { MetricCard, StatsGrid, DashboardSectionHeader } from "@/components/shared";
 
 export default function CoachProducts() {
   const { t } = useTranslation('coach');
@@ -53,16 +52,12 @@ export default function CoachProducts() {
       />
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-              <Package className="h-6 w-6 text-primary" />
-              Digital <span className="gradient-text">Products</span>
-            </h1>
-            <p className="text-muted-foreground mt-1">
-              {t('productsPage.subtitle')}
-            </p>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <DashboardSectionHeader
+            title="Digital Products"
+            description={t('productsPage.subtitle')}
+            className="mb-0"
+          />
           <div className="flex gap-2 flex-wrap">
             {products && products.length > 0 && (
               <Button variant="outline" onClick={() => setShowBulkEdit(true)}>

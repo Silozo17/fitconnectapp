@@ -357,7 +357,7 @@ const CoachPipeline = () => {
                 </div>
               </div>
 
-              <div className="flex-1 min-h-[200px] p-2 rounded-lg glass-card border border-border/30">
+              <div className="flex-1 min-h-[200px] p-2 rounded-lg border border-border/30 bg-muted/20">
                 {leadsByStage[stage.key].length === 0 ? (
                   <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
                     {t("pipeline.noLeads")}

@@ -1,4 +1,3 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, DollarSign, TrendingUp, Calendar, Clock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useCoachBoostStatus, useBoostAttributions, useBoostSettings, calculateBoostFee, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
@@ -7,6 +6,7 @@ import { format } from "date-fns";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { useActivePricing } from "@/hooks/useActivePricing";
+import { MetricCard, StatsGrid, DashboardSectionHeader } from "@/components/shared";
 
 export const BoostStatsCard = () => {
   const { t } = useTranslation("coach");
@@ -19,18 +19,11 @@ export const BoostStatsCard = () => {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
-          <Card key={i}>
-            <CardHeader className="pb-2">
-              <Skeleton className="h-4 w-24" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-16" />
-            </CardContent>
-          </Card>
+      <StatsGrid columns={{ default: 2, lg: 5 }} gap="default">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <Skeleton key={i} className="h-24 rounded-xl" />
         ))}
-      </div>
+      </StatsGrid>
     );
   }
 
@@ -48,91 +41,57 @@ export const BoostStatsCard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        {/* Boost Status */}
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              {t("boostStats.boostStatus")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {boostActive ? (
-              <>
-                <p className="text-2xl font-bold text-primary">{remainingDays} {t("boostStats.days")}</p>
-                <p className="text-xs text-muted-foreground">{t("boostStats.remaining")}</p>
-              </>
-            ) : (
-              <>
-                <p className="text-2xl font-bold text-muted-foreground">{t("boostStats.inactive")}</p>
-                <p className="text-xs text-muted-foreground">{t("boostStats.purchaseToActivate")}</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              {t("boostStats.clientsAcquired")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{totalClients}</p>
-            <p className="text-xs text-muted-foreground">{t("boostStats.viaBoost")}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <DollarSign className="h-4 w-4" />
-              {t("boostStats.commissionPaid")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{pricing.formatPrice(totalFees)}</p>
-            <p className="text-xs text-muted-foreground">{t("boostStats.onNewClients")}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              {t("boostStats.estClientValue")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{pricing.formatPrice(estimatedLifetimeValue)}</p>
-            <p className="text-xs text-muted-foreground">{t("boostStats.fromRepeatVisits")}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              {t("boostStats.roi")}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className={`text-3xl font-bold ${roi > 0 ? "text-green-500" : "text-muted-foreground"}`}>
-              {roi > 0 ? `+${Math.round(roi)}%` : "N/A"}
-            </p>
-            <p className="text-xs text-muted-foreground">{t("boostStats.returnOnInvestment")}</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Stats Grid */}
+      <StatsGrid columns={{ default: 2, lg: 5 }} gap="default">
+        <MetricCard
+          icon={Clock}
+          label={t("boostStats.boostStatus")}
+          value={boostActive ? remainingDays : t("boostStats.inactive")}
+          unit={boostActive ? t("boostStats.days") : undefined}
+          description={boostActive ? t("boostStats.remaining") : t("boostStats.purchaseToActivate")}
+          color="primary"
+          size="sm"
+        />
+        <MetricCard
+          icon={Users}
+          label={t("boostStats.clientsAcquired")}
+          value={totalClients}
+          description={t("boostStats.viaBoost")}
+          color="green"
+          size="sm"
+        />
+        <MetricCard
+          icon={DollarSign}
+          label={t("boostStats.commissionPaid")}
+          value={pricing.formatPrice(totalFees)}
+          description={t("boostStats.onNewClients")}
+          color="purple"
+          size="sm"
+        />
+        <MetricCard
+          icon={TrendingUp}
+          label={t("boostStats.estClientValue")}
+          value={pricing.formatPrice(estimatedLifetimeValue)}
+          description={t("boostStats.fromRepeatVisits")}
+          color="cyan"
+          size="sm"
+        />
+        <MetricCard
+          icon={TrendingUp}
+          label={t("boostStats.roi")}
+          value={roi > 0 ? `+${Math.round(roi)}%` : "N/A"}
+          description={t("boostStats.returnOnInvestment")}
+          color={roi > 0 ? "green" : "primary"}
+          size="sm"
+        />
+      </StatsGrid>
 
       {/* Recent Acquisitions */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">{t("boostStats.recentAcquisitions")}</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="space-y-3">
+        <DashboardSectionHeader 
+          title={t("boostStats.recentAcquisitions")}
+        />
+        <div className="rounded-xl border border-border/50 bg-card/50 p-4">
           {attributions && attributions.length > 0 ? (
             <div className="space-y-4">
               {attributions.map((attribution) => {
@@ -143,14 +102,12 @@ export const BoostStatsCard = () => {
                 return (
                   <div key={attribution.id} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                     <div className="flex items-center gap-3">
-                      <div className="pt-3">
-                        <UserAvatar 
-                          src={attribution.client_profiles?.avatar_url} 
-                          name={clientName} 
-                          variant="squircle"
-                          size="xs"
-                        />
-                      </div>
+                      <UserAvatar 
+                        src={attribution.client_profiles?.avatar_url} 
+                        name={clientName} 
+                        variant="squircle"
+                        size="xs"
+                      />
                       <div>
                         <p className="font-medium text-sm">{clientName}</p>
                         <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -184,16 +141,16 @@ export const BoostStatsCard = () => {
               {t("boostStats.noClientsYet", { price: pricing.formatPrice(pricing.prices.boost) })}
             </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Fee Calculator */}
       {settings && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{t("boostStats.feeCalculator")}</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="space-y-3">
+          <DashboardSectionHeader 
+            title={t("boostStats.feeCalculator")}
+          />
+          <div className="rounded-xl border border-border/50 bg-card/50 p-4">
             <p className="text-sm text-muted-foreground mb-4">
               {t("boostStats.feeDescription", { 
                 rate: Math.round(settings.commission_rate * 100),
@@ -207,15 +164,15 @@ export const BoostStatsCard = () => {
               {[20, 50, 100, 150].map((amount) => {
                 const fee = calculateBoostFee(amount, settings);
                 return (
-                  <div key={amount} className="p-3 rounded-lg glass-item text-center">
+                  <div key={amount} className="p-3 rounded-lg bg-muted/50 text-center">
                     <p className="text-sm text-muted-foreground">{pricing.formatPrice(amount)} {t("boostStats.booking")}</p>
                     <p className="text-lg font-bold text-primary">{pricing.formatPrice(fee)} {t("boostStats.fee")}</p>
                   </div>
                 );
               })}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       )}
     </div>
   );
