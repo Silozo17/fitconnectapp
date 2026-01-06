@@ -867,6 +867,8 @@
       "title": "Wideokonferencje",
       "subtitle": "Połącz platformy wideo dla sesji online",
       "autoCreateMeetings": "Automatycznie twórz spotkania dla sesji",
+      "blockedByOther": "Najpierw odłącz {{provider}}, aby użyć tego dostawcy",
+      "onlyOneProvider": "Tylko jeden dostawca wideo może być podłączony jednocześnie",
       "zoom": {
         "name": "Zoom",
         "description": "Prowadź i dołączaj do sesji wideo przez Zoom"

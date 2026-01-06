@@ -873,6 +873,8 @@
       "title": "Video Conferencing",
       "subtitle": "Connect video platforms for online sessions",
       "autoCreateMeetings": "Auto-create meetings for sessions",
+      "blockedByOther": "Disconnect {{provider}} first to use this provider",
+      "onlyOneProvider": "Only one video provider can be connected at a time",
       "zoom": {
         "name": "Zoom",
         "description": "Host and join video sessions via Zoom"

@@ -204,7 +204,7 @@ const Eula = () => {
                 <address className="not-italic">
                   <strong>AMW Media Ltd</strong><br />
                   Trading as FitConnect<br />
-                  Company Number: 15893034<br />
+                  Company Number: 15747911<br />
                   Registered in England and Wales<br /><br />
                   <strong>Email:</strong> {contact.email}<br />
                   <strong>Privacy Enquiries:</strong> {contact.privacyEmail}<br />
