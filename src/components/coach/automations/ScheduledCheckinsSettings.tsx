@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -43,6 +42,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 
 // Component to show delivery status for a check-in
 const DeliveryStatus = ({ checkinId }: { checkinId: string }) => {
@@ -202,189 +204,171 @@ export const ScheduledCheckinsSettings = () => {
 
   return (
     <FeatureGate feature="scheduled_checkin_automation">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center">
-                <Calendar className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
-              </div>
-              <div className="text-center sm:text-left">
-                <p className="text-lg sm:text-2xl font-bold">{scheduledCheckins.length}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t("scheduledCheckins.totalScheduled")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-success/10 flex items-center justify-center">
-                <Play className="w-5 h-5 sm:w-7 sm:h-7 text-success" />
-              </div>
-              <div className="text-center sm:text-left">
-                <p className="text-lg sm:text-2xl font-bold">{activeCount}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t("scheduledCheckins.activeCheckins")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-muted/50 flex items-center justify-center">
-                <MessageSquare className="w-5 h-5 sm:w-7 sm:h-7 text-muted-foreground" />
-              </div>
-              <div className="text-center sm:text-left">
-                <p className="text-lg sm:text-2xl font-bold">{totalSent}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t("scheduledCheckins.messagesSent")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      <div className="space-y-6">
+        {/* Stats Cards - Compact 3-column grid */}
+        <StatsGrid columns={3} gap="default">
+          <MetricCard
+            icon={Calendar}
+            label={t("scheduledCheckins.totalScheduled", "Total Scheduled")}
+            value={isLoading ? "—" : scheduledCheckins.length}
+            color="primary"
+            size="sm"
+          />
+          <MetricCard
+            icon={Play}
+            label={t("scheduledCheckins.activeCheckins", "Active Check-ins")}
+            value={isLoading ? "—" : activeCount}
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={MessageSquare}
+            label={t("scheduledCheckins.messagesSent", "Messages Sent")}
+            value={isLoading ? "—" : totalSent}
+            color="cyan"
+            size="sm"
+          />
+        </StatsGrid>
 
-      {/* Main Content */}
-      <Card variant="glass" className="glass-card rounded-2xl sm:rounded-3xl">
-        <CardHeader className="p-4 sm:p-6">
-          {/* Delivery Notice */}
-          <Alert className="border-border/30 bg-card/30 backdrop-blur-xl mb-4">
-            <CalendarCheck className="h-4 w-4" />
-            <AlertDescription className="text-sm">
-              <span className="font-medium">{t("scheduledCheckins.deliveryNotice", "How Scheduled Check-ins work:")}</span>{" "}
-              {t("scheduledCheckins.deliveryNoticeDesc", "Messages are sent at the scheduled time via push notification and appear in the client's in-app message center.")}{" "}
-              <span className="text-muted-foreground">
-                {t("scheduledCheckins.deliveryNoticeHint", "If push notifications are disabled, clients will see check-ins when they open the app.")}
-              </span>
-            </AlertDescription>
-          </Alert>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-              {t("scheduledCheckins.title")}
-            </CardTitle>
-            <Button size="sm" className="w-full sm:w-auto" onClick={() => { setEditingCheckin(null); setFormOpen(true); }}>
+        {/* Delivery Notice */}
+        <Alert className="border-border/30 bg-card/30 backdrop-blur-xl rounded-xl">
+          <CalendarCheck className="h-4 w-4" />
+          <AlertDescription className="text-sm">
+            <span className="font-medium">{t("scheduledCheckins.deliveryNotice", "How Scheduled Check-ins work:")}</span>{" "}
+            {t("scheduledCheckins.deliveryNoticeDesc", "Messages are sent at the scheduled time via push notification and appear in the client's in-app message center.")}{" "}
+            <span className="text-muted-foreground">
+              {t("scheduledCheckins.deliveryNoticeHint", "If push notifications are disabled, clients will see check-ins when they open the app.")}
+            </span>
+          </AlertDescription>
+        </Alert>
+
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <DashboardSectionHeader
+            title={t("scheduledCheckins.title", "Scheduled Check-ins")}
+            className="mb-0"
+          />
+          <Button size="sm" className="w-full sm:w-auto" onClick={() => { setEditingCheckin(null); setFormOpen(true); }}>
+            <Plus className="w-4 h-4 mr-2" />
+            {t("scheduledCheckins.createNew", "Create New")}
+          </Button>
+        </div>
+
+        {/* Check-in Items - flat bordered divs, NOT cards inside cards */}
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : scheduledCheckins.length === 0 ? (
+          <div className="text-center py-16 rounded-xl border border-dashed border-border bg-muted/20">
+            <div className="w-16 h-16 rounded-2xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <Calendar className="w-8 h-8 text-muted-foreground" />
+            </div>
+            <p className="text-muted-foreground mb-4">{t("scheduledCheckins.noCheckins", "No scheduled check-ins yet")}</p>
+            <Button onClick={() => setFormOpen(true)}>
               <Plus className="w-4 h-4 mr-2" />
-              {t("scheduledCheckins.createNew")}
+              {t("scheduledCheckins.createNew", "Create New")}
             </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : scheduledCheckins.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                <Calendar className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground mb-4">{t("scheduledCheckins.noCheckins")}</p>
-              <Button onClick={() => setFormOpen(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                {t("scheduledCheckins.createNew")}
-              </Button>
-            </div>
-          ) : (
-            <div className="space-y-3 sm:space-y-4">
-              {scheduledCheckins.map((checkin) => (
-                <Card key={checkin.id} variant="glass" className="glass-card">
-                  <CardContent className="p-3 sm:p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-2">
-                          <p className="font-medium truncate text-sm sm:text-base">
-                            {checkin.client?.first_name} {checkin.client?.last_name}
-                          </p>
-                          <Badge variant={checkin.is_active ? "default" : "secondary"} className="text-xs">
-                            {checkin.is_active ? t("scheduledCheckins.statusActive") : t("scheduledCheckins.statusPaused")}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs">
-                            {t(`scheduledCheckins.scheduleTypes.${checkin.schedule_type}`)}
-                          </Badge>
-                          <DeliveryStatus checkinId={checkin.id} />
-                        </div>
-                        <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
-                          {checkin.message_template}
-                        </p>
-                        <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {getScheduleDescription(checkin)}
-                          </span>
-                          {checkin.last_sent_at && (
-                            <span className="hidden sm:inline">
-                              {t("scheduledCheckins.lastSent")}: {format(new Date(checkin.last_sent_at), "PP")}
-                            </span>
-                          )}
-                          {checkin.next_run_at && checkin.is_active && (
-                            <span className="hidden sm:inline">
-                              {t("scheduledCheckins.nextRun")}: {format(new Date(checkin.next_run_at), "PP 'at' p")}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-1 sm:gap-2 self-end sm:self-start">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 sm:h-9 sm:w-9"
-                                onClick={() => handleTestNow(checkin.id)}
-                                disabled={testingCheckinId === checkin.id}
-                              >
-                                {testingCheckinId === checkin.id ? (
-                                  <Loader2 className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <Send className="w-4 h-4" />
-                                )}
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Test now</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 sm:h-9 sm:w-9"
-                          onClick={() => toggleActive(checkin.id, !checkin.is_active)}
-                        >
-                          {checkin.is_active ? (
-                            <Pause className="w-4 h-4" />
-                          ) : (
-                            <Play className="w-4 h-4" />
-                          )}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 sm:h-9 sm:w-9"
-                          onClick={() => handleEdit(checkin)}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 sm:h-9 sm:w-9"
-                          onClick={() => handleDelete(checkin.id)}
-                        >
-                          <Trash2 className="w-4 h-4 text-destructive" />
-                        </Button>
-                      </div>
+        ) : (
+          <div className="space-y-3">
+            {scheduledCheckins.map((checkin) => (
+              <div 
+                key={checkin.id} 
+                className="p-4 rounded-xl border border-border bg-card/30"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-2">
+                      <p className="font-medium truncate text-sm sm:text-base">
+                        {checkin.client?.first_name} {checkin.client?.last_name}
+                      </p>
+                      <Badge variant={checkin.is_active ? "default" : "secondary"} className="text-xs">
+                        {checkin.is_active ? t("scheduledCheckins.statusActive", "Active") : t("scheduledCheckins.statusPaused", "Paused")}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {t(`scheduledCheckins.scheduleTypes.${checkin.schedule_type}`, checkin.schedule_type)}
+                      </Badge>
+                      <DeliveryStatus checkinId={checkin.id} />
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    <p className="text-xs sm:text-sm text-muted-foreground mb-2 line-clamp-2">
+                      {checkin.message_template}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        {getScheduleDescription(checkin)}
+                      </span>
+                      {checkin.last_sent_at && (
+                        <span className="hidden sm:inline">
+                          {t("scheduledCheckins.lastSent", "Last sent")}: {format(new Date(checkin.last_sent_at), "PP")}
+                        </span>
+                      )}
+                      {checkin.next_run_at && checkin.is_active && (
+                        <span className="hidden sm:inline">
+                          {t("scheduledCheckins.nextRun", "Next")}: {format(new Date(checkin.next_run_at), "PP 'at' p")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1 sm:gap-2 self-end sm:self-start">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 sm:h-9 sm:w-9"
+                            onClick={() => handleTestNow(checkin.id)}
+                            disabled={testingCheckinId === checkin.id}
+                          >
+                            {testingCheckinId === checkin.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Send className="w-4 h-4" />
+                            )}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Test now</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 sm:h-9 sm:w-9"
+                      onClick={() => toggleActive(checkin.id, !checkin.is_active)}
+                    >
+                      {checkin.is_active ? (
+                        <Pause className="w-4 h-4" />
+                      ) : (
+                        <Play className="w-4 h-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 sm:h-9 sm:w-9"
+                      onClick={() => handleEdit(checkin)}
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 sm:h-9 sm:w-9"
+                      onClick={() => handleDelete(checkin.id)}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* Form Modal */}
       <ScheduledCheckInForm
@@ -407,15 +391,15 @@ export const ScheduledCheckinsSettings = () => {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t("scheduledCheckins.deleteConfirm")}</AlertDialogTitle>
+            <AlertDialogTitle>{t("scheduledCheckins.deleteConfirm", "Delete Check-in?")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t("scheduledCheckins.deleteConfirmDesc")}
+              {t("scheduledCheckins.deleteConfirmDesc", "This will permanently delete this scheduled check-in.")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t("common:common.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>{t("common:common.cancel", "Cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} disabled={isDeleting}>
-              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : t("common:common.delete")}
+              {isDeleting ? <Loader2 className="w-4 h-4 animate-spin" /> : t("common:common.delete", "Delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

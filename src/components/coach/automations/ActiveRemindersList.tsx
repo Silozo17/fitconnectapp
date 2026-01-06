@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
@@ -17,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 
 export function ActiveRemindersList() {
   const { t } = useTranslation("coach");
@@ -51,113 +51,107 @@ export function ActiveRemindersList() {
   };
 
   return (
-    <Card variant="glass">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bell className="h-5 w-5 text-accent" />
-          {t("automations.reminders.activeTitle", "Active Reminders")}
-        </CardTitle>
-        <CardDescription>
-          {t("automations.reminders.activeDescription", "Reminders currently scheduled for your clients")}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {activeReminders.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
-            <p>{t("automations.reminders.noActive", "No active reminders")}</p>
-            <p className="text-sm">
-              {t("automations.reminders.noActiveHint", "Assign templates to clients to create reminders")}
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {activeReminders.map((reminder) => (
-              <div 
-                key={reminder.id}
-                className="p-4 rounded-lg border border-border bg-card/50 space-y-3"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <User className="h-4 w-4 text-muted-foreground" />
-                      <span className="font-medium">
-                        {reminder.client?.first_name} {reminder.client?.last_name}
-                      </span>
-                      {getStatusBadge(reminder)}
-                    </div>
-                    
-                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                      {reminder.custom_message || reminder.template?.message_template || "No message"}
-                    </p>
-                  </div>
+    <div className="space-y-4">
+      <DashboardSectionHeader
+        title={t("automations.reminders.activeTitle", "Active Reminders")}
+        description={t("automations.reminders.activeDescription", "Reminders currently scheduled for your clients")}
+      />
 
-                  <div className="flex items-center gap-2">
-                    <Switch 
-                      checked={!reminder.is_paused}
-                      onCheckedChange={(checked) => togglePause(reminder.id, !checked)}
-                      disabled={isUpdating}
-                    />
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Reminder</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete this reminder for {reminder.client?.first_name}. This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction 
-                            onClick={() => deleteReminder(reminder.id)}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
+      {activeReminders.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground rounded-xl border border-dashed border-border bg-muted/20">
+          <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
+          <p>{t("automations.reminders.noActive", "No active reminders")}</p>
+          <p className="text-sm">
+            {t("automations.reminders.noActiveHint", "Assign templates to clients to create reminders")}
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {activeReminders.map((reminder) => (
+            <div 
+              key={reminder.id}
+              className="p-4 rounded-xl border border-border bg-card/30 space-y-3"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <User className="h-4 w-4 text-muted-foreground" />
+                    <span className="font-medium">
+                      {reminder.client?.first_name} {reminder.client?.last_name}
+                    </span>
+                    {getStatusBadge(reminder)}
                   </div>
+                  
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                    {reminder.custom_message || reminder.template?.message_template || "No message"}
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {frequencyLabels[reminder.frequency]} @ {reminder.time_of_day}
+                <div className="flex items-center gap-2">
+                  <Switch 
+                    checked={!reminder.is_paused}
+                    onCheckedChange={(checked) => togglePause(reminder.id, !checked)}
+                    disabled={isUpdating}
+                  />
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Reminder</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will permanently delete this reminder for {reminder.client?.first_name}. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => deleteReminder(reminder.id)}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Calendar className="h-3 w-3" />
+                  {frequencyLabels[reminder.frequency]} @ {reminder.time_of_day}
+                </span>
+                {reminder.last_sent_at && (
+                  <span>
+                    Last sent: {formatDistanceToNow(new Date(reminder.last_sent_at), { addSuffix: true })}
                   </span>
-                  {reminder.last_sent_at && (
-                    <span>
-                      Last sent: {formatDistanceToNow(new Date(reminder.last_sent_at), { addSuffix: true })}
-                    </span>
-                  )}
-                  {reminder.next_run_at && !reminder.is_paused && (
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      Next: {format(new Date(reminder.next_run_at), "MMM d, h:mm a")}
-                    </span>
-                  )}
-                  {reminder.max_sends && (
-                    <span>
-                      {reminder.sends_count}/{reminder.max_sends} sent
-                    </span>
-                  )}
-                </div>
-
-                {reminder.template && (
-                  <Badge variant="outline" className="text-xs">
-                    Template: {reminder.template.name}
-                  </Badge>
+                )}
+                {reminder.next_run_at && !reminder.is_paused && (
+                  <span className="flex items-center gap-1">
+                    <Clock className="h-3 w-3" />
+                    Next: {format(new Date(reminder.next_run_at), "MMM d, h:mm a")}
+                  </span>
+                )}
+                {reminder.max_sends && (
+                  <span>
+                    {reminder.sends_count}/{reminder.max_sends} sent
+                  </span>
                 )}
               </div>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+
+              {reminder.template && (
+                <Badge variant="outline" className="text-xs">
+                  Template: {reminder.template.name}
+                </Badge>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

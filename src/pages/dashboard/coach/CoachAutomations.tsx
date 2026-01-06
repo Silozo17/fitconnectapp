@@ -34,12 +34,15 @@ export default function CoachAutomations() {
       <DashboardLayout>
         <FeatureGate feature="automations">
           <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold flex items-center gap-2">
-                <Zap className="h-6 w-6 text-primary" />
-                {t("automations.title", "Automations")}
+            <div className="mb-6">
+              <h1 className="font-display text-2xl font-bold text-foreground tracking-tight flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Zap className="h-5 w-5 text-primary" />
+                </div>
+                {t("automations.title", "Workflow ")}
+                <span className="gradient-text">{t("automations.titleHighlight", "Automations")}</span>
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground mt-1 ml-[52px]">
                 {t("automations.subtitle", "Set up automated workflows to save time and keep clients engaged")}
               </p>
             </div>
