@@ -1,48 +1,22 @@
+import { useContext } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { createContext, useContext } from "react";
+import { AdminContext } from "@/contexts/AdminContext";
 
-// Re-export the hook from AdminContext but with a safe fallback
-// This prevents crashes when used outside AdminProvider
-const AdminContext = createContext<{
-  activeProfileType: "admin" | "coach" | "client";
-  activeProfileId: string | null;
-  availableProfiles: Record<string, string | undefined>;
-} | null>(null);
-
-// Try to import the real useAdminView, but handle cases where context isn't available
-const useAdminViewSafe = () => {
-  try {
-    // Dynamic import to avoid circular dependency issues
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useAdminView } = require("@/contexts/AdminContext");
-    return useAdminView();
-  } catch {
-    // Return safe defaults if AdminProvider isn't mounted
-    return {
-      activeProfileType: "client" as const,
-      activeProfileId: null,
-      availableProfiles: {},
-    };
-  }
-};
-
+/**
+ * Safe hook to get active profile information.
+ * Works both inside and outside AdminProvider.
+ * Returns sensible defaults when context is unavailable.
+ */
 export const useActiveProfile = () => {
   const { user, role } = useAuth();
-  
-  // Safely get admin view context - returns defaults if not in AdminProvider
-  let adminContext;
-  try {
-    adminContext = useAdminViewSafe();
-  } catch {
-    // Fallback for edge cases
-    adminContext = {
-      activeProfileType: "client" as const,
-      activeProfileId: null,
-      availableProfiles: {},
-    };
-  }
-  
-  const { activeProfileType, activeProfileId, availableProfiles } = adminContext;
+
+  // useContext returns undefined when outside AdminProvider (safe, no throw)
+  const adminContext = useContext(AdminContext);
+
+  // Use defaults if context is not available
+  const activeProfileType = adminContext?.activeProfileType ?? "client";
+  const activeProfileId = adminContext?.activeProfileId ?? null;
+  const availableProfiles = adminContext?.availableProfiles ?? {};
 
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
   const canSwitchRoles = isAdminUser || role === "coach";
@@ -60,14 +34,14 @@ export const useActiveProfile = () => {
     };
   }
 
-  // For admin users, return the active profile based on their selection
+  // For admin/coach users, return the active profile based on their selection
   return {
     profileId: activeProfileId,
     profileType: activeProfileType,
     isAdmin: activeProfileType === "admin",
     isCoach: activeProfileType === "coach",
     isClient: activeProfileType === "client",
-    isRoleSwitching: true, // Admin is using role switching
+    isRoleSwitching: true,
     userId: user?.id || null,
     availableProfiles,
   };

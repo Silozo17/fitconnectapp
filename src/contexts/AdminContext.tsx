@@ -32,7 +32,8 @@ interface AdminContextType {
   refreshProfiles: () => Promise<void>;
 }
 
-const AdminContext = createContext<AdminContextType | undefined>(undefined);
+// Export the context so it can be used safely with useContext (returns undefined if outside provider)
+export const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 /**
  * SYNCHRONOUS: Get initial view mode from localStorage on first render.

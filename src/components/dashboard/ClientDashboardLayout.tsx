@@ -17,6 +17,7 @@ import ProfileNotch from "@/components/shared/ProfileNotch";
 import ClientProfileSummary from "@/components/dashboard/client/ClientProfileSummary";
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
@@ -147,9 +148,11 @@ const ClientDashboardLayoutInner = memo(({
 ClientDashboardLayoutInner.displayName = 'ClientDashboardLayoutInner';
 
 const ClientDashboardLayout = (props: ClientDashboardLayoutProps) => (
-  <ProfilePanelProvider>
-    <ClientDashboardLayoutInner {...props} />
-  </ProfilePanelProvider>
+  <ErrorBoundary>
+    <ProfilePanelProvider>
+      <ClientDashboardLayoutInner {...props} />
+    </ProfilePanelProvider>
+  </ErrorBoundary>
 );
 
 export default ClientDashboardLayout;

@@ -2,12 +2,12 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
-import {
-  getBestDashboardRoute,
-  saveViewState,
-  getViewModeFromPath,
-} from "@/lib/view-restoration";
+import { getBestDashboardRoute } from "@/lib/view-restoration";
 
+/**
+ * Simple redirect component that sends users to their appropriate dashboard.
+ * Waits for auth to load, then navigates to the best dashboard for their role.
+ */
 const DashboardRedirect = () => {
   const { role, loading } = useAuth();
   const navigate = useNavigate();
@@ -15,15 +15,8 @@ const DashboardRedirect = () => {
   useEffect(() => {
     if (loading) return;
 
-    // Use centralized restoration logic - checks saved route, then saved view, then role default
+    // Get the best route based on saved preferences and role
     const targetRoute = getBestDashboardRoute(role);
-    
-    // Sync view state before navigating
-    const viewMode = getViewModeFromPath(targetRoute);
-    if (viewMode) {
-      saveViewState(viewMode);
-    }
-    
     navigate(targetRoute, { replace: true });
   }, [role, loading, navigate]);
 
