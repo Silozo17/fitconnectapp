@@ -111,7 +111,9 @@ export const BoostToggleCard = () => {
 
   return (
     <>
-      <Card className={`border-2 transition-all ${isActive ? "border-primary bg-primary/5" : "border-border"}`}>
+      <Card className={`relative overflow-hidden border-2 transition-all ${isActive ? "border-primary bg-primary/5" : "border-border"}`}>
+        {/* Top accent line */}
+        <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${isActive ? "from-amber-400/80 via-amber-500/60 to-transparent" : "from-white/20 via-white/10 to-transparent"}`} />
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">

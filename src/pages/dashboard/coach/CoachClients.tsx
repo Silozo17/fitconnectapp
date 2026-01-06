@@ -204,7 +204,9 @@ const CoachClients = () => {
       </StatsGrid>
 
       {/* Filters */}
-      <Card variant="glass" className="p-4 mb-6">
+      <Card variant="glass" className="relative overflow-hidden p-4 mb-6">
+        {/* White accent line for filter bar */}
+        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -285,7 +287,9 @@ const CoachClients = () => {
           </div>
 
           {/* Desktop Table View */}
-          <Card variant="glass" className="overflow-hidden hidden md:block">
+          <Card variant="glass" className="relative overflow-hidden hidden md:block">
+            {/* White accent line for clients table */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
             <div className="overflow-x-hidden">
               <table className="w-full table-fixed">
                 <thead className="bg-secondary/50">

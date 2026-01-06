@@ -91,7 +91,9 @@ export const BoostStatsCard = () => {
         <DashboardSectionHeader 
           title={t("boostStats.recentAcquisitions")}
         />
-        <div className="rounded-xl border border-border/50 bg-card/50 p-4">
+        <div className="relative overflow-hidden rounded-xl border border-border/50 bg-card/50 p-4">
+          {/* Amber/gold accent line for recent acquisitions */}
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400/60 via-amber-500/40 to-transparent" />
           {attributions && attributions.length > 0 ? (
             <div className="space-y-4">
               {attributions.map((attribution) => {
@@ -146,31 +148,27 @@ export const BoostStatsCard = () => {
 
       {/* Fee Calculator */}
       {settings && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           <DashboardSectionHeader 
             title={t("boostStats.feeCalculator")}
+            description={t("boostStats.feeDescription", { 
+              rate: Math.round(settings.commission_rate * 100),
+              minFee: pricing.formatPrice(settings.min_fee * settings.commission_rate),
+              minBooking: pricing.formatPrice(settings.min_fee),
+              maxFee: pricing.formatPrice(settings.max_fee * settings.commission_rate),
+              maxBooking: pricing.formatPrice(settings.max_fee)
+            })}
           />
-          <div className="rounded-xl border border-border/50 bg-card/50 p-4">
-            <p className="text-sm text-muted-foreground mb-4">
-              {t("boostStats.feeDescription", { 
-                rate: Math.round(settings.commission_rate * 100),
-                minFee: pricing.formatPrice(settings.min_fee * settings.commission_rate),
-                minBooking: pricing.formatPrice(settings.min_fee),
-                maxFee: pricing.formatPrice(settings.max_fee * settings.commission_rate),
-                maxBooking: pricing.formatPrice(settings.max_fee)
-              })}
-            </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {[20, 50, 100, 150].map((amount) => {
-                const fee = calculateBoostFee(amount, settings);
-                return (
-                  <div key={amount} className="p-3 rounded-lg bg-muted/50 text-center">
-                    <p className="text-sm text-muted-foreground">{pricing.formatPrice(amount)} {t("boostStats.booking")}</p>
-                    <p className="text-lg font-bold text-primary">{pricing.formatPrice(fee)} {t("boostStats.fee")}</p>
-                  </div>
-                );
-              })}
-            </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[20, 50, 100, 150].map((amount) => {
+              const fee = calculateBoostFee(amount, settings);
+              return (
+                <div key={amount} className="text-center py-3 px-2">
+                  <p className="text-sm text-muted-foreground">{pricing.formatPrice(amount)} {t("boostStats.booking")}</p>
+                  <p className="text-lg font-bold text-primary">{pricing.formatPrice(fee)} {t("boostStats.fee")}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

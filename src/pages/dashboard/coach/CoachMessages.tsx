@@ -47,7 +47,9 @@ const CoachMessages = () => {
           </Button>
         </div>
 
-        <div className="flex-1 glass-card rounded-3xl overflow-hidden flex shadow-float">
+        <div className="relative flex-1 glass-card rounded-3xl overflow-hidden flex shadow-float">
+          {/* White accent line */}
+          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent z-10" />
           {/* Conversations List - Hidden on mobile when in chat */}
           <div className={`w-full lg:w-80 border-r border-border/50 flex flex-col ${participantId ? "hidden lg:flex" : "flex"}`}>
             <div className="p-4 border-b border-border/50">
