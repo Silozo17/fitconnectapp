@@ -38,7 +38,9 @@ const CoachMessages = () => {
       />
       <div className="flex flex-col h-full min-h-0">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="font-display text-2xl font-bold text-foreground">{t('title')}</h1>
+          <h1 className="font-display text-2xl font-bold text-foreground">
+            Client <span className="gradient-text">Messages</span>
+          </h1>
           <Button onClick={() => setShowNewConversation(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
             {t('newMessage')}

@@ -14,6 +14,8 @@ import {
 } from "@/hooks/useCoachFinancial";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -176,7 +178,9 @@ export default function CoachFinancial() {
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold">{t("financial.title")}</h1>
+            <h1 className="font-display text-2xl font-bold text-foreground">
+              Financial <span className="gradient-text">Overview</span>
+            </h1>
             <p className="text-muted-foreground">
               {t("financial.subtitle")}
             </p>
@@ -194,69 +198,36 @@ export default function CoachFinancial() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-          <Card variant="glass" className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">{t("financial.totalPaid")}</p>
-                  <p className="text-xl font-bold truncate">{formatCurrency(summary.totalPaid / 100)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card variant="glass" className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <Clock className="h-5 w-5 text-blue-500" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">{t("financial.outstanding")}</p>
-                  <p className="text-xl font-bold truncate">{formatCurrency(summary.totalOutstanding / 100)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card variant="glass" className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-destructive/10">
-                  <TrendingDown className="h-5 w-5 text-destructive" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">{t("financial.expenses")}</p>
-                  <p className="text-xl font-bold truncate">{formatCurrency(summary.totalExpenses / 100)}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card variant="glass" className="glass-card">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className={`p-2 rounded-lg ${summary.netProfit >= 0 ? "bg-green-500/10" : "bg-destructive/10"}`}>
-                  {summary.netProfit >= 0 ? (
-                    <TrendingUp className="h-5 w-5 text-green-500" />
-                  ) : (
-                    <TrendingDown className="h-5 w-5 text-destructive" />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs text-muted-foreground truncate">{t("financial.netProfit")}</p>
-                  <p className={`text-xl font-bold truncate ${summary.netProfit >= 0 ? "text-green-500" : "text-destructive"}`}>
-                    {formatCurrency(summary.netProfit / 100)}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsGrid columns={{ default: 2, lg: 4 }} gap="default">
+          <MetricCard
+            icon={CheckCircle2}
+            label={t("financial.totalPaid")}
+            value={formatCurrency(summary.totalPaid / 100)}
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={Clock}
+            label={t("financial.outstanding")}
+            value={formatCurrency(summary.totalOutstanding / 100)}
+            color="blue"
+            size="sm"
+          />
+          <MetricCard
+            icon={TrendingDown}
+            label={t("financial.expenses")}
+            value={formatCurrency(summary.totalExpenses / 100)}
+            color="red"
+            size="sm"
+          />
+          <MetricCard
+            icon={summary.netProfit >= 0 ? TrendingUp : TrendingDown}
+            label={t("financial.netProfit")}
+            value={formatCurrency(summary.netProfit / 100)}
+            color={summary.netProfit >= 0 ? "green" : "red"}
+            size="sm"
+          />
+        </StatsGrid>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
