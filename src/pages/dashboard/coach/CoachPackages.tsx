@@ -187,7 +187,9 @@ const CoachPackages = () => {
         description="Create bundles and subscription plans for your services"
       />
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-foreground">{t('packagesPage.title')}</h1>
+        <h1 className="text-2xl font-display font-bold">
+          Service <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Packages</span>
+        </h1>
         <p className="text-muted-foreground">
           {t('packagesPage.subtitle')}
         </p>

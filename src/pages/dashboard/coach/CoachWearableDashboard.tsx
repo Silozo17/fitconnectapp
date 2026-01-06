@@ -109,75 +109,65 @@ const CoachWearableDashboard = () => {
       )}
 
       {/* Client List */}
-      <Card variant="glass" className="glass-card rounded-2xl sm:rounded-3xl">
-        <CardHeader className="p-4 sm:p-6">
-          <div className="flex flex-col gap-3 sm:gap-4">
-            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-              <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-              {t("wearableDashboard.clientData")}
-            </CardTitle>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <Input
-                  placeholder={t("wearableDashboard.searchClients")}
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant={showAlertsOnly ? "default" : "outline"}
-                  size="sm"
-                  className="flex-1 sm:flex-none"
-                  onClick={() => setShowAlertsOnly(!showAlertsOnly)}
-                >
-                  <AlertTriangle className="w-4 h-4 mr-1" />
-                  <span className="hidden sm:inline">{t("wearableDashboard.alerts")}</span> ({alerts.length})
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => refetch()}
-                  disabled={isRefetching}
-                >
-                  <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
-                </Button>
-              </div>
-            </div>
+      <div className="space-y-4">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder={t("wearableDashboard.searchClients")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          <div className="flex items-center gap-2">
+            <Button
+              variant={showAlertsOnly ? "default" : "outline"}
+              size="sm"
+              className="flex-1 sm:flex-none"
+              onClick={() => setShowAlertsOnly(!showAlertsOnly)}
+            >
+              <AlertTriangle className="w-4 h-4 mr-1" />
+              <span className="hidden sm:inline">{t("wearableDashboard.alerts")}</span> ({alerts.length})
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => refetch()}
+              disabled={isRefetching}
+            >
+              <RefreshCw className={`w-4 h-4 ${isRefetching ? "animate-spin" : ""}`} />
+            </Button>
+          </div>
+        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : filteredClients.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
+              <Activity className="w-8 h-8 text-muted-foreground" />
             </div>
-          ) : filteredClients.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-16 h-16 rounded-3xl bg-muted/50 flex items-center justify-center mx-auto mb-4">
-                <Activity className="w-8 h-8 text-muted-foreground" />
-              </div>
-              <p className="text-muted-foreground">
-                {searchQuery || showAlertsOnly
-                  ? t("wearableDashboard.noMatchingClients")
-                  : t("wearableDashboard.noConnectedClients")}
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredClients.map((client) => (
-                <ClientWearableRow
-                  key={client.id}
-                  client={client}
-                  hasAlert={alerts.some((a) => a.client_id === client.id)}
-                  alertType={alerts.find((a) => a.client_id === client.id)?.type}
-                />
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            <p className="text-muted-foreground">
+              {searchQuery || showAlertsOnly
+                ? t("wearableDashboard.noMatchingClients")
+                : t("wearableDashboard.noConnectedClients")}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {filteredClients.map((client) => (
+              <ClientWearableRow
+                key={client.id}
+                client={client}
+                hasAlert={alerts.some((a) => a.client_id === client.id)}
+                alertType={alerts.find((a) => a.client_id === client.id)?.type}
+              />
+            ))}
+          </div>
+        )}
+      </div>
       </FeatureGate>
     </DashboardLayout>
   );

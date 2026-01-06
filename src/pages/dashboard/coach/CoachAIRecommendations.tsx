@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 import { Sparkles, Dumbbell, Apple, Heart, RefreshCw, Check, X, Loader2, Clock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAIPlanRecommendations } from "@/hooks/useAIPlanRecommendations";
@@ -59,47 +60,29 @@ const CoachAIRecommendations = () => {
 
       {/* Stats Cards */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 flex-1">
-          <Card variant="glass" className="glass-card rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-destructive/10 flex items-center justify-center">
-                  <Sparkles className="w-7 h-7 text-destructive" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{priorityCounts.high}</p>
-                  <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.high")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card variant="glass" className="glass-card rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-warning/10 flex items-center justify-center">
-                  <Sparkles className="w-7 h-7 text-warning" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{priorityCounts.medium}</p>
-                  <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.medium")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card variant="glass" className="glass-card rounded-2xl">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-muted/50 flex items-center justify-center">
-                  <Sparkles className="w-7 h-7 text-muted-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{priorityCounts.low}</p>
-                  <p className="text-sm text-muted-foreground">{t("aiRecommendations.priority.low")}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsGrid columns={{ default: 3 }} gap="sm" className="flex-1">
+          <MetricCard
+            icon={Sparkles}
+            label={t("aiRecommendations.priority.high")}
+            value={priorityCounts.high}
+            color="red"
+            size="sm"
+          />
+          <MetricCard
+            icon={Sparkles}
+            label={t("aiRecommendations.priority.medium")}
+            value={priorityCounts.medium}
+            color="orange"
+            size="sm"
+          />
+          <MetricCard
+            icon={Sparkles}
+            label={t("aiRecommendations.priority.low")}
+            value={priorityCounts.low}
+            color="blue"
+            size="sm"
+          />
+        </StatsGrid>
         <div className="shrink-0 flex items-center">
           <Button
             onClick={() => generateRecommendations()}
@@ -122,17 +105,9 @@ const CoachAIRecommendations = () => {
       </div>
 
       {/* Recommendations List */}
-      <Card variant="glass" className="glass-card rounded-3xl">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              {t("aiRecommendations.title")}
-            </CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <TooltipProvider>
+      <div className="space-y-4">
+        <DashboardSectionHeader title={t("aiRecommendations.title")} />
+        <TooltipProvider>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="mb-4">
                 <TabsTrigger value="pending">
@@ -223,8 +198,7 @@ const CoachAIRecommendations = () => {
             </TabsContent>
             </Tabs>
           </TooltipProvider>
-        </CardContent>
-      </Card>
+      </div>
       </FeatureGate>
     </DashboardLayout>
   );

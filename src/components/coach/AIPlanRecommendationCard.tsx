@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Check, X, LucideIcon } from "lucide-react";
@@ -24,8 +23,7 @@ export function AIPlanRecommendationCard({ recommendation, onApply, onDismiss, t
   };
 
   return (
-    <Card variant="glass" className="glass-card">
-      <CardContent className="p-3 sm:p-4">
+    <div className="p-3 sm:p-4 rounded-xl border border-border bg-card/50 hover:bg-muted/30 transition-colors">
         <div className="flex flex-col sm:flex-row sm:items-start gap-3 sm:gap-4">
           <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${priorityColors[recommendation.priority]}`}>
             <TypeIcon className="w-5 h-5 sm:w-6 sm:h-6" />
@@ -64,7 +62,6 @@ export function AIPlanRecommendationCard({ recommendation, onApply, onDismiss, t
             </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }

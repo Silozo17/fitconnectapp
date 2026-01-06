@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 import { 
   FileText, 
   Plus, 
@@ -82,53 +84,35 @@ const CoachCaseStudies = () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-4 mb-6">
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-primary/10 flex items-center justify-center">
-                <FileText className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
-              </div>
-              <div className="text-center sm:text-left">
-                <p className="text-lg sm:text-2xl font-bold">{caseStudies.length}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t("caseStudies.totalCaseStudies")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl">
-          <CardContent className="p-3 sm:p-6">
-            <div className="flex flex-col sm:flex-row items-center sm:items-center gap-2 sm:gap-3">
-              <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-success/10 flex items-center justify-center">
-                <Globe className="w-5 h-5 sm:w-7 sm:h-7 text-success" />
-              </div>
-              <div className="text-center sm:text-left">
-                <p className="text-lg sm:text-2xl font-bold">{publishedCount}</p>
-                <p className="text-xs sm:text-sm text-muted-foreground">{t("caseStudies.published")}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card variant="glass" className="glass-card rounded-xl sm:rounded-2xl col-span-2 sm:col-span-1">
-          <CardContent className="p-3 sm:p-6 flex items-center justify-center h-full">
-            <Button onClick={() => setGeneratorOpen(true)} className="w-full" size="sm">
-              <Plus className="w-4 h-4 mr-2" />
-              {t("caseStudies.generate")}
-            </Button>
-          </CardContent>
-        </Card>
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <StatsGrid columns={{ default: 2 }} gap="sm" className="flex-1">
+          <MetricCard
+            icon={FileText}
+            label={t("caseStudies.totalCaseStudies")}
+            value={caseStudies.length}
+            color="primary"
+            size="sm"
+          />
+          <MetricCard
+            icon={Globe}
+            label={t("caseStudies.published")}
+            value={publishedCount}
+            color="green"
+            size="sm"
+          />
+        </StatsGrid>
+        <div className="shrink-0 flex items-center">
+          <Button onClick={() => setGeneratorOpen(true)} size="lg">
+            <Plus className="w-4 h-4 mr-2" />
+            {t("caseStudies.generate")}
+          </Button>
+        </div>
       </div>
 
       {/* Case Studies List */}
-      <Card variant="glass" className="glass-card rounded-2xl sm:rounded-3xl">
-        <CardHeader className="p-4 sm:p-6">
-          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-            <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
-            {t("caseStudies.yourCaseStudies")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-4 sm:p-6 pt-0 sm:pt-0">
-          {isLoading ? (
+      <div className="space-y-4">
+        <DashboardSectionHeader title={t("caseStudies.yourCaseStudies")} />
+        {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
             </div>
@@ -146,8 +130,7 @@ const CoachCaseStudies = () => {
           ) : (
             <div className="space-y-3 sm:space-y-4">
               {caseStudies.map((caseStudy) => (
-                <Card key={caseStudy.id} variant="glass" className="glass-card">
-                  <CardContent className="p-3 sm:p-4">
+                <div key={caseStudy.id} className="p-3 sm:p-4 rounded-xl border border-border bg-card/50 hover:bg-muted/30 transition-colors">
                     <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-2">
@@ -220,17 +203,15 @@ const CoachCaseStudies = () => {
                           className="h-8 w-8"
                           onClick={() => handleDelete(caseStudy.id)}
                         >
-                          <Trash2 className="w-4 h-4 text-destructive" />
+                        <Trash2 className="w-4 h-4 text-destructive" />
                         </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                </div>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Generator Modal */}
       <CaseStudyGenerator
