@@ -8,7 +8,6 @@ import { AvatarShowcase } from '@/components/avatars/AvatarShowcase';
 import { AvatarPicker } from '@/components/avatars/AvatarPicker';
 import { useSelectedAvatar } from '@/hooks/useAvatars';
 import { useAutoAwardClientBadges } from '@/hooks/useAutoAwardClientBadges';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
@@ -17,7 +16,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { PageHelpBanner } from '@/components/discover/PageHelpBanner';
-import { DashboardSectionHeader } from '@/components/shared/DashboardSectionHeader';
+import { DashboardSectionHeader, ContentSection } from '@/components/shared';
+import { cn } from '@/lib/utils';
 
 function AchievementsContent() {
   const { t } = useTranslation('client');
@@ -123,36 +123,32 @@ function AchievementsContent() {
         
         <TabsContent value="badges">
           <ErrorBoundary fallback={
-            <Card variant="glass" className="rounded-3xl">
-              <CardContent className="py-12">
-                <div className="text-center text-muted-foreground">
-                  <div className="w-16 h-16 rounded-3xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
-                    <AlertTriangle className="h-8 w-8 text-destructive/70" />
-                  </div>
-                  <p className="font-medium mb-1">Unable to load badges</p>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="mt-4 rounded-xl"
-                    onClick={() => window.location.reload()}
-                  >
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <ContentSection colorTheme="muted" className="py-12 text-center">
+              <div className="w-16 h-16 rounded-3xl bg-destructive/10 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle className="h-8 w-8 text-destructive/70" />
+              </div>
+              <p className="font-medium mb-1">Unable to load badges</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-4 rounded-xl"
+                onClick={() => window.location.reload()}
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+            </ContentSection>
           }>
             <BadgeGrid />
           </ErrorBoundary>
         </TabsContent>
         
         <TabsContent value="history">
-          <Card variant="glass" className="rounded-3xl">
-            <CardHeader>
-              <CardTitle className="text-lg">{t('achievements.xpHistory.title')}</CardTitle>
-            </CardHeader>
-            <CardContent>
+          <ContentSection colorTheme="primary">
+            <div className="p-4 pb-2">
+              <h3 className="text-lg font-semibold text-foreground">{t('achievements.xpHistory.title')}</h3>
+            </div>
+            <div className="px-4 pb-4">
               {transactionsLoading ? (
                 <div className="space-y-3">
                   {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 rounded-2xl" />)}
@@ -175,7 +171,11 @@ function AchievementsContent() {
               ) : (
                 <div className="space-y-3">
                   {transactions.map((tx) => (
-                    <div key={tx.id} className="flex items-center justify-between p-4 glass-item rounded-2xl hover:bg-white/[0.08] transition-colors">
+                    <div key={tx.id} className={cn(
+                      "flex items-center justify-between p-4 rounded-2xl",
+                      "bg-gradient-to-br from-card/60 via-card/40 to-card/30",
+                      "border border-border/30 hover:border-primary/20 transition-colors"
+                    )}>
                       <div className="flex items-center gap-3">
                         <div className={`p-2.5 rounded-xl ${tx.amount > 0 ? 'bg-primary/20' : 'bg-destructive/20'}`}>
                           {tx.amount > 0 ? <TrendingUp className="h-4 w-4 text-primary" /> : <TrendingDown className="h-4 w-4 text-destructive" />}
@@ -192,8 +192,8 @@ function AchievementsContent() {
                   ))}
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </ContentSection>
         </TabsContent>
       </Tabs>
     </div>

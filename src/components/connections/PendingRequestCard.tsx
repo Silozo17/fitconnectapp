@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Check, X, MapPin, AtSign, Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface PendingRequestCardProps {
   request: {
@@ -46,9 +46,16 @@ export const PendingRequestCard = ({
     .toUpperCase();
 
   return (
-    <Card variant="glass" className="p-4 hover:border-primary/30 transition-colors">
+    <div className={cn(
+      "relative overflow-hidden rounded-2xl p-4",
+      "bg-gradient-to-br from-card/80 via-card/60 to-card/40",
+      "border border-border/50 hover:border-primary/30",
+      "backdrop-blur-sm transition-all duration-200",
+      "before:absolute before:inset-x-0 before:top-0 before:h-[2px]",
+      "before:bg-gradient-to-r before:from-accent/60 before:via-primary/40 before:to-accent/60"
+    )}>
       <div className="flex items-start gap-4">
-        <Avatar className="h-12 w-12 border-2 border-border">
+        <Avatar className="h-12 w-12 border-2 border-border/50 ring-2 ring-accent/10">
           <AvatarImage src={avatarUrl || undefined} alt={displayName} />
           <AvatarFallback className="bg-muted text-muted-foreground">
             {initials}
@@ -114,6 +121,6 @@ export const PendingRequestCard = ({
           )}
         </div>
       </div>
-    </Card>
+    </div>
   );
 };

@@ -17,7 +17,7 @@ import { ReadinessComponentCard } from "@/components/dashboard/client/ReadinessC
 import { WearableTrendCard } from "@/components/dashboard/client/WearableTrendCard";
 import { WeeklySummaryCard } from "@/components/dashboard/client/WeeklySummaryCard";
 import MonthlyReviewCard from "@/components/dashboard/client/MonthlyReviewCard";
-import { DashboardSectionHeader } from "@/components/dashboard/client/DashboardSectionHeader";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 import { WidgetErrorBoundary } from "@/components/shared/WidgetErrorBoundary";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

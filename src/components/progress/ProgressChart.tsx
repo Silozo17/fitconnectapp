@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientProgress, ProgressMeasurements } from '@/hooks/useClientProgress';
 import { format, parseISO } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface ProgressChartProps {
   data: ClientProgress[];
@@ -43,16 +43,23 @@ export const ProgressChart = ({ data, type }: ProgressChartProps) => {
 
   if (chartData.length < 2) {
     return (
-      <Card variant="glass">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-lg">{getTitle()}</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className={cn(
+        "relative overflow-hidden rounded-2xl",
+        "bg-gradient-to-br from-card/80 via-card/60 to-card/40",
+        "border border-border/50",
+        "backdrop-blur-sm",
+        "before:absolute before:inset-x-0 before:top-0 before:h-[2px]",
+        "before:bg-gradient-to-r before:from-primary/60 before:via-accent/40 before:to-primary/60"
+      )}>
+        <div className="p-4 pb-2">
+          <h3 className="text-lg font-semibold text-foreground">{getTitle()}</h3>
+        </div>
+        <div className="px-4 pb-4">
           <div className="h-[200px] flex items-center justify-center text-muted-foreground">
             {t("progress.needTwoEntries")}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     );
   }
 
@@ -135,17 +142,24 @@ export const ProgressChart = ({ data, type }: ProgressChartProps) => {
   };
 
   return (
-    <Card className="bg-card border-border">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg">{getTitle()}</CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className={cn(
+      "relative overflow-hidden rounded-2xl",
+      "bg-gradient-to-br from-card/80 via-card/60 to-card/40",
+      "border border-border/50",
+      "backdrop-blur-sm",
+      "before:absolute before:inset-x-0 before:top-0 before:h-[2px]",
+      "before:bg-gradient-to-r before:from-primary/60 before:via-accent/40 before:to-primary/60"
+    )}>
+      <div className="p-4 pb-2">
+        <h3 className="text-lg font-semibold text-foreground">{getTitle()}</h3>
+      </div>
+      <div className="px-4 pb-4">
         <div className="h-[250px]">
           <ResponsiveContainer width="100%" height="100%">
             {renderChart()}
           </ResponsiveContainer>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };

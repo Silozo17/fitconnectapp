@@ -1,11 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import { format, parseISO } from 'date-fns';
 import { Scale, Percent, Ruler, Calendar, Trash2, ImageIcon } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ClientProgress, ProgressMeasurements, useDeleteProgress } from '@/hooks/useClientProgress';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,8 +39,15 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
   };
 
   return (
-    <Card variant="glass" className="hover:border-primary/30 transition-colors">
-      <CardContent className="p-4">
+    <div className={cn(
+      "relative overflow-hidden rounded-2xl",
+      "bg-gradient-to-br from-card/80 via-card/60 to-card/40",
+      "border border-border/50 hover:border-primary/30",
+      "backdrop-blur-sm transition-all duration-200",
+      "before:absolute before:inset-x-0 before:top-0 before:h-[2px]",
+      "before:bg-gradient-to-r before:from-accent/60 before:via-primary/40 before:to-accent/60"
+    )}>
+      <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
@@ -138,7 +145,7 @@ export const ProgressEntryCard = ({ entry }: ProgressEntryCardProps) => {
             "{entry.notes}"
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
