@@ -16,7 +16,7 @@ import { FoodSearchModal } from "@/components/nutrition/FoodSearchModal";
 import { EditFoodEntryModal } from "@/components/nutrition/EditFoodEntryModal";
 import { InfoTooltip } from "@/components/shared/InfoTooltip";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { DashboardSectionHeader, ContentSection } from "@/components/shared";
+import { DashboardSectionHeader, ContentSection, SectionHeader } from "@/components/shared";
 
 const MEAL_TYPES = [
   { id: 'breakfast', label: 'Breakfast', icon: '🌅', time: '6am - 10am' },
@@ -160,10 +160,10 @@ const ClientFoodDiary = () => {
             </Button>
           </div>
 
-          {/* Daily Summary */}
-          <ContentSection colorTheme="primary" className="p-5">
-            <div className="flex items-center gap-1 mb-4">
-              <h3 className="text-base font-bold text-foreground font-display">Daily Summary</h3>
+          {/* Daily Summary Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <SectionHeader title="Daily Summary" size="sm" />
               <TooltipProvider>
                 <InfoTooltip 
                   content={getTargetSourceLabel() || "Your daily nutrition targets"} 
@@ -171,11 +171,11 @@ const ClientFoodDiary = () => {
               </TooltipProvider>
             </div>
             
-            {/* Calories */}
-            <div className="mb-5">
-              <div className="flex justify-between text-sm mb-1">
+            {/* Calories Card */}
+            <ContentSection colorTheme="primary" className="p-5">
+              <div className="flex justify-between text-sm mb-2">
                 <div className="flex items-center gap-1">
-                  <span className="text-muted-foreground">Calories</span>
+                  <span className="font-medium text-foreground">Calories</span>
                   <TooltipProvider>
                     <InfoTooltip content="Your daily calorie target based on your goals and activity level" />
                   </TooltipProvider>
@@ -188,38 +188,38 @@ const ClientFoodDiary = () => {
                 value={Math.min((dailyMacros.calories / targets.calories) * 100, 100)} 
                 className="h-2"
               />
-            </div>
+            </ContentSection>
 
-            {/* Macros */}
-            <div className="grid grid-cols-3 gap-4">
+            {/* Macro Cards */}
+            <div className="grid grid-cols-3 gap-3">
               <TooltipProvider>
-                <div className="text-center p-3 rounded-xl bg-blue-500/20">
-                  <div className="flex items-center justify-center gap-0.5">
+                <ContentSection colorTheme="primary" className="p-4 text-center">
+                  <div className="flex items-center justify-center gap-0.5 mb-1">
                     <p className="text-xs text-muted-foreground">Protein</p>
                     <InfoTooltip content="Protein supports muscle growth and repair" />
                   </div>
-                  <p className="text-lg font-bold text-blue-400">{Math.round(dailyMacros.protein_g)}g</p>
+                  <p className="text-xl font-bold text-blue-400">{Math.round(dailyMacros.protein_g)}g</p>
                   <p className="text-xs text-muted-foreground">/ {targets.protein}g</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-amber-500/20">
-                  <div className="flex items-center justify-center gap-0.5">
+                </ContentSection>
+                <ContentSection colorTheme="primary" className="p-4 text-center">
+                  <div className="flex items-center justify-center gap-0.5 mb-1">
                     <p className="text-xs text-muted-foreground">Carbs</p>
                     <InfoTooltip content="Carbohydrates provide energy for workouts" />
                   </div>
-                  <p className="text-lg font-bold text-amber-400">{Math.round(dailyMacros.carbs_g)}g</p>
+                  <p className="text-xl font-bold text-amber-400">{Math.round(dailyMacros.carbs_g)}g</p>
                   <p className="text-xs text-muted-foreground">/ {targets.carbs}g</p>
-                </div>
-                <div className="text-center p-3 rounded-xl bg-rose-500/20">
-                  <div className="flex items-center justify-center gap-0.5">
+                </ContentSection>
+                <ContentSection colorTheme="primary" className="p-4 text-center">
+                  <div className="flex items-center justify-center gap-0.5 mb-1">
                     <p className="text-xs text-muted-foreground">Fat</p>
                     <InfoTooltip content="Healthy fats support hormone function" />
                   </div>
-                  <p className="text-lg font-bold text-rose-400">{Math.round(dailyMacros.fat_g)}g</p>
+                  <p className="text-xl font-bold text-rose-400">{Math.round(dailyMacros.fat_g)}g</p>
                   <p className="text-xs text-muted-foreground">/ {targets.fat}g</p>
-                </div>
+                </ContentSection>
               </TooltipProvider>
             </div>
-          </ContentSection>
+          </div>
 
           {/* Quick Add Buttons - Inline */}
           <div className="flex items-center justify-center gap-3">
