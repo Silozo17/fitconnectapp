@@ -42,12 +42,10 @@ export const useHealthAggregation = (options: UseHealthAggregationOptions = {}) 
   const { user } = useAuth();
   const { clientId, days = 30 } = options;
 
-  // Fetch data for the specified period
-  const startDate = useMemo(() => startOfDay(subDays(new Date(), days)), [days]);
-  const endDate = useMemo(() => startOfDay(new Date()), []);
-  
-  const startDateKey = format(startDate, "yyyy-MM-dd");
-  const endDateKey = format(endDate, "yyyy-MM-dd");
+  // Fetch data for the specified period - calculate fresh each render to ensure midnight reset
+  const todayKey = format(new Date(), "yyyy-MM-dd");
+  const startDateKey = format(startOfDay(subDays(new Date(), days)), "yyyy-MM-dd");
+  const endDateKey = todayKey;
 
   const { data: rawData, isLoading, error, refetch } = useQuery({
     queryKey: ["health-aggregation", user?.id, clientId, days, startDateKey, endDateKey],
