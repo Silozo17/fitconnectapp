@@ -49,7 +49,7 @@ const MMA = lazy(() => import('@/pages/coaches/MMA'));
 function PageRoutes() {
   return (
     <Routes>
-      <Route index element={<Index />} />
+      <Route index element={<GuestOnlyRoute><Index /></GuestOnlyRoute>} />
       <Route path="get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
       <Route path="coaches" element={<Coaches />} />
       <Route path="coaches/:id" element={<CoachDetail />} />
@@ -118,7 +118,7 @@ export function WebsiteRouter() {
           </Route>
           
           {/* Non-prefixed routes (root level) */}
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<GuestOnlyRoute><Index /></GuestOnlyRoute>} />
           <Route path="get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
           {/* iOS-restricted: Coach marketplace routes */}
           <Route path="coaches" element={<IOSRestrictedRoute restrictionType="coaches"><Coaches /></IOSRestrictedRoute>} />
