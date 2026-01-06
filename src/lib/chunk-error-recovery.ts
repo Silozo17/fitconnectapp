@@ -18,18 +18,19 @@ const RECOVERY_COOLDOWN_MS = 60000; // 1 minute cooldown between auto-recoveries
  */
 export const isChunkLoadError = (error: Error | string): boolean => {
   const message = typeof error === "string" ? error : error?.message || "";
+  const lowerMessage = message.toLowerCase();
+  
+  // Only match specific chunk/dynamic import signatures
+  // REMOVED: "failed to load" - too generic, matches fonts/images/etc.
   const patterns = [
-    "Failed to fetch dynamically imported module",
-    "ChunkLoadError",
-    "Loading chunk",
-    "failed to load",
-    "Loading CSS chunk",
-    "Unable to preload CSS",
+    "failed to fetch dynamically imported module",
+    "chunkloaderror",
+    "loading chunk",
+    "loading css chunk",
+    "unable to preload css",
   ];
   
-  return patterns.some((pattern) => 
-    message.toLowerCase().includes(pattern.toLowerCase())
-  );
+  return patterns.some((pattern) => lowerMessage.includes(pattern));
 };
 
 /**

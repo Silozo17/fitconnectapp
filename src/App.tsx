@@ -287,11 +287,9 @@ function GlobalErrorCapture() {
         }
         
         // Check for chunk load errors and trigger auto-recovery
+        // Only use the actual Error object, not the message string (too many false positives)
         if (error && handlePotentialChunkError(error)) {
           return; // Recovery triggered, don't process further
-        }
-        if (handlePotentialChunkError(message)) {
-          return; // Recovery triggered from message
         }
       } catch { /* ignore storage errors */ }
     };
@@ -319,29 +317,14 @@ function GlobalErrorCapture() {
   return null;
 }
 
-// Despia native initialization (Android status bar config + pull-to-refresh visual fix)
+// Despia native initialization (Android status bar config)
 function DespiaInitializer() {
   useAppInitialization();
   
-  // FIX: Prevent visual duplication during native pull-to-refresh
-  // Despia overlays a snapshot of the current WebView during reload
-  // By fading out before unload, we prevent the "double navbar" flicker
-  React.useEffect(() => {
-    // Only apply for Despia native apps
-    if (!navigator.userAgent.toLowerCase().includes('despia')) return;
-    
-    const handleBeforeUnload = () => {
-      // Fade out the content before Despia takes a snapshot
-      const root = document.getElementById('root');
-      if (root) {
-        root.style.transition = 'opacity 0.05s ease-out';
-        root.style.opacity = '0';
-      }
-    };
-    
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, []);
+  // REMOVED: The beforeunload opacity fade was causing persistent black screens
+  // on Android. The WebView would fire beforeunload, set opacity to 0, but the
+  // page would remain alive with invisible content. This is the root cause of
+  // "shows briefly then goes black" on Android native app.
   
   return null;
 }
