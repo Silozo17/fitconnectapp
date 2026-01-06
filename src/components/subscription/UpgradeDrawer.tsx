@@ -229,11 +229,17 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
               )}>
                 Yearly
               </span>
-              {billingInterval === 'yearly' && (
-                <Badge variant="secondary" className="bg-primary/20 text-primary text-xs">
-                  Save ~17%
-                </Badge>
-              )}
+              <Badge 
+                variant="secondary" 
+                className={cn(
+                  "text-xs transition-colors",
+                  billingInterval === 'yearly' 
+                    ? "bg-primary/20 text-primary" 
+                    : "bg-muted text-muted-foreground"
+                )}
+              >
+                Save ~17%
+              </Badge>
             </div>
 
             {/* Tier selection cards - compact */}
