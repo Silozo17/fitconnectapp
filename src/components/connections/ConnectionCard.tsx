@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { MessageSquare, UserMinus, MapPin, AtSign } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAdminView } from "@/contexts/AdminContext";
@@ -8,6 +7,7 @@ import { toast } from "sonner";
 import { FriendProfileSheet } from "./FriendProfileSheet";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Rarity } from "@/lib/avatar-utils";
+import { cn } from "@/lib/utils";
 
 interface ConnectionCardProps {
   connection: {
@@ -65,7 +65,14 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
 
   return (
     <>
-      <Card variant="glass" className="glass-card p-4 hover:border-primary/30 transition-colors">
+      <div className={cn(
+        "relative overflow-hidden rounded-2xl p-4",
+        "bg-gradient-to-br from-card/80 via-card/60 to-card/40",
+        "border border-border/50 hover:border-primary/30",
+        "backdrop-blur-sm transition-all duration-200",
+        "before:absolute before:inset-x-0 before:top-0 before:h-[2px]",
+        "before:bg-gradient-to-r before:from-primary/60 before:via-accent/40 before:to-primary/60"
+      )}>
         <div className="flex items-center gap-4">
           <div 
             className="cursor-pointer pt-3"
@@ -122,7 +129,7 @@ export const ConnectionCard = ({ connection, currentUserId, onRemove }: Connecti
             </Button>
           </div>
         </div>
-      </Card>
+      </div>
 
       <FriendProfileSheet
         open={showProfile}

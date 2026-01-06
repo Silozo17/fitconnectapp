@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Heart, Loader2, MapPin, Video, Users } from "lucide-react";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useFavouriteCoaches } from "@/hooks/useFavourites";
@@ -17,6 +16,8 @@ import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
+import { DashboardSectionHeader, ContentSection } from "@/components/shared";
+import { cn } from "@/lib/utils";
 
 // Batch fetch reviews for all coaches at once
 const useBatchCoachReviews = (coachIds: string[]) => {
@@ -70,95 +71,98 @@ const FavouriteCoachCard = React.memo(({ coach, reviewData, linkPrefix }: Favour
   const reviewCount = reviewData?.count || 0;
 
   return (
-    <Card className="group overflow-hidden hover:shadow-float transition-all rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
-      <CardContent className="p-0">
-        <div className="relative">
-          {coach.profile_image_url ? (
-            <img
-              src={coach.profile_image_url}
-              alt={coach.display_name || "Coach"}
-              className="w-full h-48 object-cover"
+    <div className={cn(
+      "group overflow-hidden rounded-2xl",
+      "bg-gradient-to-br from-card/80 via-card/60 to-card/40",
+      "border border-border/50 hover:border-primary/30",
+      "backdrop-blur-sm transition-all duration-200 hover:shadow-float"
+    )}>
+      <div className="relative">
+        {coach.profile_image_url ? (
+          <img
+            src={coach.profile_image_url}
+            alt={coach.display_name || "Coach"}
+            className="w-full h-48 object-cover"
+          />
+        ) : (
+          <div className="w-full h-48 bg-muted flex items-center justify-center">
+            <UserAvatar
+              src={null}
+              name={coach.display_name}
+              className="h-20 w-20 text-3xl"
             />
-          ) : (
-            <div className="w-full h-48 bg-muted flex items-center justify-center">
-              <UserAvatar
-                src={null}
-                name={coach.display_name}
-                className="h-20 w-20 text-3xl"
-              />
-            </div>
-          )}
-          
-          {/* Favourite Button */}
-          <div className="absolute top-3 right-3">
-            <FavouriteButton coachId={coach.id} />
           </div>
-
-          {/* Availability Badges */}
-          <div className="absolute bottom-3 left-3 flex gap-2">
-            {coach.online_available && (
-              <Badge variant="secondary" className="bg-green-500/90 text-white border-0 rounded-full">
-                <Video className="h-3 w-3 mr-1" />
-                Online
-              </Badge>
-            )}
-            {coach.in_person_available && (
-              <Badge variant="secondary" className="bg-blue-500/90 text-white border-0 rounded-full">
-                <Users className="h-3 w-3 mr-1" />
-                In-Person
-              </Badge>
-            )}
-          </div>
+        )}
+        
+        {/* Favourite Button */}
+        <div className="absolute top-3 right-3">
+          <FavouriteButton coachId={coach.id} />
         </div>
 
-        <div className="p-5">
-          <div className="flex items-start justify-between mb-2">
-            <div>
-              <h3 className="font-semibold text-foreground">
-                {coach.display_name || "Coach"}
-              </h3>
-              {(coach.location || coach.location_city) && (
-                <p className="text-sm text-muted-foreground flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {getDisplayLocation(coach)}
-                </p>
-              )}
-            </div>
-            <StarRating rating={averageRating} reviewCount={reviewCount} size="sm" />
-          </div>
-
-          {/* Coach Types */}
-          {coach.coach_types && coach.coach_types.length > 0 && (
-            <div className="flex flex-wrap gap-1.5 mb-3">
-              {coach.coach_types.slice(0, 2).map((type: string) => (
-                <Badge key={type} variant="outline" className="text-xs rounded-full">
-                  {getCoachTypeDisplayLabel(type)}
-                </Badge>
-              ))}
-              {coach.coach_types.length > 2 && (
-                <Badge variant="outline" className="text-xs rounded-full">
-                  +{coach.coach_types.length - 2}
-                </Badge>
-              )}
-            </div>
+        {/* Availability Badges */}
+        <div className="absolute bottom-3 left-3 flex gap-2">
+          {coach.online_available && (
+            <Badge variant="secondary" className="bg-green-500/90 text-white border-0 rounded-full">
+              <Video className="h-3 w-3 mr-1" />
+              Online
+            </Badge>
           )}
+          {coach.in_person_available && (
+            <Badge variant="secondary" className="bg-blue-500/90 text-white border-0 rounded-full">
+              <Users className="h-3 w-3 mr-1" />
+              In-Person
+            </Badge>
+          )}
+        </div>
+      </div>
 
-          {/* Price & CTA */}
-          <div className="flex items-center justify-between pt-4 border-t border-border/50">
-            {coach.hourly_rate ? (
-              <p className="font-semibold text-foreground">
-                {formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}<span className="text-sm text-muted-foreground font-normal">/session</span>
+      <div className="p-5">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <h3 className="font-semibold text-foreground">
+              {coach.display_name || "Coach"}
+            </h3>
+            {(coach.location || coach.location_city) && (
+              <p className="text-sm text-muted-foreground flex items-center gap-1">
+                <MapPin className="h-3 w-3" />
+                {getDisplayLocation(coach)}
               </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">Contact for pricing</p>
             )}
-            <Button size="sm" asChild className="rounded-xl">
-              <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View Profile</Link>
-            </Button>
           </div>
+          <StarRating rating={averageRating} reviewCount={reviewCount} size="sm" />
         </div>
-      </CardContent>
-    </Card>
+
+        {/* Coach Types */}
+        {coach.coach_types && coach.coach_types.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {coach.coach_types.slice(0, 2).map((type: string) => (
+              <Badge key={type} variant="outline" className="text-xs rounded-full">
+                {getCoachTypeDisplayLabel(type)}
+              </Badge>
+            ))}
+            {coach.coach_types.length > 2 && (
+              <Badge variant="outline" className="text-xs rounded-full">
+                +{coach.coach_types.length - 2}
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Price & CTA */}
+        <div className="flex items-center justify-between pt-4 border-t border-border/50">
+          {coach.hourly_rate ? (
+            <p className="font-semibold text-foreground">
+              {formatCurrency(coach.hourly_rate, (coach.currency as CurrencyCode) || 'GBP')}<span className="text-sm text-muted-foreground font-normal">/session</span>
+            </p>
+          ) : (
+            <p className="text-sm text-muted-foreground">Contact for pricing</p>
+          )}
+          <Button size="sm" asChild className="rounded-xl">
+            <Link to={`${linkPrefix}/${coach.username || coach.id}`}>View Profile</Link>
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }, (prevProps, nextProps) => {
   // Custom comparison - only re-render if coach.id or reviewData changes
@@ -188,22 +192,18 @@ const ClientFavourites = () => {
         title="Saved Coaches"
         description="Quick access to coaches you've bookmarked"
       />
-      <div className="mb-11">
-        <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
-          Favourite <span className="gradient-text">Coaches</span>
-        </h2>
-        <p className="text-muted-foreground text-sm mt-1">
-          Quick access to coaches you've saved
-        </p>
-      </div>
+      <div className="space-y-11">
+        <DashboardSectionHeader
+          title="Favourite Coaches"
+          description="Quick access to coaches you've saved"
+        />
 
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
-      ) : coaches.length === 0 ? (
-        <Card className="rounded-3xl border-border/50 bg-card/50 backdrop-blur-sm">
-          <CardContent className="py-16 text-center">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : coaches.length === 0 ? (
+          <ContentSection colorTheme="muted" className="py-16 text-center border-dashed">
             <div className="w-16 h-16 rounded-3xl bg-pink-500/10 flex items-center justify-center mx-auto mb-4">
               <Heart className="h-8 w-8 text-pink-500/70" />
             </div>
@@ -214,20 +214,20 @@ const ClientFavourites = () => {
             <Button asChild className="rounded-xl">
               <Link to={linkPrefix}>Browse Coaches</Link>
             </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {coaches.map((coach) => (
-            <FavouriteCoachCard 
-              key={coach.id} 
-              coach={coach} 
-              reviewData={reviewsMap[coach.id]}
-              linkPrefix={linkPrefix}
-            />
-          ))}
-        </div>
-      )}
+          </ContentSection>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {coaches.map((coach) => (
+              <FavouriteCoachCard 
+                key={coach.id} 
+                coach={coach} 
+                reviewData={reviewsMap[coach.id]}
+                linkPrefix={linkPrefix}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </ClientDashboardLayout>
   );
 };

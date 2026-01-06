@@ -15,7 +15,6 @@ import {
   ChevronRight,
   Calendar as CalendarIcon
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
@@ -33,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { useHealthData } from "@/hooks/useHealthData";
+import { DashboardSectionHeader, ContentSection } from "@/components/shared";
 import { cn } from "@/lib/utils";
 
 const DATA_TYPES = [
@@ -153,74 +153,78 @@ const ClientHealthHistory = () => {
       title={t('healthHistory.title', 'Health History')} 
       description={t('healthHistory.description', 'View your health data over time')}
     >
-      <div className="space-y-6">
+      <div className="space-y-11">
+        {/* Section Header */}
+        <DashboardSectionHeader
+          title="Health History"
+          description="View your health data over time"
+        />
+        
         {/* Date Selector Header */}
-        <Card variant="glass">
-          <CardContent className="p-4">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              {/* Date Navigation */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigateDate("prev")}
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </Button>
-                
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className="min-w-[200px]">
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      {isToday ? "Today" : format(selectedDate, "EEEE, d MMMM yyyy")}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="center">
-                    <Calendar
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(date) => date && setSelectedDate(date)}
-                      modifiers={{
-                        hasData: (date) => datesWithData.has(format(date, "yyyy-MM-dd")),
-                      }}
-                      modifiersStyles={{
-                        hasData: { 
-                          fontWeight: "bold",
-                          backgroundColor: "hsl(var(--primary) / 0.1)",
-                        },
-                      }}
-                      disabled={(date) => date > new Date()}
-                    />
-                  </PopoverContent>
-                </Popover>
-                
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => navigateDate("next")}
-                  disabled={isToday}
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </Button>
-              </div>
+        <ContentSection colorTheme="primary" padding="default">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            {/* Date Navigation */}
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigateDate("prev")}
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </Button>
               
-              {/* Range Selector */}
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">Show averages for:</span>
-                <Select value={dateRange} onValueChange={(v) => setDateRange(v as "7" | "30" | "90")}>
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="7">7 days</SelectItem>
-                    <SelectItem value="30">30 days</SelectItem>
-                    <SelectItem value="90">90 days</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="min-w-[200px]">
+                    <CalendarIcon className="w-4 h-4 mr-2" />
+                    {isToday ? "Today" : format(selectedDate, "EEEE, d MMMM yyyy")}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    modifiers={{
+                      hasData: (date) => datesWithData.has(format(date, "yyyy-MM-dd")),
+                    }}
+                    modifiersStyles={{
+                      hasData: { 
+                        fontWeight: "bold",
+                        backgroundColor: "hsl(var(--primary) / 0.1)",
+                      },
+                    }}
+                    disabled={(date) => date > new Date()}
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigateDate("next")}
+                disabled={isToday}
+              >
+                <ChevronRight className="w-5 h-5" />
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+            
+            {/* Range Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Show averages for:</span>
+              <Select value={dateRange} onValueChange={(v) => setDateRange(v as "7" | "30" | "90")}>
+                <SelectTrigger className="w-[100px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7">7 days</SelectItem>
+                  <SelectItem value="30">30 days</SelectItem>
+                  <SelectItem value="90">90 days</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </ContentSection>
 
         {/* Selected Date Data - Apple-inspired cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -300,28 +304,26 @@ const ClientHealthHistory = () => {
 
         {/* No Data Message */}
         {!hasDataForSelectedDate && (
-          <Card variant="glass">
-            <CardContent className="py-12 text-center">
-              <Activity className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
-              <p className="text-muted-foreground">
-                {t('healthHistory.noData', 'No health data recorded for this date')}
-              </p>
-              <p className="text-sm text-muted-foreground/70 mt-1">
-                {t('healthHistory.syncHint', 'Sync your wearable device or add data manually')}
-              </p>
-            </CardContent>
-          </Card>
+          <ContentSection colorTheme="muted" className="py-12 text-center">
+            <Activity className="w-12 h-12 text-muted-foreground/50 mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              {t('healthHistory.noData', 'No health data recorded for this date')}
+            </p>
+            <p className="text-sm text-muted-foreground/70 mt-1">
+              {t('healthHistory.syncHint', 'Sync your wearable device or add data manually')}
+            </p>
+          </ContentSection>
         )}
 
         {/* Historical Timeline */}
-        <Card variant="glass">
-          <CardHeader>
-            <CardTitle className="text-base flex items-center gap-2">
+        <ContentSection colorTheme="primary">
+          <div className="p-4 pb-2">
+            <h3 className="text-base font-semibold text-foreground flex items-center gap-2">
               <CalendarIcon className="w-4 h-4" />
               Recent Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+            </h3>
+          </div>
+          <div className="px-4 pb-4">
             <div className="space-y-2 max-h-[400px] overflow-y-auto">
               {Array.from({ length: Math.min(days, 14) }).map((_, i) => {
                 const date = subDays(new Date(), i);
@@ -384,8 +386,8 @@ const ClientHealthHistory = () => {
                 );
               })}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </ContentSection>
       </div>
     </ClientDashboardLayout>
   );
