@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { STORAGE_KEYS, getStorage, setStorage } from "@/lib/storage-keys";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 /**
  * Simplified onboarding guard hook
@@ -26,8 +26,9 @@ export const useOnboardingGuard = (userType: "client" | "coach") => {
         ? STORAGE_KEYS.CLIENT_ONBOARDED 
         : STORAGE_KEYS.COACH_ONBOARDED;
       
-      const cached = getStorage<{ isOnboarded: boolean }>(storageKey);
-      if (cached?.isOnboarded) {
+      // Check cache - handle both string 'true' and legacy JSON formats
+      const cachedValue = localStorage.getItem(storageKey);
+      if (cachedValue === 'true' || (cachedValue && JSON.parse(cachedValue)?.isOnboarded)) {
         setIsOnboarded(true);
         setIsChecking(false);
         return;
@@ -51,7 +52,7 @@ export const useOnboardingGuard = (userType: "client" | "coach") => {
         setIsOnboarded(completed);
 
         if (completed) {
-          setStorage(storageKey, { isOnboarded: true });
+          localStorage.setItem(storageKey, 'true');
         } else {
           navigate(`/onboarding/${userType}`, { replace: true });
         }

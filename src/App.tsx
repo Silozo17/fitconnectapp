@@ -365,6 +365,23 @@ function DeferredCelebration({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Migrate legacy localStorage formats on app start (one-time, runs synchronously before React)
+(() => {
+  try {
+    ['fitconnect_client_onboarded', 'fitconnect_coach_onboarded'].forEach(key => {
+      const value = localStorage.getItem(key);
+      if (value && value.startsWith('{')) {
+        const parsed = JSON.parse(value);
+        if (parsed?.isOnboarded) {
+          localStorage.setItem(key, 'true');
+        } else {
+          localStorage.removeItem(key);
+        }
+      }
+    });
+  } catch { /* ignore migration errors */ }
+})();
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
