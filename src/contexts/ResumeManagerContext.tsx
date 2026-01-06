@@ -1,38 +1,30 @@
-import React, { createContext, useContext, useEffect, useCallback, ReactNode } from 'react';
-import { useAppResumeManager, ResumeHandler } from '@/hooks/useAppResumeManager';
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useSimpleAppResume } from '@/hooks/useAppResumeManager';
+
+/**
+ * Simplified ResumeManager Context
+ * 
+ * Previously: Complex priority-based handler system (300+ lines)
+ * Now: Simple visibility handler that lets React Query and Supabase do their jobs
+ */
 
 interface ResumeManagerContextType {
-  /**
-   * Register a handler to be called when the app resumes from background
-   */
-  registerHandler: (handler: ResumeHandler) => void;
-  /**
-   * Unregister a previously registered handler
-   */
+  // Kept for backward compatibility - these are no-ops now
+  registerHandler: (handler: unknown) => void;
   unregisterHandler: (id: string) => void;
 }
 
 const ResumeManagerContext = createContext<ResumeManagerContextType | undefined>(undefined);
 
-/**
- * ResumeManagerProvider
- * 
- * Provides centralized app resume handling to the entire application.
- * Place this provider high in the component tree, after AuthProvider.
- * 
- * Benefits:
- * - Single visibility/focus listener instead of 6+ separate ones
- * - Global 2-second debounce prevents rapid-fire handling
- * - Priority-based execution (immediate → fast → background)
- * - Staggered background tasks prevent network congestion
- */
 export function ResumeManagerProvider({ children }: { children: ReactNode }) {
-  const { registerHandler, unregisterHandler } = useAppResumeManager();
+  // This hook handles all resume logic now
+  useSimpleAppResume();
 
+  // No-op handlers for backward compatibility
   const value = React.useMemo(() => ({
-    registerHandler,
-    unregisterHandler,
-  }), [registerHandler, unregisterHandler]);
+    registerHandler: () => {},
+    unregisterHandler: () => {},
+  }), []);
 
   return (
     <ResumeManagerContext.Provider value={value}>
@@ -41,9 +33,6 @@ export function ResumeManagerProvider({ children }: { children: ReactNode }) {
   );
 }
 
-/**
- * Hook to access the resume manager context
- */
 export function useResumeManager() {
   const context = useContext(ResumeManagerContext);
   if (context === undefined) {
@@ -52,26 +41,13 @@ export function useResumeManager() {
   return context;
 }
 
-/**
- * Safe version that returns undefined outside provider
- */
 export function useResumeManagerSafe() {
   return useContext(ResumeManagerContext);
 }
 
 /**
- * Hook to easily register a resume handler with automatic cleanup
+ * @deprecated No longer needed - resume is handled centrally
  */
-export function useRegisterResumeHandler(handler: ResumeHandler | null) {
-  const manager = useResumeManagerSafe();
-  
-  useEffect(() => {
-    if (!manager || !handler) return;
-    
-    manager.registerHandler(handler);
-    
-    return () => {
-      manager.unregisterHandler(handler.id);
-    };
-  }, [manager, handler?.id, handler?.priority, handler?.delay]);
+export function useRegisterResumeHandler(_handler: unknown) {
+  // No-op for backward compatibility
 }

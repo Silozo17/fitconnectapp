@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
+import { STORAGE_KEYS, getStorage, setStorage } from "@/lib/storage-keys";
 
 interface OnboardingStatus {
   isOnboarded: boolean;
@@ -14,21 +15,16 @@ interface OnboardingStatus {
   error?: boolean;
 }
 
-// Default placeholder to prevent loading flash
 const DEFAULT_ONBOARDING_STATUS: OnboardingStatus = {
   isOnboarded: false,
   onboardingProgress: null,
 };
 
-// PERFORMANCE FIX: Read from localStorage for instant hydration
 const getClientOnboardingFromStorage = (): OnboardingStatus | undefined => {
-  try {
-    if (typeof localStorage === 'undefined') return undefined;
-    const isOnboarded = localStorage.getItem('fitconnect_client_onboarded') === 'true';
-    if (isOnboarded) {
-      return { isOnboarded: true, onboardingProgress: null };
-    }
-  } catch {}
+  const data = getStorage<{ isOnboarded: boolean }>(STORAGE_KEYS.CLIENT_ONBOARDED);
+  if (data?.isOnboarded) {
+    return { isOnboarded: true, onboardingProgress: null };
+  }
   return undefined;
 };
 
@@ -38,14 +34,9 @@ export const useClientOnboardingStatus = () => {
   return useQuery({
     queryKey: ["client-onboarding-status", user?.id],
     queryFn: async (): Promise<OnboardingStatus> => {
-      // FIX: Guard against race condition during native pull-to-refresh
-      // Check localStorage for known-onboarded users before making DB call
       if (!user?.id) {
-        const isKnown = localStorage.getItem('fitconnect_client_onboarded') === 'true';
-        if (isKnown) {
-          return { isOnboarded: true, onboardingProgress: null };
-        }
-        return { isOnboarded: false };
+        const cached = getClientOnboardingFromStorage();
+        return cached ?? { isOnboarded: false };
       }
 
       try {
@@ -60,9 +51,9 @@ export const useClientOnboardingStatus = () => {
           return { isOnboarded: false, error: true };
         }
 
-        // Cache the result for future visits
+        // Cache the result
         if (data?.onboarding_completed) {
-          localStorage.setItem('fitconnect_client_onboarded', 'true');
+          setStorage(STORAGE_KEYS.CLIENT_ONBOARDED, { isOnboarded: true });
         }
 
         return {
@@ -75,12 +66,10 @@ export const useClientOnboardingStatus = () => {
       }
     },
     enabled: !!user?.id,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 60 * 60 * 1000, // 1 hour
+    staleTime: 5 * 60 * 1000,
+    gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: !isDespia(),
-    // PERFORMANCE FIX: Changed from 'always' to false - trust localStorage for returning users
     refetchOnMount: false,
-    // PERFORMANCE FIX: Use localStorage for instant hydration
     initialData: getClientOnboardingFromStorage,
     placeholderData: DEFAULT_ONBOARDING_STATUS,
     retry: 2,
@@ -88,15 +77,11 @@ export const useClientOnboardingStatus = () => {
   });
 };
 
-// PERFORMANCE FIX: Read from localStorage for instant hydration
 const getCoachOnboardingFromStorage = (): OnboardingStatus | undefined => {
-  try {
-    if (typeof localStorage === 'undefined') return undefined;
-    const isOnboarded = localStorage.getItem('fitconnect_coach_onboarded') === 'true';
-    if (isOnboarded) {
-      return { isOnboarded: true, onboardingProgress: null };
-    }
-  } catch {}
+  const data = getStorage<{ isOnboarded: boolean }>(STORAGE_KEYS.COACH_ONBOARDED);
+  if (data?.isOnboarded) {
+    return { isOnboarded: true, onboardingProgress: null };
+  }
   return undefined;
 };
 
@@ -120,9 +105,9 @@ export const useCoachOnboardingStatus = () => {
           return { isOnboarded: false, error: true };
         }
 
-        // Cache the result for future visits
+        // Cache the result
         if (data?.onboarding_completed) {
-          localStorage.setItem('fitconnect_coach_onboarded', 'true');
+          setStorage(STORAGE_KEYS.COACH_ONBOARDED, { isOnboarded: true });
         }
 
         return {
@@ -139,9 +124,7 @@ export const useCoachOnboardingStatus = () => {
     staleTime: 5 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     refetchOnWindowFocus: !isDespia(),
-    // PERFORMANCE FIX: Changed from 'always' to false - trust localStorage for returning users
     refetchOnMount: false,
-    // PERFORMANCE FIX: Use localStorage for instant hydration
     initialData: getCoachOnboardingFromStorage,
     placeholderData: DEFAULT_ONBOARDING_STATUS,
     retry: 2,
