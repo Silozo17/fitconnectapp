@@ -17,6 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/hooks/useTranslation';
 import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 import { PageHelpBanner } from '@/components/discover/PageHelpBanner';
+import { DashboardSectionHeader } from '@/components/shared/DashboardSectionHeader';
 
 function AchievementsContent() {
   const { t } = useTranslation('client');
@@ -54,18 +55,17 @@ function AchievementsContent() {
   }
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-11">
       <PageHelpBanner
         pageKey="client_achievements"
         title="Your Milestones"
         description="Celebrate badges earned from your fitness journey"
       />
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{t('achievements.title')}</h1>
-          <p className="text-muted-foreground">{t('achievements.subtitle')}</p>
-        </div>
-        {xpData && (
+      
+      <DashboardSectionHeader
+        title={t('achievements.title')}
+        description={t('achievements.subtitle')}
+        action={xpData && (
           <ShareAchievementButton
             achievement={{
               type: 'level',
@@ -75,7 +75,7 @@ function AchievementsContent() {
             }}
           />
         )}
-      </div>
+      />
       
       {/* Avatar and XP Progress Section */}
       <div className="flex flex-col md:flex-row gap-6 items-start">

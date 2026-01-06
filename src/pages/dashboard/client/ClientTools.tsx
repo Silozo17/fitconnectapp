@@ -40,7 +40,7 @@ const ClientTools = () => {
         title="Fitness Calculators"
         description="Use tools to calculate calories, macros, BMI, and more"
       />
-      <div className="space-y-6">
+      <div className="space-y-11">
         {/* Header */}
         <div className="flex items-center gap-3">
           {selectedTool ? (
@@ -54,15 +54,17 @@ const ClientTools = () => {
               Back to Tools
             </Button>
           ) : (
-            <>
-              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Calculator className="w-5 h-5 text-primary" />
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Calculator className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Fitness Tools</h1>
-                <p className="text-muted-foreground text-sm">Select a calculator to get started</p>
+                <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
+                  Fitness <span className="gradient-text">Tools</span>
+                </h2>
+                <p className="text-muted-foreground text-sm mt-1">Select a calculator to get started</p>
               </div>
-            </>
+            </div>
           )}
         </div>
 

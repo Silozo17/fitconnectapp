@@ -49,19 +49,23 @@ const ClientCoaches = () => {
         description="Message, book sessions, and view plans from your connected coaches."
       />
 
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">My Coaches</h1>
-          <p className="text-muted-foreground">
-            {coaches.length} active connection{coaches.length !== 1 ? "s" : ""}
-          </p>
+      <div className="mb-11">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
+              My <span className="gradient-text">Coaches</span>
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              {coaches.length} active connection{coaches.length !== 1 ? "s" : ""}
+            </p>
+          </div>
+          <Button asChild className="shrink-0">
+            <Link to="/dashboard/client/find-coaches">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Find More Coaches
+            </Link>
+          </Button>
         </div>
-        <Button asChild>
-          <Link to="/dashboard/client/find-coaches">
-            <UserPlus className="w-4 h-4 mr-2" />
-            Find More Coaches
-          </Link>
-        </Button>
       </div>
 
       {error && (

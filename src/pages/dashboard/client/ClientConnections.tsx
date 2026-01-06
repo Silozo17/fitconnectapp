@@ -12,6 +12,7 @@ import { AddConnectionModal } from "@/components/connections/AddConnectionModal"
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 
 const ClientConnections = () => {
   const { user } = useAuth();
@@ -36,20 +37,18 @@ const ClientConnections = () => {
         title="Coach Connections"
         description="Manage your relationships with coaches"
       />
-      <div className="space-y-6">
+      <div className="space-y-11">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Connections</h1>
-            <p className="text-muted-foreground">
-              Connect with friends and other fitness enthusiasts
-            </p>
-          </div>
-          <Button onClick={() => setAddModalOpen(true)} className="gap-2">
-            <UserPlus className="w-4 h-4" />
-            Add Connection
-          </Button>
-        </div>
+        <DashboardSectionHeader
+          title="Connections"
+          description="Connect with friends and other fitness enthusiasts"
+          action={
+            <Button onClick={() => setAddModalOpen(true)} className="gap-2">
+              <UserPlus className="w-4 h-4" />
+              Add Connection
+            </Button>
+          }
+        />
 
         {/* Error Alert */}
         {error && (

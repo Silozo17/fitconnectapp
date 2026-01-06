@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Trophy, Target, CheckCircle2, Flame } from 'lucide-react';
 import { PageHelpBanner } from '@/components/discover/PageHelpBanner';
+import { DashboardSectionHeader, MetricCard, StatsGrid } from '@/components/shared';
 
 export default function ClientChallenges() {
   const { data: availableChallenges, isLoading: availableLoading } = useAvailableChallenges();
@@ -22,18 +23,38 @@ export default function ClientChallenges() {
         title="Fitness Challenges"
         description="Join challenges to stay motivated and win rewards"
       />
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold">Challenges</h1>
-          <p className="text-muted-foreground">Join challenges and compete with others</p>
-        </div>
+      <div className="space-y-11">
+        <DashboardSectionHeader
+          title="Challenges"
+          description="Join challenges and compete with others"
+        />
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card variant="glass" className="glass-card rounded-2xl"><CardContent className="pt-5 pb-4"><div className="flex items-center gap-3"><div className="bg-primary/20 rounded-xl p-2.5"><Flame className="h-5 w-5 text-primary" /></div><div><div className="text-2xl font-bold">{activeChallenges.length}</div><div className="text-xs text-muted-foreground">Active</div></div></div></CardContent></Card>
-          <Card variant="glass" className="glass-card rounded-2xl"><CardContent className="pt-5 pb-4"><div className="flex items-center gap-3"><div className="bg-green-500/20 rounded-xl p-2.5"><CheckCircle2 className="h-5 w-5 text-green-500" /></div><div><div className="text-2xl font-bold">{completedChallenges.length}</div><div className="text-xs text-muted-foreground">Completed</div></div></div></CardContent></Card>
-          <Card variant="glass" className="glass-card rounded-2xl"><CardContent className="pt-5 pb-4"><div className="flex items-center gap-3"><div className="bg-blue-500/20 rounded-xl p-2.5"><Target className="h-5 w-5 text-blue-500" /></div><div><div className="text-2xl font-bold">{notJoinedChallenges.length}</div><div className="text-xs text-muted-foreground">Available</div></div></div></CardContent></Card>
-          <Card variant="glass" className="glass-card rounded-2xl"><CardContent className="pt-5 pb-4"><div className="flex items-center gap-3"><div className="bg-yellow-500/20 rounded-xl p-2.5"><Trophy className="h-5 w-5 text-yellow-500" /></div><div><div className="text-2xl font-bold">{myChallenges?.length || 0}</div><div className="text-xs text-muted-foreground">Total Joined</div></div></div></CardContent></Card>
-        </div>
+        <StatsGrid columns={4}>
+          <MetricCard
+            icon={Flame}
+            label="Active"
+            value={activeChallenges.length}
+            colorTheme="orange"
+          />
+          <MetricCard
+            icon={CheckCircle2}
+            label="Completed"
+            value={completedChallenges.length}
+            colorTheme="green"
+          />
+          <MetricCard
+            icon={Target}
+            label="Available"
+            value={notJoinedChallenges.length}
+            colorTheme="blue"
+          />
+          <MetricCard
+            icon={Trophy}
+            label="Total Joined"
+            value={myChallenges?.length || 0}
+            colorTheme="yellow"
+          />
+        </StatsGrid>
         
         <Tabs defaultValue="active" className="space-y-4">
           <TabsList className="bg-muted/50 backdrop-blur-sm p-1 rounded-2xl">
