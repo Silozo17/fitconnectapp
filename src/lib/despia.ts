@@ -118,19 +118,38 @@ export const openNativeSettings = (): boolean => {
  * Configure the native status bar appearance (Android only)
  * Sets dark background with white text for visibility
  * iOS uses apple-mobile-web-app-status-bar-style meta tag instead
+ * 
+ * CRITICAL FIX: Delayed execution to ensure Android native interceptor is ready
+ * Without delay, Android WebView navigates to statusbarcolor:// as a URL
+ * causing ERR_UNKNOWN_URL_SCHEME crash
  */
 export const configureStatusBar = (): void => {
-  if (!isDespia()) return;
+  // Only Android needs Despia status bar commands
+  // iOS uses apple-mobile-web-app-status-bar-style meta tag in index.html
+  if (!isDespia() || !isDespiaAndroid()) return;
   
-  try {
-    // Set status bar background to dark (#0D0D14 = RGB 13, 13, 20)
-    despia('statusbarcolor://{13, 13, 20}');
-    
-    // Set status bar icons/text to white for visibility on dark background
-    despia('statusbartextcolor://{white}');
-  } catch (e) {
-    console.warn('Failed to configure status bar:', e);
-  }
+  // Delay execution to ensure native interceptor is ready
+  // Android WebView needs time to set up the window.despia observer
+  setTimeout(() => {
+    try {
+      // Verify despia function exists and is callable
+      if (typeof despia !== 'function') {
+        console.warn('[Despia] SDK not available, skipping status bar config');
+        return;
+      }
+      
+      // Set status bar background to dark (#0D0D14 = RGB 13, 13, 20)
+      despia('statusbarcolor://{13, 13, 20}');
+      
+      // Set status bar icons/text to white for visibility on dark background
+      despia('statusbartextcolor://{white}');
+      
+      console.log('[Despia] Status bar configured successfully');
+    } catch (e) {
+      // Non-fatal: status bar styling is cosmetic, app should continue
+      console.warn('[Despia] Status bar configuration failed (non-fatal):', e);
+    }
+  }, 500);
 };
 
 /**
