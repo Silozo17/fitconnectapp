@@ -29,25 +29,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchUserRole = useCallback(async (userId: string) => {
-    const { data: roles } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
+    console.log('[Auth] Fetching roles for user:', userId);
     
-    if (roles && roles.length > 0) {
-      const roleOrder: AppRole[] = ['admin', 'manager', 'staff', 'coach', 'client'];
-      const sortedRoles = roles
-        .map(r => r.role)
-        .sort((a, b) => roleOrder.indexOf(a) - roleOrder.indexOf(b));
+    try {
+      const { data: roles, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
       
-      const primaryRole = sortedRoles[0];
-      setRole(primaryRole);
-      setAllRoles(sortedRoles);
+      if (error) {
+        console.error('[Auth] Error fetching roles:', error);
+        return;
+      }
       
-      // Cache for native cold start
-      setNativeCache(CACHE_KEYS.USER_ROLE, primaryRole, CACHE_TTL.USER_ROLE, userId);
-      setNativeCache(CACHE_KEYS.ALL_USER_ROLES, sortedRoles, CACHE_TTL.USER_ROLE, userId);
-    } else {
+      if (roles && roles.length > 0) {
+        const roleOrder: AppRole[] = ['admin', 'manager', 'staff', 'coach', 'client'];
+        const sortedRoles = roles
+          .map(r => r.role)
+          .sort((a, b) => roleOrder.indexOf(a) - roleOrder.indexOf(b));
+        
+        const primaryRole = sortedRoles[0];
+        console.log('[Auth] Roles fetched successfully:', sortedRoles);
+        setRole(primaryRole);
+        setAllRoles(sortedRoles);
+        
+        // Cache for native cold start
+        setNativeCache(CACHE_KEYS.USER_ROLE, primaryRole, CACHE_TTL.USER_ROLE, userId);
+        setNativeCache(CACHE_KEYS.ALL_USER_ROLES, sortedRoles, CACHE_TTL.USER_ROLE, userId);
+      } else {
+        console.log('[Auth] No roles found for user');
+        setAllRoles([]);
+      }
+    } catch (err) {
+      console.error('[Auth] Exception fetching roles:', err);
       setAllRoles([]);
     }
   }, []);
@@ -68,6 +82,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
+        console.log('[Auth] State change:', event, !!session);
+        
         // Basic JWT validation - check for corrupted tokens
         if (session?.access_token) {
           try {

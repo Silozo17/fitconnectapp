@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { isDespia, isDespiaIOS, configureStatusBar } from '@/lib/despia';
+import { isDespia, isDespiaIOS, isDespiaAndroid, configureStatusBar } from '@/lib/despia';
 import { initNativeCache } from '@/lib/native-cache';
 
 /**
@@ -13,6 +13,12 @@ export const useAppInitialization = () => {
   useEffect(() => {
     if (!isDespia()) return;
     
+    console.log('[Despia] App initialization started', {
+      isIOS: isDespiaIOS(),
+      isAndroid: isDespiaAndroid(),
+      userAgent: navigator.userAgent
+    });
+    
     // Initialize native cache system (checks version, clears if stale)
     initNativeCache();
     
@@ -24,6 +30,11 @@ export const useAppInitialization = () => {
     // where env(safe-area-inset-top) may return 0
     if (isDespiaIOS()) {
       document.documentElement.classList.add('native-ios');
+    }
+    
+    // Android-specific: Signal that WebView is ready
+    if (isDespiaAndroid()) {
+      console.log('[Despia Android] Initialization complete');
     }
     
     return () => {

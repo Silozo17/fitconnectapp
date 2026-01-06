@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
@@ -6,11 +6,13 @@ import { isDespia } from "@/lib/despia";
 import { getBestDashboardRoute, getViewModeFromPath, saveRoute } from "@/lib/view-restoration";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 
+const PROFILE_LOADING_TIMEOUT_MS = 5000;
+
 /**
- * Simplified RouteRestorer
+ * Simplified RouteRestorer with timeout protection
  * 
  * Handles navigation for authenticated users on app launch.
- * Reduced from 113 lines to ~50 lines.
+ * Includes timeout protection to prevent infinite loading on Android.
  */
 const RouteRestorer = () => {
   const { user, role, loading } = useAuth();
@@ -18,6 +20,19 @@ const RouteRestorer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const hasRestored = useRef(false);
+  const [hasTimedOut, setHasTimedOut] = useState(false);
+
+  // Timeout protection for profile loading
+  useEffect(() => {
+    if (!isLoadingProfiles || hasTimedOut) return;
+    
+    const timeout = setTimeout(() => {
+      console.warn('[RouteRestorer] Profile loading timed out after 5s, proceeding with navigation');
+      setHasTimedOut(true);
+    }, PROFILE_LOADING_TIMEOUT_MS);
+    
+    return () => clearTimeout(timeout);
+  }, [isLoadingProfiles, hasTimedOut]);
 
   // Track route changes for future restoration
   useEffect(() => {
@@ -28,7 +43,8 @@ const RouteRestorer = () => {
 
   // Handle route restoration for authenticated users
   useEffect(() => {
-    if (loading || isLoadingProfiles || hasRestored.current) return;
+    // Block until loading completes OR timeout fires
+    if (loading || (isLoadingProfiles && !hasTimedOut) || hasRestored.current) return;
     if (!user || !role) return;
 
     const currentPath = location.pathname;
@@ -66,7 +82,7 @@ const RouteRestorer = () => {
     }
 
     hasRestored.current = true;
-  }, [user, role, loading, isLoadingProfiles, activeProfileType, navigate, location.pathname]);
+  }, [user, role, loading, isLoadingProfiles, hasTimedOut, activeProfileType, navigate, location.pathname]);
 
   return null;
 };
