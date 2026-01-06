@@ -247,8 +247,9 @@ const DocsAppleHealth = lazy(() => import('@/pages/docs/integrations/AppleHealth
 const DocsHealthConnect = lazy(() => import('@/pages/docs/integrations/HealthConnectIntegration'));
 const DocsGarmin = lazy(() => import('@/pages/docs/integrations/GarminIntegration'));
 
-// Debug page
+// Debug pages
 const Debug = lazy(() => import('@/pages/Debug'));
+const NativeDiagnostics = lazy(() => import('@/pages/NativeDiagnostics'));
 
 // Subscribe pages
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
@@ -261,6 +262,9 @@ function LanguagePersistence() {
 }
 
 // Global error capture for errors outside React lifecycle
+// Enhanced with chunk load error detection and auto-recovery for Despia
+import { handlePotentialChunkError } from "@/lib/chunk-error-recovery";
+
 function GlobalErrorCapture() {
   React.useEffect(() => {
     const captureError = (message: string, source: string, error?: Error) => {
@@ -280,6 +284,14 @@ function GlobalErrorCapture() {
         // Log in dev mode
         if (import.meta.env.DEV) {
           console.error(`[GlobalErrorCapture:${source}]`, errorDetails);
+        }
+        
+        // Check for chunk load errors and trigger auto-recovery
+        if (error && handlePotentialChunkError(error)) {
+          return; // Recovery triggered, don't process further
+        }
+        if (handlePotentialChunkError(message)) {
+          return; // Recovery triggered from message
         }
       } catch { /* ignore storage errors */ }
     };
@@ -425,6 +437,9 @@ const App = () => (
                             
                             {/* Debug page - direct SDK testing */}
                             <Route path="/debug" element={<Suspense fallback={<PageLoadingSpinner />}><Debug /></Suspense>} />
+                            
+                            {/* Native diagnostics - Android debugging, accessible without auth */}
+                            <Route path="/debug/native" element={<Suspense fallback={<PageLoadingSpinner />}><NativeDiagnostics /></Suspense>} />
                             
                             {/* Reset page - emergency state clear for stuck users */}
                             <Route path="/reset" element={<Suspense fallback={<PageLoadingSpinner />}><Reset /></Suspense>} />

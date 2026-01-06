@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Database } from "@/integrations/supabase/types";
 import { STORAGE_KEYS, clearSessionStorage } from "@/lib/storage-keys";
 import { getNativeCache, setNativeCache, clearUserNativeCache, CACHE_KEYS, CACHE_TTL } from "@/lib/native-cache";
+import { recordBootStage, BOOT_STAGES } from "@/lib/boot-stages";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -29,7 +30,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const fetchUserRole = useCallback(async (userId: string) => {
-    console.log('[Auth] Fetching roles for user:', userId);
+    console.log('[Auth] Fetching roles from database for user:', userId);
     
     try {
       const { data: roles, error } = await supabase
@@ -38,7 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .eq("user_id", userId);
       
       if (error) {
-        console.error('[Auth] Error fetching roles:', error);
+        console.error('[Auth] Error fetching roles from DB:', error);
         return;
       }
       
@@ -49,7 +50,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .sort((a, b) => roleOrder.indexOf(a) - roleOrder.indexOf(b));
         
         const primaryRole = sortedRoles[0];
-        console.log('[Auth] Roles fetched successfully:', sortedRoles);
+        console.log('[Auth] Roles fetched from DB:', sortedRoles);
+        recordBootStage(BOOT_STAGES.ROLE_FROM_DB);
         setRole(primaryRole);
         setAllRoles(sortedRoles);
         
@@ -57,16 +59,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setNativeCache(CACHE_KEYS.USER_ROLE, primaryRole, CACHE_TTL.USER_ROLE, userId);
         setNativeCache(CACHE_KEYS.ALL_USER_ROLES, sortedRoles, CACHE_TTL.USER_ROLE, userId);
       } else {
-        console.log('[Auth] No roles found for user');
-        setAllRoles([]);
+        console.log('[Auth] No roles found in DB for user');
+        // Don't clear roles if we already have them from metadata/cache
+        // This prevents race conditions
       }
     } catch (err) {
-      console.error('[Auth] Exception fetching roles:', err);
-      setAllRoles([]);
+      console.error('[Auth] Exception fetching roles from DB:', err);
+      // Don't clear roles on error - keep whatever we have
     }
   }, []);
 
   useEffect(() => {
+    recordBootStage(BOOT_STAGES.APP_MOUNT);
+    
     // Handle visibility to manage auto refresh
     const handleVisibility = () => {
       if (document.visibilityState === 'visible') {
@@ -83,6 +88,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('[Auth] State change:', event, !!session);
+        recordBootStage(BOOT_STAGES.AUTH_STATE_RECEIVED);
         
         // Basic JWT validation - check for corrupted tokens
         if (session?.access_token) {
@@ -114,14 +120,32 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Try to restore role from cache first for instant render
+          let roleResolved = false;
+          
+          // Priority 1: Try to restore role from native cache (fastest)
           const cachedRole = getNativeCache<AppRole>(CACHE_KEYS.USER_ROLE, session.user.id);
           const cachedAllRoles = getNativeCache<AppRole[]>(CACHE_KEYS.ALL_USER_ROLES, session.user.id);
           
-          if (cachedRole) setRole(cachedRole);
-          if (cachedAllRoles?.length) setAllRoles(cachedAllRoles);
+          if (cachedRole && cachedAllRoles?.length) {
+            console.log('[Auth] Restored roles from native cache:', cachedAllRoles);
+            recordBootStage(BOOT_STAGES.ROLE_FROM_CACHE);
+            setRole(cachedRole);
+            setAllRoles(cachedAllRoles);
+            roleResolved = true;
+          }
           
-          // Fetch fresh role data in background
+          // Priority 2: Use user_metadata.role as immediate fallback (works even if DB query fails)
+          if (!roleResolved && session.user.user_metadata?.role) {
+            const metadataRole = session.user.user_metadata.role as AppRole;
+            console.log('[Auth] Using role from user_metadata:', metadataRole);
+            recordBootStage(BOOT_STAGES.ROLE_FROM_METADATA);
+            setRole(metadataRole);
+            setAllRoles([metadataRole]);
+            roleResolved = true;
+          }
+          
+          // Always fetch fresh role data from DB in background to ensure accuracy
+          // Use setTimeout to not block the auth state update
           setTimeout(() => fetchUserRole(session.user.id), 0);
         } else {
           setRole(null);
@@ -131,6 +155,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setLoading(false);
       }
     );
+
+    recordBootStage(BOOT_STAGES.AUTH_LISTENER_ATTACHED);
 
     // Background session validation
     const validateSession = async () => {
