@@ -23,10 +23,10 @@ import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 // Widget section definitions for grouping
 const WIDGET_SECTIONS = {
-  stats: { key: "stats", title: "Dashboard Overview", description: "Your key metrics at a glance" },
   clients: { key: "clients", title: "Client Quickview", description: "Quick access to client stats" },
-  actions: { key: "actions", title: "Quick Actions", description: "Common tasks" },
+  stats: { key: "stats", title: "Dashboard Overview", description: "Your key metrics at a glance" },
   activity: { key: "activity", title: "Client Activity", description: "Client activity and sessions" },
+  actions: { key: "actions", title: "Quick Actions", description: "Common tasks" },
   engagement: { key: "engagement", title: "Client Engagement", description: "Reviews and connections" },
   intelligence: { key: "intelligence", title: "Smart Insights", description: "AI-powered insights" },
   business: { key: "business", title: "Business Analytics", description: "Revenue and analytics" },
@@ -105,7 +105,7 @@ const CoachOverview = () => {
   // Group widgets by section for organized rendering
   const groupedWidgets = useMemo(() => {
     const groups: Record<string, WidgetItem[]> = {};
-    const sectionOrder = ["stats", "clients", "actions", "activity", "engagement", "intelligence", "business"];
+    const sectionOrder = ["clients", "stats", "activity", "actions", "engagement", "intelligence", "business"];
     
     visibleWidgets.forEach((widget) => {
       const section = getWidgetSection(widget.widget_type);
