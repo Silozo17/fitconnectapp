@@ -19,6 +19,7 @@ import ProfileNotch from "@/components/shared/ProfileNotch";
 import CoachProfileSummary from "@/components/dashboard/coach/CoachProfileSummary";
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
+import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -167,9 +168,11 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
 DashboardLayoutInner.displayName = "DashboardLayoutInner";
 
 const DashboardLayout = (props: DashboardLayoutProps) => (
-  <ProfilePanelProvider>
-    <DashboardLayoutInner {...props} />
-  </ProfilePanelProvider>
+  <ErrorBoundary>
+    <ProfilePanelProvider>
+      <DashboardLayoutInner {...props} />
+    </ProfilePanelProvider>
+  </ErrorBoundary>
 );
 
 export default DashboardLayout;
