@@ -59,7 +59,7 @@ export function QuickActionsWidget({
       color: "green" as const,
       icon: ClipboardList,
       label: t("quickActions.createPlan"),
-      description: "Build workout/nutrition",
+      description: "Workout/nutrition",
     },
     {
       key: "message",
