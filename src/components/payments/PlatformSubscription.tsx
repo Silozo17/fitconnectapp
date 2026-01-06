@@ -1,13 +1,13 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Crown, Loader2, Clock, AlertTriangle, ExternalLink, CreditCard, Sparkles } from "lucide-react";
+import { Crown, Loader2, Clock, AlertTriangle, ExternalLink, CreditCard, Sparkles, Check, Rocket } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { SUBSCRIPTION_TIERS, normalizeTier } from "@/lib/stripe-config";
+import { SUBSCRIPTION_TIERS, normalizeTier, TierKey, BillingInterval } from "@/lib/stripe-config";
 import { useNativeIAP } from "@/hooks/useNativeIAP";
 import { isDespia } from "@/lib/despia";
 import { triggerHaptic } from "@/lib/despia";
@@ -20,7 +20,11 @@ import { NativeSubscriptionManagement } from "@/components/payments/NativeSubscr
 import { LegalDisclosure, LegalLinks } from "@/components/shared/LegalLinks";
 import { useQueryClient } from "@tanstack/react-query";
 import { UpgradeDrawer } from "@/components/subscription/UpgradeDrawer";
-import type { TierKey } from "@/lib/stripe-config";
+import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
+import { supabase } from "@/integrations/supabase/client";
+import { TierSelector } from "@/components/payments/TierSelector";
+import { BillingToggle } from "@/components/payments/BillingToggle";
+import { cn } from "@/lib/utils";
 import type { SubscriptionTier } from "@/hooks/useNativeIAP";
 
 interface PlatformSubscriptionProps {
@@ -33,15 +37,21 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const { user } = useAuth();
   const queryClient = useQueryClient();
   
-  // State for upgrade drawer
+  // Platform detection
+  const { isNativeMobile } = usePlatformRestrictions();
+  
+  // State for upgrade drawer (native only)
   const [showUpgradeDrawer, setShowUpgradeDrawer] = useState(false);
+  
+  // State for web Stripe checkout
+  const [selectedTier, setSelectedTier] = useState<TierKey>('pro');
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  const [isPortalLoading, setIsPortalLoading] = useState(false);
   
   // FEATURES ACTIVATED MODAL state
   const [showFeaturesModal, setShowFeaturesModal] = useState(false);
   const [upgradedToTier, setUpgradedToTier] = useState<TierKey>('free');
-  
-  // Platform detection
-  const isNativeApp = isDespia();
 
   // PHASE 4: Upgrade success callback with celebration UI
   const handleUpgradeSuccess = useCallback(async (tier: SubscriptionTier) => {
@@ -100,6 +110,71 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
 
   // Get current tier display info
   const currentTierData = SUBSCRIPTION_TIERS[activeTier];
+
+  // Web Stripe checkout handler
+  const handleStripeCheckout = async () => {
+    if (!user?.email) {
+      toast.error("Please log in to subscribe");
+      return;
+    }
+
+    setIsCheckoutLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-platform-subscription', {
+        body: {
+          action: 'create-checkout',
+          coachId,
+          userId: user.id,
+          email: user.email,
+          tier: selectedTier,
+          successUrl: `${window.location.origin}/dashboard/coach/settings?subscription=success`,
+          cancelUrl: `${window.location.origin}/dashboard/coach/settings?subscription=cancelled`,
+          isNativeApp: false,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error: any) {
+      console.error('[PlatformSubscription] Stripe checkout error:', error);
+      toast.error(error.message || "Failed to start checkout");
+    } finally {
+      setIsCheckoutLoading(false);
+    }
+  };
+
+  // Web Stripe customer portal handler
+  const handleManageSubscription = async () => {
+    if (!user?.email) {
+      toast.error("Please log in to manage subscription");
+      return;
+    }
+
+    setIsPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('stripe-platform-subscription', {
+        body: {
+          action: 'get-portal-link',
+          coachId,
+          email: user.email,
+          successUrl: `${window.location.origin}/dashboard/coach/settings`,
+          isNativeApp: false,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (error: any) {
+      console.error('[PlatformSubscription] Stripe portal error:', error);
+      toast.error(error.message || "Failed to open subscription management");
+    } finally {
+      setIsPortalLoading(false);
+    }
+  };
 
   return (
     <>
@@ -194,60 +269,149 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
             </div>
           </div>
 
-          {/* Upgrade Button */}
-          <Button
-            className="w-full mb-4"
-            onClick={() => setShowUpgradeDrawer(true)}
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            {activeTier === 'free' ? t("subscription.upgrade", "Upgrade") : t("subscription.changePlan", "Change Plan")}
-          </Button>
+          {/* NATIVE UI: Simple upgrade button + App Store note */}
+          {isNativeMobile ? (
+            <>
+              <Button
+                className="w-full mb-4"
+                onClick={() => setShowUpgradeDrawer(true)}
+              >
+                <Sparkles className="h-4 w-4 mr-2" />
+                {activeTier === 'free' ? t("subscription.upgrade", "Upgrade") : t("subscription.changePlan", "Change Plan")}
+              </Button>
 
-          {/* Apple subscription management note */}
-          {isNativeApp && (
-            <p className="text-xs text-muted-foreground text-center mb-4">
-              Subscriptions can be managed in the App Store
-            </p>
-          )}
-          
-          {/* Legal footer with restore purchases */}
-          <div className="pt-4 border-t border-border">
-            <div className="flex flex-wrap justify-center items-center gap-4 text-sm mb-3">
-              {isNativeApp && (
-                <button 
-                  type="button"
-                  onClick={async () => {
-                    if (typeof window !== 'undefined' && (window as any).despia?.restorePurchases) {
-                      try {
-                        toast.loading("Restoring purchases...");
-                        await (window as any).despia.restorePurchases();
-                        toast.success("Purchases restored successfully");
-                      } catch (error) {
-                        console.error("Failed to restore purchases:", error);
-                        toast.error("Failed to restore purchases");
+              <p className="text-xs text-muted-foreground text-center mb-4">
+                Subscriptions can be managed in the App Store
+              </p>
+              
+              {/* Legal footer with restore purchases */}
+              <div className="pt-4 border-t border-border">
+                <div className="flex flex-wrap justify-center items-center gap-4 text-sm mb-3">
+                  <button 
+                    type="button"
+                    onClick={async () => {
+                      if (typeof window !== 'undefined' && (window as any).despia?.restorePurchases) {
+                        try {
+                          toast.loading("Restoring purchases...");
+                          await (window as any).despia.restorePurchases();
+                          toast.success("Purchases restored successfully");
+                        } catch (error) {
+                          console.error("Failed to restore purchases:", error);
+                          toast.error("Failed to restore purchases");
+                        }
+                      } else {
+                        toast.info("Restore purchases is only available on iOS/Android");
                       }
-                    } else {
-                      toast.info("Restore purchases is only available on iOS/Android");
-                    }
-                  }}
-                  className="text-muted-foreground hover:text-primary transition-colors"
+                    }}
+                    className="text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Restore Purchases
+                  </button>
+                  <LegalLinks variant="compact" />
+                </div>
+                <LegalDisclosure />
+              </div>
+            </>
+          ) : (
+            /* WEB/PWA UI: Tier selector + Stripe checkout */
+            <>
+              {/* Tier Selector */}
+              <div className="mb-4">
+                <TierSelector 
+                  selectedTier={selectedTier} 
+                  onTierChange={setSelectedTier} 
+                />
+              </div>
+
+              {/* Billing Toggle */}
+              <div className="mb-4">
+                <BillingToggle 
+                  selectedTier={selectedTier}
+                  billingInterval={billingInterval}
+                  onIntervalChange={setBillingInterval}
+                />
+              </div>
+
+              {/* Tier Features Preview */}
+              <div className="mb-4 p-4 rounded-lg bg-muted/50 border border-border">
+                <h4 className="font-medium mb-2">{SUBSCRIPTION_TIERS[selectedTier]?.name} Features</h4>
+                <ul className="space-y-1.5">
+                  {SUBSCRIPTION_TIERS[selectedTier]?.features.slice(0, 5).map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
+                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-3">
+                {/* Subscribe/Upgrade Button */}
+                <Button
+                  className="w-full"
+                  onClick={handleStripeCheckout}
+                  disabled={isCheckoutLoading || selectedTier === activeTier}
                 >
-                  Restore Purchases
-                </button>
-              )}
-              <LegalLinks variant="compact" />
-            </div>
-            <LegalDisclosure />
-          </div>
+                  {isCheckoutLoading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      {activeTier === 'free' 
+                        ? `Subscribe to ${SUBSCRIPTION_TIERS[selectedTier]?.name}`
+                        : `Change to ${SUBSCRIPTION_TIERS[selectedTier]?.name}`
+                      }
+                    </>
+                  )}
+                </Button>
+
+                {/* Manage Subscription Button (only show if user has a subscription) */}
+                {activeTier !== 'free' && !isNativeSubscription && (
+                  <Button
+                    variant="outline"
+                    className="w-full"
+                    onClick={handleManageSubscription}
+                    disabled={isPortalLoading}
+                  >
+                    {isPortalLoading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        {t("subscription.manageSubscription", "Manage Subscription")}
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+              
+              {/* Legal footer */}
+              <div className="pt-4 mt-4 border-t border-border">
+                <div className="flex flex-wrap justify-center items-center gap-4 text-sm mb-3">
+                  <LegalLinks variant="compact" />
+                </div>
+                <LegalDisclosure />
+              </div>
+            </>
+          )}
         </CardContent>
       </Card>
 
-      {/* Upgrade Drawer */}
-      <UpgradeDrawer
-        open={showUpgradeDrawer}
-        onOpenChange={setShowUpgradeDrawer}
-        coachId={coachId}
-      />
+      {/* Upgrade Drawer (Native only) */}
+      {isNativeMobile && (
+        <UpgradeDrawer
+          open={showUpgradeDrawer}
+          onOpenChange={setShowUpgradeDrawer}
+          coachId={coachId}
+        />
+      )}
 
       {/* Native IAP unsuccessful dialog */}
       <IAPUnsuccessfulDialog 
