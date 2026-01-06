@@ -11,21 +11,25 @@ import { DraggableWidgetGrid, WidgetItem } from "@/components/dashboard/Draggabl
 import { AddClientModal } from "@/components/dashboard/clients/AddClientModal";
 import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 import { ContentSection } from "@/components/shared/ContentSection";
+import { ClientQuickViewCarousel } from "@/components/dashboard/coach/ClientQuickViewCarousel";
+import { ClientQuickViewModal } from "@/components/dashboard/coach/ClientQuickViewModal";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
 import { useCoachDashboardStats } from "@/hooks/useCoachDashboardStats";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { useAutoAwardCoachBadges } from "@/hooks/useAutoAwardCoachBadges";
 import { useCoachWidgets, useUpdateCoachWidget, useReorderCoachWidgets } from "@/hooks/useCoachWidgets";
+import { useCoachClients } from "@/hooks/useCoachClients";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
 // Widget section definitions for grouping
 const WIDGET_SECTIONS = {
-  stats: { key: "stats", title: "overview", description: "Your key metrics at a glance" },
-  actions: { key: "actions", title: "quickActions", description: "Common tasks" },
-  activity: { key: "activity", title: "activity", description: "Client activity and sessions" },
-  engagement: { key: "engagement", title: "engagement", description: "Reviews and connections" },
-  intelligence: { key: "intelligence", title: "intelligence", description: "AI-powered insights" },
-  business: { key: "business", title: "business", description: "Revenue and analytics" },
+  stats: { key: "stats", title: "Dashboard Overview", description: "Your key metrics at a glance" },
+  clients: { key: "clients", title: "Client Quickview", description: "Quick access to client stats" },
+  actions: { key: "actions", title: "Quick Actions", description: "Common tasks" },
+  activity: { key: "activity", title: "Client Activity", description: "Client activity and sessions" },
+  engagement: { key: "engagement", title: "Client Engagement", description: "Reviews and connections" },
+  intelligence: { key: "intelligence", title: "Smart Insights", description: "AI-powered insights" },
+  business: { key: "business", title: "Business Analytics", description: "Revenue and analytics" },
 } as const;
 
 // Map widget types to sections
@@ -72,6 +76,14 @@ const CoachOverview = () => {
   const [customizerOpen, setCustomizerOpen] = useState(false);
   const [addClientOpen, setAddClientOpen] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [quickViewClientId, setQuickViewClientId] = useState<string | null>(null);
+  
+  // Fetch active clients for quick view carousel
+  const { data: clients } = useCoachClients();
+  const activeClients = useMemo(
+    () => (clients || []).filter((c) => c.status === "active"),
+    [clients]
+  );
 
   const stats = dashboardData?.stats;
   const upcomingSessions = dashboardData?.upcomingSessions || [];
@@ -93,7 +105,7 @@ const CoachOverview = () => {
   // Group widgets by section for organized rendering
   const groupedWidgets = useMemo(() => {
     const groups: Record<string, WidgetItem[]> = {};
-    const sectionOrder = ["stats", "actions", "activity", "engagement", "intelligence", "business"];
+    const sectionOrder = ["stats", "clients", "actions", "activity", "engagement", "intelligence", "business"];
     
     visibleWidgets.forEach((widget) => {
       const section = getWidgetSection(widget.widget_type);
@@ -202,13 +214,27 @@ const CoachOverview = () => {
         <ProfileCompletionCard />
       </div>
 
+      {/* Client Quickview Section - Always show if has clients */}
+      {activeClients.length > 0 && (
+        <div className="mb-11">
+          <DashboardSectionHeader
+            title={WIDGET_SECTIONS.clients.title}
+            description={WIDGET_SECTIONS.clients.description}
+          />
+          <ClientQuickViewCarousel
+            clients={activeClients}
+            onClientClick={(clientId) => setQuickViewClientId(clientId)}
+          />
+        </div>
+      )}
+
       {/* Sectioned Widget Grid */}
       {groupedWidgets.length > 0 ? (
         <div className="space-y-11">
           {groupedWidgets.map(({ key, widgets: sectionWidgets }) => (
             <div key={key}>
               <DashboardSectionHeader
-                title={t(`sections.${WIDGET_SECTIONS[key as keyof typeof WIDGET_SECTIONS]?.title || key}`, key)}
+                title={WIDGET_SECTIONS[key as keyof typeof WIDGET_SECTIONS]?.title || key}
                 description={WIDGET_SECTIONS[key as keyof typeof WIDGET_SECTIONS]?.description}
               />
               <DraggableWidgetGrid
@@ -243,6 +269,11 @@ const CoachOverview = () => {
       {/* Modals */}
       <CoachDashboardCustomizer open={customizerOpen} onOpenChange={setCustomizerOpen} />
       <AddClientModal open={addClientOpen} onOpenChange={setAddClientOpen} />
+      <ClientQuickViewModal
+        clientId={quickViewClientId}
+        open={!!quickViewClientId}
+        onClose={() => setQuickViewClientId(null)}
+      />
     </DashboardLayout>
   );
 };
