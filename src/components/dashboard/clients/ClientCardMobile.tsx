@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
   MessageSquare,
@@ -97,16 +97,15 @@ export function ClientCardMobile({
 
         {/* Actions */}
         <div className="flex items-center gap-1 shrink-0">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-8 w-8"
-            onClick={() => {
-              window.location.href = `/dashboard/coach/messages/${client.client_id}`;
-            }}
-          >
-            <MessageSquare className="w-4 h-4" />
-          </Button>
+          <Link to={`/dashboard/coach/messages/${client.client_id}`}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8"
+            >
+              <MessageSquare className="w-4 h-4" />
+            </Button>
+          </Link>
           <Button 
             variant="ghost" 
             size="icon" 

@@ -5,6 +5,7 @@ import { useAdminView } from "@/contexts/AdminContext";
 import { isDespia } from "@/lib/despia";
 import { getBestDashboardRoute, getViewModeFromPath, saveRoute } from "@/lib/view-restoration";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
+import { recordBootStage, BOOT_STAGES } from "@/lib/boot-stages";
 
 const PROFILE_LOADING_TIMEOUT_MS = 5000;
 
@@ -47,6 +48,8 @@ const RouteRestorer = () => {
     if (loading || (isLoadingProfiles && !hasTimedOut) || hasRestored.current) return;
     if (!user || !role) return;
 
+    recordBootStage(BOOT_STAGES.ROUTE_RESTORER_START);
+    
     const currentPath = location.pathname;
     const isNativeApp = isDespia();
 
@@ -54,6 +57,7 @@ const RouteRestorer = () => {
     const currentViewMode = getViewModeFromPath(currentPath);
     if (currentViewMode === activeProfileType) {
       hasRestored.current = true;
+      recordBootStage(BOOT_STAGES.ROUTE_RESTORER_COMPLETE);
       return;
     }
 
@@ -70,6 +74,7 @@ const RouteRestorer = () => {
         if (cachedValue === 'false') {
           navigate("/onboarding/client", { replace: true });
           hasRestored.current = true;
+          recordBootStage(BOOT_STAGES.ROUTE_RESTORER_COMPLETE);
           return;
         }
       }
@@ -82,6 +87,7 @@ const RouteRestorer = () => {
     }
 
     hasRestored.current = true;
+    recordBootStage(BOOT_STAGES.ROUTE_RESTORER_COMPLETE);
   }, [user, role, loading, isLoadingProfiles, hasTimedOut, activeProfileType, navigate, location.pathname]);
 
   return null;
