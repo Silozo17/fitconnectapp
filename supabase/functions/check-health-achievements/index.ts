@@ -364,14 +364,18 @@ serve(async (req) => {
             console.log(`[check-health-achievements] XP update error:`, xpError);
           }
 
-          // Also add XP transaction
-          await supabase.from('xp_transactions').insert({
+          // Also add XP transaction with correct schema
+          const { error: txError } = await supabase.from('xp_transactions').insert({
             client_id: clientId,
             amount: badge.xp_reward,
-            action: 'badge_earned',
+            source: 'badge_earned',
+            source_id: badge.id,
             description: `Earned "${badge.name}" badge from wearable data`,
-            metadata: { badge_id: badge.id, badge_name: badge.name },
           });
+          
+          if (txError) {
+            console.log(`[check-health-achievements] XP transaction insert error:`, txError);
+          }
 
           results.push({
             badgeId: badge.id,

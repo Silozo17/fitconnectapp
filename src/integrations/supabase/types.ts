@@ -8297,6 +8297,16 @@ export type Database = {
       }
     }
     Functions: {
+      award_xp: {
+        Args: {
+          p_amount: number
+          p_client_id: string
+          p_description?: string
+          p_source: string
+          p_source_id?: string
+        }
+        Returns: undefined
+      }
       calculate_age: { Args: { dob: string }; Returns: number }
       calculate_boost_fee: { Args: { booking_amount: number }; Returns: number }
       calculate_experience_years: {
