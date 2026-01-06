@@ -82,15 +82,36 @@ export class ErrorBoundary extends Component<Props, State> {
     window.location.reload();
   };
 
-  private handleClearCacheAndRetry = () => {
-    // Clear ALL localStorage and sessionStorage for a fresh start
+  private handleClearCacheAndRetry = async () => {
+    // Hard reset for PWA/native users:
+    // - clears local/session storage
+    // - deletes Service Worker caches
+    // - unregisters Service Workers
     try {
       localStorage.clear();
       sessionStorage.clear();
     } catch {}
-    
+
+    try {
+      // Clear Cache Storage (PWA asset cache)
+      if (typeof window !== "undefined" && "caches" in window) {
+        const keys = await caches.keys();
+        await Promise.all(keys.map((key) => caches.delete(key)));
+      }
+    } catch {}
+
+    try {
+      // Unregister service workers so the next load is guaranteed fresh
+      if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+        const regs = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(regs.map((r) => r.unregister()));
+      }
+    } catch {}
+
     this.setState({ hasError: false, error: null, componentStack: null });
-    window.location.href = "/auth";
+
+    // Force a fresh navigation (cache-bust query param)
+    window.location.replace(`/auth?reset=${Date.now()}`);
   };
 
   private handleGoHome = () => {
