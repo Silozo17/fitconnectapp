@@ -105,7 +105,7 @@ const CoachOverview = () => {
   // Group widgets by section for organized rendering
   const groupedWidgets = useMemo(() => {
     const groups: Record<string, WidgetItem[]> = {};
-    const sectionOrder = ["clients", "stats", "activity", "actions", "engagement", "intelligence", "business"];
+    const sectionOrder = ["stats", "clients", "activity", "actions", "engagement", "intelligence", "business"];
     
     visibleWidgets.forEach((widget) => {
       const section = getWidgetSection(widget.widget_type);
