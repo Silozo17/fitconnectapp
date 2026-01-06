@@ -205,7 +205,9 @@
     "description": "Połącz usługi zewnętrzne",
     "video": {
       "title": "Wideokonferencje",
-      "description": "Automatycznie twórz linki do spotkań wideo dla sesji online"
+      "description": "Automatycznie twórz linki do spotkań wideo dla sesji online",
+      "blockedByOther": "Najpierw odłącz {{provider}}, aby użyć tego dostawcy",
+      "onlyOneProvider": "Tylko jeden dostawca wideo może być połączony jednocześnie"
     },
     "calendar": {
       "title": "Synchronizacja kalendarza",
