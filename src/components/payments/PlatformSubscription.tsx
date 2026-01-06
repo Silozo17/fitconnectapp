@@ -25,6 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TierSelector } from "@/components/payments/TierSelector";
 import { BillingToggle } from "@/components/payments/BillingToggle";
 import { cn } from "@/lib/utils";
+import { useCountry } from "@/hooks/useCountry";
 import type { SubscriptionTier } from "@/hooks/useNativeIAP";
 
 interface PlatformSubscriptionProps {
@@ -36,6 +37,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const { t } = useTranslation("settings");
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const { countryCode } = useCountry();
   
   // Platform detection
   const { isNativeMobile } = usePlatformRestrictions();
@@ -111,7 +113,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   // Get current tier display info
   const currentTierData = SUBSCRIPTION_TIERS[activeTier];
 
-  // Web Stripe checkout handler
+  // Web Stripe checkout handler - uses create-subscription-checkout with correct price IDs
   const handleStripeCheckout = async () => {
     if (!user?.email) {
       toast.error("Please log in to subscribe");
@@ -120,22 +122,30 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
 
     setIsCheckoutLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('stripe-platform-subscription', {
+      console.log('[PlatformSubscription] Creating checkout with:', { 
+        tier: selectedTier, 
+        billingInterval, 
+        countryCode 
+      });
+      
+      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
         body: {
-          action: 'create-checkout',
-          coachId,
-          userId: user.id,
-          email: user.email,
           tier: selectedTier,
-          successUrl: `${window.location.origin}/dashboard/coach/settings?subscription=success`,
-          cancelUrl: `${window.location.origin}/dashboard/coach/settings?subscription=cancelled`,
+          billingInterval: billingInterval,
+          countryCode: countryCode || 'GB',
           isNativeApp: false,
         },
       });
 
       if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, '_blank');
+      
+      // The function returns a clientSecret for embedded checkout
+      if (data?.clientSecret) {
+        // Navigate to embedded checkout page with session info
+        const checkoutUrl = `/subscribe?tier=${selectedTier}&interval=${billingInterval}&session=${data.sessionId}`;
+        window.location.href = checkoutUrl;
+      } else {
+        throw new Error("No checkout session created");
       }
     } catch (error: any) {
       console.error('[PlatformSubscription] Stripe checkout error:', error);
