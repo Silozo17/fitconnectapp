@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRegisterResumeHandler } from '@/contexts/ResumeManagerContext';
 import { BACKGROUND_DELAYS } from '@/hooks/useAppResumeManager';
+import { STORAGE_KEYS } from '@/lib/storage-keys';
 import {
   isNativeIAPAvailable,
   registerIAPCallbacksWithId,
@@ -89,7 +90,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   const isFounderFromDB = coachProfile?.subscription_tier === 'founder';
   const isFounderFromCache = (() => {
     try {
-      return localStorage.getItem('fitconnect_cached_tier') === 'founder';
+      return localStorage.getItem(STORAGE_KEYS.CACHED_TIER) === 'founder';
     } catch {
       return false;
     }
@@ -182,8 +183,8 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       if (data?.reconciled) {
         // PHASE 2 FIX: Use resetQueries for critical tier queries to force fresh data
         // This clears cache completely rather than just marking as stale
-        localStorage.removeItem('fitconnect_cached_tier');
-        localStorage.removeItem('fitconnect_tier_timestamp');
+        localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
+        localStorage.removeItem(STORAGE_KEYS.TIER_TIMESTAMP);
         
         await Promise.all([
           queryClient.resetQueries({ queryKey: ['subscription-status'] }),
@@ -341,10 +342,10 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
         }));
 
         // Clear localStorage cache and upgrade protection
-        localStorage.removeItem('fitconnect_cached_tier');
-        localStorage.removeItem('fitconnect_tier_timestamp');
-        localStorage.removeItem('fitconnect_upgrade_protection');
-        localStorage.setItem('fitconnect_coach_onboarded', 'true');
+        localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
+        localStorage.removeItem(STORAGE_KEYS.TIER_TIMESTAMP);
+        localStorage.removeItem(STORAGE_KEYS.UPGRADE_PROTECTION);
+        localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
         
         // Use resetQueries for tier-related queries to force complete cache clear and refetch
         await Promise.all([
@@ -421,13 +422,13 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     }));
 
     // Store upgrade protection in localStorage for extra safety
-    localStorage.setItem('fitconnect_upgrade_protection', JSON.stringify({
+    localStorage.setItem(STORAGE_KEYS.UPGRADE_PROTECTION, JSON.stringify({
       tier,
       timestamp: Date.now(),
     }));
 
     // Determine if this is an UPGRADE from current tier
-    const currentTierFromCache = localStorage.getItem('fitconnect_cached_tier') || 'free';
+    const currentTierFromCache = localStorage.getItem(STORAGE_KEYS.CACHED_TIER) || 'free';
     const currentPriority = TIER_PRIORITY[currentTierFromCache] ?? 3;
     const newPriority = TIER_PRIORITY[tier] ?? 3;
     const isUpgrade = newPriority < currentPriority;
@@ -469,10 +470,10 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
           purchaseStatus: 'idle',
         }));
         
-        localStorage.removeItem('fitconnect_cached_tier');
-        localStorage.removeItem('fitconnect_tier_timestamp');
-        localStorage.removeItem('fitconnect_upgrade_protection');
-        localStorage.setItem('fitconnect_coach_onboarded', 'true');
+        localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
+        localStorage.removeItem(STORAGE_KEYS.TIER_TIMESTAMP);
+        localStorage.removeItem(STORAGE_KEYS.UPGRADE_PROTECTION);
+        localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
         
         await Promise.all([
           queryClient.resetQueries({ queryKey: ['subscription-status'] }),

@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { AdminContext } from "@/contexts/AdminContext";
+import { isAdminRole } from "@/lib/role-utils";
 
 /**
  * Safe hook to get active profile information.
@@ -18,7 +19,7 @@ export const useActiveProfile = () => {
   const activeProfileId = adminContext?.activeProfileId ?? null;
   const availableProfiles = adminContext?.availableProfiles ?? {};
 
-  const isAdminUser = role === "admin" || role === "manager" || role === "staff";
+  const isAdminUser = isAdminRole(role);
   const canSwitchRoles = isAdminUser || role === "coach";
 
   // If user cannot switch roles (pure clients), return based on their actual role

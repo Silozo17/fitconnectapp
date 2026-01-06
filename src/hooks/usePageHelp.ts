@@ -1,9 +1,8 @@
 import { useState, useCallback } from 'react';
-
-const STORAGE_KEY_PREFIX = 'fitconnect_page_help_';
+import { STORAGE_KEYS } from '@/lib/storage-keys';
 
 export function usePageHelp(pageKey: string) {
-  const storageKey = `${STORAGE_KEY_PREFIX}${pageKey}`;
+  const storageKey = `${STORAGE_KEYS.PAGE_HELP_PREFIX}${pageKey}`;
   
   const [hasSeen, setHasSeen] = useState(() => {
     try {

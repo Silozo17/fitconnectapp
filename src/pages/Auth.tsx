@@ -24,6 +24,7 @@ import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { supabase } from "@/integrations/supabase/client";
 import { logError } from "@/lib/error-utils";
 import { getEnvironment } from "@/hooks/useEnvironment";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 // Base schema for login
 const loginSchema = z.object({
@@ -298,7 +299,7 @@ const Auth = () => {
     if (!pendingSignupData) return;
 
     // Set flag BEFORE signup to prevent GuestOnlyRoute flash
-    sessionStorage.setItem('fitconnect_signup_in_progress', 'true');
+    sessionStorage.setItem(STORAGE_KEYS.SIGNUP_IN_PROGRESS, 'true');
     setIsSubmitting(true);
     
     try {
@@ -311,7 +312,7 @@ const Auth = () => {
       );
       if (error) {
         // Clear flag on error
-        sessionStorage.removeItem('fitconnect_signup_in_progress');
+        sessionStorage.removeItem(STORAGE_KEYS.SIGNUP_IN_PROGRESS);
         
         if (error.message.includes("already registered")) {
           toast.error(t("auth.emailAlreadyRegistered"));
@@ -343,11 +344,11 @@ const Auth = () => {
         
         // Clear flag after navigation (slight delay to ensure navigation starts)
         setTimeout(() => {
-          sessionStorage.removeItem('fitconnect_signup_in_progress');
+          sessionStorage.removeItem(STORAGE_KEYS.SIGNUP_IN_PROGRESS);
         }, 500);
       }
     } catch (error) {
-      sessionStorage.removeItem('fitconnect_signup_in_progress');
+      sessionStorage.removeItem(STORAGE_KEYS.SIGNUP_IN_PROGRESS);
       toast.error(t("auth.unexpectedError"));
     } finally {
       setIsSubmitting(false);

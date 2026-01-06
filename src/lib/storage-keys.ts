@@ -30,6 +30,10 @@ export const STORAGE_KEYS = {
   CLIENT_ONBOARDED: 'fc_onboarded_client',
   /** Coach onboarding completion status */
   COACH_ONBOARDED: 'fc_onboarded_coach',
+  /** Just completed onboarding flag (sessionStorage) */
+  ONBOARDING_JUST_COMPLETED: 'fc_onboarding_just_completed',
+  /** Signup in progress flag (sessionStorage) */
+  SIGNUP_IN_PROGRESS: 'fc_signup_in_progress',
   
   // =====================
   // Subscription & Tier
@@ -38,6 +42,10 @@ export const STORAGE_KEYS = {
   CACHED_TIER: 'fc_cached_tier',
   /** Timestamp of cached tier */
   TIER_TIMESTAMP: 'fc_tier_timestamp',
+  /** Upgrade protection (instant access after purchase) */
+  UPGRADE_PROTECTION: 'fc_upgrade_protection',
+  /** Billing interval preference */
+  BILLING_INTERVAL: 'fc_billing_interval',
   
   // =====================
   // Native App Cache
@@ -54,6 +62,30 @@ export const STORAGE_KEYS = {
   THEME: 'theme',
   /** Cookie consent status */
   COOKIE_CONSENT: 'fc_cookie_consent',
+  
+  // =====================
+  // Location
+  // =====================
+  /** Manual location override */
+  MANUAL_LOCATION: 'fc_manual_location',
+  /** Session precise location */
+  SESSION_PRECISE_LOCATION: 'fc_session_precise_location',
+  /** Location prompt dismissed */
+  LOCATION_PROMPT_DISMISSED: 'fc_location_prompt_dismissed',
+  /** IP-based location cache */
+  IP_LOCATION_CACHE: 'fc_ip_location_cache',
+  /** Marketplace location filter */
+  MARKETPLACE_LOCATION_FILTER: 'fc_marketplace_location_filter',
+  /** User location data */
+  USER_LOCATION: 'fc_user_location',
+  
+  // =====================
+  // UI State
+  // =====================
+  /** Page help dismissed prefix (append page id) */
+  PAGE_HELP_PREFIX: 'fc_page_help_',
+  /** Dismissed goal suggestions */
+  DISMISSED_GOAL_SUGGESTIONS: 'fc_dismissed_goal_suggestions',
   
   // =====================
   // 2FA
@@ -78,6 +110,17 @@ export function getStorage<T>(key: StorageKey): T | null {
 }
 
 /**
+ * Get a raw string value from localStorage (for simple string values)
+ */
+export function getStorageRaw(key: StorageKey): string | null {
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Set a value in localStorage with type safety
  */
 export function setStorage<T>(key: StorageKey, value: T): void {
@@ -85,6 +128,17 @@ export function setStorage<T>(key: StorageKey, value: T): void {
     localStorage.setItem(key, JSON.stringify(value));
   } catch {
     // Storage error (quota exceeded, private browsing, etc.)
+  }
+}
+
+/**
+ * Set a raw string value in localStorage
+ */
+export function setStorageRaw(key: StorageKey, value: string): void {
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // Storage error
   }
 }
 
@@ -126,7 +180,10 @@ export function clearSessionStorage(): void {
     removeStorage(STORAGE_KEYS.COACH_ONBOARDED);
     removeStorage(STORAGE_KEYS.CACHED_TIER);
     removeStorage(STORAGE_KEYS.TIER_TIMESTAMP);
+    removeStorage(STORAGE_KEYS.UPGRADE_PROTECTION);
     sessionStorage.removeItem(STORAGE_KEYS.TWO_FACTOR_VERIFIED);
+    sessionStorage.removeItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED);
+    sessionStorage.removeItem(STORAGE_KEYS.SIGNUP_IN_PROGRESS);
   } catch {
     // Storage error
   }

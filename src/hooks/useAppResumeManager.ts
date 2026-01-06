@@ -49,24 +49,13 @@ export function useSimpleAppResume() {
   }, [handleResume]);
 }
 
-// Legacy exports for backward compatibility during migration
-export type ResumePriority = 'immediate' | 'fast' | 'background';
-export interface ResumeHandler {
-  id: string;
-  priority: ResumePriority;
-  handler: () => void | Promise<void>;
-  delay?: number;
-  webOnly?: boolean;
-  nativeOnly?: boolean;
-}
+// Legacy delays - still used by some hooks during resume
 export const BACKGROUND_DELAYS = {
-  session: 0,
-  viewRestore: 100,
   subscription: 3000,
   boost: 4000,
   wearable: 5000,
   sessionActivity: 6000,
-};
+} as const;
 
 /**
  * @deprecated Use useSimpleAppResume instead. This is a no-op for backward compatibility.

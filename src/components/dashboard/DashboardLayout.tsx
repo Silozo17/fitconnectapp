@@ -6,6 +6,7 @@ import { useCoachOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useCoachProfileRealtime } from "@/hooks/useCoachProfileRealtime";
 import { usePlatformSubscriptionRealtime } from "@/hooks/usePlatformSubscriptionRealtime";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 // OPTIMIZED: Moved useAutoAwardCoachBadges to specific pages (CoachOverview, CoachAchievements)
 // to prevent 3 database queries on every navigation
 import CoachSidebar from "./CoachSidebar";
@@ -43,18 +44,18 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   // PERFORMANCE: Check localStorage for known-onboarded coaches to skip DB check
   const isKnownOnboarded = useMemo(() => {
     if (typeof localStorage === 'undefined') return false;
-    return localStorage.getItem('fitconnect_coach_onboarded') === 'true';
+    return localStorage.getItem(STORAGE_KEYS.COACH_ONBOARDED) === 'true';
   }, []);
 
   // Check if onboarding was JUST completed (set by CoachOnboarding before navigation)
   const justCompletedOnboarding = useMemo(() => {
     if (typeof sessionStorage === 'undefined') return false;
-    const flag = sessionStorage.getItem('fitconnect_onboarding_just_completed');
+    const flag = sessionStorage.getItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED);
     if (flag === 'coach') {
       // Remove the flag immediately so it doesn't persist
-      sessionStorage.removeItem('fitconnect_onboarding_just_completed');
+      sessionStorage.removeItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED);
       // Set the permanent flag for future visits
-      localStorage.setItem('fitconnect_coach_onboarded', 'true');
+      localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
       if (import.meta.env.DEV) {
         console.log('[DashboardLayout] Detected just-completed onboarding flag, skipping redirect check');
       }
@@ -77,7 +78,7 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   // When onboarding status confirms user is onboarded, cache it
   useEffect(() => {
     if (onboardingStatus?.isOnboarded && !isKnownOnboarded) {
-      localStorage.setItem('fitconnect_coach_onboarded', 'true');
+      localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
     }
   }, [onboardingStatus?.isOnboarded, isKnownOnboarded]);
 

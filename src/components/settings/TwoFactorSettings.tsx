@@ -15,6 +15,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { toast } from "sonner";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -97,7 +98,7 @@ export const TwoFactorSettings = () => {
       if (error) throw error;
 
       // Clear 2FA session verification
-      sessionStorage.removeItem("fitconnect_2fa_verified");
+      sessionStorage.removeItem(STORAGE_KEYS.TWO_FACTOR_VERIFIED);
 
       setTwoFactorEnabled(false);
       setShowDisableDialog(false);
@@ -126,7 +127,7 @@ export const TwoFactorSettings = () => {
       if (error) throw error;
 
       // Clear session verification so they need to verify again
-      sessionStorage.removeItem("fitconnect_2fa_verified");
+      sessionStorage.removeItem(STORAGE_KEYS.TWO_FACTOR_VERIFIED);
 
       setTwoFactorEnabled(true);
       toast.success(t("twoFactor.enabled", "Two-factor authentication has been enabled"));
