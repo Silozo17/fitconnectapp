@@ -4,6 +4,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { triggerHaptic } from '@/lib/despia';
 
+/**
+ * Get the public URL for a level badge image from storage
+ * Maps level 1-10 directly, levels 11+ use level_10 badge until more are added
+ */
+export function getLevelBadgeUrl(level: number): string {
+  // Clamp to available badges (1-10, more coming soon)
+  const badgeLevel = Math.min(Math.max(level, 1), 10);
+  const { data } = supabase.storage
+    .from('client-levels')
+    .getPublicUrl(`level_${badgeLevel}.webp`);
+  return data.publicUrl;
+}
+
 export interface ClientXP {
   id: string;
   client_id: string;

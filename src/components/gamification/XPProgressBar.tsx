@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next';
 import { Progress } from '@/components/ui/progress';
-import { useClientXP, getLevelTitle, calculateLevelFromXP } from '@/hooks/useGamification';
-import { Zap } from 'lucide-react';
+import { useClientXP, getLevelTitle, calculateLevelFromXP, getLevelBadgeUrl } from '@/hooks/useGamification';
 import { ProgressCircle } from '@/components/stats/ProgressCircle';
 import { InfoTooltip } from '@/components/ui/info-tooltip';
 import { getMetricExplanation } from '@/lib/metric-explanations';
+import { Zap } from 'lucide-react';
 
 interface XPProgressBarProps {
   compact?: boolean;
@@ -52,11 +52,14 @@ export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgres
             showCompletedIcon={false}
           >
             <div className="flex flex-col items-center justify-center">
-              <Zap className="h-6 w-6 text-primary mb-1" />
-              <span className="text-2xl font-bold text-foreground font-display">
+              <img
+                src={getLevelBadgeUrl(level)}
+                alt={`Level ${level}`}
+                className="h-10 w-10 rounded-lg object-cover"
+              />
+              <span className="text-lg font-bold text-foreground font-display mt-1">
                 {level}
               </span>
-              <span className="text-[10px] text-muted-foreground">LEVEL</span>
             </div>
           </ProgressCircle>
           
@@ -77,8 +80,12 @@ export function XPProgressBar({ compact = false, variant = 'linear' }: XPProgres
     <div className="glass-card rounded-xl p-4">
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
-          <div className="bg-primary/20 rounded-full p-2">
-            <Zap className="h-5 w-5 text-primary" />
+          <div className="h-10 w-10 rounded-xl overflow-hidden border border-primary/20">
+            <img
+              src={getLevelBadgeUrl(level)}
+              alt={`Level ${level}`}
+              className="h-full w-full object-cover"
+            />
           </div>
           <div>
             <div className="flex items-center gap-1.5">

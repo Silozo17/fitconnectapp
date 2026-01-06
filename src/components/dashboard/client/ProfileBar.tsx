@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AvatarStatsHero } from '@/components/dashboard/AvatarStatsHero';
 import { useSelectedAvatar, getAvatarImageUrl } from '@/hooks/useAvatars';
-import { useClientXP, getLevelTitle } from '@/hooks/useGamification';
+import { useClientXP, getLevelTitle, getLevelBadgeUrl } from '@/hooks/useGamification';
 import { useUserProfile } from '@/hooks/useUserProfile';
 
 export function ProfileBar() {
@@ -66,8 +66,25 @@ export function ProfileBar() {
                 </div>
               </div>
               {/* Level badge */}
-              <div className="absolute -bottom-1 -right-1 bg-primary text-primary-foreground text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-elevation-2">
-                {currentLevel}
+              <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-xl overflow-hidden shadow-elevation-2 border-2 border-background">
+                <img
+                  src={getLevelBadgeUrl(currentLevel)}
+                  alt={`Level ${currentLevel}`}
+                  className="h-full w-full object-cover"
+                />
+              </div>
+            </div>
+            
+            {/* Level Badge Card */}
+            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20">
+              <img
+                src={getLevelBadgeUrl(currentLevel)}
+                alt={`Level ${currentLevel}`}
+                className="h-8 w-8 rounded-lg object-cover"
+              />
+              <div className="text-xs">
+                <p className="font-bold text-primary">Lvl {currentLevel}</p>
+                <p className="text-muted-foreground">{levelTitle}</p>
               </div>
             </div>
             
