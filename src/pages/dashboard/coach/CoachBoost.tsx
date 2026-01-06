@@ -44,16 +44,6 @@ const CoachBoost = () => {
           description="Get more exposure in search results and attract new clients"
         />
         <div className="space-y-6">
-        {/* Header */}
-          <div>
-            <h1 className="font-display text-2xl font-bold text-foreground flex items-center gap-2">
-              <Rocket className="h-6 w-6 text-primary" />
-              Boost <span className="gradient-text">Visibility</span>
-            </h1>
-            <p className="text-muted-foreground">
-              {t('boostPage.subtitle')}
-            </p>
-          </div>
 
           {/* Toggle Card */}
           <BoostToggleCard />

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Package, RefreshCcw, Plus, Edit, ToggleLeft, ToggleRight, Loader2 } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { useLocale } from "@/contexts/LocaleContext";
 import { useTranslation } from "@/hooks/useTranslation";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { DashboardSectionHeader } from "@/components/shared";
 
 const CoachPackages = () => {
   const { t } = useTranslation('coach');
@@ -186,14 +187,11 @@ const CoachPackages = () => {
         title="Session Packages"
         description="Create bundles and subscription plans for your services"
       />
-      <div className="mb-6">
-        <h1 className="text-2xl font-display font-bold">
-          Service <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">Packages</span>
-        </h1>
-        <p className="text-muted-foreground">
-          {t('packagesPage.subtitle')}
-        </p>
-      </div>
+      <DashboardSectionHeader
+        title="Service Packages"
+        description={t('packagesPage.subtitle')}
+        className="mb-6"
+      />
 
       {isLoading ? (
         <div className="flex items-center justify-center py-12">

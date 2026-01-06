@@ -40,6 +40,7 @@ import { useCoachEarnings, useCoachProfile, useStripeExpressLogin } from "@/hook
 import { format } from "date-fns";
 import { FeatureGate } from "@/components/FeatureGate";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
+import { MetricCard, StatsGrid } from "@/components/shared";
 
 type PeriodType = "week" | "month" | "quarter" | "year";
 
@@ -124,71 +125,38 @@ const CoachEarnings = () => {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Net Revenue (Primary) */}
-        <Card variant="glass" className="p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
-              <PoundSterling className="w-6 h-6 text-success" />
-            </div>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="w-4 h-4 text-muted-foreground" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="text-sm">
-                    <span className="text-muted-foreground">{t("earnings.grossRevenue")}: </span>
-                    <span className="font-medium">{formatCurrency(stats.grossRevenue)}</span>
-                    <br />
-                    <span className="text-muted-foreground">{t("earnings.platformFee", { rate: stats.commissionRate })}: </span>
-                    <span className="font-medium">-{formatCurrency(stats.commissionPaid)}</span>
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </div>
-          <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.netRevenue)}</p>
-          <p className="text-sm text-muted-foreground">{t("earnings.netRevenue")}</p>
-          <p className="text-xs text-muted-foreground mt-1">{t("earnings.afterPlatformFee", { rate: stats.commissionRate })}</p>
-        </Card>
-
-        <Card variant="glass" className="p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-              <Calendar className="w-6 h-6 text-primary" />
-            </div>
-            {stats.sessionsChange !== 0 && (
-              <div className={`flex items-center gap-1 text-sm ${stats.sessionsChange > 0 ? 'text-success' : 'text-destructive'}`}>
-                {stats.sessionsChange > 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                {Math.abs(stats.sessionsChange)}%
-              </div>
-            )}
-          </div>
-          <p className="text-3xl font-display font-bold text-foreground">{stats.sessions}</p>
-          <p className="text-sm text-muted-foreground">{t("earnings.sessionsCompleted")}</p>
-        </Card>
-
-        <Card variant="glass" className="p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-              <PoundSterling className="w-6 h-6 text-accent" />
-            </div>
-          </div>
-          <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.avgSession)}</p>
-          <p className="text-sm text-muted-foreground">{t("earnings.avgNetPerSession")}</p>
-        </Card>
-
-        <Card variant="glass" className="p-6">
-          <div className="flex items-center justify-between mb-3">
-            <div className="w-12 h-12 rounded-xl bg-warning/10 flex items-center justify-center">
-              <Clock className="w-6 h-6 text-warning" />
-            </div>
-          </div>
-          <p className="text-3xl font-display font-bold text-foreground">{formatCurrency(stats.pending)}</p>
-          <p className="text-sm text-muted-foreground">{t("earnings.pendingNet")}</p>
-        </Card>
-      </div>
+      <StatsGrid columns={{ default: 2, lg: 4 }} gap="default" className="mb-6">
+        <MetricCard
+          icon={PoundSterling}
+          label={t("earnings.netRevenue")}
+          value={formatCurrency(stats.netRevenue)}
+          description={t("earnings.afterPlatformFee", { rate: stats.commissionRate })}
+          color="green"
+          size="sm"
+        />
+        <MetricCard
+          icon={Calendar}
+          label={t("earnings.sessionsCompleted")}
+          value={stats.sessions}
+          trend={stats.sessionsChange !== 0 ? { value: Math.abs(stats.sessionsChange), direction: stats.sessionsChange > 0 ? "up" : "down", suffix: "%" } : undefined}
+          color="primary"
+          size="sm"
+        />
+        <MetricCard
+          icon={PoundSterling}
+          label={t("earnings.avgNetPerSession")}
+          value={formatCurrency(stats.avgSession)}
+          color="purple"
+          size="sm"
+        />
+        <MetricCard
+          icon={Clock}
+          label={t("earnings.pendingNet")}
+          value={formatCurrency(stats.pending)}
+          color="orange"
+          size="sm"
+        />
+      </StatsGrid>
 
       {/* Revenue Chart */}
       <Card variant="glass" className="p-6 mb-6">

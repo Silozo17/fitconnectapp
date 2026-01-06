@@ -23,8 +23,7 @@ import { UserAvatar } from "@/components/shared/UserAvatar";
 import { cn } from "@/lib/utils";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { FeatureGate } from "@/components/FeatureGate";
-import { MetricCard } from "@/components/shared/MetricCard";
-import { StatsGrid } from "@/components/shared/StatsGrid";
+import { MetricCard, StatsGrid, DashboardSectionHeader } from "@/components/shared";
 
 interface Review {
   id: string;
@@ -196,11 +195,8 @@ const CoachReviews = () => {
       </StatsGrid>
 
       {/* Reviews List */}
-      <Card variant="glass" className="glass-card rounded-3xl">
-        <CardHeader>
-          <CardTitle>{t("reviewsPage.allReviews")}</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <DashboardSectionHeader title={t("reviewsPage.allReviews")} className="mb-4" />
+      <div className="space-y-4">
           {reviewsLoading ? (
             <div className="text-center py-12 text-muted-foreground">{t("reviewsPage.loading")}</div>
           ) : reviews.length === 0 ? (
@@ -305,8 +301,7 @@ const CoachReviews = () => {
               })}
             </div>
           )}
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Dispute Modal */}
       <Dialog open={disputeModalOpen} onOpenChange={setDisputeModalOpen}>

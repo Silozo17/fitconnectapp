@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Package, TrendingUp, Target, DollarSign, ArrowUpRight, ArrowDownRight } from "lucide-react";
+import { Package, TrendingUp, Target, DollarSign } from "lucide-react";
 import { usePackageAnalytics, usePackageComparison } from "@/hooks/usePackageAnalytics";
 import { useLocale } from "@/contexts/LocaleContext";
 import { PackageComparisonChart } from "@/components/dashboard/coach/PackageComparisonChart";
@@ -19,6 +19,7 @@ import {
 import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, BarChart, Bar, CartesianGrid } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FeatureGate } from "@/components/FeatureGate";
+import { DashboardSectionHeader, MetricCard, StatsGrid } from "@/components/shared";
 
 const CoachPackageAnalytics = () => {
   const { t } = useTranslation();
@@ -59,77 +60,55 @@ const CoachPackageAnalytics = () => {
       <FeatureGate feature="package_analytics">
       <div className="space-y-6 overflow-x-hidden">
         {/* Header with Period Selector */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-display font-bold text-foreground">
-              {t('analytics.packagePerformance', 'Package Performance')}
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {t('analytics.trackPackages', 'Track how your session packages are performing')}
-            </p>
-          </div>
-          <Select value={period} onValueChange={setPeriod}>
-            <SelectTrigger className="w-[140px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="3months">{t('analytics.last3Months', 'Last 3 Months')}</SelectItem>
-              <SelectItem value="6months">{t('analytics.last6Months', 'Last 6 Months')}</SelectItem>
-              <SelectItem value="12months">{t('analytics.lastYear', 'Last Year')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <DashboardSectionHeader 
+          title={t('analytics.packagePerformance', 'Package Performance')}
+          description={t('analytics.trackPackages', 'Track how your session packages are performing')}
+          action={
+            <Select value={period} onValueChange={setPeriod}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="3months">{t('analytics.last3Months', 'Last 3 Months')}</SelectItem>
+                <SelectItem value="6months">{t('analytics.last6Months', 'Last 6 Months')}</SelectItem>
+                <SelectItem value="12months">{t('analytics.lastYear', 'Last Year')}</SelectItem>
+              </SelectContent>
+            </Select>
+          }
+        />
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card variant="glass">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <DollarSign className="w-4 h-4 text-primary" />
-                <span className="text-sm text-muted-foreground">{t('analytics.totalRevenue', 'Total Revenue')}</span>
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">
-                {formatCurrency(totalRevenue)}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card variant="glass">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Target className="w-4 h-4 text-success" />
-                <span className="text-sm text-muted-foreground">{t('analytics.avgCompletion', 'Avg Completion')}</span>
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">
-                {Math.round(avgCompletionRate)}%
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card variant="glass">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-accent" />
-                <span className="text-sm text-muted-foreground">{t('analytics.topPackage', 'Top Package')}</span>
-              </div>
-              <p className="text-lg font-display font-bold text-foreground truncate">
-                {topPackage?.packageName || '-'}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card variant="glass">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Package className="w-4 h-4 text-warning" />
-                <span className="text-sm text-muted-foreground">{t('analytics.activePurchases', 'Active')}</span>
-              </div>
-              <p className="text-2xl font-display font-bold text-foreground">
-                {totalActivePurchases}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsGrid columns={{ default: 2, md: 4 }} gap="default">
+          <MetricCard
+            icon={DollarSign}
+            label={t('analytics.totalRevenue', 'Total Revenue')}
+            value={formatCurrency(totalRevenue)}
+            color="primary"
+            size="sm"
+          />
+          <MetricCard
+            icon={Target}
+            label={t('analytics.avgCompletion', 'Avg Completion')}
+            value={Math.round(avgCompletionRate)}
+            unit="%"
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={TrendingUp}
+            label={t('analytics.topPackage', 'Top Package')}
+            value={topPackage?.packageName || '-'}
+            color="purple"
+            size="sm"
+          />
+          <MetricCard
+            icon={Package}
+            label={t('analytics.activePurchases', 'Active')}
+            value={totalActivePurchases}
+            color="orange"
+            size="sm"
+          />
+        </StatsGrid>
 
         {/* Tabs */}
         <Tabs defaultValue="overview" className="space-y-4">
