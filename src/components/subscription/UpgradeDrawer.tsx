@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { Check, X, Loader2, Dumbbell, Users, Brain, TrendingUp, Infinity, Headphones, Cog, MessageSquare, Sparkles, Crown, Rocket } from "lucide-react";
+import { Check, ChevronDown, Loader2, Dumbbell, Users, Brain, TrendingUp, Infinity, Headphones, Cog, MessageSquare, Sparkles, Crown, Rocket } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -165,13 +165,14 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
             <div className="absolute inset-0 bg-gradient-to-t from-background via-background/98 via-[45%] to-transparent" />
           </div>
 
-          {/* Close button - top right */}
+          {/* Close button - centered swipe down indicator */}
           <button
             onClick={handleClose}
-            className="absolute right-4 top-4 z-20 rounded-full bg-background/50 p-2 backdrop-blur-sm transition-colors hover:bg-background/70"
-            aria-label="Close"
+            className="absolute left-1/2 -translate-x-1/2 top-[26px] z-20 flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-background/50 backdrop-blur-sm transition-colors hover:bg-background/70"
+            aria-label="Swipe down to close"
           >
-            <X className="h-5 w-5 text-foreground/70" />
+            <div className="w-8 h-1 rounded-full bg-foreground/30" />
+            <ChevronDown className="h-4 w-4 text-foreground/70 animate-bounce" />
           </button>
 
           {/* Restore button - top left (native only) */}

@@ -1208,13 +1208,13 @@ const CoachOnboarding = () => {
                 <>
                   <button onClick={() => openExternalUrl(`${window.location.origin}/terms`)} className="text-primary hover:underline">Terms</button>,{" "}
                   <button onClick={() => openExternalUrl(`${window.location.origin}/privacy`)} className="text-primary hover:underline">Privacy</button>{" "}
-                  & <button onClick={() => openExternalUrl(`${window.location.origin}/terms#eula`)} className="text-primary hover:underline">EULA</button>
+                  & <button onClick={() => openExternalUrl(`${window.location.origin}/eula`)} className="text-primary hover:underline">EULA</button>
                 </>
               ) : (
                 <>
                   <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms</Link>,{" "}
                   <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy</Link>{" "}
-                  & <Link to="/terms#eula" target="_blank" className="text-primary hover:underline">EULA</Link>
+                  & <Link to="/eula" target="_blank" className="text-primary hover:underline">EULA</Link>
                 </>
               )}.
             </p>
