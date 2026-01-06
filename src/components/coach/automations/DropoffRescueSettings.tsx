@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,10 +12,12 @@ import { toast } from "sonner";
 import { DropoffTimeline } from "./DropoffTimeline";
 import { AutomationSummary } from "./AutomationSummary";
 import { AtRiskClientsPanel } from "./AtRiskClientsPanel";
-import { StatCard, StatCardGrid } from "@/components/shared/StatCard";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
 import { useDropoffStats } from "@/hooks/useDropoffStats";
 import { VariableInserter } from "@/components/coach/message-editor/VariableInserter";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 
 export function DropoffRescueSettings() {
   const { t } = useTranslation("coach");
@@ -128,7 +129,7 @@ export function DropoffRescueSettings() {
   return (
     <div className="space-y-6">
       {/* Delivery Notice */}
-      <Alert className="border-border/30 bg-card/30 backdrop-blur-xl">
+      <Alert className="border-border/30 bg-card/30 backdrop-blur-xl rounded-xl">
         <MessageSquare className="h-4 w-4" />
         <AlertDescription className="text-sm">
           <span className="font-medium">{t("automations.dropoff.deliveryNotice", "How Drop-off Rescue works:")}</span>{" "}
@@ -139,201 +140,195 @@ export function DropoffRescueSettings() {
         </AlertDescription>
       </Alert>
 
-      {/* Stats Cards */}
-      <StatCardGrid columns={3}>
-        <StatCard
-          title={t("automations.dropoff.stats.monitored", "Clients Monitored")}
-          value={stats?.totalClients ?? 0}
+      {/* Stats Cards - Compact 3-column grid */}
+      <StatsGrid columns={3} gap="default">
+        <MetricCard
           icon={Users}
-          loading={statsLoading}
+          label={t("automations.dropoff.stats.monitored", "Clients Monitored")}
+          value={statsLoading ? "—" : (stats?.totalClients ?? 0)}
+          color="primary"
+          size="sm"
         />
-        <StatCard
-          title={t("automations.dropoff.stats.atRisk", "Currently at Risk")}
-          value={stats?.atRiskCount ?? 0}
+        <MetricCard
           icon={AlertTriangle}
-          loading={statsLoading}
-          className={stats?.atRiskCount && stats.atRiskCount > 0 ? "border-destructive/50" : ""}
+          label={t("automations.dropoff.stats.atRisk", "Currently at Risk")}
+          value={statsLoading ? "—" : (stats?.atRiskCount ?? 0)}
+          color="red"
+          size="sm"
         />
-        <StatCard
-          title={t("automations.dropoff.stats.messagesSent", "Messages This Month")}
-          value={stats?.messagesSentThisMonth ?? 0}
+        <MetricCard
           icon={Mail}
-          loading={statsLoading}
+          label={t("automations.dropoff.stats.messagesSent", "Messages This Month")}
+          value={statsLoading ? "—" : (stats?.messagesSentThisMonth ?? 0)}
+          color="cyan"
+          size="sm"
         />
-      </StatCardGrid>
+      </StatsGrid>
 
       {/* At-Risk Clients Panel */}
       <AtRiskClientsPanel isEnabled={isEnabled} />
 
-      <Card variant="glass">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <AlertTriangle className="h-5 w-5 text-warning" />
-                {t("automations.dropoff.title", "Client Drop-off Rescue")}
-              </CardTitle>
-              <CardDescription>
-                {t("automations.dropoff.description", "Automatically detect and re-engage clients who become inactive")}
-              </CardDescription>
-            </div>
-            <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Visual Timeline */}
-          <DropoffTimeline 
-            stage1Days={stage1Days}
-            stage2Days={stage2Days}
-            stage3Days={stage3Days}
-            isEnabled={isEnabled}
+      {/* Configuration Section - NO outer Card wrapper */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <DashboardSectionHeader 
+            title={t("automations.dropoff.title", "Client Drop-off Rescue")}
+            description={t("automations.dropoff.description", "Automatically detect and re-engage clients who become inactive")}
+            className="mb-0"
           />
+          <Switch checked={isEnabled} onCheckedChange={setIsEnabled} />
+        </div>
 
-          {/* Helper text explaining timing logic */}
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              {t("automations.dropoff.timingExplanation", "All stages are measured from the client's last activity (workout log, message, or session). When a client becomes active again, they automatically exit the rescue flow.")}
-            </AlertDescription>
-          </Alert>
+        {/* Visual Timeline */}
+        <DropoffTimeline 
+          stage1Days={stage1Days}
+          stage2Days={stage2Days}
+          stage3Days={stage3Days}
+          isEnabled={isEnabled}
+        />
 
-          {/* Stage Configuration */}
-          <div className="space-y-6">
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-primary" />
-                {t("automations.dropoff.stage1Label", "Stage 1: Auto-message client")}
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                {t("automations.dropoff.stage1Help", "Days after last activity before sending automatic check-in")}
-              </p>
-              <div className="flex items-center gap-3 sm:gap-4">
-                <Slider
-                  value={[stage1Days]}
-                  onValueChange={([v]) => setStage1Days(v)}
-                  min={1}
-                  max={14}
-                  step={1}
-                  className="flex-1"
-                  disabled={!isEnabled}
-                />
-                <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
-                  {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage1Days })}
-                </span>
-              </div>
-            </div>
+        {/* Helper text explaining timing logic */}
+        <Alert className="rounded-xl">
+          <Info className="h-4 w-4" />
+          <AlertDescription>
+            {t("automations.dropoff.timingExplanation", "All stages are measured from the client's last activity (workout log, message, or session). When a client becomes active again, they automatically exit the rescue flow.")}
+          </AlertDescription>
+        </Alert>
 
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <Bell className="h-4 w-4 text-warning" />
-                {t("automations.dropoff.stage2Label", "Stage 2: Alert you (coach)")}
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                {t("automations.dropoff.stage2Help", "Days after last activity before you receive a notification")}
-              </p>
-              <div className="flex items-center gap-3 sm:gap-4">
-                <Slider
-                  value={[stage2Days]}
-                  onValueChange={([v]) => setStage2Days(v)}
-                  min={3}
-                  max={21}
-                  step={1}
-                  className="flex-1"
-                  disabled={!isEnabled}
-                />
-                <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
-                  {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage2Days })}
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <Label className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-destructive" />
-                {t("automations.dropoff.stage3Label", "Stage 3: Critical escalation")}
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                {t("automations.dropoff.stage3Help", "Days after last activity before critical notification")}
-              </p>
-              <div className="flex items-center gap-3 sm:gap-4">
-                <Slider
-                  value={[stage3Days]}
-                  onValueChange={([v]) => setStage3Days(v)}
-                  min={7}
-                  max={45}
-                  step={1}
-                  className="flex-1"
-                  disabled={!isEnabled}
-                />
-                <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
-                  {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage3Days })}
-                </span>
-              </div>
-            </div>
-
-            {/* Validation warning */}
-            {!isValidConfig && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  {t("automations.dropoff.invalidConfigWarning", "Stage days must be in ascending order (Stage 1 < Stage 2 < Stage 3)")}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-
-          {/* Message Template Section */}
-          <div className="space-y-4 pt-4 border-t border-border">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <Label className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  {t("automations.dropoff.messageTemplate", "Stage 1 Message Template")}
-                </Label>
-                <VariableInserter onInsert={handleInsertVariable} />
-              </div>
-              <p className="text-xs text-muted-foreground mb-2">
-                {t("automations.dropoff.messageTemplateHelp", "This message is sent automatically when a client reaches Stage 1. Use variables like {client_name} to personalize.")}
-              </p>
-              <Textarea
-                ref={textareaRef}
-                value={stage1Template}
-                onChange={(e) => setStage1Template(e.target.value)}
-                rows={3}
-                className="resize-none"
+        {/* Stage Configuration - bordered sections, not cards */}
+        <div className="space-y-4">
+          <div className="p-4 rounded-xl border border-border bg-card/30 space-y-3">
+            <Label className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-primary" />
+              {t("automations.dropoff.stage1Label", "Stage 1: Auto-message client")}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {t("automations.dropoff.stage1Help", "Days after last activity before sending automatic check-in")}
+            </p>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Slider
+                value={[stage1Days]}
+                onValueChange={([v]) => setStage1Days(v)}
+                min={1}
+                max={14}
+                step={1}
+                className="flex-1"
                 disabled={!isEnabled}
-                placeholder={t("automations.dropoff.messagePlaceholder", "Hey {client_name}! Just checking in...")}
               />
+              <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
+                {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage1Days })}
+              </span>
             </div>
           </div>
 
-          {/* Automation Summary */}
-          <AutomationSummary 
-            isEnabled={isEnabled}
-            summaryPoints={summaryPoints}
-          />
-
-          {/* Action Buttons */}
-          <div className="flex gap-3">
-            <Button 
-              onClick={handleSave} 
-              disabled={isSaving || !isValidConfig}
-              className="flex-1"
-            >
-              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {t("common:common.save", "Save Settings")}
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={handleTestNow}
-              disabled={isTesting || !isEnabled}
-            >
-              {isTesting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
-              {t("automations.dropoff.runDetection", "Run Detection Now")}
-            </Button>
+          <div className="p-4 rounded-xl border border-border bg-card/30 space-y-3">
+            <Label className="flex items-center gap-2">
+              <Bell className="h-4 w-4 text-warning" />
+              {t("automations.dropoff.stage2Label", "Stage 2: Alert you (coach)")}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {t("automations.dropoff.stage2Help", "Days after last activity before you receive a notification")}
+            </p>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Slider
+                value={[stage2Days]}
+                onValueChange={([v]) => setStage2Days(v)}
+                min={3}
+                max={21}
+                step={1}
+                className="flex-1"
+                disabled={!isEnabled}
+              />
+              <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
+                {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage2Days })}
+              </span>
+            </div>
           </div>
-        </CardContent>
-      </Card>
+
+          <div className="p-4 rounded-xl border border-border bg-card/30 space-y-3">
+            <Label className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-destructive" />
+              {t("automations.dropoff.stage3Label", "Stage 3: Critical escalation")}
+            </Label>
+            <p className="text-xs text-muted-foreground">
+              {t("automations.dropoff.stage3Help", "Days after last activity before critical notification")}
+            </p>
+            <div className="flex items-center gap-3 sm:gap-4">
+              <Slider
+                value={[stage3Days]}
+                onValueChange={([v]) => setStage3Days(v)}
+                min={7}
+                max={45}
+                step={1}
+                className="flex-1"
+                disabled={!isEnabled}
+              />
+              <span className="text-sm font-medium w-16 sm:w-20 text-right shrink-0">
+                {t("automations.dropoff.daysAfter", "{{days}} days", { days: stage3Days })}
+              </span>
+            </div>
+          </div>
+
+          {/* Validation warning */}
+          {!isValidConfig && (
+            <Alert variant="destructive" className="rounded-xl">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                {t("automations.dropoff.invalidConfigWarning", "Stage days must be in ascending order (Stage 1 < Stage 2 < Stage 3)")}
+              </AlertDescription>
+            </Alert>
+          )}
+        </div>
+
+        {/* Message Template Section */}
+        <div className="p-4 rounded-xl border border-border bg-card/30 space-y-4">
+          <div className="flex items-center justify-between">
+            <Label className="flex items-center gap-2">
+              <MessageSquare className="h-4 w-4" />
+              {t("automations.dropoff.messageTemplate", "Stage 1 Message Template")}
+            </Label>
+            <VariableInserter onInsert={handleInsertVariable} />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {t("automations.dropoff.messageTemplateHelp", "This message is sent automatically when a client reaches Stage 1. Use variables like {client_name} to personalize.")}
+          </p>
+          <Textarea
+            ref={textareaRef}
+            value={stage1Template}
+            onChange={(e) => setStage1Template(e.target.value)}
+            rows={3}
+            className="resize-none"
+            disabled={!isEnabled}
+            placeholder={t("automations.dropoff.messagePlaceholder", "Hey {client_name}! Just checking in...")}
+          />
+        </div>
+
+        {/* Automation Summary */}
+        <AutomationSummary 
+          isEnabled={isEnabled}
+          summaryPoints={summaryPoints}
+        />
+
+        {/* Action Buttons */}
+        <div className="flex gap-3">
+          <Button 
+            onClick={handleSave} 
+            disabled={isSaving || !isValidConfig}
+            className="flex-1"
+          >
+            {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            {t("common:common.save", "Save Settings")}
+          </Button>
+          <Button 
+            variant="outline"
+            onClick={handleTestNow}
+            disabled={isTesting || !isEnabled}
+          >
+            {isTesting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Play className="h-4 w-4 mr-2" />}
+            {t("automations.dropoff.runDetection", "Run Detection Now")}
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
