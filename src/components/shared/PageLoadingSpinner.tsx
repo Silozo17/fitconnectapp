@@ -2,13 +2,17 @@ import { useTranslation } from "react-i18next";
 import { Dumbbell } from "lucide-react";
 
 export default function PageLoadingSpinner() {
-  const { t } = useTranslation();
+  const { t, ready } = useTranslation();
+
+  // Fallback text if i18n isn't ready yet (prevents empty/broken UI)
+  const loadingText = ready ? t('loading.loadingPage') : 'Loading';
 
   return (
     <div 
       className="min-h-screen flex items-center justify-center bg-background" 
       role="status" 
-      aria-label={t('loading.loadingPage')}
+      aria-label={loadingText}
+      style={{ backgroundColor: 'hsl(var(--background))' }}
     >
       <div className="flex flex-col items-center gap-6">
         {/* Branded loader with dumbbell icon */}
@@ -30,7 +34,7 @@ export default function PageLoadingSpinner() {
         {/* Loading text with shimmer */}
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium text-muted-foreground">
-            {t('loading.loadingPage')}
+            {loadingText}
           </span>
           <span className="flex gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />

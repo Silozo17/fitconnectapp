@@ -285,6 +285,8 @@ const NativeDiagnostics = () => {
         <p className="text-xs text-center text-muted-foreground">
           Current path: {window.location.pathname}
           <br />
+          Time since mount: {Math.round((Date.now() - performance.timing.navigationStart) / 1000)}s
+          <br />
           App version: {import.meta.env.VITE_APP_VERSION || "dev"}
         </p>
       </div>

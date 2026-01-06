@@ -69,6 +69,7 @@ export const BOOT_STAGES = {
   APP_MOUNT: "app_mount",
   AUTH_LISTENER_ATTACHED: "auth_listener_attached",
   AUTH_STATE_RECEIVED: "auth_state_received",
+  AUTH_LOADING_TIMEOUT: "auth_loading_timeout",
   ROLE_FROM_CACHE: "role_from_cache",
   ROLE_FROM_METADATA: "role_from_metadata",
   ROLE_FROM_DB: "role_from_db",
@@ -77,4 +78,6 @@ export const BOOT_STAGES = {
   DASHBOARD_RENDERED: "dashboard_rendered",
   CHUNK_LOAD_ERROR: "chunk_load_error",
   RECOVERY_TRIGGERED: "recovery_triggered",
+  GUEST_ROUTE_TIMEOUT: "guest_route_timeout",
+  GUEST_ROUTE_RENDERED: "guest_route_rendered",
 } as const;

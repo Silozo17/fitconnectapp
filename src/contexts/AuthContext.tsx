@@ -158,6 +158,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     recordBootStage(BOOT_STAGES.AUTH_LISTENER_ATTACHED);
 
+    // Auth loading timeout - prevent indefinite loading on Android
+    // If onAuthStateChange doesn't fire within 4 seconds, assume no user
+    const authLoadingTimeout = setTimeout(() => {
+      setLoading((currentLoading) => {
+        if (currentLoading) {
+          console.warn('[Auth] Loading timeout reached - assuming no authenticated user');
+          recordBootStage(BOOT_STAGES.AUTH_LOADING_TIMEOUT);
+          return false;
+        }
+        return currentLoading;
+      });
+    }, 4000);
+
     // Background session validation
     const validateSession = async () => {
       try {
@@ -192,6 +205,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
       clearTimeout(validationTimeout);
+      clearTimeout(authLoadingTimeout);
       supabase.auth.stopAutoRefresh();
       subscription.unsubscribe();
     };
