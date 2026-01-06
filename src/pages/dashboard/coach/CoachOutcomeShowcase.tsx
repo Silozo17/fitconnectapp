@@ -4,6 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { MetricCard } from "@/components/shared/MetricCard";
+import { StatsGrid } from "@/components/shared/StatsGrid";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
@@ -411,32 +413,36 @@ export default function CoachOutcomeShowcase() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <Card variant="glass">
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-foreground">{showcases.length}</p>
-              <p className="text-xs text-muted-foreground">{t("showcase.totalShowcases", "Total Showcases")}</p>
-            </CardContent>
-          </Card>
-          <Card variant="glass">
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-success">{publishedCount}</p>
-              <p className="text-xs text-muted-foreground">{t("showcase.published", "Published")}</p>
-            </CardContent>
-          </Card>
-          <Card variant="glass">
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-foreground">{eligibleClients.length}</p>
-              <p className="text-xs text-muted-foreground">{t("showcase.eligible", "Eligible Clients")}</p>
-            </CardContent>
-          </Card>
-          <Card variant="glass">
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-foreground">{showcases.filter(s => s.isExternal).length}</p>
-              <p className="text-xs text-muted-foreground">{t("showcase.external", "External")}</p>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsGrid columns={{ default: 2, sm: 4 }} gap="sm" className="mb-6">
+          <MetricCard
+            icon={Camera}
+            label={t("showcase.totalShowcases", "Total Showcases")}
+            value={showcases.length}
+            color="primary"
+            size="sm"
+          />
+          <MetricCard
+            icon={Eye}
+            label={t("showcase.published", "Published")}
+            value={publishedCount}
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={Users}
+            label={t("showcase.eligible", "Eligible Clients")}
+            value={eligibleClients.length}
+            color="blue"
+            size="sm"
+          />
+          <MetricCard
+            icon={ExternalLink}
+            label={t("showcase.external", "External")}
+            value={showcases.filter(s => s.isExternal).length}
+            color="purple"
+            size="sm"
+          />
+        </StatsGrid>
 
         {/* Showcases List */}
         {showcases.length === 0 ? (

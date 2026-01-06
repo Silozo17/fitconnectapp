@@ -1,4 +1,3 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { Activity, Heart, Moon, Flame, AlertTriangle } from "lucide-react";
@@ -25,8 +24,7 @@ export function ClientWearableRow({ client, hasAlert, alertType }: Props) {
   const calories = getLatestValue("calories");
 
   return (
-    <Card variant="glass" className={`glass-card ${hasAlert ? "border-warning/50" : ""}`}>
-      <CardContent className="p-3 sm:p-4">
+    <div className={`p-3 sm:p-4 rounded-xl border bg-card/50 ${hasAlert ? "border-warning/50" : "border-border"}`}>
         <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <UserAvatar
@@ -67,7 +65,6 @@ export function ClientWearableRow({ client, hasAlert, alertType }: Props) {
             </div>
           </div>
         </div>
-      </CardContent>
-    </Card>
+    </div>
   );
 }
