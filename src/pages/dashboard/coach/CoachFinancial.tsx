@@ -252,7 +252,9 @@ export default function CoachFinancial() {
 
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-4">
-            <Card variant="glass" className="glass-card">
+            <Card variant="glass" className="relative overflow-hidden glass-card">
+              {/* White accent line for invoices */}
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
               <CardHeader>
                 <CardTitle>{t("financial.tabs.invoices")}</CardTitle>
                 <CardDescription>{t("financial.manageInvoices")}</CardDescription>
@@ -290,7 +292,9 @@ export default function CoachFinancial() {
 
           {/* Expenses Tab */}
           <TabsContent value="expenses" className="space-y-4">
-            <Card variant="glass" className="glass-card">
+            <Card variant="glass" className="relative overflow-hidden glass-card">
+              {/* White accent line for expenses */}
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
               <CardHeader>
                 <CardTitle>{t("financial.tabs.expenses")}</CardTitle>
                 <CardDescription>{t("financial.trackExpenses")}</CardDescription>
@@ -328,7 +332,9 @@ export default function CoachFinancial() {
             <FeatureGate feature="advanced_reporting">
               <div className="grid gap-4 lg:grid-cols-2">
                 {/* Income vs Expenses Chart */}
-                <Card variant="glass" className="glass-card">
+                <Card variant="glass" className="relative overflow-hidden glass-card">
+                  {/* Blue accent line for charts */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400/60 via-blue-500/40 to-transparent" />
                   <CardHeader>
                     <CardTitle>{t("financial.reports.incomeVsExpenses")}</CardTitle>
                     <CardDescription>{t("financial.reports.last6Months")}</CardDescription>
@@ -353,7 +359,9 @@ export default function CoachFinancial() {
                 </Card>
 
                 {/* Expense Breakdown */}
-                <Card variant="glass" className="glass-card">
+                <Card variant="glass" className="relative overflow-hidden glass-card">
+                  {/* Blue accent line for charts */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400/60 via-blue-500/40 to-transparent" />
                   <CardHeader>
                     <CardTitle>{t("financial.reports.expenseBreakdown")}</CardTitle>
                     <CardDescription>{t("financial.reports.byCategory")}</CardDescription>

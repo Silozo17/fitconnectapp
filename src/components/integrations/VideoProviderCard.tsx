@@ -42,9 +42,11 @@ const VideoProviderCard = ({
 
   return (
     <Card variant="glass" className={cn(
-      "transition-all",
+      "relative overflow-hidden transition-all",
       isBlocked && !isConnected ? "opacity-60" : "hover:border-primary/30"
     )}>
+      {/* Top accent line - blue for integrations */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400/60 via-blue-500/40 to-transparent" />
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

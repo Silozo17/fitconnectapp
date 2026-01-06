@@ -193,7 +193,9 @@ const CoachPlans = () => {
         <TabsContent value="workout">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filterPlans(workoutPlans).map((plan) => (
-              <Card key={plan.id} variant="glass" className="p-6 hover:-translate-y-1 transition-transform">
+              <Card key={plan.id} variant="glass" className="relative overflow-hidden p-6 hover:-translate-y-1 transition-transform">
+                {/* Primary accent line for workout plans */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-primary/40 to-transparent" />
                 <div className="flex items-start justify-between mb-4">
                   <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                     <Dumbbell className="w-6 h-6 text-primary" />
@@ -266,7 +268,9 @@ const CoachPlans = () => {
               const content = plan.content as any;
               const targetCalories = content?.targets?.calories;
               return (
-                <Card key={plan.id} variant="glass" className="p-6 hover:-translate-y-1 transition-transform">
+                <Card key={plan.id} variant="glass" className="relative overflow-hidden p-6 hover:-translate-y-1 transition-transform">
+                  {/* Green accent line for nutrition plans */}
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-400/60 via-green-500/40 to-transparent" />
                   <div className="flex items-start justify-between mb-4">
                     <div className="w-12 h-12 rounded-xl bg-success/10 flex items-center justify-center">
                       <Apple className="w-6 h-6 text-success" />

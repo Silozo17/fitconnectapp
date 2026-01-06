@@ -657,7 +657,9 @@ const CoachSchedule = () => {
           ) : (
             <>
               {/* Week Navigation */}
-              <Card variant="glass" className="p-4 mb-4">
+              <Card variant="glass" className="relative overflow-hidden p-4 mb-4">
+                {/* Primary accent line for calendar */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-primary/40 to-transparent" />
                 <div className="flex items-center justify-between">
                   <Button variant="ghost" size="icon" onClick={() => setWeekStart(prev => addDays(prev, -7))}>
                     <ChevronLeft className="w-5 h-5" />
@@ -691,7 +693,9 @@ const CoachSchedule = () => {
               </Card>
 
               {/* Calendar Grid with absolute positioning for multi-hour events */}
-              <Card variant="glass" className="overflow-hidden">
+              <Card variant="glass" className="relative overflow-hidden">
+                {/* Primary accent line for calendar grid */}
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-primary/40 to-transparent z-10" />
                 <div className="overflow-x-auto">
                   <div className="min-w-[800px]">
                     {/* Header */}
@@ -857,7 +861,9 @@ const CoachSchedule = () => {
 
         {/* Booking Requests Tab */}
         <TabsContent value="requests">
-          <Card variant="glass">
+          <Card variant="glass" className="relative overflow-hidden">
+            {/* Orange accent line for pending requests */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-400/60 via-orange-500/40 to-transparent" />
             <div className="p-4 border-b border-border">
               <h3 className="font-display font-bold text-foreground">{t("schedule.pendingRequests")}</h3>
             </div>
@@ -954,7 +960,9 @@ const CoachSchedule = () => {
           )}
 
           {/* Booking Settings Card */}
-          <Card variant="glass">
+          <Card variant="glass" className="relative overflow-hidden">
+            {/* White accent line for settings */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
             <div className="p-4 border-b border-border">
               <h3 className="font-display font-bold text-foreground">{t("schedule.bookingSettings.title")}</h3>
               <p className="text-sm text-muted-foreground">{t("schedule.bookingSettings.subtitle")}</p>
@@ -1077,7 +1085,9 @@ const CoachSchedule = () => {
           </Card>
 
           {/* Weekly Availability Card */}
-          <Card variant="glass">
+          <Card variant="glass" className="relative overflow-hidden">
+            {/* White accent line for availability */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
             <div className="p-4 border-b border-border">
               <h3 className="font-display font-bold text-foreground">{t("schedule.weeklyAvailability.title")}</h3>
               <p className="text-sm text-muted-foreground">{t("schedule.weeklyAvailability.subtitle")}</p>
@@ -1144,7 +1154,9 @@ const CoachSchedule = () => {
           </Card>
 
           {/* Session Types */}
-          <Card variant="glass" className="mt-6">
+          <Card variant="glass" className="relative overflow-hidden mt-6">
+            {/* Primary accent line for session types */}
+            <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-primary/40 to-transparent" />
             <div className="p-4 border-b border-border flex items-center justify-between">
               <div>
                 <h3 className="font-display font-bold text-foreground">{t("schedule.sessionTypes.title")}</h3>
