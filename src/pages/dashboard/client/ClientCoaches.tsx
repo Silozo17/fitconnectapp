@@ -13,6 +13,7 @@ import { useMyShowcaseConsents } from "@/hooks/useClientShowcaseConsents";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { ShowcaseConsentCard } from "@/components/coaches/ShowcaseConsentCard";
 import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
+import { DashboardSectionHeader, ContentSection } from "@/components/shared";
 
 const ClientCoaches = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -37,6 +38,7 @@ const ClientCoaches = () => {
       setSearchParams({}, { replace: true });
     }
   }, [targetCoachId, isLoading, coaches, setSearchParams]);
+
   return (
     <ClientDashboardLayout
       title="My Coaches"
@@ -50,31 +52,27 @@ const ClientCoaches = () => {
       />
 
       <div className="mb-11">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
-              My <span className="gradient-text">Coaches</span>
-            </h2>
-            <p className="text-muted-foreground text-sm mt-1">
-              {coaches.length} active connection{coaches.length !== 1 ? "s" : ""}
-            </p>
-          </div>
-          <Button asChild className="shrink-0">
-            <Link to="/dashboard/client/find-coaches">
-              <UserPlus className="w-4 h-4 mr-2" />
-              Find More Coaches
-            </Link>
-          </Button>
-        </div>
+        <DashboardSectionHeader
+          title="My Coaches"
+          description={`${coaches.length} active connection${coaches.length !== 1 ? "s" : ""}`}
+          action={
+            <Button asChild className="rounded-xl">
+              <Link to="/dashboard/client/find-coaches">
+                <UserPlus className="w-4 h-4 mr-2" />
+                Find More Coaches
+              </Link>
+            </Button>
+          }
+        />
       </div>
 
       {error && (
-        <Alert variant="destructive" className="mb-6">
+        <Alert variant="destructive" className="mb-6 rounded-2xl">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription className="flex items-center justify-between">
             <span>Failed to load coaches. Please try again.</span>
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
+            <Button variant="outline" size="sm" className="rounded-xl" onClick={() => refetch()}>
               Retry
             </Button>
           </AlertDescription>
@@ -86,20 +84,20 @@ const ClientCoaches = () => {
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
         </div>
       ) : coaches.length === 0 ? (
-        <Card>
-          <CardContent className="py-12 text-center">
-            <UserPlus className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No coaches yet</h3>
-            <p className="text-muted-foreground mb-4">
-              Browse our marketplace to find a coach that fits your goals.
-            </p>
-            <Button asChild>
-              <Link to="/dashboard/client/find-coaches">Browse Coaches</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        <ContentSection colorTheme="muted" className="py-16 text-center border-dashed">
+          <div className="w-20 h-20 mx-auto mb-6 rounded-3xl bg-muted/50 flex items-center justify-center">
+            <UserPlus className="w-10 h-10 text-muted-foreground" />
+          </div>
+          <h3 className="text-xl font-bold mb-2 font-display">No coaches yet</h3>
+          <p className="text-muted-foreground text-lg max-w-sm mx-auto mb-6">
+            Browse our marketplace to find a coach that fits your goals.
+          </p>
+          <Button asChild className="rounded-xl">
+            <Link to="/dashboard/client/find-coaches">Browse Coaches</Link>
+          </Button>
+        </ContentSection>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {coaches.map((connection) => {
             const consent = consentsMap?.get(connection.coach.id) || null;
             const isTargetCoach = connection.coach.id === targetCoachId;
@@ -110,13 +108,13 @@ const ClientCoaches = () => {
                 ref={(el) => {
                   if (el) coachCardRefs.current.set(connection.coach.id, el);
                 }}
-                className={`hover:border-primary/50 transition-colors ${isTargetCoach ? 'ring-2 ring-primary' : ''}`}
+                className={`rounded-3xl hover:border-primary/50 transition-colors ${isTargetCoach ? 'ring-2 ring-primary' : ''}`}
               >
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <Avatar className="w-16 h-16">
+                    <Avatar className="w-16 h-16 rounded-2xl">
                       <AvatarImage src={connection.coach.profile_image_url || undefined} />
-                      <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                      <AvatarFallback className="bg-primary text-primary-foreground text-lg rounded-2xl">
                         {connection.coach.display_name?.[0] || "C"}
                       </AvatarFallback>
                     </Avatar>
@@ -126,7 +124,7 @@ const ClientCoaches = () => {
                       </h3>
                       <div className="flex flex-wrap gap-1 mt-1 mb-2">
                         {connection.coach.coach_types?.slice(0, 2).map((type) => (
-                          <Badge key={type} variant="secondary" className="text-xs">
+                          <Badge key={type} variant="secondary" className="text-xs rounded-lg">
                             {getCoachTypeDisplayLabel(type)}
                           </Badge>
                         ))}
@@ -139,13 +137,13 @@ const ClientCoaches = () => {
                     </div>
                   </div>
                   <div className="flex gap-2 mt-4">
-                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Button variant="outline" className="flex-1 rounded-xl" asChild>
                       <Link to={`/dashboard/client/messages/${connection.coach.id}`}>
                         <MessageSquare className="w-4 h-4 mr-2" />
                         Message
                       </Link>
                     </Button>
-                    <Button variant="outline" size="sm" className="flex-1" asChild>
+                    <Button variant="outline" className="flex-1 rounded-xl" asChild>
                       <Link to="/dashboard/client/sessions">
                         <Calendar className="w-4 h-4 mr-2" />
                         Sessions
@@ -165,7 +163,7 @@ const ClientCoaches = () => {
                         <span className="font-medium">Transformation Showcase</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant={consent ? "default" : "secondary"} className="text-xs">
+                        <Badge variant={consent ? "default" : "secondary"} className="text-xs rounded-lg">
                           {consent ? (
                             consent.consentType === "full" ? "Full" :
                             consent.consentType === "with_name" ? "With Name" :

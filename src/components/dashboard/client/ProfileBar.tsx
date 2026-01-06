@@ -1,9 +1,7 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { AvatarStatsHero } from '@/components/dashboard/AvatarStatsHero';
@@ -34,7 +32,7 @@ export function ProfileBar() {
   
   if (isLoading) {
     return (
-      <Card variant="elevated" className="mb-6 p-5">
+      <Card variant="elevated" className="mb-6 p-5 rounded-3xl">
         <div className="flex items-center gap-4">
           <Skeleton className="h-16 w-16 rounded-2xl" />
           <div className="space-y-2 flex-1">
@@ -48,11 +46,11 @@ export function ProfileBar() {
   
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <Card variant="elevated" className="mb-6 overflow-hidden">
+      <Card variant="elevated" className="mb-6 overflow-hidden rounded-3xl">
         <CollapsibleTrigger asChild>
           <button className="w-full p-5 flex items-center gap-4 hover:bg-secondary/30 transition-all duration-200">
-            {/* Avatar - Premium styling */}
-            <div className="relative">
+            {/* Avatar with Level Badge Overlay */}
+            <div className="relative shrink-0">
               <div className="h-16 w-16 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/20 p-0.5">
                 <div className="h-full w-full rounded-[14px] overflow-hidden bg-card">
                   <img
@@ -65,7 +63,7 @@ export function ProfileBar() {
                   />
                 </div>
               </div>
-              {/* Level badge */}
+              {/* Level badge overlay */}
               <div className="absolute -bottom-2 -right-2 h-8 w-8 rounded-xl overflow-hidden shadow-elevation-2 border-2 border-background">
                 <img
                   src={getLevelBadgeUrl(currentLevel)}
@@ -75,23 +73,14 @@ export function ProfileBar() {
               </div>
             </div>
             
-            {/* Level Badge Card */}
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-primary/10 border border-primary/20">
-              <img
-                src={getLevelBadgeUrl(currentLevel)}
-                alt={`Level ${currentLevel}`}
-                className="h-8 w-8 rounded-lg object-cover"
-              />
-              <div className="text-xs">
-                <p className="font-bold text-primary">Lvl {currentLevel}</p>
-                <p className="text-muted-foreground">{levelTitle}</p>
-              </div>
-            </div>
-            
             {/* Info */}
-            <div className="flex-1 text-left">
-              <h2 className="font-semibold text-lg text-foreground font-display">{displayName}</h2>
-              <p className="text-sm text-muted-foreground">{levelTitle}</p>
+            <div className="flex-1 text-left min-w-0">
+              <h2 className="font-semibold text-lg text-foreground font-display truncate">{displayName}</h2>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="font-medium text-primary">Lvl {currentLevel}</span>
+                <span>•</span>
+                <span className="truncate">{levelTitle}</span>
+              </div>
               
               {/* XP Progress bar */}
               <div className="mt-2 flex items-center gap-2">
@@ -110,7 +99,7 @@ export function ProfileBar() {
             {/* Expand indicator */}
             <ChevronRight 
               className={cn(
-                'h-5 w-5 text-muted-foreground transition-transform duration-300',
+                'h-5 w-5 text-muted-foreground transition-transform duration-300 shrink-0',
                 isOpen && 'rotate-90'
               )} 
             />
@@ -118,7 +107,7 @@ export function ProfileBar() {
         </CollapsibleTrigger>
         
         <CollapsibleContent className="border-t border-border/50">
-          <div className="p-5 pt-0">
+          <div className="p-5">
             <AvatarStatsHero firstName={profile?.first_name || ''} />
           </div>
         </CollapsibleContent>

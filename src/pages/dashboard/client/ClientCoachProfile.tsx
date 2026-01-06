@@ -83,7 +83,7 @@ const ClientCoachProfile = () => {
       <ClientDashboardLayout title="Coach Not Found" description="The requested coach profile could not be found">
         <div className="min-h-[400px] flex flex-col items-center justify-center gap-4">
           <p className="text-muted-foreground">Coach not found</p>
-          <Button asChild>
+          <Button asChild className="rounded-xl">
             <Link to="/dashboard/client/find-coaches">Browse Coaches</Link>
           </Button>
         </div>
@@ -100,7 +100,7 @@ const ClientCoachProfile = () => {
     >
       {/* Back Button */}
       <div className="mb-6">
-        <Button variant="ghost" asChild size="sm">
+        <Button variant="ghost" asChild className="rounded-xl">
           <Link to="/dashboard/client/find-coaches">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Find Coaches
@@ -113,7 +113,7 @@ const ClientCoachProfile = () => {
         {/* Main Content Column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Hero Section */}
-          <Card className="overflow-hidden border-0 shadow-lg">
+          <Card className="rounded-3xl overflow-hidden border-0 shadow-lg">
             <CoachHeroSection 
               coach={coach}
               averageRating={averageRating}
@@ -170,7 +170,7 @@ const ClientCoachProfile = () => {
 
         {/* Sidebar - Booking Card */}
         <div className="lg:col-span-1 order-first lg:order-last">
-          <Card className="lg:sticky lg:top-24 shadow-lg border-border/50">
+          <Card className="rounded-3xl lg:sticky lg:top-24 shadow-lg border-border/50">
             <CardContent className="p-6">
               {/* Price Display */}
               <div className="text-center mb-6 pb-6 border-b border-border">
@@ -191,7 +191,7 @@ const ClientCoachProfile = () => {
                 {isClient && (
                   <>
                     <Button 
-                      className="w-full" 
+                      className="w-full rounded-2xl h-12" 
                       size="lg"
                       onClick={handleMessageCoach}
                       disabled={startingConversation}
@@ -204,7 +204,7 @@ const ClientCoachProfile = () => {
                       Message Coach
                     </Button>
                     <Button 
-                      className="w-full" 
+                      className="w-full rounded-2xl h-12" 
                       size="lg"
                       variant="outline"
                       onClick={() => setShowBookingModal(true)}
@@ -214,7 +214,7 @@ const ClientCoachProfile = () => {
                     </Button>
                     <div className="pt-2">
                       <Button 
-                        className="w-full" 
+                        className="w-full rounded-xl" 
                         variant="ghost"
                         size="sm"
                         onClick={() => setShowRequestModal(true)}
@@ -229,14 +229,14 @@ const ClientCoachProfile = () => {
               {/* Info Section */}
               <div className="mt-6 pt-6 border-t border-border space-y-4">
                 <div className="flex items-center gap-3 text-sm">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted">
+                  <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <span className="text-muted-foreground">Usually responds within 24 hours</span>
                 </div>
                 {sessionTypes.length > 0 && (
                   <div className="flex items-center gap-3 text-sm">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted">
+                    <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-muted">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                     </div>
                     <span className="text-muted-foreground">
@@ -257,7 +257,7 @@ const ClientCoachProfile = () => {
                         <Badge 
                           key={day} 
                           variant={dayAvail ? "default" : "secondary"}
-                          className={dayAvail ? "" : "opacity-40"}
+                          className={`rounded-lg ${dayAvail ? "" : "opacity-40"}`}
                         >
                           {day}
                         </Badge>
