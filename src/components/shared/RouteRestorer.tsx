@@ -44,7 +44,7 @@ const RouteRestorer = () => {
     // Paths that should trigger restoration
     const shouldRestore = isNativeApp
       ? ["/", "/auth", "/get-started", "/dashboard"].includes(currentPath)
-      : ["/", "/auth", "/get-started"].includes(currentPath);
+      : ["/auth", "/get-started"].includes(currentPath);
 
     if (shouldRestore) {
       // For clients, check onboarding status (handle both formats)
