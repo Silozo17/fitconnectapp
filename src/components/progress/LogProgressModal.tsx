@@ -1,18 +1,22 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
+import { format, subDays } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
 import { ProgressPhotoUpload } from './ProgressPhotoUpload';
 import { useCreateProgress } from '@/hooks/useClientProgress';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCelebration } from '@/contexts/CelebrationContext';
 import { toast } from 'sonner';
-import { Scale, Ruler, Camera } from 'lucide-react';
+import { Scale, Ruler, Camera, CalendarIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface LogProgressModalProps {
   open: boolean;
@@ -44,6 +48,7 @@ export const LogProgressModal = ({ open, onOpenChange, clientId }: LogProgressMo
     onFirstPhoto: () => showFirstTimeAchievement('first_photo'),
   });
   const [photos, setPhotos] = useState<string[]>([]);
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [activeTab, setActiveTab] = useState('weight');
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<ProgressFormData>({
@@ -81,7 +86,7 @@ export const LogProgressModal = ({ open, onOpenChange, clientId }: LogProgressMo
         measurements: Object.keys(measurements).length > 0 ? measurements : null,
         notes: data.notes || null,
         photo_urls: photos.length > 0 ? photos : [],
-        recorded_at: new Date().toISOString().split('T')[0],
+        recorded_at: format(selectedDate, 'yyyy-MM-dd'),
       });
 
       toast.success(t("progress.successMessage"));
@@ -97,6 +102,7 @@ export const LogProgressModal = ({ open, onOpenChange, clientId }: LogProgressMo
   const handleClose = () => {
     reset();
     setPhotos([]);
+    setSelectedDate(new Date());
     onOpenChange(false);
   };
 
@@ -108,6 +114,34 @@ export const LogProgressModal = ({ open, onOpenChange, clientId }: LogProgressMo
         </DialogHeader>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex-1 overflow-y-auto space-y-6 pr-1">
+          {/* Date Selector */}
+          <div className="space-y-2">
+            <Label>Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "PPP") : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={(date) => date && setSelectedDate(date)}
+                  disabled={(date) => date > new Date()}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList className="grid grid-cols-3 bg-secondary">
               <TabsTrigger value="weight" className="gap-2">

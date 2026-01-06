@@ -61,15 +61,17 @@ const ClientFoodDiary = () => {
   const dailyMacros = useMemo(() => calculateDailyMacros(entries), [entries]);
   const groupedEntries = useMemo(() => groupEntriesByMeal(entries), [entries]);
 
-  const handleFoodFound = (food: any, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack', quantity?: number) => {
+  const handleFoodFound = (food: any, mealType: 'breakfast' | 'lunch' | 'dinner' | 'snack', quantity?: number, overrideMealType?: 'breakfast' | 'lunch' | 'dinner' | 'snack') => {
     if (!clientProfile?.id) return;
 
     const servingSize = quantity || food.serving_size_g || 100;
     const multiplier = servingSize / 100;
+    // Use the override meal type if provided (from meal selector in modal)
+    const finalMealType = overrideMealType || food.meal_type || mealType;
 
     const entry: FoodDiaryInsert = {
       client_id: clientProfile.id,
-      meal_type: mealType,
+      meal_type: finalMealType,
       food_name: food.name,
       external_id: food.external_id || food.fatsecret_id || null,
       serving_size_g: servingSize,
@@ -355,7 +357,7 @@ const ClientFoodDiary = () => {
             if (!open) setScannedFood(null);
           }}
           mealType={activeMealType}
-          onFoodSelected={(food, quantity) => handleFoodFound(food, activeMealType, quantity)}
+          onFoodSelected={(food, quantity, selectedMealType) => handleFoodFound(food, activeMealType, quantity, selectedMealType)}
           initialFood={scannedFood}
         />
 
