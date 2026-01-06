@@ -3,6 +3,7 @@ import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
+  PolarRadiusAxis,
   Radar,
   ResponsiveContainer,
 } from "recharts";
@@ -126,6 +127,11 @@ export const HealthRadarChart = ({
               fontWeight: 500,
             }}
             tickLine={false}
+          />
+          <PolarRadiusAxis 
+            domain={[-20, 100]}
+            tick={false}
+            axisLine={false}
           />
           <Radar
             name="Health"
