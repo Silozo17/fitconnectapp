@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useNativeIAP } from "@/hooks/useNativeIAP";
-import { triggerHaptic } from "@/lib/despia";
+import { triggerHaptic, triggerRestorePurchases, isDespia } from "@/lib/despia";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
@@ -249,17 +249,38 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                   <button 
                     type="button"
                     onClick={async () => {
-                      if (typeof window !== 'undefined' && (window as any).despia?.restorePurchases) {
-                        try {
-                          toast.loading("Restoring purchases...");
-                          await (window as any).despia.restorePurchases();
-                          toast.success("Purchases restored successfully");
-                        } catch (error) {
-                          console.error("Failed to restore purchases:", error);
-                          toast.error("Failed to restore purchases");
-                        }
-                      } else {
+                      if (!isDespia()) {
                         toast.info("Restore purchases is only available on iOS/Android");
+                        return;
+                      }
+                      
+                      const triggered = triggerRestorePurchases();
+                      if (!triggered) {
+                        toast.error("Unable to trigger restore");
+                        return;
+                      }
+                      
+                      toast.info("Restoring purchases...", { duration: 4000 });
+                      
+                      // Wait for RevenueCat to process
+                      await new Promise(resolve => setTimeout(resolve, 4000));
+                      
+                      // Reconcile with backend
+                      const { data, error } = await supabase.functions.invoke('verify-subscription-entitlement');
+                      
+                      if (error) {
+                        toast.error("Failed to restore purchases");
+                        return;
+                      }
+                      
+                      if (data?.reconciled && data?.tier) {
+                        toast.success("Purchases restored!", { description: `Your ${data.tier} plan is active.` });
+                        queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+                        queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+                      } else if (data?.status === 'no_active_entitlement') {
+                        toast.info("No purchases to restore");
+                      } else {
+                        toast.success("Restore complete");
                       }
                     }}
                     className="text-muted-foreground hover:text-primary transition-colors"

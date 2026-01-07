@@ -30,6 +30,7 @@ import { useNativePricing } from "@/hooks/useNativePricing";
 import { UpgradeDrawer } from "@/components/subscription/UpgradeDrawer";
 import { useQueryClient } from "@tanstack/react-query";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
+import { triggerRestorePurchases, isDespia } from "@/lib/despia";
 
 // Full steps array (for new users without client profile)
 const FULL_STEPS = [
@@ -592,17 +593,38 @@ const CoachOnboarding = () => {
 
   // Handle restore purchases for native apps
   const handleRestorePurchases = async () => {
-    if (typeof window !== 'undefined' && (window as any).despia?.restorePurchases) {
-      try {
-        toast.loading("Restoring purchases...");
-        await (window as any).despia.restorePurchases();
-        toast.success("Purchases restored successfully");
-      } catch (error) {
-        console.error("Failed to restore purchases:", error);
-        toast.error("Failed to restore purchases");
-      }
-    } else {
+    if (!isDespia()) {
       toast.info("Restore purchases is only available on iOS/Android");
+      return;
+    }
+    
+    const triggered = triggerRestorePurchases();
+    if (!triggered) {
+      toast.error("Unable to trigger restore");
+      return;
+    }
+    
+    toast.info("Restoring purchases...", { duration: 4000 });
+    
+    // Wait for RevenueCat to process
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    
+    // Reconcile with backend
+    const { data, error } = await supabase.functions.invoke('verify-subscription-entitlement');
+    
+    if (error) {
+      toast.error("Failed to restore purchases");
+      return;
+    }
+    
+    if (data?.reconciled && data?.tier) {
+      toast.success("Purchases restored!", { description: `Your ${data.tier} plan is active.` });
+      queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+    } else if (data?.status === 'no_active_entitlement') {
+      toast.info("No purchases to restore");
+    } else {
+      toast.success("Restore complete");
     }
   };
 
