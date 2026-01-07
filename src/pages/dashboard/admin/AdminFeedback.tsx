@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -38,6 +37,7 @@ import { useFeedbackList, useUpdateFeedbackStatus } from "@/hooks/useFeedback";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { DashboardSectionHeader, MetricCard, ContentSection, StatsGrid } from "@/components/shared";
 
 const CATEGORY_ICONS = {
   bug: Bug,
@@ -91,6 +91,10 @@ const AdminFeedback = () => {
       f.user_name?.toLowerCase().includes(search.toLowerCase())
   );
 
+  const pendingCount = feedbackList?.filter((f) => f.status === "pending").length || 0;
+  const plannedCount = feedbackList?.filter((f) => f.status === "planned").length || 0;
+  const completedCount = feedbackList?.filter((f) => f.status === "completed").length || 0;
+
   const handleOpenDetail = (feedback: any) => {
     setSelectedFeedback(feedback);
     setAdminNotes(feedback.admin_notes || "");
@@ -125,96 +129,121 @@ const AdminFeedback = () => {
     );
   };
 
-  const pendingCount = feedbackList?.filter((f) => f.status === "pending").length || 0;
-
   return (
     <AdminLayout>
       <Helmet>
         <title>Feedback | Admin Dashboard</title>
       </Helmet>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">Feedback</h1>
-            <p className="text-muted-foreground">
-              Review and manage user feedback submissions
-            </p>
-          </div>
-          {pendingCount > 0 && (
-            <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500">
-              {pendingCount} pending
-            </Badge>
-          )}
-        </div>
+        <DashboardSectionHeader
+          title="Feedback"
+          description="Review and manage user feedback submissions"
+          action={
+            pendingCount > 0 ? (
+              <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-500">
+                {pendingCount} pending
+              </Badge>
+            ) : undefined
+          }
+        />
+
+        {/* Stats */}
+        <StatsGrid columns={4}>
+          <MetricCard
+            icon={MessageSquare}
+            label="Total Feedback"
+            value={feedbackList?.length || 0}
+            color="blue"
+            size="sm"
+          />
+          <MetricCard
+            icon={Clock}
+            label="Pending"
+            value={pendingCount}
+            color="yellow"
+            size="sm"
+          />
+          <MetricCard
+            icon={Calendar}
+            label="Planned"
+            value={plannedCount}
+            color="purple"
+            size="sm"
+          />
+          <MetricCard
+            icon={CheckCircle}
+            label="Completed"
+            value={completedCount}
+            color="green"
+            size="sm"
+          />
+        </StatsGrid>
 
         {/* Filters */}
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search feedback..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[150px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="planned">Planned</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="rejected">Rejected</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-full sm:w-[150px]">
-                  <SelectValue placeholder="Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  <SelectItem value="bug">Bug Report</SelectItem>
-                  <SelectItem value="feature">Feature Request</SelectItem>
-                  <SelectItem value="improvement">Improvement</SelectItem>
-                  <SelectItem value="general">General</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
-                <SelectTrigger className="w-full sm:w-[150px]">
-                  <SelectValue placeholder="User Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Users</SelectItem>
-                  <SelectItem value="client">Clients</SelectItem>
-                  <SelectItem value="coach">Coaches</SelectItem>
-                  <SelectItem value="admin">Admins</SelectItem>
-                </SelectContent>
-              </Select>
+        <ContentSection colorTheme="muted" withAccent>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search feedback..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10"
+              />
             </div>
-          </CardContent>
-        </Card>
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="planned">Planned</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+                <SelectItem value="rejected">Rejected</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="bug">Bug Report</SelectItem>
+                <SelectItem value="feature">Feature Request</SelectItem>
+                <SelectItem value="improvement">Improvement</SelectItem>
+                <SelectItem value="general">General</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={userTypeFilter} onValueChange={setUserTypeFilter}>
+              <SelectTrigger className="w-full sm:w-[150px]">
+                <SelectValue placeholder="User Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Users</SelectItem>
+                <SelectItem value="client">Clients</SelectItem>
+                <SelectItem value="coach">Coaches</SelectItem>
+                <SelectItem value="admin">Admins</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </ContentSection>
 
         {/* Feedback List */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {isLoading ? (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
+            <ContentSection colorTheme="muted">
+              <div className="py-12 text-center text-muted-foreground">
                 Loading feedback...
-              </CardContent>
-            </Card>
+              </div>
+            </ContentSection>
           ) : filteredFeedback?.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
+            <ContentSection colorTheme="muted">
+              <div className="py-12 text-center text-muted-foreground">
                 <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
                 <p>No feedback found</p>
-              </CardContent>
-            </Card>
+              </div>
+            </ContentSection>
           ) : (
             filteredFeedback?.map((feedback) => {
               const CategoryIcon = CATEGORY_ICONS[feedback.category as keyof typeof CATEGORY_ICONS] || HelpCircle;
@@ -222,45 +251,43 @@ const AdminFeedback = () => {
               const StatusIcon = statusConfig.icon;
 
               return (
-                <Card
+                <div
                   key={feedback.id}
-                  className="cursor-pointer hover:border-primary/50 transition-colors"
+                  className="p-4 rounded-xl border border-border bg-gradient-to-br from-background to-muted/30 cursor-pointer hover:border-primary/50 transition-colors"
                   onClick={() => handleOpenDetail(feedback)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="p-2 rounded-lg bg-muted">
-                          <CategoryIcon className="h-5 w-5 text-primary" />
+                  <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="p-2 rounded-lg bg-muted">
+                        <CategoryIcon className="h-5 w-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-medium truncate">{feedback.subject}</h3>
+                          <Badge variant="outline" className="text-xs">
+                            {CATEGORY_LABELS[feedback.category as keyof typeof CATEGORY_LABELS]}
+                          </Badge>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="font-medium truncate">{feedback.subject}</h3>
-                            <Badge variant="outline" className="text-xs">
-                              {CATEGORY_LABELS[feedback.category as keyof typeof CATEGORY_LABELS]}
-                            </Badge>
-                          </div>
-                          <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
-                            {feedback.message}
-                          </p>
-                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <User className="h-3 w-3" />
-                              {feedback.user_name} ({USER_TYPE_LABELS[feedback.user_type as keyof typeof USER_TYPE_LABELS]})
-                            </span>
-                            <span>
-                              {format(new Date(feedback.created_at), "MMM d, yyyy")}
-                            </span>
-                          </div>
+                        <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
+                          {feedback.message}
+                        </p>
+                        <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                          <span className="flex items-center gap-1">
+                            <User className="h-3 w-3" />
+                            {feedback.user_name} ({USER_TYPE_LABELS[feedback.user_type as keyof typeof USER_TYPE_LABELS]})
+                          </span>
+                          <span>
+                            {format(new Date(feedback.created_at), "MMM d, yyyy")}
+                          </span>
                         </div>
                       </div>
-                      <Badge className={cn("shrink-0", statusConfig.color)}>
-                        <StatusIcon className="h-3 w-3 mr-1" />
-                        {statusConfig.label}
-                      </Badge>
                     </div>
-                  </CardContent>
-                </Card>
+                    <Badge className={cn("shrink-0", statusConfig.color)}>
+                      <StatusIcon className="h-3 w-3 mr-1" />
+                      {statusConfig.label}
+                    </Badge>
+                  </div>
+                </div>
               );
             })
           )}

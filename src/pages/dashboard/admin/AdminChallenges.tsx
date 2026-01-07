@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import AdminLayout from '@/components/admin/AdminLayout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Plus, Search, Trophy, Users, Calendar, Target, 
-  MoreHorizontal, Edit, Trash2, Sparkles, Loader2, Gift 
+  MoreHorizontal, Edit, Trash2, Loader2, Gift 
 } from 'lucide-react';
 import { format, isPast, isFuture, isWithinInterval } from 'date-fns';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -34,6 +33,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { CreateChallengeModal } from '@/components/admin/CreateChallengeModal';
 import { CHALLENGE_TYPES } from '@/hooks/useChallenges';
+import { DashboardSectionHeader, MetricCard, ContentSection, StatsGrid } from '@/components/shared';
 
 interface ChallengeReward {
   id: string;
@@ -137,10 +137,11 @@ export default function AdminChallenges() {
   const pastChallenges = filteredChallenges?.filter(c => {
     return !c.is_active || isPast(new Date(c.end_date));
   }) || [];
+
+  const totalParticipants = challenges?.reduce((sum, c) => sum + (c.participant_count || 0), 0) || 0;
   
   const ChallengeRow = ({ challenge }: { challenge: Challenge }) => {
     const status = getChallengeStatus(challenge);
-    const typeInfo = CHALLENGE_TYPES.find(t => t.value === challenge.challenge_type);
     
     return (
       <div className="flex items-center justify-between p-4 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
@@ -207,97 +208,72 @@ export default function AdminChallenges() {
       <Helmet>
         <title>Challenges | Admin Dashboard</title>
       </Helmet>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Challenges</h1>
-        <p className="text-muted-foreground">Create and manage platform challenges</p>
-      </div>
+
+      <DashboardSectionHeader
+        title="Challenges"
+        description="Create and manage platform challenges"
+        action={
+          <Button onClick={() => setCreateOpen(true)} className="gap-2">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Create Challenge</span>
+          </Button>
+        }
+      />
+
       <div className="space-y-6">
         {/* Stats */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Trophy className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{challenges?.length || 0}</p>
-                  <p className="text-xs text-muted-foreground">Total Challenges</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <Target className="h-5 w-5 text-green-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{activeChallenges.length}</p>
-                  <p className="text-xs text-muted-foreground">Active Now</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <Calendar className="h-5 w-5 text-blue-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{upcomingChallenges.length}</p>
-                  <p className="text-xs text-muted-foreground">Upcoming</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-orange-500/10">
-                  <Users className="h-5 w-5 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">
-                    {challenges?.reduce((sum, c) => sum + (c.participant_count || 0), 0) || 0}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Total Participants</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsGrid columns={4}>
+          <MetricCard
+            icon={Trophy}
+            label="Total Challenges"
+            value={challenges?.length || 0}
+            color="primary"
+            size="sm"
+          />
+          <MetricCard
+            icon={Target}
+            label="Active Now"
+            value={activeChallenges.length}
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={Calendar}
+            label="Upcoming"
+            value={upcomingChallenges.length}
+            color="blue"
+            size="sm"
+          />
+          <MetricCard
+            icon={Users}
+            label="Total Participants"
+            value={totalParticipants}
+            color="orange"
+            size="sm"
+          />
+        </StatsGrid>
         
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto sm:flex-1">
-            <div className="relative w-full sm:max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search challenges..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 w-full"
-              />
-            </div>
-            <Select value={audienceFilter} onValueChange={setAudienceFilter}>
-              <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="Audience" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Audiences</SelectItem>
-                <SelectItem value="clients">Clients Only</SelectItem>
-                <SelectItem value="coaches">Coaches Only</SelectItem>
-              </SelectContent>
-            </Select>
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="relative flex-1 sm:max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search challenges..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 w-full"
+            />
           </div>
-          
-          <Button onClick={() => setCreateOpen(true)} className="w-full sm:w-auto gap-2">
-            <Plus className="h-4 w-4" />
-            <span className="sm:inline">Create Challenge</span>
-          </Button>
+          <Select value={audienceFilter} onValueChange={setAudienceFilter}>
+            <SelectTrigger className="w-full sm:w-40">
+              <SelectValue placeholder="Audience" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Audiences</SelectItem>
+              <SelectItem value="clients">Clients Only</SelectItem>
+              <SelectItem value="coaches">Coaches Only</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         
         {/* Challenges List */}
@@ -309,7 +285,7 @@ export default function AdminChallenges() {
             <TabsTrigger value="all" className="text-xs sm:text-sm">All ({filteredChallenges?.length || 0})</TabsTrigger>
           </TabsList>
           
-          <Card className="mt-4">
+          <ContentSection colorTheme="primary" withAccent padding="none" className="mt-4">
             <TabsContent value="active" className="m-0">
               {isLoading ? (
                 <div className="p-4 space-y-3">
@@ -350,7 +326,7 @@ export default function AdminChallenges() {
             <TabsContent value="all" className="m-0">
               {filteredChallenges?.map(c => <ChallengeRow key={c.id} challenge={c} />)}
             </TabsContent>
-          </Card>
+          </ContentSection>
         </Tabs>
       </div>
       
