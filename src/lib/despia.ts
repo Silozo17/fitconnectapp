@@ -419,17 +419,83 @@ const initializeGlobalIAPCallbacks = (): void => {
     }
   };
   
-  // iapError - called by Despia when purchase fails
-  (window as any).iapError = (error: string) => {
-    console.log('[Despia IAP] window.iapError called:', error);
+  // iapError - called by Despia when purchase fails OR is cancelled
+  // RevenueCat often sends cancellation via iapError with specific payload
+  (window as any).iapError = (rawError: string | object) => {
+    console.log('[Despia IAP] window.iapError called with raw payload:', rawError);
     
     if (!isDespia()) return;
     
-    if (currentIAPCallbacks?.onError) {
-      try {
-        currentIAPCallbacks.onError(error);
-      } catch (e) {
-        console.error('[Despia IAP] Error in error handler:', e);
+    // Parse the error to detect if it's actually a cancellation
+    let errorString = '';
+    let isCancellation = false;
+    
+    try {
+      // Handle string or object payload
+      let errorData: any = rawError;
+      
+      if (typeof rawError === 'string') {
+        // Try to parse as JSON if it looks like JSON
+        if (rawError.trim().startsWith('{') || rawError.trim().startsWith('[')) {
+          try {
+            errorData = JSON.parse(rawError);
+          } catch {
+            errorData = rawError;
+          }
+        } else {
+          errorData = rawError;
+        }
+      }
+      
+      // Check for cancellation indicators in the parsed data
+      if (typeof errorData === 'object' && errorData !== null) {
+        // RevenueCat specific cancellation detection
+        isCancellation = Boolean(
+          errorData.userCancelled === true ||
+          errorData.readableErrorCode === 'PurchaseCancelledError' ||
+          errorData.code === 'PurchaseCancelledError' ||
+          errorData.code === 1 || // StoreKit cancellation code
+          errorData.code === 'E_USER_CANCELLED' ||
+          (errorData.message && typeof errorData.message === 'string' && 
+            (errorData.message.toLowerCase().includes('cancel') || 
+             errorData.message.toLowerCase().includes('user cancelled')))
+        );
+        
+        errorString = errorData.message || errorData.readableErrorCode || JSON.stringify(errorData);
+      } else {
+        errorString = String(errorData);
+        // Check string for cancellation keywords
+        const lowerError = errorString.toLowerCase();
+        isCancellation = lowerError.includes('cancel') || 
+                         lowerError.includes('user cancelled') ||
+                         lowerError.includes('purchasecancelled');
+      }
+    } catch (e) {
+      console.error('[Despia IAP] Error parsing iapError payload:', e);
+      errorString = String(rawError);
+    }
+    
+    console.log('[Despia IAP] Parsed error:', { errorString, isCancellation });
+    
+    if (isCancellation) {
+      // Treat as cancellation, not error
+      console.log('[Despia IAP] Detected cancellation via iapError - calling onCancel');
+      if (currentIAPCallbacks?.onCancel) {
+        try {
+          currentIAPCallbacks.onCancel();
+        } catch (e) {
+          console.error('[Despia IAP] Error in cancel handler:', e);
+        }
+      }
+    } else {
+      // Genuine error
+      console.log('[Despia IAP] Genuine error - calling onError');
+      if (currentIAPCallbacks?.onError) {
+        try {
+          currentIAPCallbacks.onError(errorString);
+        } catch (e) {
+          console.error('[Despia IAP] Error in error handler:', e);
+        }
       }
     }
   };
