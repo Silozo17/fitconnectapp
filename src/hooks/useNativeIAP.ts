@@ -12,6 +12,7 @@ import {
   isNativeIAPAvailable,
   registerIAPCallbacksWithId,
   unregisterIAPCallbacksWithId,
+  setIAPCallbacks,
   triggerRevenueCatPurchase,
   getPlatformProductId,
   IAPSuccessData,
@@ -553,46 +554,32 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     });
   }, [clearPurchaseTimeout]);
 
-  // PHASE 1 FIX: Use ref to hold latest callbacks and register once on mount
-  // This prevents re-registration during purchase flow which can interrupt callbacks
-  const callbacksRef = useRef({
-    onSuccess: handleIAPSuccess,
-    onError: handleIAPError,
-    onCancel: handleIAPCancel,
-    onPending: handleIAPPending,
-  });
-
-  // Keep ref updated with latest callbacks
-  useEffect(() => {
-    callbacksRef.current = {
-      onSuccess: handleIAPSuccess,
-      onError: handleIAPError,
-      onCancel: handleIAPCancel,
-      onPending: handleIAPPending,
-    };
-  }, [handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
-
-  // Register callbacks ONCE on mount with stable wrapper functions
+  // Register callbacks on mount - simplified approach
   useEffect(() => {
     if (state.isAvailable) {
-      registerIAPCallbacksWithId('subscription', {
-        onSuccess: (data) => callbacksRef.current.onSuccess(data),
-        onError: (error) => callbacksRef.current.onError(error),
-        onCancel: () => callbacksRef.current.onCancel(),
-        onPending: () => callbacksRef.current.onPending(),
+      // Register callbacks with Despia
+      setIAPCallbacks({
+        onSuccess: handleIAPSuccess,
+        onError: handleIAPError,
+        onCancel: handleIAPCancel,
+        onPending: handleIAPPending,
       });
+      console.log('[NativeIAP] IAP callbacks registered');
     }
 
     return () => {
-      unregisterIAPCallbacksWithId('subscription');
+      setIAPCallbacks(null);
+      console.log('[NativeIAP] IAP callbacks cleared');
     };
-  }, [state.isAvailable]); // Only re-register if availability changes
+  }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
 
   /**
    * Trigger a purchase
    * ANDROID FIX: For upgrades, pass oldProductId and replacementMode to RevenueCat
    */
   const purchase = useCallback(async (tier: SubscriptionTier, interval: BillingInterval) => {
+    console.log('[NativeIAP] purchase() called', { tier, interval, isAvailable: state.isAvailable, userId: user?.id });
+    
     if (!state.isAvailable) {
       toast.error('Native purchases not available');
       return;
@@ -604,11 +591,11 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     }
 
     // Get the user ID to use as external_id for RevenueCat
-    // Use auth user ID so RevenueCat can match with webhook
     const externalId = user.id;
 
     // Get the platform-specific product ID (iOS or Android)
     const productId = getPlatformProductId(tier, interval);
+    console.log('[NativeIAP] Product ID:', productId);
 
     if (!productId) {
       toast.error('Invalid subscription selection for this platform');
@@ -673,12 +660,20 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       });
     }, PURCHASE_TIMEOUT_MS);
 
-    // PHASE 2 FIX: Trigger purchase synchronously (no requestAnimationFrame)
-    // Async wrapping caused race conditions where callbacks weren't ready
+    // Ensure callbacks are set right before purchase
+    setIAPCallbacks({
+      onSuccess: handleIAPSuccess,
+      onError: handleIAPError,
+      onCancel: handleIAPCancel,
+      onPending: handleIAPPending,
+    });
+
+    // Trigger the purchase
+    console.log('[NativeIAP] Triggering purchase...');
     triggerHaptic('light');
     
-    // Trigger the native purchase (with upgrade info for Android if applicable)
     const triggered = triggerRevenueCatPurchase(externalId, productId, upgradeInfo);
+    console.log('[NativeIAP] Purchase triggered:', triggered);
 
     if (!triggered) {
       clearPurchaseTimeout();
@@ -690,7 +685,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       }));
       toast.error('Failed to start purchase');
     }
-  }, [state.isAvailable, user, clearPurchaseTimeout, coachProfile?.subscription_tier]);
+  }, [state.isAvailable, user, clearPurchaseTimeout, coachProfile?.subscription_tier, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
 
   /**
    * Reset all state - useful for recovering from stuck states
