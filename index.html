@@ -78,7 +78,83 @@
       
       /* Hide loader when React mounts */
       .app-loader[data-hydrated]{display:none!important}
+      
+      /* Native/PWA Splash Screen Styles */
+      #native-splash{display:none;position:fixed;inset:0;z-index:9999;background:#0D0D14}
+      #native-splash.active{display:block}
+      #native-splash.fade-out{animation:native-fade-out 0.5s ease-out forwards}
+      @keyframes native-fade-out{from{opacity:1}to{opacity:0;pointer-events:none}}
+      @keyframes native-pulse{0%,100%{opacity:0.6}50%{opacity:1}}
     </style>
+    
+    <!-- Native/PWA Splash Detection & Management Script -->
+    <script>
+    (function(){
+      var ua=navigator.userAgent.toLowerCase();
+      var isDespia=ua.includes('despia');
+      var isIOS=ua.includes('iphone')||ua.includes('ipad');
+      var isAndroid=ua.includes('android');
+      var isStandalone=window.matchMedia('(display-mode:standalone)').matches||navigator.standalone===true;
+      var isPWA=isStandalone&&!isDespia;
+      var showNativeSplash=isDespia||isPWA;
+      
+      if(!showNativeSplash)return;
+      
+      var tips={
+        ios:["Swipe down to refresh your dashboard","Use Face ID for quick secure login","Connect Apple Health to sync your metrics","Long press the app icon for quick actions"],
+        android:["Use the back gesture to navigate","Enable Health Connect for automatic sync","Add the widget to your home screen","Enable Google Fit sync in Settings"],
+        general:["Track your progress daily for best results","Message your coach anytime for support","Complete habits to earn achievement badges","Book sessions 24/7 from the app","Enable notifications to stay on track","Check the leaderboard to see your ranking","Log your meals to hit your macro targets","Upload progress photos to track changes"]
+      };
+      
+      var platformTips=tips.general.slice();
+      if(isIOS)platformTips=tips.ios.concat(platformTips);
+      if(isAndroid)platformTips=tips.android.concat(platformTips);
+      
+      window.__nativeSplash={
+        tips:platformTips,
+        currentTip:Math.floor(Math.random()*platformTips.length),
+        interval:null,
+        show:function(){
+          var splash=document.getElementById('native-splash');
+          var loader=document.getElementById('app-loader');
+          if(splash)splash.classList.add('active');
+          if(loader)loader.style.display='none';
+        },
+        hide:function(){
+          var splash=document.getElementById('native-splash');
+          if(splash){
+            splash.classList.add('fade-out');
+            clearInterval(window.__nativeSplash.interval);
+          }
+        },
+        rotateTip:function(){
+          var tip=document.getElementById('native-splash-tip');
+          if(!tip)return;
+          tip.style.opacity='0';
+          setTimeout(function(){
+            window.__nativeSplash.currentTip=(window.__nativeSplash.currentTip+1)%window.__nativeSplash.tips.length;
+            tip.textContent=window.__nativeSplash.tips[window.__nativeSplash.currentTip];
+            tip.style.opacity='1';
+          },300);
+        },
+        start:function(){
+          var tip=document.getElementById('native-splash-tip');
+          if(tip)tip.textContent=this.tips[this.currentTip];
+          this.interval=setInterval(this.rotateTip.bind(this),3000);
+        }
+      };
+      
+      if(document.readyState==='loading'){
+        document.addEventListener('DOMContentLoaded',function(){
+          window.__nativeSplash.show();
+          window.__nativeSplash.start();
+        });
+      }else{
+        window.__nativeSplash.show();
+        window.__nativeSplash.start();
+      }
+    })();
+    </script>
     <meta name="msapplication-TileColor" content="#0D0D14" />
 
     <!-- iOS PWA Support -->
@@ -183,7 +259,26 @@
       </div>
     </noscript>
     
-    <!-- Branded Loader - Shown instantly before React hydrates -->
+    <!-- Native/PWA Splash Screen - Shown instantly before React loads -->
+    <div id="native-splash">
+      <div style="position:absolute;inset:0;background-image:url('https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/iap_image.webp');background-size:cover;background-position:center;"></div>
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.6),rgba(0,0,0,0.4),rgba(0,0,0,0.7));"></div>
+      <div style="position:relative;z-index:10;display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top,20px) 24px env(safe-area-inset-bottom,20px);">
+        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding-top:48px;">
+          <img src="https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/logo-with-text-white.webp" alt="FitConnect" style="height:48px;width:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));"/>
+        </div>
+        <div style="padding-bottom:64px;text-align:center;">
+          <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:#BEFF00;animation:native-pulse 1s ease-in-out infinite;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#BEFF00;animation:native-pulse 1s ease-in-out infinite;animation-delay:0.15s;"></span>
+            <span style="width:8px;height:8px;border-radius:50%;background:#BEFF00;animation:native-pulse 1s ease-in-out infinite;animation-delay:0.3s;"></span>
+          </div>
+          <p id="native-splash-tip" style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:500;max-width:280px;margin:0 auto;line-height:1.5;transition:opacity 0.3s;"></p>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Branded Loader - Shown instantly before React hydrates (web only) -->
     <div class="app-loader" id="app-loader">
       <div class="loader-ring">
         <div class="loader-ring-outer"></div>
