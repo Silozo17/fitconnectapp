@@ -2005,6 +2005,7 @@ export type Database = {
           onboarding_progress: Json | null
           plans_last_viewed_at: string | null
           selected_avatar_id: string | null
+          selected_discipline: string | null
           status: string | null
           status_reason: string | null
           status_updated_at: string | null
@@ -2048,6 +2049,7 @@ export type Database = {
           onboarding_progress?: Json | null
           plans_last_viewed_at?: string | null
           selected_avatar_id?: string | null
+          selected_discipline?: string | null
           status?: string | null
           status_reason?: string | null
           status_updated_at?: string | null
@@ -2091,6 +2093,7 @@ export type Database = {
           onboarding_progress?: Json | null
           plans_last_viewed_at?: string | null
           selected_avatar_id?: string | null
+          selected_discipline?: string | null
           status?: string | null
           status_reason?: string | null
           status_updated_at?: string | null
@@ -4495,6 +4498,63 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      discipline_events: {
+        Row: {
+          created_at: string | null
+          discipline_id: string
+          event_type: string
+          id: string
+          recorded_at: string
+          source: string
+          user_id: string
+          value_json: Json
+        }
+        Insert: {
+          created_at?: string | null
+          discipline_id: string
+          event_type: string
+          id?: string
+          recorded_at?: string
+          source?: string
+          user_id: string
+          value_json?: Json
+        }
+        Update: {
+          created_at?: string | null
+          discipline_id?: string
+          event_type?: string
+          id?: string
+          recorded_at?: string
+          source?: string
+          user_id?: string
+          value_json?: Json
+        }
+        Relationships: []
+      }
+      discipline_requests: {
+        Row: {
+          created_at: string | null
+          discipline_name: string
+          id: string
+          requested_metrics: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          discipline_name: string
+          id?: string
+          requested_metrics?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          discipline_name?: string
+          id?: string
+          requested_metrics?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       email_logs: {
         Row: {
