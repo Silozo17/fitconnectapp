@@ -1252,16 +1252,16 @@ const App = () => (
                                 </ProtectedRoute>
                               } />
 
-                              {/* Dashboard Routes - use AppLocaleWrapper (DashboardSkeleton fallback) */}
-                              <Route path="/dashboard" element={
-                                <AppLocaleWrapper>
+                              {/* Dashboard Routes - use AppLocaleWrapper as layout (renders Outlet for children) */}
+                              <Route path="/dashboard" element={<AppLocaleWrapper />}>
+                                {/* Index route for /dashboard - redirects to appropriate role dashboard */}
+                                <Route index element={
                                   <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
                                       <DashboardRedirect />
                                     </Suspense>
                                   </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              }>
+                                } />
                                 {/* Admin Dashboard Routes */}
                                 <Route path="admin" element={
                                   <ProtectedRoute allowedRoles={["admin"]}>
