@@ -57,13 +57,14 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
   const { user } = useAuth();
   const { data: coachProfileId } = useCoachProfileId();
   const queryClient = useQueryClient();
-  const [state, setState] = useState<NativeBoostPurchaseState>({
-    isAvailable: false,
+  // Initialize isAvailable synchronously to prevent race conditions
+  const [state, setState] = useState<NativeBoostPurchaseState>(() => ({
+    isAvailable: isNativeIAPAvailable(),
     purchaseStatus: 'idle',
     isPolling: false,
     error: null,
     showUnsuccessfulModal: false,
-  });
+  }));
 
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
@@ -76,11 +77,6 @@ export const useNativeBoostPurchase = (): UseNativeBoostPurchaseReturn => {
       clearTimeout(purchaseTimeoutRef.current);
       purchaseTimeoutRef.current = null;
     }
-  }, []);
-
-  // Check availability on mount
-  useEffect(() => {
-    setState(prev => ({ ...prev, isAvailable: isNativeIAPAvailable() }));
   }, []);
 
   // Cleanup polling and timeout on unmount
