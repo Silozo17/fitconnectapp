@@ -1,7 +1,8 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { memo } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Activity, UserPlus, Shield, Star, DollarSign, Settings } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
 
 interface ActivityItem {
   id: string;
@@ -27,13 +28,13 @@ const actionIcons: Record<string, React.ComponentType<any>> = {
   PAYMENT: DollarSign,
 };
 
-const actionColors: Record<string, string> = {
-  CREATE: "bg-green-500/10 text-green-500",
-  UPDATE: "bg-blue-500/10 text-blue-500",
-  DELETE: "bg-red-500/10 text-red-500",
-  VERIFY: "bg-purple-500/10 text-purple-500",
-  REVIEW: "bg-yellow-500/10 text-yellow-500",
-  PAYMENT: "bg-primary/10 text-primary",
+const actionColors: Record<string, { bg: string; text: string }> = {
+  CREATE: { bg: "bg-green-500/20", text: "text-green-400" },
+  UPDATE: { bg: "bg-blue-500/20", text: "text-blue-400" },
+  DELETE: { bg: "bg-red-500/20", text: "text-red-400" },
+  VERIFY: { bg: "bg-purple-500/20", text: "text-purple-400" },
+  REVIEW: { bg: "bg-yellow-500/20", text: "text-yellow-400" },
+  PAYMENT: { bg: "bg-primary/20", text: "text-primary" },
 };
 
 function getActionType(action: string): string {
@@ -61,35 +62,47 @@ function formatAction(action: string, entityType: string): string {
   return actionMap[action] || action.replace(/_/g, " ").toLowerCase();
 }
 
-export function ActivityWidget({ activities, title = "Recent Activity" }: ActivityWidgetProps) {
+export const ActivityWidget = memo(function ActivityWidget({ 
+  activities, 
+  title = "Recent Activity" 
+}: ActivityWidgetProps) {
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Activity className="h-5 w-5 text-muted-foreground" />
-          {title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="relative bg-gradient-to-br from-purple-500/10 via-background to-indigo-600/5 rounded-2xl border border-purple-500/20 overflow-hidden">
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400/60 via-indigo-400/40 to-transparent" />
+      
+      {/* Header */}
+      <div className="px-4 pt-4 pb-2 flex items-center gap-2">
+        <div className="p-2 rounded-xl bg-purple-500/20">
+          <Activity className="h-4 w-4 text-purple-400" />
+        </div>
+        <h3 className="font-semibold text-foreground text-base">{title}</h3>
+      </div>
+      
+      {/* Content */}
+      <div className="px-4 pb-4">
         <ScrollArea className="h-[280px]">
-          <div className="space-y-3">
+          <div className="space-y-2">
             {activities.length > 0 ? (
               activities.map((activity) => {
                 const actionType = getActionType(activity.action);
                 const Icon = actionIcons[actionType] || Activity;
-                const colorClass = actionColors[actionType] || "bg-muted text-muted-foreground";
+                const colors = actionColors[actionType] || { bg: "bg-muted", text: "text-muted-foreground" };
 
                 return (
-                  <div key={activity.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${colorClass}`}>
-                      <Icon className="w-4 h-4" />
+                  <div 
+                    key={activity.id} 
+                    className="flex items-start gap-3 p-2.5 rounded-xl bg-background/50 hover:bg-background/80 transition-colors"
+                  >
+                    <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center shrink-0", colors.bg)}>
+                      <Icon className={cn("w-4 h-4", colors.text)} />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
+                      <p className="text-sm font-medium text-foreground truncate">
                         {formatAction(activity.action, activity.entity_type)}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
+                        {activity.created_at && formatDistanceToNow(new Date(activity.created_at), { addSuffix: true })}
                       </p>
                     </div>
                   </div>
@@ -102,7 +115,7 @@ export function ActivityWidget({ activities, title = "Recent Activity" }: Activi
             )}
           </div>
         </ScrollArea>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
-}
+});
