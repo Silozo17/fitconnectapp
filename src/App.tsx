@@ -1,4 +1,4 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense, useState, useEffect, useCallback } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +18,8 @@ import { useLanguagePersistence } from "@/hooks/useLanguagePersistence";
 import { useAppInitialization } from "@/hooks/useAppInitialization";
 import { useDeferredMount } from "@/hooks/useDeferredMount";
 import { HydrationSignal } from "@/components/shared/HydrationSignal";
+import { isDespia } from "@/lib/despia";
+import { NativeSplashLoader } from "@/components/native/NativeSplashLoader";
 
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
@@ -321,13 +323,54 @@ function GlobalErrorCapture() {
 // Despia native initialization (Android status bar config)
 function DespiaInitializer() {
   useAppInitialization();
-  
-  // REMOVED: The beforeunload opacity fade was causing persistent black screens
-  // on Android. The WebView would fire beforeunload, set opacity to 0, but the
-  // page would remain alive with invisible content. This is the root cause of
-  // "shows briefly then goes black" on Android native app.
-  
   return null;
+}
+
+// Native splash screen wrapper - only shows in Despia environment
+function NativeSplashWrapper({ children }: { children: React.ReactNode }) {
+  const [isAppReady, setIsAppReady] = useState(false);
+  const [splashDismissed, setSplashDismissed] = useState(false);
+  const inDespia = isDespia();
+  
+  // Mark as ready after initial mount + small delay for auth to initialize
+  useEffect(() => {
+    if (!inDespia) return;
+    
+    const timeout = setTimeout(() => {
+      setIsAppReady(true);
+    }, 800); // Allow time for initial data fetch
+    
+    return () => clearTimeout(timeout);
+  }, [inDespia]);
+  
+  const handleFadeComplete = useCallback(() => {
+    setSplashDismissed(true);
+  }, []);
+  
+  // If not in Despia, skip splash entirely
+  if (!inDespia) {
+    return <>{children}</>;
+  }
+  
+  return (
+    <>
+      {/* Always render children so they can initialize - hidden until splash dismissed */}
+      <div 
+        className={`transition-opacity duration-300 ${splashDismissed ? 'opacity-100' : 'opacity-0'}`}
+        style={{ visibility: splashDismissed ? 'visible' : 'hidden' }}
+      >
+        {children}
+      </div>
+      
+      {/* Show native splash until ready and faded */}
+      {!splashDismissed && (
+        <NativeSplashLoader 
+          isReady={isAppReady} 
+          onFadeComplete={handleFadeComplete} 
+        />
+      )}
+    </>
+  );
 }
 
 // Deferred non-critical trackers - don't block initial render
@@ -395,612 +438,1372 @@ const App = () => (
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <ReloadPrompt />
-          <HydrationSignal />
-          <DespiaInitializer />
-          <GlobalErrorCapture />
-          <BrowserRouter>
-            <InstallBanner />
-            <ScrollRestoration />
-            <CookieConsentProvider>
-              <CookieConsentBanner />
-              <CountryProvider>
-                <AuthProvider>
-                  <ResumeManagerProvider>
-                    <DeferredTrackers />
-                    <AnimationSettingsProvider>
-                      <DeferredCelebration>
-                        <AdminProvider>
-                        <LocaleProvider>
-                          <LanguagePersistence />
-                          <Routes>
-                            {/* Zoom OAuth redirect - must be outside wrappers for isolation */}
-                            <Route path="/api/zoom/oauth" element={<ZoomOAuth />} />
-                            
-                            {/* Debug page - direct SDK testing */}
-                            <Route path="/debug" element={<Suspense fallback={<PageLoadingSpinner />}><Debug /></Suspense>} />
-                            
-                            {/* Native diagnostics - Android debugging, accessible without auth */}
-                            <Route path="/debug/native" element={<Suspense fallback={<PageLoadingSpinner />}><NativeDiagnostics /></Suspense>} />
-                            
-                            {/* Reset page - emergency state clear for stuck users */}
-                            <Route path="/reset" element={<Suspense fallback={<PageLoadingSpinner />}><Reset /></Suspense>} />
-                            
-                            {/* Public routes - wrapped with WebsiteLocaleWrapper (simple spinner fallback) */}
-                            <Route element={<WebsiteLocaleWrapper />}>
-                              {/* Auth */}
-                              <Route path="/auth" element={<Auth />} />
-                              <Route path="/auth/reset-password" element={<Suspense fallback={<PageLoadingSpinner />}><ResetPassword /></Suspense>} />
+          <NativeSplashWrapper>
+            <Toaster />
+            <Sonner />
+            <ReloadPrompt />
+            <HydrationSignal />
+            <DespiaInitializer />
+            <GlobalErrorCapture />
+            <BrowserRouter>
+              <InstallBanner />
+              <ScrollRestoration />
+              <CookieConsentProvider>
+                <CookieConsentBanner />
+                <CountryProvider>
+                  <AuthProvider>
+                    <ResumeManagerProvider>
+                      <DeferredTrackers />
+                      <AnimationSettingsProvider>
+                        <DeferredCelebration>
+                          <AdminProvider>
+                          <LocaleProvider>
+                            <LanguagePersistence />
+                            <Routes>
+                              {/* Zoom OAuth redirect - must be outside wrappers for isolation */}
+                              <Route path="/api/zoom/oauth" element={<ZoomOAuth />} />
                               
-                              {/* Review Handler - for email deep links */}
-                              <Route path="/review" element={<Suspense fallback={<PageLoadingSpinner />}><ReviewHandler /></Suspense>} />
-                              
-                              {/* Subscription Pages */}
-                              <Route path="/subscribe" element={<Subscribe />} />
-                              <Route path="/subscribe/success" element={<SubscribeSuccess />} />
-                              
-                              {/* Documentation Routes */}
-                              <Route path="/docs" element={<DocsHub />} />
-                              <Route path="/docs/getting-started" element={<GettingStarted />} />
-                              <Route path="/docs/client" element={<DocsClientOverview />} />
-                              <Route path="/docs/client/profile" element={<DocsClientProfile />} />
-                              <Route path="/docs/client/coaches" element={<DocsClientCoaches />} />
-                              <Route path="/docs/client/sessions" element={<DocsClientSessions />} />
-                              <Route path="/docs/client/plans" element={<DocsClientPlans />} />
-                              <Route path="/docs/client/progress" element={<DocsClientProgress />} />
-                              <Route path="/docs/client/achievements" element={<DocsClientAchievements />} />
-                              <Route path="/docs/client/settings" element={<DocsClientSettings />} />
-                              <Route path="/docs/client/habits" element={<DocsClientHabits />} />
-                              <Route path="/docs/client/grocery" element={<DocsClientGrocery />} />
-                              <Route path="/docs/client/challenges" element={<DocsClientChallenges />} />
-                              <Route path="/docs/client/tools" element={<DocsClientTools />} />
-                              <Route path="/docs/client/library" element={<DocsClientLibrary />} />
-                              <Route path="/docs/client/connections" element={<DocsClientConnections />} />
-                              <Route path="/docs/client/food-diary" element={<DocsClientFoodDiary />} />
-                              <Route path="/docs/client/training-logs" element={<DocsClientTrainingLogs />} />
-                              <Route path="/docs/client/data-privacy" element={<DocsClientDataPrivacy />} />
-                              <Route path="/docs/client/marketplace" element={<DocsClientMarketplace />} />
-                              <Route path="/docs/client/receipts" element={<DocsClientReceipts />} />
-                              <Route path="/docs/client/security" element={<DocsClientSecurity />} />
-                              <Route path="/docs/client/wearables" element={<DocsClientWearables />} />
-                              <Route path="/docs/client/data-sharing" element={<DocsClientDataSharing />} />
-                              <Route path="/docs/client/leaderboards" element={<DocsClientLeaderboards />} />
-                              <Route path="/docs/client/messages" element={<DocsClientMessages />} />
-                              <Route path="/docs/client/favourites" element={<DocsClientFavourites />} />
-                              <Route path="/docs/client/readiness" element={<DocsClientReadiness />} />
-                              <Route path="/docs/client/micro-wins" element={<DocsClientMicroWins />} />
-                              <Route path="/docs/client/goal-suggestions" element={<DocsClientGoalSuggestions />} />
-                              <Route path="/docs/client/trends" element={<DocsClientTrends />} />
-                              <Route path="/docs/coach" element={<DocsCoachOverview />} />
-                              <Route path="/docs/coach/onboarding" element={<DocsCoachOnboarding />} />
-                              <Route path="/docs/coach/profile" element={<DocsCoachProfile />} />
-                              <Route path="/docs/coach/earnings" element={<DocsCoachEarnings />} />
-                              <Route path="/docs/coach/clients" element={<DocsCoachClients />} />
-                              <Route path="/docs/coach/messaging" element={<DocsCoachMessaging />} />
-                              <Route path="/docs/coach/plans" element={<DocsCoachPlans />} />
-                              <Route path="/docs/coach/schedule" element={<DocsCoachSchedule />} />
-                              <Route path="/docs/coach/packages" element={<DocsCoachPackages />} />
-                              <Route path="/docs/coach/verification" element={<DocsCoachVerification />} />
-                              <Route path="/docs/coach/pipeline" element={<DocsCoachPipeline />} />
-                              <Route path="/docs/coach/products" element={<DocsCoachProducts />} />
-                              <Route path="/docs/coach/boost" element={<DocsCoachBoost />} />
-                              <Route path="/docs/coach/nutrition" element={<DocsCoachNutrition />} />
-                              <Route path="/docs/coach/ai" element={<DocsCoachAI />} />
-                              <Route path="/docs/coach/ai/overview" element={<DocsCoachAIOverview />} />
-                              <Route path="/docs/coach/ai/client-summary" element={<DocsAIClientSummary />} />
-                              <Route path="/docs/coach/ai/workout-generator" element={<DocsAIWorkoutGenerator />} />
-                              <Route path="/docs/coach/ai/nutrition-generator" element={<DocsAINutritionGenerator />} />
-                              <Route path="/docs/coach/ai/macro-calculator" element={<DocsAIMacroCalculator />} />
-                              <Route path="/docs/coach/ai/checkin-composer" element={<DocsAICheckInComposer />} />
-                              <Route path="/docs/coach/ai/progress-insights" element={<DocsAIProgressInsights />} />
-                              <Route path="/docs/coach/ai/exercise-alternatives" element={<DocsAIExerciseAlternatives />} />
-                              <Route path="/docs/coach/ai/food-substitutions" element={<DocsAIFoodSubstitutions />} />
-                              <Route path="/docs/coach/ai/plan-recommendations" element={<DocsAIPlanRecommendations />} />
-                              <Route path="/docs/coach/reviews" element={<DocsCoachReviews />} />
-                              <Route path="/docs/coach/achievements" element={<DocsCoachAchievements />} />
-                              <Route path="/docs/coach/financial" element={<DocsCoachFinancial />} />
-                              <Route path="/docs/coach/wearables" element={<DocsCoachWearables />} />
-                              <Route path="/docs/coach/integrations" element={<DocsCoachIntegrations />} />
-                              <Route path="/docs/coach/settings" element={<DocsCoachSettings />} />
-                              <Route path="/docs/coach/showcase" element={<DocsCoachShowcase />} />
-                              <Route path="/docs/coach/comparison" element={<DocsCoachComparison />} />
-                              <Route path="/docs/coach/case-studies" element={<DocsCoachCaseStudies />} />
-                              <Route path="/docs/coach/package-analytics" element={<DocsCoachPackageAnalytics />} />
-                              <Route path="/docs/coach/connections" element={<DocsCoachConnections />} />
-                              <Route path="/docs/coach/ai-recommendations" element={<DocsCoachAIRecommendations />} />
-                              <Route path="/docs/coach/client-risk" element={<DocsCoachClientRisk />} />
-                              <Route path="/docs/coach/plateau-detection" element={<DocsCoachPlateau />} />
-                              <Route path="/docs/coach/revenue-forecast" element={<DocsCoachRevenueForecast />} />
-                              <Route path="/docs/coach/checkin-suggestions" element={<DocsCoachCheckInSuggestions />} />
-                              <Route path="/docs/coach/group-classes" element={<DocsCoachGroupClasses />} />
-                              <Route path="/docs/coach/engagement-scoring" element={<DocsCoachEngagementScoring />} />
-                              <Route path="/docs/coach/client-ltv" element={<DocsCoachClientLTV />} />
-                              <Route path="/docs/coach/upsell-insights" element={<DocsCoachUpsell />} />
-                              <Route path="/docs/coach/goal-adherence" element={<DocsCoachGoalAdherence />} />
-                              <Route path="/docs/coach/automations" element={<DocsCoachAutomations />} />
-                              <Route path="/docs/coach/automations/dropoff-rescue" element={<DocsCoachDropoffRescue />} />
-                              <Route path="/docs/coach/automations/milestones" element={<DocsCoachMilestones />} />
-                              <Route path="/docs/coach/automations/reminders" element={<DocsCoachReminders />} />
-                              <Route path="/docs/coach/automations/checkins" element={<DocsCoachScheduledCheckins />} />
-                              
-                              {/* Protected Admin Documentation Routes */}
-                              <Route path="/docs/admin" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminOverview /></ProtectedRoute>} />
-                              <Route path="/docs/admin/dashboard" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminDashboard /></ProtectedRoute>} />
-                              <Route path="/docs/admin/users" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminUsers /></ProtectedRoute>} />
-                              <Route path="/docs/admin/coaches" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminCoaches /></ProtectedRoute>} />
-                              <Route path="/docs/admin/team" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminTeam /></ProtectedRoute>} />
-                              <Route path="/docs/admin/revenue" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminRevenue /></ProtectedRoute>} />
-                              <Route path="/docs/admin/analytics" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminAnalytics /></ProtectedRoute>} />
-                              <Route path="/docs/admin/challenges" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminChallenges /></ProtectedRoute>} />
-                              <Route path="/docs/admin/blog" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminBlog /></ProtectedRoute>} />
-                              <Route path="/docs/admin/boosts" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminBoosts /></ProtectedRoute>} />
-                              <Route path="/docs/admin/integrations" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminIntegrations /></ProtectedRoute>} />
-                              <Route path="/docs/admin/audit" element={<ProtectedRoute allowedRoles={["admin", "manager", "staff"]}><DocsAdminAudit /></ProtectedRoute>} />
-                              
-                              {/* Public Integration Documentation Routes */}
-                              <Route path="/docs/integrations/wearables" element={<WearablesOverviewDocs />} />
-                              <Route path="/docs/integrations/apple-health" element={<DocsAppleHealth />} />
-                              <Route path="/docs/integrations/health-connect" element={<DocsHealthConnect />} />
-                              <Route path="/docs/integrations/garmin" element={<DocsGarmin />} />
-                              <Route path="/docs/integrations/fitbit" element={<FitbitIntegrationDocs />} />
-                              <Route path="/docs/integrations/zoom" element={<ZoomIntegrationDocs />} />
-                              <Route path="/docs/integrations/google-meet" element={<GoogleMeetIntegrationDocs />} />
-                              <Route path="/docs/integrations/google-calendar" element={<GoogleCalendarIntegrationDocs />} />
-                              <Route path="/docs/integrations/apple-calendar" element={<AppleCalendarIntegrationDocs />} />
-                            </Route>
-                            
-                            {/* Dashboard/Onboarding routes - wrapped with AppLocaleWrapper (skeleton fallback) */}
-                            <Route element={<AppLocaleWrapper />}>
-                              {/* Onboarding */}
-                              <Route path="/onboarding/client" element={
+                              {/* Auth routes - wrap with WebsiteLocaleWrapper (simple spinner fallback) */}
+                              <Route path="/auth" element={
+                                <WebsiteLocaleWrapper>
+                                  <Auth />
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/reset-password" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <ResetPassword />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/reset" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <Reset />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Subscribe routes (coach registration via Stripe) - wrap with WebsiteLocaleWrapper */}
+                              <Route path="/subscribe" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <Subscribe />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/subscribe/success" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <SubscribeSuccess />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Debug route (local development only) */}
+                              <Route path="/debug" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <Debug />
+                                </Suspense>
+                              } />
+                              <Route path="/native-diagnostics" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <NativeDiagnostics />
+                                </Suspense>
+                              } />
+
+                              {/* Documentation Routes - wrap with WebsiteLocaleWrapper */}
+                              <Route path="/docs" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsHub />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/getting-started" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GettingStarted />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Client Documentation Routes */}
+                              <Route path="/docs/client" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientOverview />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/profile" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientProfile />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/coaches" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientCoaches />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/sessions" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientSessions />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/plans" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientPlans />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/progress" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientProgress />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/achievements" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientAchievements />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/settings" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientSettings />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/habits" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientHabits />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/grocery" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientGrocery />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/challenges" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientChallenges />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/tools" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientTools />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/library" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientLibrary />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/connections" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientConnections />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/food-diary" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientFoodDiary />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/training-logs" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientTrainingLogs />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/data-privacy" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientDataPrivacy />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/marketplace" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientMarketplace />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/receipts" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientReceipts />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/security" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientSecurity />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/wearables" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientWearables />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/data-sharing" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientDataSharing />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/leaderboards" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientLeaderboards />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/messages" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientMessages />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/favourites" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientFavourites />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/readiness" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientReadiness />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/micro-wins" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientMicroWins />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/goal-suggestions" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientGoalSuggestions />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/trends" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientTrends />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Coach Documentation Routes */}
+                              <Route path="/docs/coach" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachOverview />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/onboarding" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachOnboarding />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/profile" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachProfile />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/earnings" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachEarnings />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/clients" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachClients />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/messaging" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachMessaging />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/plans" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachPlans />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/schedule" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachSchedule />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/packages" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachPackages />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/verification" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachVerification />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/pipeline" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachPipeline />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/products" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachProducts />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/boost" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachBoost />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/nutrition" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachNutrition />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachAI />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/reviews" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachReviews />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/automations" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachAutomations />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/automations/dropoff-rescue" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachDropoffRescue />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/automations/milestones" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachMilestones />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/automations/reminders" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachReminders />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/automations/scheduled-checkins" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachScheduledCheckins />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai-tools" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachAIOverview />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/client-summary" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAIClientSummary />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/workout-generator" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAIWorkoutGenerator />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/nutrition-generator" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAINutritionGenerator />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/macro-calculator" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAIMacroCalculator />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/check-in-composer" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAICheckInComposer />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/progress-insights" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAIProgressInsights />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/exercise-alternatives" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAIExerciseAlternatives />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/food-substitutions" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAIFoodSubstitutions />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai/plan-recommendations" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAIPlanRecommendations />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/achievements" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachAchievements />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/financial" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachFinancial />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/wearables" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachWearables />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/integrations" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachIntegrations />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/settings" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachSettings />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/showcase" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachShowcase />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/compare" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachComparison />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/case-studies" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachCaseStudies />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/package-analytics" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachPackageAnalytics />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/connections" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachConnections />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/ai-recommendations" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachAIRecommendations />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/client-risk" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachClientRisk />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/plateau" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachPlateau />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/revenue-forecast" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachRevenueForecast />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/check-in-suggestions" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachCheckInSuggestions />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/group-classes" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachGroupClasses />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/engagement-scoring" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachEngagementScoring />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/client-ltv" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachClientLTV />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/upsell" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachUpsell />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/coach/goal-adherence" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsCoachGoalAdherence />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Admin Documentation Routes */}
+                              <Route path="/docs/admin" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminOverview />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/dashboard" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminDashboard />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/users" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminUsers />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/coaches" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminCoaches />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/team" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminTeam />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/revenue" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminRevenue />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/analytics" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminAnalytics />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/challenges" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminChallenges />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/blog" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminBlog />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/boosts" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminBoosts />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/integrations" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminIntegrations />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/audit" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminAudit />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Integration Documentation Routes */}
+                              <Route path="/docs/integrations/zoom" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <ZoomIntegrationDocs />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/integrations/google-meet" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GoogleMeetIntegrationDocs />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/integrations/google-calendar" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GoogleCalendarIntegrationDocs />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/integrations/apple-calendar" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <AppleCalendarIntegrationDocs />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/integrations/fitbit" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <FitbitIntegrationDocs />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/integrations/wearables" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <WearablesOverviewDocs />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/integrations/apple-health" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAppleHealth />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/integrations/health-connect" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsHealthConnect />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/integrations/garmin" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGarmin />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Review Handler Route - must be before dashboard routes */}
+                              <Route path="/review-handler" element={
                                 <ProtectedRoute allowedRoles={["client"]}>
-                                  <ClientOnboarding />
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <ReviewHandler />
+                                  </Suspense>
                                 </ProtectedRoute>
                               } />
-                              <Route path="/onboarding/coach" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachOnboarding />
-                                </ProtectedRoute>
-                              } />
-                              
-                              {/* Dashboard Redirect */}
+
+                              {/* Dashboard Routes - use AppLocaleWrapper (DashboardSkeleton fallback) */}
                               <Route path="/dashboard" element={
-                                <ProtectedRoute allowedRoles={["client", "coach", "admin", "manager", "staff"]}>
-                                  <DashboardRedirect />
-                                </ProtectedRoute>
-                              } />
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <DashboardRedirect />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              }>
+                                {/* Admin Dashboard Routes */}
+                                <Route path="admin" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminDashboard />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/users" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminUsers />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/coaches" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminCoaches />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/settings" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminSettings />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/team" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminTeam />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/revenue" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminRevenue />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/analytics" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminAnalytics />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/reviews" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminReviews />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/verification" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminVerification />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/integrations" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminIntegrations />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/challenges" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminChallenges />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/audit" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminAuditLog />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/feedback" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminFeedback />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/blog" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminBlog />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/boosts" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminBoosts />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="my-profile" element={
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <MyProfile />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                
+                                {/* Onboarding Routes */}
+                                <Route path="onboarding/client" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientOnboarding />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="onboarding/coach" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachOnboarding />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                
+                                {/* Client Dashboard Routes */}
+                                <Route path="client" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientOverview />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/coaches" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientCoaches />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/sessions" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientSessions />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/messages" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientMessages />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/plans" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientPlans />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/plans/:planId" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientPlanDetail />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/habits" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientHabits />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/progress" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientProgress />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/settings" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientSettings />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/favourites" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientFavourites />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/achievements" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientAchievements />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/leaderboard" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientLeaderboard />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/challenges" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientChallenges />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/integrations" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientIntegrations />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/grocery" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientGrocery />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/connections" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientConnections />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/library" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientLibrary />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/tools" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientTools />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/receipts" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientReceipts />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/find-coaches" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientFindCoaches />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/coach/:username" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientCoachProfile />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/marketplace" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientMarketplace />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/marketplace/product/:productId" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientMarketplaceProduct />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/marketplace/bundle/:bundleId" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientMarketplaceBundle />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/food-diary" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientFoodDiary />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/training-logs" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientTrainingLogs />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/health-history" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientHealthHistory />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/discipline-setup" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <DisciplineSetup />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                
+                                {/* Coach Dashboard Routes */}
+                                <Route path="coach" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachOverview />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/clients" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachClients />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/clients/:clientId" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachClientDetail />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/schedule" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachSchedule />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/messages" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachMessages />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/plans" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachPlans />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/plans/builder" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachPlanBuilder />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/plans/builder/:planId" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachPlanBuilder />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/nutrition" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachNutritionBuilder />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/nutrition/:planId" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachNutritionBuilder />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/earnings" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachEarnings />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/settings" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachSettings />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/packages" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachPackages />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/integrations" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachIntegrations />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/reviews" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachReviews />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/financial" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachFinancial />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/pipeline" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachPipeline />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/boost" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachBoost />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/achievements" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachAchievements />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/connections" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachConnections />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/products" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachProducts />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/package-analytics" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachPackageAnalytics />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/showcase" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachOutcomeShowcase />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/ai-recommendations" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachAIRecommendations />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/dashboard/coach/scheduled-checkins" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <CoachAutomations />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/dashboard/coach/automations" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <CoachAutomations />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/dashboard/coach/wearables" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <CoachWearableDashboard />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/dashboard/coach/compare" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <CoachClientComparison />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/dashboard/coach/case-studies" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <CoachCaseStudies />
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="/dashboard/notifications" element={
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Notifications />
+                                  </ProtectedRoute>
+                                } />
+                              </Route>
                               
-                              {/* Admin Dashboard */}
-                              <Route path="/dashboard/admin" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                                  <AdminDashboard />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/users" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                                  <AdminUsers />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/coaches" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                                  <AdminCoaches />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/team" element={
-                                <ProtectedRoute allowedRoles={["admin"]}>
-                                  <AdminTeam />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/revenue" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                                  <AdminRevenue />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/boosts" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                                  <AdminBoosts />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/analytics" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                                  <AdminAnalytics />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/profile" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager", "staff", "coach", "client"]}>
-                                  <MyProfile />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/settings" element={
-                                <ProtectedRoute allowedRoles={["admin"]}>
-                                  <AdminSettings />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/reviews" element={
-                                <ProtectedRoute allowedRoles={["admin"]}>
-                                  <AdminReviews />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/verification" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                                  <AdminVerification />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/integrations" element={
-                                <ProtectedRoute allowedRoles={["admin"]}>
-                                  <AdminIntegrations />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/challenges" element={
-                                <ProtectedRoute allowedRoles={["admin"]}>
-                                  <AdminChallenges />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/audit" element={
-                                <ProtectedRoute allowedRoles={["admin"]}>
-                                  <AdminAuditLog />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/feedback" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                                  <AdminFeedback />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/blog" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager"]}>
-                                  <AdminBlog />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/notifications" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                                  <Notifications />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/messages" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                                  <CoachMessages />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/admin/messages/:participantId" element={
-                                <ProtectedRoute allowedRoles={["admin", "manager", "staff"]}>
-                                  <CoachMessages />
-                                </ProtectedRoute>
-                              } />
-                              
-                              {/* Client Dashboard Routes */}
-                              <Route path="/dashboard/client" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientOverview />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/coaches" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientCoaches />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/find-coaches" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientFindCoaches />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/find-coaches/:coachSlug" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientCoachProfile />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/favourites" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientFavourites />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/sessions" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientSessions />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/messages" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientMessages />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/messages/:id" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientMessages />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/plans" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientPlans />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/plans/:planId" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientPlanDetail />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/habits" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientHabits />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/progress" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientProgress />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/achievements" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientAchievements />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/leaderboard" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientLeaderboard />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/challenges" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientChallenges />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/settings" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientSettings />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/integrations" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientIntegrations />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/health-history" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientHealthHistory />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/grocery" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientGrocery />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/library" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientLibrary />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/marketplace/bundles/:bundleId" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientMarketplaceBundle />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/marketplace/:productSlug" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientMarketplaceProduct />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/marketplace" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientMarketplace />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/food-diary" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientFoodDiary />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/training-logs" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientTrainingLogs />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/tools" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientTools />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/connections" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientConnections />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/receipts" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <ClientReceipts />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/notifications" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <Notifications />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/discipline-setup" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <DisciplineSetup />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/client/discipline/:disciplineId" element={
-                                <ProtectedRoute allowedRoles={["client", "admin"]}>
-                                  <DisciplineSetup />
-                                </ProtectedRoute>
-                              } />
-                              
-                              {/* Coach Dashboard Routes */}
-                              <Route path="/dashboard/coach" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachOverview />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/pipeline" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachPipeline />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/clients" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachClients />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/clients/:id" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachClientDetail />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/schedule" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachSchedule />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/messages" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachMessages />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/messages/:id" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachMessages />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/connections" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachConnections />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/plans" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachPlans />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/plans/new" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachPlanBuilder />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/plans/:id" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachPlanBuilder />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/plans/nutrition/new" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachNutritionBuilder />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/plans/nutrition/:planId" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachNutritionBuilder />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/packages" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachPackages />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/achievements" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachAchievements />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/earnings" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachEarnings />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/financial" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachFinancial />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/boost" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachBoost />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/reviews" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachReviews />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/settings" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachSettings />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/notifications" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <Notifications />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/integrations" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachIntegrations />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/products" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachProducts />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/analytics/packages" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachPackageAnalytics />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/showcase" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachOutcomeShowcase />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/ai-recommendations" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachAIRecommendations />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/scheduled-checkins" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachAutomations />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/automations" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachAutomations />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/wearables" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachWearableDashboard />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/compare" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachClientComparison />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/coach/case-studies" element={
-                                <ProtectedRoute allowedRoles={["coach"]}>
-                                  <CoachCaseStudies />
-                                </ProtectedRoute>
-                              } />
-                              <Route path="/dashboard/notifications" element={
-                                <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                  <Notifications />
-                                </ProtectedRoute>
-                              } />
-                            </Route>
-                            
-                            {/* Website routes - WITH locale URL logic (must be last) */}
-                            <Route path="/*" element={<WebsiteRouter />} />
-                        </Routes>
-                        </LocaleProvider>
-                      </AdminProvider>
-                    </DeferredCelebration>
-                  </AnimationSettingsProvider>
-                </ResumeManagerProvider>
-              </AuthProvider>
-              </CountryProvider>
-            </CookieConsentProvider>
-          </BrowserRouter>
+                              {/* Website routes - WITH locale URL logic (must be last) */}
+                              <Route path="/*" element={<WebsiteRouter />} />
+                          </Routes>
+                          </LocaleProvider>
+                        </AdminProvider>
+                      </DeferredCelebration>
+                    </AnimationSettingsProvider>
+                  </ResumeManagerProvider>
+                </AuthProvider>
+                </CountryProvider>
+              </CookieConsentProvider>
+            </BrowserRouter>
+          </NativeSplashWrapper>
         </TooltipProvider>
       </QueryClientProvider>
     </HelmetProvider>
