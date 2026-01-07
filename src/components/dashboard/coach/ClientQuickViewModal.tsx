@@ -31,6 +31,7 @@ import {
   Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatSleepDuration } from "@/lib/format-utils";
 import { useClientQuickViewData } from "@/hooks/useClientQuickViewData";
 
 interface ClientQuickViewModalProps {
@@ -137,8 +138,7 @@ export const ClientQuickViewModal = memo(({
                     <MetricCard
                       icon={Moon}
                       label="Avg Sleep"
-                      value={data.healthStats.avgSleep}
-                      unit="hrs"
+                      value={formatSleepDuration(data.healthStats.avgSleep)}
                       color="purple"
                       size="sm"
                     />
