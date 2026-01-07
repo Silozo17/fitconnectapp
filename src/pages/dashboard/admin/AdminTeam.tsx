@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -23,6 +22,7 @@ import { useAdminTeamManagement } from "@/hooks/useAdminTeamManagement";
 import { AdminTeamCard } from "@/components/admin/AdminTeamCard";
 import { logError } from "@/lib/error-utils";
 import { useTranslation } from "@/hooks/useTranslation";
+import { DashboardSectionHeader, MetricCard, ContentSection, StatsGrid } from "@/components/shared";
 
 interface TeamMember {
   id: string;
@@ -213,89 +213,67 @@ const AdminTeam = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Team Management</h1>
-            <p className="text-muted-foreground">Manage admins, managers, and staff</p>
-          </div>
-          <Button onClick={() => setIsAddModalOpen(true)} className="w-full sm:w-auto">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Team Member
-          </Button>
-        </div>
-
-        <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                  <p className="text-sm text-muted-foreground">Total Team</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-destructive/10 rounded-lg">
-                  <Shield className="h-6 w-6 text-destructive" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.admins}</p>
-                  <p className="text-sm text-muted-foreground">Admins</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-primary/10 rounded-lg">
-                  <Users className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.managers}</p>
-                  <p className="text-sm text-muted-foreground">Managers</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-4">
-                <div className="p-3 bg-secondary/50 rounded-lg">
-                  <Users className="h-6 w-6 text-secondary-foreground" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.staff}</p>
-                  <p className="text-sm text-muted-foreground">Staff</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <BulkActionBar
-          count={selectedIds.size}
-          onActivate={handleBulkActivate}
-          onSuspend={handleBulkSuspend}
-          onBan={handleBulkBan}
-          onDelete={handleBulkDelete}
-          onClear={() => setSelectedIds(new Set())}
-          loading={actionLoading}
+      <div className="space-y-11">
+        <DashboardSectionHeader
+          title="Team Management"
+          description="Manage admins, managers, and staff"
+          action={
+            <Button onClick={() => setIsAddModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add Team Member
+            </Button>
+          }
         />
 
-        <Card>
-          <CardHeader>
+        <StatsGrid columns={4}>
+          <MetricCard
+            icon={Users}
+            label="Total Team"
+            value={stats.total}
+            color="purple"
+            size="sm"
+          />
+          <MetricCard
+            icon={Shield}
+            label="Admins"
+            value={stats.admins}
+            color="red"
+            size="sm"
+          />
+          <MetricCard
+            icon={Users}
+            label="Managers"
+            value={stats.managers}
+            color="primary"
+            size="sm"
+          />
+          <MetricCard
+            icon={Users}
+            label="Staff"
+            value={stats.staff}
+            color="blue"
+            size="sm"
+          />
+        </StatsGrid>
+
+        {selectedIds.size > 0 && (
+          <BulkActionBar
+            count={selectedIds.size}
+            onActivate={handleBulkActivate}
+            onSuspend={handleBulkSuspend}
+            onBan={handleBulkBan}
+            onDelete={handleBulkDelete}
+            onClear={() => setSelectedIds(new Set())}
+            loading={actionLoading}
+          />
+        )}
+
+        <ContentSection colorTheme="purple" withAccent>
+          <div className="space-y-4">
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <CardTitle>Team Members</CardTitle>
-                <CardDescription>All admins, managers, and staff</CardDescription>
+                <h3 className="font-semibold text-base">Team Members</h3>
+                <p className="text-sm text-muted-foreground">All admins, managers, and staff</p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:flex-wrap">
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -331,8 +309,7 @@ const AdminTeam = () => {
                 </div>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
+            
             {loading ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -489,8 +466,8 @@ const AdminTeam = () => {
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </ContentSection>
       </div>
 
       <AddTeamMemberModal
