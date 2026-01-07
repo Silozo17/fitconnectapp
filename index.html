@@ -168,6 +168,7 @@
           if(tip)tip.textContent=this.tips[this.currentTip];
           this.interval=setInterval(this.rotateTip.bind(this),3000);
         }
+      };
       
       if(document.readyState==='loading'){
         document.addEventListener('DOMContentLoaded',function(){
