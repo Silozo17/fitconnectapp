@@ -83,7 +83,8 @@
       #native-splash{display:none;position:fixed;inset:0;z-index:9999;background:#0D0D14}
       #native-splash.active{display:block}
       #native-splash.fade-out{animation:native-fade-out 0.5s ease-out forwards}
-      @keyframes native-fade-out{from{opacity:1}to{opacity:0;pointer-events:none}}
+      #native-splash.hidden{display:none!important}
+      @keyframes native-fade-out{from{opacity:1}to{opacity:0}}
       @keyframes native-pulse{0%,100%{opacity:0.6}50%{opacity:1}}
     </style>
     
@@ -125,6 +126,9 @@
           if(splash){
             splash.classList.add('fade-out');
             clearInterval(window.__nativeSplash.interval);
+            splash.addEventListener('animationend',function(){
+              splash.classList.add('hidden');
+            },{once:true});
           }
         },
         rotateTip:function(){
@@ -264,17 +268,21 @@
       <div style="position:absolute;inset:0;background-image:url('https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/iap_image.webp');background-size:cover;background-position:center;"></div>
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.6),rgba(0,0,0,0.4),rgba(0,0,0,0.7));"></div>
       <div style="position:relative;z-index:10;display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top,20px) 24px env(safe-area-inset-bottom,20px);">
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding-top:48px;">
+        <!-- Logo at TOP -->
+        <div style="padding-top:48px;display:flex;justify-content:center;">
           <img src="https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/logo-with-text-white.webp" alt="FitConnect" style="height:48px;width:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));"/>
         </div>
-        <div style="padding-bottom:64px;text-align:center;">
+        <!-- Tips in CENTER -->
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
           <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;">
             <span style="width:8px;height:8px;border-radius:50%;background:#BEFF00;animation:native-pulse 1s ease-in-out infinite;"></span>
             <span style="width:8px;height:8px;border-radius:50%;background:#BEFF00;animation:native-pulse 1s ease-in-out infinite;animation-delay:0.15s;"></span>
             <span style="width:8px;height:8px;border-radius:50%;background:#BEFF00;animation:native-pulse 1s ease-in-out infinite;animation-delay:0.3s;"></span>
           </div>
-          <p id="native-splash-tip" style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:500;max-width:280px;margin:0 auto;line-height:1.5;transition:opacity 0.3s;"></p>
+          <p id="native-splash-tip" style="color:rgba(255,255,255,0.8);font-size:14px;font-weight:500;max-width:280px;margin:0 auto;line-height:1.5;transition:opacity 0.3s;text-align:center;"></p>
         </div>
+        <!-- Bottom spacer for balance -->
+        <div style="padding-bottom:48px;"></div>
       </div>
     </div>
     

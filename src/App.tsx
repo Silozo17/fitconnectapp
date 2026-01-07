@@ -341,7 +341,7 @@ function NativeSplashWrapper({ children }: { children: React.ReactNode }) {
       if (typeof window !== 'undefined' && (window as any).__nativeSplash) {
         (window as any).__nativeSplash.hide();
       }
-    }, 800);
+    }, 1500);
     
     return () => clearTimeout(timeout);
   }, [showNativeSplash]);
