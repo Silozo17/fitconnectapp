@@ -82,8 +82,11 @@
       /* Native/PWA Splash Screen Styles */
       #native-splash{display:none;position:fixed;inset:0;z-index:9999;background:#0D0D14}
       #native-splash.active{display:block}
-      #native-splash.fade-out{animation:native-fade-out 0.5s ease-out forwards}
+      #native-splash.fade-out{animation:native-fade-out 1s ease-out forwards}
       #native-splash.hidden{display:none!important}
+      #native-splash-bg{opacity:0;transition:opacity 0.6s ease-out}
+      #native-splash-logo{opacity:0;transition:opacity 0.5s ease-out}
+      #native-splash-content{opacity:0;transition:opacity 0.5s ease-out}
       @keyframes native-fade-out{from{opacity:1}to{opacity:0}}
       @keyframes native-pulse{0%,100%{opacity:0.6}50%{opacity:1}}
     </style>
@@ -118,8 +121,27 @@
         show:function(){
           var splash=document.getElementById('native-splash');
           var loader=document.getElementById('app-loader');
+          var bgLayer=document.getElementById('native-splash-bg');
+          var logoLayer=document.getElementById('native-splash-logo');
+          var contentLayer=document.getElementById('native-splash-content');
           if(splash)splash.classList.add('active');
           if(loader)loader.style.display='none';
+          // Preload background image then fade in layers
+          var img=new Image();
+          var self=this;
+          img.onload=function(){
+            // Fade in background
+            if(bgLayer)bgLayer.style.opacity='1';
+            // Fade in logo after 400ms
+            setTimeout(function(){
+              if(logoLayer)logoLayer.style.opacity='1';
+              // Fade in tips 200ms after logo
+              setTimeout(function(){
+                if(contentLayer)contentLayer.style.opacity='1';
+              },200);
+            },400);
+          };
+          img.src='https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/iap_image.webp';
         },
         hide:function(){
           var splash=document.getElementById('native-splash');
@@ -146,7 +168,6 @@
           if(tip)tip.textContent=this.tips[this.currentTip];
           this.interval=setInterval(this.rotateTip.bind(this),3000);
         }
-      };
       
       if(document.readyState==='loading'){
         document.addEventListener('DOMContentLoaded',function(){
@@ -265,15 +286,17 @@
     
     <!-- Native/PWA Splash Screen - Shown instantly before React loads -->
     <div id="native-splash">
-      <div style="position:absolute;inset:0;background-image:url('https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/iap_image.webp');background-size:cover;background-position:center;"></div>
+      <!-- Background image layer - starts hidden, fades in when loaded -->
+      <div id="native-splash-bg" style="position:absolute;inset:0;background-image:url('https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/iap_image.webp');background-size:cover;background-position:center;"></div>
+      <!-- Gradient overlay -->
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.6),rgba(0,0,0,0.4),rgba(0,0,0,0.7));"></div>
       <div style="position:relative;z-index:10;display:flex;flex-direction:column;height:100%;padding:env(safe-area-inset-top,20px) 24px env(safe-area-inset-bottom,20px);">
-        <!-- Logo at TOP -->
-        <div style="padding-top:48px;display:flex;justify-content:center;">
+        <!-- Logo at TOP - starts hidden, fades in after image -->
+        <div id="native-splash-logo" style="padding-top:48px;display:flex;justify-content:center;">
           <img src="https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/logo-with-text-white.webp" alt="FitConnect" style="height:48px;width:auto;filter:drop-shadow(0 4px 6px rgba(0,0,0,0.3));"/>
         </div>
-        <!-- Tips in CENTER -->
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+        <!-- Tips in CENTER - starts hidden, fades in after logo -->
+        <div id="native-splash-content" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;">
           <div style="display:flex;justify-content:center;gap:8px;margin-bottom:12px;">
             <span style="width:8px;height:8px;border-radius:50%;background:#BEFF00;animation:native-pulse 1s ease-in-out infinite;"></span>
             <span style="width:8px;height:8px;border-radius:50%;background:#BEFF00;animation:native-pulse 1s ease-in-out infinite;animation-delay:0.15s;"></span>
