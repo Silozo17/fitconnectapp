@@ -88,12 +88,12 @@ export const LockedFeatureCard = ({ feature, requiredTier, className }: LockedFe
           </Link>
         )}
         
-        <a 
-          href="/pricing" 
+        <Link 
+          to="/pricing" 
           className="text-xs text-muted-foreground underline hover:text-primary mt-3"
         >
           View all plan features
-        </a>
+        </Link>
       </CardContent>
     </Card>
   );

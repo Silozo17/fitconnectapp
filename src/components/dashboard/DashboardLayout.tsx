@@ -75,40 +75,33 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     setMobileOpen(true);
   }, []);
 
-  // When onboarding status confirms user is onboarded WITH valid progress, cache it
+  // Consolidated onboarding check effect - prevents multiple redirects and race conditions
   useEffect(() => {
-    if (onboardingStatus?.isOnboarded && !isKnownOnboarded) {
-      // Only cache if they have actual onboarding progress (not falsely marked)
+    // Skip if still loading or just completed onboarding or already known to be onboarded
+    if (isLoading || justCompletedOnboarding || isKnownOnboarded) return;
+    if (!onboardingStatus) return;
+    
+    // Case 1: User is onboarded with valid progress - cache it
+    if (onboardingStatus.isOnboarded) {
       const progress = onboardingStatus.onboardingProgress;
       const hasValidProgress = progress && Object.keys(progress).length > 0;
+      
       if (hasValidProgress) {
         localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
+        return; // All good, stay on dashboard
       }
-    }
-  }, [onboardingStatus?.isOnboarded, onboardingStatus?.onboardingProgress, isKnownOnboarded]);
-
-  // Safety net: Detect falsely-marked-as-onboarded profiles (legacy bug fix)
-  // These have isOnboarded=true but empty onboardingProgress
-  useEffect(() => {
-    if (!isLoading && onboardingStatus?.isOnboarded && !justCompletedOnboarding) {
-      const progress = onboardingStatus.onboardingProgress;
-      const hasNoProgress = !progress || Object.keys(progress).length === 0;
       
-      if (hasNoProgress) {
-        if (import.meta.env.DEV) {
-          console.log('[DashboardLayout] Detected falsely-onboarded profile, forcing onboarding');
-        }
-        // Clear the cached flag since it's invalid
-        localStorage.removeItem(STORAGE_KEYS.COACH_ONBOARDED);
-        navigate("/onboarding/coach", { replace: true });
-        return;
+      // Case 2: Falsely-marked as onboarded (legacy bug) - force onboarding
+      if (import.meta.env.DEV) {
+        console.log('[DashboardLayout] Detected falsely-onboarded profile, forcing onboarding');
       }
+      localStorage.removeItem(STORAGE_KEYS.COACH_ONBOARDED);
+      navigate("/onboarding/coach", { replace: true });
+      return;
     }
-  }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding]);
-
-  // Redirect to onboarding if not completed - but skip if just completed or known-onboarded
-  useEffect(() => {
-    if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error && !justCompletedOnboarding && !isKnownOnboarded) {
+    
+    // Case 3: Not onboarded at all - redirect to onboarding
+    if (!onboardingStatus.error) {
       if (import.meta.env.DEV) {
         console.log('[DashboardLayout] Not onboarded, redirecting to onboarding');
       }

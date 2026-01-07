@@ -43,6 +43,22 @@ export class ErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error("ErrorBoundary caught an error:", error, errorInfo);
     
+    const errorMessage = error.message?.toLowerCase() || '';
+    
+    // Check if this is a chunk load error (fast page switching issue)
+    const isChunkError = 
+      errorMessage.includes('loading chunk') ||
+      errorMessage.includes('chunkloaderror') ||
+      errorMessage.includes('failed to fetch dynamically imported module') ||
+      errorMessage.includes('loading css chunk');
+    
+    if (isChunkError) {
+      console.warn('[ErrorBoundary] Chunk load error detected, auto-recovering...');
+      // Auto-recover by reloading the current route
+      window.location.reload();
+      return;
+    }
+    
     // Store component stack
     this.setState({ componentStack: errorInfo.componentStack || null });
     
@@ -60,7 +76,6 @@ export class ErrorBoundary extends Component<Props, State> {
     } catch { /* ignore storage errors */ }
     
     // Check if this is an auth-related error (JWT/token corruption)
-    const errorMessage = error.message?.toLowerCase() || '';
     const isAuthError = 
       errorMessage.includes('jwt') ||
       errorMessage.includes('token') ||
