@@ -133,27 +133,25 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
       return;
     }
     
-    setIsSubmitting(true);
-    
     if (isNativeMobile) {
-      // Native IAP flow
+      // Native IAP flow - DO NOT use isSubmitting, rely on iapState.purchaseStatus
       if (!iapState.isAvailable) {
         console.error('[UpgradeDrawer] IAP not available on native device');
         toast.error('In-app purchases are not available. Please reinstall the app.');
-        setIsSubmitting(false);
         return;
       }
       
       try {
         console.log('[UpgradeDrawer] Triggering iapPurchase', { selectedTier, billingInterval });
         await iapPurchase(selectedTier, billingInterval);
+        // Note: State is managed by useNativeIAP hook - no need for local isSubmitting
       } catch (error) {
         console.error('[UpgradeDrawer] IAP purchase failed:', error);
         toast.error('Purchase failed. Please try again.');
-        setIsSubmitting(false);
       }
     } else {
-      // Web Stripe checkout flow
+      // Web Stripe checkout flow - uses isSubmitting
+      setIsSubmitting(true);
       try {
         const { data, error } = await supabase.functions.invoke('create-checkout-session', {
           body: {
@@ -350,10 +348,15 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
             {/* Primary CTA */}
             <Button
               onClick={handlePurchase}
-              disabled={isSubmitting || isProcessingIAP || (isNativeMobile && isCoachIdLoading && !effectiveCoachId)}
+              disabled={
+                // Web: use isSubmitting
+                // Native: use iapState.purchaseStatus (not isSubmitting)
+                (isNativeMobile ? isProcessingIAP : isSubmitting) || 
+                (isNativeMobile && isCoachIdLoading && !effectiveCoachId)
+              }
               className="mb-1.5 h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
             >
-              {(isSubmitting || isProcessingIAP) ? (
+              {(isNativeMobile ? isProcessingIAP : isSubmitting) ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Processing...
