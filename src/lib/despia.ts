@@ -695,19 +695,20 @@ export const isNativeIAPAvailable = (): boolean => {
  * - Users reinstalling the app
  * - Users who purchased but didn't get entitlement activated
  * 
- * @param userId The user's ID (typically the auth user ID)
+ * Per Despia documentation: restoreinapppurchases:// takes no parameters
+ * RevenueCat handles user association server-side via the existing external_id
+ * 
  * @returns true if restore was triggered, false if not in Despia environment
  */
-export const triggerRestorePurchases = (userId: string): boolean => {
+export const triggerRestorePurchases = (): boolean => {
   if (!isDespia()) {
     console.warn('[Despia IAP] Attempted restore outside of Despia environment');
     return false;
   }
   
   try {
-    // Use the standard RestoreInAppPurchases protocol
-    // The external_id ensures RevenueCat associates restored purchases with the right user
-    const command = `restoreinapppurchases://external_id=${encodeURIComponent(userId)}`;
+    // Per Despia docs: no parameters for restore command
+    const command = 'restoreinapppurchases://';
     console.log('[Despia IAP] Triggering restore purchases:', command);
     despia(command);
     return true;

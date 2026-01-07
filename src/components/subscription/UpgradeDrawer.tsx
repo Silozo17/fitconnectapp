@@ -15,7 +15,7 @@ import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { FeaturesActivatedModal } from "@/components/subscription/FeaturesActivatedModal";
 import { openExternalUrl, shouldOpenExternally } from "@/lib/external-links";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
-import { triggerHaptic } from "@/lib/despia";
+import { triggerHaptic, triggerRestorePurchases } from "@/lib/despia";
 import { useQueryClient } from "@tanstack/react-query";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 import { supabase } from "@/integrations/supabase/client";
@@ -131,8 +131,26 @@ export const UpgradeDrawer = ({
   const isProcessingIAP = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
   
   const handleRestorePurchases = useCallback(async () => {
+    if (!isNativeMobile) {
+      toast.info('Restore purchases is only available on iOS/Android');
+      return;
+    }
+    
+    // Trigger native restore command first
+    const triggered = triggerRestorePurchases();
+    if (!triggered) {
+      toast.error('Unable to trigger restore');
+      return;
+    }
+    
+    toast.info('Restoring purchases...', { duration: 4000 });
+    
+    // Wait for native restore + webhook processing
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    
+    // Now reconcile with backend
     await reconcileSubscription();
-  }, [reconcileSubscription]);
+  }, [isNativeMobile, reconcileSubscription]);
   
   const handlePurchase = async () => {
     console.log('[UpgradeDrawer] handlePurchase called', { 

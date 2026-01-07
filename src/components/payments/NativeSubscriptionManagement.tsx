@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { triggerRestorePurchases, isDespia } from "@/lib/despia";
-import { useAuth } from "@/contexts/AuthContext";
+
 
 interface NativeSubscriptionManagementProps {
   tier: string;
@@ -33,7 +33,6 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
   const queryClient = useQueryClient();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
-  const { user } = useAuth();
 
   const handleOpenSubscriptionSettings = () => {
     // Open external URLs - window.open works in Despia for external links
@@ -98,15 +97,10 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
    * Calls RevenueCat restore and then reconciles with backend
    */
   const handleRestorePurchases = async () => {
-    if (!user?.id) {
-      toast.error('Please sign in to restore purchases');
-      return;
-    }
-    
     setIsRestoring(true);
     try {
-      // Trigger native restore
-      const triggered = triggerRestorePurchases(user.id);
+      // Trigger native restore (no userId needed per Despia docs)
+      const triggered = triggerRestorePurchases();
       
       if (!triggered) {
         toast.error('Restore not available', {
@@ -121,8 +115,8 @@ export const NativeSubscriptionManagement = ({ tier, currentPeriodEnd }: NativeS
         description: 'Please wait while we verify your subscriptions.',
       });
       
-      // Wait 3 seconds for RevenueCat to process the restore
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Wait 4 seconds for RevenueCat to process the restore + webhook
+      await new Promise(resolve => setTimeout(resolve, 4000));
       
       // Now reconcile with backend
       const { data, error } = await supabase.functions.invoke('verify-subscription-entitlement');
