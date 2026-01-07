@@ -113,6 +113,7 @@ export function useUserStats() {
           goalsAchievedResult,
           wearableCountResult,
           coachConnectionResult,
+          wearableDataResult,
         ] = await Promise.all([
           // Workout count from XP transactions
           supabase
@@ -202,6 +203,12 @@ export function useUserStats() {
             .select('*', { count: 'exact', head: true })
             .eq('client_id', clientId)
             .eq('status', 'active'),
+          
+          // Wearable health data for achievements
+          supabase
+            .from('health_data_sync')
+            .select('data_type, value')
+            .eq('client_id', clientId),
         ]);
         
         // BATCH 3: Location-based ranking (only if city or county is set)
@@ -298,6 +305,38 @@ export function useUserStats() {
           return challenge?.end_date && challenge.end_date <= now;
         }).length || 0;
         
+        // Aggregate wearable data by type
+        const wearableData = wearableDataResult.data || [];
+        const wearableTotals = wearableData.reduce((acc, row) => {
+          const type = row.data_type;
+          const value = row.value || 0;
+          
+          switch (type) {
+            case 'steps':
+              acc.steps += value;
+              break;
+            case 'calories':
+            case 'active_calories':
+              acc.calories += value;
+              break;
+            case 'distance':
+            case 'distance_walking':
+            case 'distance_cycling':
+            case 'distance_swimming':
+              acc.distance += value;
+              break;
+            case 'active_minutes':
+            case 'exercise_time':
+              acc.activeMinutes += value;
+              break;
+            case 'sleep':
+            case 'sleep_duration':
+              acc.sleepMinutes += value;
+              break;
+          }
+          return acc;
+        }, { steps: 0, calories: 0, distance: 0, activeMinutes: 0, sleepMinutes: 0 });
+        
         return {
           workoutCount: workoutCountResult.count || 0,
           habitStreak: longestStreak,
@@ -318,12 +357,12 @@ export function useUserStats() {
           badgesEarned: badgesEarnedResult.count || 0,
           currentLevel: xpDataResult.data?.current_level || 1,
           goalsAchieved: goalsAchievedResult.count || 0,
-          stepsTotal: 0,
-          caloriesTotal: 0,
-          distanceTotal: 0,
-          activeMinutesTotal: 0,
-          wearableWorkoutCount: 0,
-          sleepHoursTotal: 0,
+          stepsTotal: wearableTotals.steps,
+          caloriesTotal: wearableTotals.calories,
+          distanceTotal: wearableTotals.distance,
+          activeMinutesTotal: wearableTotals.activeMinutes,
+          wearableWorkoutCount: 0, // TODO: track workout-specific entries
+          sleepHoursTotal: Math.round(wearableTotals.sleepMinutes / 60),
           devicesConnected: wearableCountResult.count || 0,
           coachConnected: (coachConnectionResult.count || 0) > 0,
         };
