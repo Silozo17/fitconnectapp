@@ -553,21 +553,40 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     });
   }, [clearPurchaseTimeout]);
 
-  // Register IAP callbacks with unique ID to prevent collision with boost
+  // PHASE 1 FIX: Use ref to hold latest callbacks and register once on mount
+  // This prevents re-registration during purchase flow which can interrupt callbacks
+  const callbacksRef = useRef({
+    onSuccess: handleIAPSuccess,
+    onError: handleIAPError,
+    onCancel: handleIAPCancel,
+    onPending: handleIAPPending,
+  });
+
+  // Keep ref updated with latest callbacks
+  useEffect(() => {
+    callbacksRef.current = {
+      onSuccess: handleIAPSuccess,
+      onError: handleIAPError,
+      onCancel: handleIAPCancel,
+      onPending: handleIAPPending,
+    };
+  }, [handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
+
+  // Register callbacks ONCE on mount with stable wrapper functions
   useEffect(() => {
     if (state.isAvailable) {
       registerIAPCallbacksWithId('subscription', {
-        onSuccess: handleIAPSuccess,
-        onError: handleIAPError,
-        onCancel: handleIAPCancel,
-        onPending: handleIAPPending,
+        onSuccess: (data) => callbacksRef.current.onSuccess(data),
+        onError: (error) => callbacksRef.current.onError(error),
+        onCancel: () => callbacksRef.current.onCancel(),
+        onPending: () => callbacksRef.current.onPending(),
       });
     }
 
     return () => {
       unregisterIAPCallbacksWithId('subscription');
     };
-  }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
+  }, [state.isAvailable]); // Only re-register if availability changes
 
   /**
    * Trigger a purchase
@@ -654,24 +673,23 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       });
     }, PURCHASE_TIMEOUT_MS);
 
-    // Use requestAnimationFrame to batch state updates and prevent UI jitter
-    requestAnimationFrame(() => {
-      triggerHaptic('light');
-      
-      // Trigger the native purchase (with upgrade info for Android if applicable)
-      const triggered = triggerRevenueCatPurchase(externalId, productId, upgradeInfo);
+    // PHASE 2 FIX: Trigger purchase synchronously (no requestAnimationFrame)
+    // Async wrapping caused race conditions where callbacks weren't ready
+    triggerHaptic('light');
+    
+    // Trigger the native purchase (with upgrade info for Android if applicable)
+    const triggered = triggerRevenueCatPurchase(externalId, productId, upgradeInfo);
 
-      if (!triggered) {
-        clearPurchaseTimeout();
-        setState(prev => ({
-          ...prev,
-          purchaseStatus: 'failed',
-          error: 'Failed to start purchase',
-          showUnsuccessfulModal: true,
-        }));
-        toast.error('Failed to start purchase');
-      }
-    });
+    if (!triggered) {
+      clearPurchaseTimeout();
+      setState(prev => ({
+        ...prev,
+        purchaseStatus: 'failed',
+        error: 'Failed to start purchase',
+        showUnsuccessfulModal: true,
+      }));
+      toast.error('Failed to start purchase');
+    }
   }, [state.isAvailable, user, clearPurchaseTimeout, coachProfile?.subscription_tier]);
 
   /**
