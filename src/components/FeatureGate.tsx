@@ -1,8 +1,9 @@
-import { ReactNode } from "react";
+import { ReactNode, useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
 import { FeatureKey } from "@/lib/feature-config";
-import { LockedFeatureCard } from "./LockedFeatureCard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { UpgradeDrawer } from "@/components/subscription/UpgradeDrawer";
 
 interface FeatureGateProps {
   feature: FeatureKey;
@@ -11,7 +12,9 @@ interface FeatureGateProps {
 }
 
 export const FeatureGate = ({ feature, children, fallback }: FeatureGateProps) => {
-  const { hasFeature, getMinimumTier, isLoading, currentTier, isFounder } = useFeatureAccess();
+  const { hasFeature, isLoading, isFounder } = useFeatureAccess();
+  const navigate = useNavigate();
+  const [showUpgradeDrawer, setShowUpgradeDrawer] = useState(false);
   
   // FOUNDER FAST PATH: Founders always have access to all features
   // Check this FIRST before any loading state to prevent any flash
@@ -48,11 +51,31 @@ export const FeatureGate = ({ feature, children, fallback }: FeatureGateProps) =
     );
   }
   
-  // User definitively doesn't have access - show locked state
-  return fallback ?? (
-    <LockedFeatureCard 
-      feature={feature} 
-      requiredTier={getMinimumTier(feature)} 
+  // User definitively doesn't have access - show UpgradeDrawer immediately
+  // Use effect to open drawer on mount to avoid render-time state updates
+  useEffect(() => {
+    if (!hasFeature(feature) && !isLoading) {
+      setShowUpgradeDrawer(true);
+    }
+  }, [feature, hasFeature, isLoading]);
+  
+  // If custom fallback provided, use it
+  if (fallback) {
+    return <>{fallback}</>;
+  }
+  
+  // Show UpgradeDrawer when feature is locked
+  return (
+    <UpgradeDrawer
+      open={showUpgradeDrawer}
+      onOpenChange={(open) => {
+        setShowUpgradeDrawer(open);
+        if (!open) {
+          // User dismissed drawer without upgrading - navigate back
+          navigate(-1);
+        }
+      }}
+      mode="upgrade"
     />
   );
 };
