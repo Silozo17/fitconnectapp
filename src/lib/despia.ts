@@ -350,11 +350,32 @@ export interface IAPCallbacks {
 let currentIAPCallbacks: IAPCallbacks | null = null;
 let iapCallbacksInitialized = false;
 
+// Track if a purchase is currently in flight to prevent accidental callback clearing
+let purchaseInFlight = false;
+
+/**
+ * Set purchase in flight status - prevents callback clearing during purchase
+ */
+export const setPurchaseInFlight = (inFlight: boolean): void => {
+  purchaseInFlight = inFlight;
+  console.log('[Despia IAP] Purchase in flight:', inFlight);
+};
+
+/**
+ * Check if a purchase is currently in flight
+ */
+export const isPurchaseInFlight = (): boolean => purchaseInFlight;
+
 /**
  * Set the current IAP callbacks
  * Call this BEFORE triggering a purchase
+ * PROTECTED: Won't clear callbacks while purchase is in flight
  */
 export const setIAPCallbacks = (callbacks: IAPCallbacks | null): void => {
+  if (callbacks === null && purchaseInFlight) {
+    console.warn('[Despia IAP] Ignoring callback clear - purchase in flight');
+    return;
+  }
   currentIAPCallbacks = callbacks;
   console.log('[Despia IAP] Callbacks set:', callbacks ? 'active' : 'cleared');
 };
@@ -370,7 +391,13 @@ const initializeGlobalIAPCallbacks = (): void => {
   
   // iapSuccess - called by Despia when purchase succeeds
   (window as any).iapSuccess = (rawData: IAPSuccessData | string) => {
-    console.log('[Despia IAP] window.iapSuccess called with:', rawData);
+    console.log('[Despia IAP] ▶ window.iapSuccess INVOKED');
+    console.log('[Despia IAP] Current callbacks registered:', !!currentIAPCallbacks);
+    console.log('[Despia IAP] Purchase in flight:', purchaseInFlight);
+    console.log('[Despia IAP] Raw payload:', rawData);
+    
+    // Clear purchase in flight flag
+    purchaseInFlight = false;
     
     if (!isDespia()) {
       console.warn('[Despia IAP] iapSuccess called outside Despia environment');
@@ -406,7 +433,12 @@ const initializeGlobalIAPCallbacks = (): void => {
   
   // iapCancel - called by Despia when user cancels
   (window as any).iapCancel = () => {
-    console.log('[Despia IAP] window.iapCancel called');
+    console.log('[Despia IAP] ▶ window.iapCancel INVOKED');
+    console.log('[Despia IAP] Current callbacks registered:', !!currentIAPCallbacks);
+    console.log('[Despia IAP] Purchase in flight:', purchaseInFlight);
+    
+    // Clear purchase in flight flag
+    purchaseInFlight = false;
     
     if (!isDespia()) return;
     
@@ -416,13 +448,21 @@ const initializeGlobalIAPCallbacks = (): void => {
       } catch (e) {
         console.error('[Despia IAP] Error in cancel handler:', e);
       }
+    } else {
+      console.warn('[Despia IAP] No cancel callback registered');
     }
   };
   
   // iapError - called by Despia when purchase fails OR is cancelled
   // RevenueCat often sends cancellation via iapError with specific payload
   (window as any).iapError = (rawError: string | object) => {
-    console.log('[Despia IAP] window.iapError called with raw payload:', rawError);
+    console.log('[Despia IAP] ▶ window.iapError INVOKED');
+    console.log('[Despia IAP] Current callbacks registered:', !!currentIAPCallbacks);
+    console.log('[Despia IAP] Purchase in flight:', purchaseInFlight);
+    console.log('[Despia IAP] Raw payload:', rawError);
+    
+    // Clear purchase in flight flag
+    purchaseInFlight = false;
     
     if (!isDespia()) return;
     
@@ -502,7 +542,12 @@ const initializeGlobalIAPCallbacks = (): void => {
 
   // iapPending - called by Despia for Ask to Buy
   (window as any).iapPending = () => {
-    console.log('[Despia IAP] window.iapPending called');
+    console.log('[Despia IAP] ▶ window.iapPending INVOKED');
+    console.log('[Despia IAP] Current callbacks registered:', !!currentIAPCallbacks);
+    console.log('[Despia IAP] Purchase in flight:', purchaseInFlight);
+    
+    // Clear purchase in flight flag (pending is still a resolution)
+    purchaseInFlight = false;
     
     if (!isDespia()) return;
     
@@ -512,6 +557,8 @@ const initializeGlobalIAPCallbacks = (): void => {
       } catch (e) {
         console.error('[Despia IAP] Error in pending handler:', e);
       }
+    } else {
+      console.warn('[Despia IAP] No pending callback registered');
     }
   };
   
@@ -602,6 +649,10 @@ export const triggerRevenueCatPurchase = (
   // Ensure callbacks are initialized
   initializeGlobalIAPCallbacks();
   
+  // Mark purchase as in flight to protect callbacks from being cleared
+  purchaseInFlight = true;
+  console.log('[Despia IAP] Setting purchaseInFlight = true');
+  
   try {
     let command = `revenuecat://purchase?external_id=${encodeURIComponent(userId)}&product=${encodeURIComponent(productId)}`;
     
@@ -624,6 +675,7 @@ export const triggerRevenueCatPurchase = (
     return true;
   } catch (e) {
     console.error('[Despia IAP] Failed to trigger purchase:', e);
+    purchaseInFlight = false; // Reset on error
     return false;
   }
 };
