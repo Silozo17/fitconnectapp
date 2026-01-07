@@ -72,26 +72,18 @@ async function fetchDisciplineEvents(
 
 /**
  * Fetch health data from wearables
- * Note: Uses wearable_daily_metrics or client_progress tables as fallback
+ * TODO: Integrate with actual wearable tables when wearable sync is implemented
+ * For now, returns empty - system falls back to manual discipline_events
  */
-async function fetchWearableData(
-  clientId: string,
-  wearableTypes: string[],
-  startDate: Date,
-  endDate: Date
+function fetchWearableData(
+  _clientId: string,
+  _wearableTypes: string[],
+  _startDate: Date,
+  _endDate: Date
 ): Promise<number[]> {
-  // Try wearable_daily_metrics first
-  const { data, error } = await supabase
-    .from('wearable_daily_metrics')
-    .select('metric_type, value, recorded_date')
-    .eq('client_id', clientId)
-    .in('metric_type', wearableTypes)
-    .gte('recorded_date', startDate.toISOString().split('T')[0])
-    .lte('recorded_date', endDate.toISOString().split('T')[0]);
-
-  if (error || !data) return [];
-
-  return data.map(d => Number(d.value) || 0);
+  // Wearable integration placeholder - returns empty for now
+  // Manual events will be the primary data source
+  return Promise.resolve([]);
 }
 
 /**

@@ -7,6 +7,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useMicroWinDetection } from "@/hooks/useMicroWinDetection";
 import { useAutoAwardClientBadges } from "@/hooks/useAutoAwardClientBadges";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
+import { useSelectedDiscipline } from "@/hooks/useSelectedDiscipline";
 import { getDailyTip } from "@/lib/daily-tips";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 
@@ -19,6 +20,8 @@ import { WeeklySummaryCard } from "@/components/dashboard/client/WeeklySummaryCa
 import MonthlyReviewCard from "@/components/dashboard/client/MonthlyReviewCard";
 import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
 import { WidgetErrorBoundary } from "@/components/shared/WidgetErrorBoundary";
+import { DisciplineWidget } from "@/components/discipline/DisciplineWidget";
+import { DisciplineSetupCTA } from "@/components/discipline/DisciplineSetupCTA";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -81,6 +84,9 @@ const ClientOverview = () => {
   
   // Micro-win detection (triggers celebrations on dashboard mount)
   useMicroWinDetection();
+  
+  // Get selected discipline for widget
+  const { discipline: selectedDiscipline, isLoading: isDisciplineLoading } = useSelectedDiscipline();
   
   const { 
     data: stats, 
@@ -185,6 +191,29 @@ const ClientOverview = () => {
           <HealthDataWidget compact className="mb-11" />
         </Suspense>
       </WidgetErrorBoundary>
+
+      {/* Section: My Discipline */}
+      {!isDisciplineLoading && (
+        selectedDiscipline ? (
+          <>
+            <DashboardSectionHeader 
+              title="My Discipline" 
+              description="Your training at a glance" 
+            />
+            <WidgetErrorBoundary widgetName="DisciplineWidget" silent>
+              <DisciplineWidget disciplineId={selectedDiscipline} className="mb-11" />
+            </WidgetErrorBoundary>
+          </>
+        ) : (
+          <>
+            <DashboardSectionHeader 
+              title="Track Your Discipline" 
+              description="Set up personalized sport tracking" 
+            />
+            <DisciplineSetupCTA className="mb-11" />
+          </>
+        )
+      )}
 
       {/* Section: Daily Readiness */}
       <DashboardSectionHeader 
