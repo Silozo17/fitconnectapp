@@ -12,7 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Footprints, Heart, Flame, Moon, Loader2, Activity, CalendarIcon } from "lucide-react";
@@ -210,8 +209,8 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[85vh] flex flex-col overflow-hidden">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5 text-primary" />
             {t('manualHealthModal.title')}
@@ -221,8 +220,8 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
           </DialogDescription>
         </DialogHeader>
 
-        {/* Date Selection */}
-        <div className="space-y-2">
+        {/* Date Selection - stays fixed */}
+        <div className="space-y-2 flex-shrink-0">
           <Label className="flex items-center gap-2">
             <CalendarIcon className="h-4 w-4" />
             {t('manualHealthModal.selectDate', 'Date to log')}
@@ -255,8 +254,8 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
           </Popover>
         </div>
 
-        {/* Metrics Toggle List */}
-        <ScrollArea className="flex-1 -mx-6 px-6">
+        {/* Scrollable metrics area */}
+        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide -mx-6 px-6">
           <div className="space-y-3 py-2">
             {METRICS.map((metric) => {
               const Icon = metric.icon;
@@ -352,9 +351,9 @@ const ManualHealthDataModal = ({ open, onOpenChange }: ManualHealthDataModalProp
               );
             })}
           </div>
-        </ScrollArea>
+        </div>
 
-        <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t">
+        <DialogFooter className="gap-2 sm:gap-0 pt-2 border-t flex-shrink-0">
           <Button variant="outline" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>
             {t('manualHealthModal.cancel')}
           </Button>

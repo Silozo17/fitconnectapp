@@ -56,6 +56,7 @@ export interface DisciplineMetricConfig {
   };
   formatter: MetricFormatter;
   computeRule: ComputeRule;
+  computed?: boolean; // If true, metric is derived from other data and should not appear in log modal
 }
 
 export interface DisciplineMilestoneConfig {

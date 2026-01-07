@@ -98,7 +98,7 @@ export const KARATE: DisciplineConfig = {
     { id: 'sessions_7d', label: 'Sessions', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
     { id: 'kata_min_30d', label: 'Kata Practice', type: 'duration', timeframe: '30d', sources: { manualEventType: 'kata_practice' }, formatter: 'min', computeRule: 'sum' },
     { id: 'active_min_7d', label: 'Active Minutes', type: 'duration', timeframe: '7d', sources: { wearableTypes: ['active_minutes'], manualEventType: 'active_minutes' }, formatter: 'min', computeRule: 'sum' },
-    { id: 'streak_weeks', label: 'Training Streak', type: 'streak', timeframe: '90d', sources: { manualEventType: 'session' }, formatter: 'weeks', computeRule: 'streak' }
+    { id: 'streak_weeks', label: 'Training Streak', type: 'streak', timeframe: '90d', sources: { manualEventType: 'session' }, formatter: 'weeks', computeRule: 'streak', computed: true }
   ],
   milestone: { id: 'current_belt', label: 'Current Belt', type: 'belt', eventType: 'belt_awarded', displayRule: 'latest' },
   highlight: { template: 'Streak: {streak_weeks} weeks — next belt is closer', fallback: 'Begin your karate journey', primaryMetricId: 'streak_weeks' }
@@ -115,9 +115,9 @@ export const BJJ: DisciplineConfig = {
   },
   metrics: [
     { id: 'sessions_7d', label: 'Sessions', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
-    { id: 'sessions_30d', label: 'Monthly Sessions', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'sessions_30d', label: 'Monthly Sessions', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count', computed: true },
     { id: 'sparring_30d', label: 'Sparring Rounds', type: 'rounds', timeframe: '30d', sources: { manualEventType: 'sparring_rounds' }, formatter: 'rounds', computeRule: 'sum' },
-    { id: 'consistency_12w', label: 'Consistency', type: 'streak', timeframe: '90d', sources: { manualEventType: 'session' }, formatter: 'weeks', computeRule: 'streak' }
+    { id: 'consistency_12w', label: 'Consistency', type: 'streak', timeframe: '90d', sources: { manualEventType: 'session' }, formatter: 'weeks', computeRule: 'streak', computed: true }
   ],
   milestone: { id: 'current_belt', label: 'Current Belt', type: 'belt', eventType: 'belt_awarded', displayRule: 'latest' },
   highlight: { template: '{sessions_7d} sessions this week — momentum stays', fallback: 'Start your BJJ journey', primaryMetricId: 'sessions_7d' }
@@ -277,7 +277,7 @@ export const CALISTHENICS: DisciplineConfig = {
     { id: 'sessions_7d', label: 'Sessions', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
     { id: 'skill_holds_30d', label: 'Skill Holds', type: 'duration', timeframe: '30d', sources: { manualEventType: 'skill_hold' }, formatter: 'min', computeRule: 'sum' },
     { id: 'pullups_max', label: 'Max Pull-ups', type: 'count', timeframe: 'all-time', sources: { manualEventType: 'pullups_max' }, formatter: 'sessions', computeRule: 'max' },
-    { id: 'streak_weeks', label: 'Training Streak', type: 'streak', timeframe: '90d', sources: { manualEventType: 'session' }, formatter: 'weeks', computeRule: 'streak' }
+    { id: 'streak_weeks', label: 'Training Streak', type: 'streak', timeframe: '90d', sources: { manualEventType: 'session' }, formatter: 'weeks', computeRule: 'streak', computed: true }
   ],
   milestone: { id: 'first_muscle_up', label: 'First Muscle-Up', type: 'achievement', eventType: 'muscle_up', displayRule: 'latest' },
   highlight: { template: 'Skill progress: {skill_holds_30d} mins — strength is compounding', fallback: 'Start your calisthenics journey', primaryMetricId: 'skill_holds_30d' }

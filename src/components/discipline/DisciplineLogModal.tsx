@@ -71,10 +71,10 @@ export function DisciplineLogModal({ open, onOpenChange, config }: DisciplineLog
   const detailConfig = DISCIPLINE_DETAIL_CONFIGS[config.id];
   const milestoneFieldConfig = detailConfig?.milestoneFields?.[0];
   
-  // Initialize metric inputs from config
+  // Initialize metric inputs from config (filter out computed metrics)
   const [metricInputs, setMetricInputs] = useState<MetricInput[]>(() => 
     config.metrics
-      .filter(m => m.sources.manualEventType)
+      .filter(m => m.sources.manualEventType && !m.computed)
       .map(m => ({
         id: m.id,
         label: m.label,
