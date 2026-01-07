@@ -75,12 +75,36 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
     setMobileOpen(true);
   }, []);
 
-  // When onboarding status confirms user is onboarded, cache it
+  // When onboarding status confirms user is onboarded WITH valid progress, cache it
   useEffect(() => {
     if (onboardingStatus?.isOnboarded && !isKnownOnboarded) {
-      localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
+      // Only cache if they have actual onboarding progress (not falsely marked)
+      const progress = onboardingStatus.onboardingProgress;
+      const hasValidProgress = progress && Object.keys(progress).length > 0;
+      if (hasValidProgress) {
+        localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
+      }
     }
-  }, [onboardingStatus?.isOnboarded, isKnownOnboarded]);
+  }, [onboardingStatus?.isOnboarded, onboardingStatus?.onboardingProgress, isKnownOnboarded]);
+
+  // Safety net: Detect falsely-marked-as-onboarded profiles (legacy bug fix)
+  // These have isOnboarded=true but empty onboardingProgress
+  useEffect(() => {
+    if (!isLoading && onboardingStatus?.isOnboarded && !justCompletedOnboarding) {
+      const progress = onboardingStatus.onboardingProgress;
+      const hasNoProgress = !progress || Object.keys(progress).length === 0;
+      
+      if (hasNoProgress) {
+        if (import.meta.env.DEV) {
+          console.log('[DashboardLayout] Detected falsely-onboarded profile, forcing onboarding');
+        }
+        // Clear the cached flag since it's invalid
+        localStorage.removeItem(STORAGE_KEYS.COACH_ONBOARDED);
+        navigate("/onboarding/coach", { replace: true });
+        return;
+      }
+    }
+  }, [onboardingStatus, isLoading, navigate, justCompletedOnboarding]);
 
   // Redirect to onboarding if not completed - but skip if just completed or known-onboarded
   useEffect(() => {
