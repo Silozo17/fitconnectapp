@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -51,6 +51,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import { toast } from "sonner";
+import { DashboardSectionHeader, MetricCard, ContentSection, StatsGrid } from "@/components/shared";
 
 const statusConfig = {
   pending: { label: "Pending", color: "bg-amber-500/10 text-amber-500", icon: Clock },
@@ -446,51 +447,43 @@ const AdminVerification = () => {
       <Helmet>
         <title>Coach Verification | Admin Dashboard</title>
       </Helmet>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold">Coach Verification</h1>
-            <p className="text-muted-foreground">Review and verify coach credentials with AI-assisted analysis</p>
-          </div>
-        </div>
+      <div className="space-y-11">
+        <DashboardSectionHeader
+          title="Coach Verification"
+          description="Review and verify coach credentials with AI-assisted analysis"
+        />
 
         {/* Stats */}
-        <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Pending Review</CardDescription>
-              <CardTitle className="text-3xl text-amber-500">{stats?.pendingCount ?? 0}</CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Approved This Month</CardDescription>
-              <CardTitle className="text-3xl text-primary">
-                {stats?.approvedThisMonth ?? 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <CardDescription>Rejected This Month</CardDescription>
-              <CardTitle className="text-3xl text-destructive">
-                {stats?.rejectedThisMonth ?? 0}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-          <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center gap-1">
-                <Bot className="w-4 h-4" />
-                AI Assisted
-              </CardDescription>
-              <CardTitle className="text-3xl text-primary flex items-center gap-2">
-                <Sparkles className="w-6 h-6" />
-                Active
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+        <StatsGrid columns={4}>
+          <MetricCard
+            icon={Clock}
+            label="Pending Review"
+            value={stats?.pendingCount ?? 0}
+            color="yellow"
+            size="sm"
+          />
+          <MetricCard
+            icon={CheckCircle}
+            label="Approved This Month"
+            value={stats?.approvedThisMonth ?? 0}
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={XCircle}
+            label="Rejected This Month"
+            value={stats?.rejectedThisMonth ?? 0}
+            color="red"
+            size="sm"
+          />
+          <MetricCard
+            icon={Sparkles}
+            label="AI Assisted"
+            value="Active"
+            color="primary"
+            size="sm"
+          />
+        </StatsGrid>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as VerificationStatus)}>

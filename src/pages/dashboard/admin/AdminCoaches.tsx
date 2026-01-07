@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -38,6 +37,7 @@ import { getErrorMessage, logError } from "@/lib/error-utils";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { useTranslation } from "@/hooks/useTranslation";
 import { getCoachTypeDisplayLabel } from "@/constants/coachTypes";
+import { DashboardSectionHeader, MetricCard, ContentSection, StatsGrid } from "@/components/shared";
 
 interface CoachUser {
   id: string;
@@ -339,89 +339,64 @@ const AdminCoaches = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Coaches Management</h1>
-            <p className="text-muted-foreground mt-1">Manage all coach accounts, subscriptions, and features</p>
-          </div>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={handleNormalizeLocations} 
-              disabled={normalizingLocations}
-              className="flex-1 sm:flex-none"
-            >
-              {normalizingLocations ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              ) : (
-                <MapPin className="h-4 w-4 mr-2" />
-              )}
-              Fix Locations
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExportCoaches} disabled={filteredCoaches.length === 0} className="flex-1 sm:flex-none">
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
-          </div>
-        </div>
+      <div className="space-y-11">
+        <DashboardSectionHeader
+          title="Manage Coaches"
+          description="Manage all coach accounts, subscriptions, and features"
+          action={
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleNormalizeLocations} 
+                disabled={normalizingLocations}
+              >
+                {normalizingLocations ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <MapPin className="h-4 w-4 mr-2" />
+                )}
+                Fix Locations
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExportCoaches} disabled={filteredCoaches.length === 0}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+            </div>
+          }
+        />
 
         {/* Stats */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{totalCoaches}</p>
-                  <p className="text-xs text-muted-foreground">Total Coaches</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-success/10 flex items-center justify-center">
-                  <Users className="w-5 h-5 text-success" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{activeCoaches}</p>
-                  <p className="text-xs text-muted-foreground">Active (Onboarded)</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-accent" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{paidCoaches}</p>
-                  <p className="text-xs text-muted-foreground">Paid Subscriptions</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-warning/10 flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-warning" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stripeConnected}</p>
-                  <p className="text-xs text-muted-foreground">Stripe Connected</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsGrid columns={4}>
+          <MetricCard
+            icon={Users}
+            label="Total Coaches"
+            value={totalCoaches}
+            color="orange"
+            size="sm"
+          />
+          <MetricCard
+            icon={Users}
+            label="Active (Onboarded)"
+            value={activeCoaches}
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={DollarSign}
+            label="Paid Subscriptions"
+            value={paidCoaches}
+            color="primary"
+            size="sm"
+          />
+          <MetricCard
+            icon={DollarSign}
+            label="Stripe Connected"
+            value={stripeConnected}
+            color="yellow"
+            size="sm"
+          />
+        </StatsGrid>
 
         {selectedCoaches.size > 0 && (
           <BulkActionBar
@@ -435,10 +410,10 @@ const AdminCoaches = () => {
           />
         )}
 
-        <Card>
-          <CardHeader className="pb-4">
+        <ContentSection colorTheme="orange" withAccent>
+          <div className="space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <CardTitle>All Coaches ({filteredCoaches.length})</CardTitle>
+              <h3 className="font-semibold text-base">All Coaches ({filteredCoaches.length})</h3>
               <div className="relative w-full sm:w-72">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -449,8 +424,7 @@ const AdminCoaches = () => {
                 />
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
+            
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">{t('loading.coaches')}</div>
             ) : filteredCoaches.length === 0 ? (
@@ -613,8 +587,8 @@ const AdminCoaches = () => {
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </ContentSection>
       </div>
 
       {/* Edit Modal */}

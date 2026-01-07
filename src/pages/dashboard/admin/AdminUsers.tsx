@@ -2,7 +2,6 @@ import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -45,6 +44,7 @@ import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { useAdminBadges } from "@/hooks/useSidebarBadges";
 import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateExportFilename } from "@/lib/csv-export";
 import { getErrorMessage, logError } from "@/lib/error-utils";
+import { DashboardSectionHeader, MetricCard, ContentSection, StatsGrid } from "@/components/shared";
 
 interface ClientUser {
   id: string;
@@ -352,79 +352,55 @@ const AdminUsers = () => {
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Users Management</h1>
-            <p className="text-muted-foreground mt-1">Manage all client accounts</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <Button variant="outline" size="sm" onClick={handleExportUsers} disabled={filteredUsers.length === 0} className="flex-1 sm:flex-none">
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
-            <Button size="sm" onClick={() => setAddUserOpen(true)} className="flex-1 sm:flex-none">
-              <UserPlus className="h-4 w-4 mr-2" />
-              Add User
-            </Button>
-          </div>
-        </div>
+      <div className="space-y-11">
+        <DashboardSectionHeader
+          title="Manage Users"
+          description="View and manage all platform client accounts"
+          action={
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={handleExportUsers} disabled={filteredUsers.length === 0}>
+                <Download className="h-4 w-4 mr-2" />
+                Export CSV
+              </Button>
+              <Button size="sm" onClick={() => setAddUserOpen(true)}>
+                <UserPlus className="h-4 w-4 mr-2" />
+                Add User
+              </Button>
+            </div>
+          }
+        />
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-blue-500/10 text-blue-500">
-                  <Users className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.total}</p>
-                  <p className="text-sm text-muted-foreground">Total Users</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-green-500/10 text-green-500">
-                  <UserCheck className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.active}</p>
-                  <p className="text-sm text-muted-foreground">Active Users</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-purple-500/10 text-purple-500">
-                  <UsersRound className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.withCoaches}</p>
-                  <p className="text-sm text-muted-foreground">With Coaches</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl flex items-center justify-center bg-primary/10 text-primary">
-                  <Calendar className="w-6 h-6" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stats.newThisWeek}</p>
-                  <p className="text-sm text-muted-foreground">New This Week</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+        <StatsGrid columns={4}>
+          <MetricCard
+            icon={Users}
+            label="Total Users"
+            value={stats.total}
+            color="blue"
+            size="sm"
+          />
+          <MetricCard
+            icon={UserCheck}
+            label="Active Users"
+            value={stats.active}
+            color="green"
+            size="sm"
+          />
+          <MetricCard
+            icon={UsersRound}
+            label="With Coaches"
+            value={stats.withCoaches}
+            color="purple"
+            size="sm"
+          />
+          <MetricCard
+            icon={Calendar}
+            label="New This Week"
+            value={stats.newThisWeek}
+            color="primary"
+            size="sm"
+          />
+        </StatsGrid>
 
         {selectedUsers.size > 0 && (
           <BulkActionBar
@@ -438,11 +414,11 @@ const AdminUsers = () => {
           />
         )}
 
-        <Card>
-          <CardHeader className="pb-4">
+        <ContentSection colorTheme="blue" withAccent>
+          <div className="space-y-4">
             <div className="flex flex-col gap-4">
               <div className="flex items-center justify-between">
-                <CardTitle>All Users ({filteredUsers.length})</CardTitle>
+                <h3 className="font-semibold text-base">All Users ({filteredUsers.length})</h3>
               </div>
               
               {/* Filters Row */}
@@ -492,8 +468,7 @@ const AdminUsers = () => {
                 </Select>
               </div>
             </div>
-          </CardHeader>
-          <CardContent>
+            
             {loading ? (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
                 <Loader2 className="h-6 w-6 animate-spin mr-2" />
@@ -662,8 +637,8 @@ const AdminUsers = () => {
                 </div>
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </ContentSection>
       </div>
 
       <AddUserModal
