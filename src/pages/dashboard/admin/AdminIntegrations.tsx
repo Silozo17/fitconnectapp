@@ -336,7 +336,7 @@ const AdminIntegrations = () => {
                     <p className="text-sm text-muted-foreground">Status of external service connections</p>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   {[
                     { name: "Google APIs", status: "operational", latency: "45ms" },
                     { name: "Zoom API", status: "operational", latency: "120ms" },
@@ -345,21 +345,21 @@ const AdminIntegrations = () => {
                   ].map((service) => (
                     <div
                       key={service.name}
-                      className="p-4 rounded-xl bg-background/50 border border-border/50 flex items-center justify-between"
+                      className="p-3 sm:p-4 rounded-xl bg-background/50 border border-border/50 flex flex-col gap-2"
                     >
-                      <div>
-                        <p className="font-medium text-sm">{service.name}</p>
-                        <p className="text-xs text-muted-foreground">{service.latency}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-medium text-sm truncate">{service.name}</p>
+                        <Badge
+                          className={`shrink-0 text-xs ${
+                            service.status === "operational"
+                              ? "bg-green-500/20 text-green-400 border-green-500/30"
+                              : "bg-red-500/20 text-red-400 border-red-500/30"
+                          }`}
+                        >
+                          {service.status}
+                        </Badge>
                       </div>
-                      <Badge
-                        className={
-                          service.status === "operational"
-                            ? "bg-green-500/20 text-green-400 border-green-500/30"
-                            : "bg-red-500/20 text-red-400 border-red-500/30"
-                        }
-                      >
-                        {service.status}
-                      </Badge>
+                      <p className="text-xs text-muted-foreground">{service.latency}</p>
                     </div>
                   ))}
                 </div>
