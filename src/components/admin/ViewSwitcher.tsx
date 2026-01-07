@@ -28,8 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Shield, User, Briefcase, Check, Plus, Loader2 } from "lucide-react";
-import CreateProfileModal from "./CreateProfileModal";
 import BecomeClientModal from "@/components/shared/BecomeClientModal";
+import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
 
 const ViewSwitcher = () => {
   const { t } = useTranslation("admin");
@@ -42,9 +42,8 @@ const ViewSwitcher = () => {
   } = useAdminView();
   const navigate = useNavigate();
   const location = useLocation();
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [profileTypeToCreate, setProfileTypeToCreate] = useState<"client" | "coach">("coach");
   const [becomeClientModalOpen, setBecomeClientModalOpen] = useState(false);
+  const [becomeCoachModalOpen, setBecomeCoachModalOpen] = useState(false);
 
   // Extract current page from path: /dashboard/admin/settings → "settings"
   const getCurrentPage = (pathname: string): string | null => {
@@ -66,8 +65,7 @@ const ViewSwitcher = () => {
       return;
     }
     if (value === "create-coach") {
-      setProfileTypeToCreate("coach");
-      setCreateModalOpen(true);
+      setBecomeCoachModalOpen(true);
       return;
     }
 
@@ -86,12 +84,6 @@ const ViewSwitcher = () => {
       // Fallback to dashboard home for that view
       navigate(`/dashboard/${viewMode}`);
     }
-  };
-
-  const handleProfileCreated = (newProfileId: string) => {
-    // Use the profile ID passed directly from the modal (avoids stale state)
-    setActiveProfile(profileTypeToCreate, newProfileId);
-    navigate(`/dashboard/${profileTypeToCreate}`);
   };
 
   if (isLoadingProfiles) {
@@ -162,16 +154,14 @@ const ViewSwitcher = () => {
         </SelectContent>
       </Select>
 
-      <CreateProfileModal
-        open={createModalOpen}
-        onOpenChange={setCreateModalOpen}
-        profileType={profileTypeToCreate}
-        onSuccess={handleProfileCreated}
-      />
-
       <BecomeClientModal
         open={becomeClientModalOpen}
         onOpenChange={setBecomeClientModalOpen}
+      />
+
+      <BecomeCoachModal
+        open={becomeCoachModalOpen}
+        onOpenChange={setBecomeCoachModalOpen}
       />
     </>
   );
