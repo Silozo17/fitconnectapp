@@ -166,16 +166,19 @@ const AdminDashboard = () => {
   }));
 
   // Categorize widgets for grouped rendering
-  const { statWidgets, revenueWidgets, otherWidgets } = useMemo(() => {
-    const statTypes = ["stats_users", "stats_coaches", "stats_sessions", "stats_revenue", "stats_messages", "stats_reviews"];
-    const revenueTypes = ["revenue_mrr", "revenue_commissions", "revenue_active_subs", "revenue_tier_distribution"];
+  const { combinedStatWidgets, otherWidgets } = useMemo(() => {
+    // Combined stats + revenue + user growth = 8 cards in 2x4 grid
+    const combinedTypes = [
+      "stats_users", "stats_coaches", "stats_sessions", "stats_revenue",
+      "revenue_mrr", "revenue_commissions", "revenue_active_subs", 
+      "analytics_growth_rate"
+    ];
     
     const sorted = [...widgetItems].sort((a, b) => a.position - b.position);
     
     return {
-      statWidgets: sorted.filter(w => statTypes.includes(w.widget_type)),
-      revenueWidgets: sorted.filter(w => revenueTypes.includes(w.widget_type)),
-      otherWidgets: sorted.filter(w => !statTypes.includes(w.widget_type) && !revenueTypes.includes(w.widget_type)),
+      combinedStatWidgets: sorted.filter(w => combinedTypes.includes(w.widget_type)),
+      otherWidgets: sorted.filter(w => !combinedTypes.includes(w.widget_type)),
     };
   }, [widgetItems]);
 
@@ -253,27 +256,18 @@ const AdminDashboard = () => {
               />
             ) : (
               <div className="space-y-6">
-                {/* Stat Widgets - 2 column grid */}
-                {statWidgets.length > 0 && (
+                {/* Combined Stats + Revenue + User Growth - 2 column grid (8 cards) */}
+                {combinedStatWidgets.length > 0 && (
                   <StatsGrid columns={2}>
-                    {statWidgets.map(widget => (
+                    {combinedStatWidgets.map(widget => (
                       <div key={widget.id}>{renderWidget(widget)}</div>
                     ))}
                   </StatsGrid>
                 )}
 
-                {/* Quick Actions - full width */}
+                {/* Quick Actions - below stats */}
                 {otherWidgets.find(w => w.widget_type === "quick_actions") && (
                   <QuickActionsWidget />
-                )}
-
-                {/* Revenue Widgets - 2 column grid */}
-                {revenueWidgets.length > 0 && (
-                  <StatsGrid columns={2}>
-                    {revenueWidgets.map(widget => (
-                      <div key={widget.id}>{renderWidget(widget)}</div>
-                    ))}
-                  </StatsGrid>
                 )}
 
                 {/* Other Widgets */}

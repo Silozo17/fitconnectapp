@@ -25,11 +25,11 @@ const ActionCard = ({ action, t }: { action: QuickAction; t: (key: string) => st
   const Icon = action.icon;
   return (
     <Link to={action.href} className="block h-full">
-      <Card className="h-full p-4 flex flex-col items-center justify-center text-center gap-2 hover:bg-muted/50 transition-colors cursor-pointer border-border/50">
-        <div className={`p-3 rounded-xl bg-muted/50 ${action.color}`}>
-          <Icon className="h-5 w-5" />
+      <Card className="h-full p-5 flex flex-col items-center justify-center text-center gap-3 hover:bg-muted/50 transition-colors cursor-pointer border-border/50">
+        <div className={`p-4 rounded-xl bg-muted/50 ${action.color}`}>
+          <Icon className="h-6 w-6" />
         </div>
-        <span className="text-xs font-medium text-foreground leading-tight">
+        <span className="text-sm font-medium text-foreground leading-tight">
           {t(action.labelKey)}
         </span>
       </Card>
@@ -41,25 +41,35 @@ export const QuickActionsWidget = memo(function QuickActionsWidget() {
   const { t } = useTranslation('dashboard');
 
   return (
-    <div className="overflow-hidden">
-      {/* Mobile: Carousel */}
-      <div className="md:hidden">
-        <Carousel3D showPagination gap={12}>
-          {actions.map((action) => (
-            <Carousel3DItem key={action.labelKey} className="w-28 h-24">
-              <ActionCard action={action} t={t} />
-            </Carousel3DItem>
-          ))}
-        </Carousel3D>
+    <div className="space-y-3">
+      {/* Header */}
+      <div>
+        <h3 className="text-base font-semibold text-foreground">
+          Quick <span className="gradient-text">Actions</span>
+        </h3>
+        <p className="text-xs text-muted-foreground">Navigate to common admin tasks</p>
       </div>
-      
-      {/* Desktop: Grid */}
-      <div className="hidden md:grid grid-cols-3 lg:grid-cols-6 gap-3">
-        {actions.map((action) => (
-          <div key={action.labelKey} className="h-24">
-            <ActionCard action={action} t={t} />
-          </div>
-        ))}
+
+      <div className="overflow-hidden">
+        {/* Mobile: Carousel */}
+        <div className="md:hidden">
+          <Carousel3D showPagination gap={12}>
+            {actions.map((action) => (
+              <Carousel3DItem key={action.labelKey} className="w-36 h-[120px]">
+                <ActionCard action={action} t={t} />
+              </Carousel3DItem>
+            ))}
+          </Carousel3D>
+        </div>
+        
+        {/* Desktop: Grid */}
+        <div className="hidden md:grid grid-cols-3 lg:grid-cols-6 gap-3">
+          {actions.map((action) => (
+            <div key={action.labelKey} className="h-[120px]">
+              <ActionCard action={action} t={t} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
