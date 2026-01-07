@@ -24,6 +24,7 @@ import { ClientWearableRow } from "@/components/coach/ClientWearableRow";
 import { WearableAlerts } from "@/components/coach/WearableAlerts";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { FeatureGate } from "@/components/FeatureGate";
+import { formatSleepDuration } from "@/lib/format-utils";
 
 const CoachWearableDashboard = () => {
   const { t } = useTranslation("coach");
@@ -82,8 +83,7 @@ const CoachWearableDashboard = () => {
         <MetricCard
           icon={Moon}
           label={t("wearableDashboard.avgSleep")}
-          value={aggregates.avgSleep ? `${aggregates.avgSleep}` : "—"}
-          unit="h"
+          value={aggregates.avgSleep ? formatSleepDuration(aggregates.avgSleep) : "—"}
           color="purple"
           size="sm"
         />
