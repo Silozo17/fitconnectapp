@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Search, User, LogOut, Menu } from "lucide-react";
 import UpgradeIconButton from "./UpgradeIconButton";
 import { UpgradeDrawer } from "@/components/subscription/UpgradeDrawer";
+import { UpgradeSuggestionTooltip } from "@/components/subscription/UpgradeSuggestionTooltip";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
@@ -122,7 +123,9 @@ const DashboardHeader = memo(({ subscriptionTier, coachId, onMenuToggle }: Dashb
               />
             </div>
           </TooltipProvider>
-          <UpgradeIconButton onClick={() => setUpgradeDrawerOpen(true)} />
+          <UpgradeSuggestionTooltip>
+            <UpgradeIconButton onClick={() => setUpgradeDrawerOpen(true)} />
+          </UpgradeSuggestionTooltip>
           <Button variant="ghost" size="icon" className="xl:hidden" onClick={onMenuToggle}>
             <Menu className="w-5 h-5" />
           </Button>

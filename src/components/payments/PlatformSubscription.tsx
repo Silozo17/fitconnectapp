@@ -1,15 +1,14 @@
 import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { Crown, Loader2, Clock, AlertTriangle, ExternalLink, CreditCard, Sparkles, Check, Rocket } from "lucide-react";
+import { Crown, Loader2, Clock, AlertTriangle, ExternalLink, CreditCard, Sparkles } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
-import { SUBSCRIPTION_TIERS, normalizeTier, TierKey, BillingInterval } from "@/lib/stripe-config";
+import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useNativeIAP } from "@/hooks/useNativeIAP";
-import { isDespia } from "@/lib/despia";
 import { triggerHaptic } from "@/lib/despia";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 import { triggerConfetti, confettiPresets } from "@/lib/confetti";
@@ -22,10 +21,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { UpgradeDrawer } from "@/components/subscription/UpgradeDrawer";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
 import { supabase } from "@/integrations/supabase/client";
-import { TierSelector } from "@/components/payments/TierSelector";
-import { BillingToggle } from "@/components/payments/BillingToggle";
-import { cn } from "@/lib/utils";
-import { useCountry } from "@/hooks/useCountry";
 import type { SubscriptionTier } from "@/hooks/useNativeIAP";
 
 interface PlatformSubscriptionProps {
@@ -37,7 +32,6 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   const { t } = useTranslation("settings");
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { countryCode } = useCountry();
   
   // Platform detection
   const { isNativeMobile } = usePlatformRestrictions();
@@ -45,10 +39,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   // State for upgrade drawer (native only)
   const [showUpgradeDrawer, setShowUpgradeDrawer] = useState(false);
   
-  // State for web Stripe checkout
-  const [selectedTier, setSelectedTier] = useState<TierKey>('pro');
-  const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
-  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+  // State for Stripe portal loading
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   
   // FEATURES ACTIVATED MODAL state
@@ -113,49 +104,7 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
   // Get current tier display info
   const currentTierData = SUBSCRIPTION_TIERS[activeTier];
 
-  // Web Stripe checkout handler - uses create-subscription-checkout with correct price IDs
-  const handleStripeCheckout = async () => {
-    if (!user?.email) {
-      toast.error("Please log in to subscribe");
-      return;
-    }
-
-    setIsCheckoutLoading(true);
-    try {
-      console.log('[PlatformSubscription] Creating checkout with:', { 
-        tier: selectedTier, 
-        billingInterval, 
-        countryCode 
-      });
-      
-      const { data, error } = await supabase.functions.invoke('create-subscription-checkout', {
-        body: {
-          tier: selectedTier,
-          billingInterval: billingInterval,
-          countryCode: countryCode || 'GB',
-          isNativeApp: false,
-        },
-      });
-
-      if (error) throw error;
-      
-      // The function returns a clientSecret for embedded checkout
-      if (data?.clientSecret) {
-        // Navigate to embedded checkout page with session info
-        const checkoutUrl = `/subscribe?tier=${selectedTier}&interval=${billingInterval}&session=${data.sessionId}`;
-        window.location.href = checkoutUrl;
-      } else {
-        throw new Error("No checkout session created");
-      }
-    } catch (error: any) {
-      console.error('[PlatformSubscription] Stripe checkout error:', error);
-      toast.error(error.message || "Failed to start checkout");
-    } finally {
-      setIsCheckoutLoading(false);
-    }
-  };
-
-  // Web Stripe customer portal handler
+  // Web Stripe customer portal handler - opens Stripe portal for cancellation
   const handleManageSubscription = async () => {
     if (!user?.email) {
       toast.error("Please log in to manage subscription");
@@ -323,64 +272,23 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
               </div>
             </>
           ) : (
-            /* WEB/PWA UI: Tier selector + Stripe checkout */
+            /* WEB/PWA UI: Simplified 2-button layout */
             <>
-              {/* Tier Selector */}
-              <div className="mb-4">
-                <TierSelector 
-                  selectedTier={selectedTier} 
-                  onTierChange={setSelectedTier}
-                  billingInterval={billingInterval}
-                />
-              </div>
-
-              {/* Billing Toggle */}
-              <div className="mb-4">
-                <BillingToggle 
-                  selectedTier={selectedTier}
-                  billingInterval={billingInterval}
-                  onIntervalChange={setBillingInterval}
-                />
-              </div>
-
-              {/* Tier Features Preview */}
-              <div className="mb-4 p-4 rounded-lg bg-muted/50 border border-border">
-                <h4 className="font-medium mb-2">{SUBSCRIPTION_TIERS[selectedTier]?.name} Features</h4>
-                <ul className="space-y-1.5">
-                  {SUBSCRIPTION_TIERS[selectedTier]?.features.slice(0, 5).map((feature, idx) => (
-                    <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
-                      <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
               {/* Action Buttons */}
               <div className="space-y-3">
-                {/* Subscribe/Upgrade Button */}
+                {/* Change Plan Button - navigates to /subscribe */}
                 <Button
                   className="w-full"
-                  onClick={handleStripeCheckout}
-                  disabled={isCheckoutLoading || selectedTier === activeTier}
+                  onClick={() => {
+                    // Navigate to subscribe page with current tier context
+                    window.location.href = `/subscribe?from=settings&tier=${activeTier === 'free' ? 'pro' : activeTier}`;
+                  }}
                 >
-                  {isCheckoutLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      {activeTier === 'free' 
-                        ? `Subscribe to ${SUBSCRIPTION_TIERS[selectedTier]?.name}`
-                        : `Change to ${SUBSCRIPTION_TIERS[selectedTier]?.name}`
-                      }
-                    </>
-                  )}
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  {activeTier === 'free' ? t("subscription.upgrade", "Upgrade Plan") : t("subscription.changePlan", "Change Plan")}
                 </Button>
 
-                {/* Manage Subscription Button (only show if user has a subscription) */}
+                {/* Switch to Free Plan Button - only show for subscribed users */}
                 {activeTier !== 'free' && !isNativeSubscription && (
                   <Button
                     variant="outline"
@@ -396,12 +304,19 @@ const PlatformSubscription = ({ coachId, currentTier = "free" }: PlatformSubscri
                     ) : (
                       <>
                         <CreditCard className="h-4 w-4 mr-2" />
-                        {t("subscription.manageSubscription", "Manage Subscription")}
+                        Switch to Free Plan
                       </>
                     )}
                   </Button>
                 )}
               </div>
+
+              <p className="text-xs text-muted-foreground text-center mt-3">
+                {activeTier !== 'free' 
+                  ? "Downgrades take effect at the end of your current billing period. Upgrades are immediate and pro-rated."
+                  : "Upgrade to unlock premium features for your coaching business."
+                }
+              </p>
               
               {/* Legal footer */}
               <div className="pt-4 mt-4 border-t border-border">
