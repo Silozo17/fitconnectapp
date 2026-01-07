@@ -1,5 +1,5 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { UserPlus, Dumbbell, Settings, Shield, DollarSign, BarChart, Zap } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -20,24 +20,30 @@ const actions: QuickAction[] = [
   { labelKey: "admin.actions.analytics", icon: BarChart, href: "/dashboard/admin/analytics", variant: "outline" },
 ];
 
-export function QuickActionsWidget() {
+export const QuickActionsWidget = memo(function QuickActionsWidget() {
   const { t } = useTranslation('dashboard');
 
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Zap className="h-5 w-5 text-muted-foreground" />
-          {t('admin.widgets.quickActions')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="relative bg-gradient-to-br from-cyan-500/10 via-background to-cyan-600/5 rounded-2xl border border-cyan-500/20 overflow-hidden">
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400/60 via-cyan-500/40 to-transparent" />
+      
+      {/* Header */}
+      <div className="px-4 pt-4 pb-2 flex items-center gap-2">
+        <div className="p-2 rounded-xl bg-cyan-500/20">
+          <Zap className="h-4 w-4 text-cyan-400" />
+        </div>
+        <h3 className="font-semibold text-foreground text-base">{t('admin.widgets.quickActions')}</h3>
+      </div>
+      
+      {/* Content */}
+      <div className="px-4 pb-4">
         <div className="grid grid-cols-2 gap-2">
           {actions.map((action) => (
             <Link key={action.labelKey} to={action.href}>
               <Button 
                 variant={action.variant || "outline"} 
-                className="w-full justify-start gap-2"
+                className="w-full justify-start gap-2 rounded-xl"
                 size="sm"
               >
                 <action.icon className="h-4 w-4" />
@@ -46,7 +52,7 @@ export function QuickActionsWidget() {
             </Link>
           ))}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
-}
+});

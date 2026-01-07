@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Activity, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,45 +16,51 @@ interface IntegrationHealthWidgetProps {
 const statusConfig = {
   healthy: {
     icon: CheckCircle,
-    color: "text-green-500",
-    bg: "bg-green-500/10",
+    color: "text-green-400",
+    bg: "bg-green-500/20",
     badge: "default" as const,
     label: "Healthy",
   },
   degraded: {
     icon: AlertTriangle,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
+    color: "text-amber-400",
+    bg: "bg-amber-500/20",
     badge: "secondary" as const,
     label: "Degraded",
   },
   down: {
     icon: XCircle,
-    color: "text-red-500",
-    bg: "bg-red-500/10",
+    color: "text-red-400",
+    bg: "bg-red-500/20",
     badge: "destructive" as const,
     label: "Down",
   },
 };
 
-export function IntegrationHealthWidget({ health }: IntegrationHealthWidgetProps) {
+export const IntegrationHealthWidget = memo(function IntegrationHealthWidget({ health }: IntegrationHealthWidgetProps) {
   const healthyCount = health.filter(h => h.status === "healthy").length;
   const totalCount = health.length;
 
   return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-lg flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            <Activity className="h-5 w-5 text-muted-foreground" />
-            Integration Health
-          </span>
-          <Badge variant={healthyCount === totalCount ? "default" : "secondary"}>
-            {healthyCount}/{totalCount} Online
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <div className="relative bg-gradient-to-br from-cyan-500/10 via-background to-cyan-600/5 rounded-2xl border border-cyan-500/20 overflow-hidden">
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400/60 via-cyan-500/40 to-transparent" />
+      
+      {/* Header */}
+      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="p-2 rounded-xl bg-cyan-500/20">
+            <Activity className="h-4 w-4 text-cyan-400" />
+          </div>
+          <h3 className="font-semibold text-foreground text-base">Integration Health</h3>
+        </div>
+        <Badge variant={healthyCount === totalCount ? "default" : "secondary"} className="text-xs">
+          {healthyCount}/{totalCount} Online
+        </Badge>
+      </div>
+      
+      {/* Content */}
+      <div className="px-4 pb-4">
         <div className="space-y-2">
           {health.map((integration) => {
             const config = statusConfig[integration.status];
@@ -63,13 +69,13 @@ export function IntegrationHealthWidget({ health }: IntegrationHealthWidgetProps
             return (
               <div 
                 key={integration.name}
-                className="flex items-center justify-between p-2 rounded-lg bg-muted/50"
+                className="flex items-center justify-between p-2.5 rounded-xl bg-background/50 hover:bg-background/80 transition-colors"
               >
                 <div className="flex items-center gap-3">
                   <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", config.bg)}>
                     <StatusIcon className={cn("w-4 h-4", config.color)} />
                   </div>
-                  <span className="font-medium text-sm">{integration.name}</span>
+                  <span className="font-medium text-sm text-foreground">{integration.name}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-muted-foreground">{integration.latency}</span>
@@ -81,7 +87,7 @@ export function IntegrationHealthWidget({ health }: IntegrationHealthWidgetProps
             );
           })}
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
-}
+});
