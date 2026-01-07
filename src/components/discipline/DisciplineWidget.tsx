@@ -13,6 +13,7 @@ import { DisciplineDetailsDrawer } from "./DisciplineDetailsDrawer";
 import { RequestDisciplineModal } from "./RequestDisciplineModal";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDisciplineIcon, getMilestoneIcon } from "@/config/disciplines/icons";
+import { formatMilestoneDisplay } from "@/utils/formatMilestoneDisplay";
 
 interface DisciplineWidgetProps {
   disciplineId: string;
@@ -88,7 +89,7 @@ export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetPr
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">{milestone.label}</p>
               <p className="text-sm font-medium truncate">
-                {milestone.value || "Not set yet"}
+                {formatMilestoneDisplay(milestone.value, milestone.type)}
               </p>
             </div>
           </div>
