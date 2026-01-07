@@ -1,10 +1,10 @@
 /**
- * DisciplineLogModal - Log multiple metrics at once
+ * DisciplineLogModal - Log multiple metrics at once with sport-specific inputs
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Plus, Check } from "lucide-react";
+import { CalendarIcon, Plus, Check, Trophy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,8 +19,15 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { DisciplineConfig } from "@/config/disciplines/types";
+import { DisciplineConfig, BeltValue, FightRecordValue, RaceTimeValue, SkillChecklistValue, BeltConfig } from "@/config/disciplines/types";
+import { DISCIPLINE_DETAIL_CONFIGS } from "@/config/disciplines/detailConfigs";
 import { useDisciplineEvents, DisciplineEventInput } from "@/hooks/useDisciplineEvents";
+import { BeltWithStripesInput } from "./inputs/BeltWithStripesInput";
+import { FightRecordInput } from "./inputs/FightRecordInput";
+import { RaceTimeInput } from "./inputs/RaceTimeInput";
+import { PBWeightInput } from "./inputs/PBWeightInput";
+import { SkillChecklistInput } from "./inputs/SkillChecklistInput";
+import { DropdownInput } from "./inputs/DropdownInput";
 
 interface DisciplineLogModalProps {
   open: boolean;
@@ -37,10 +44,32 @@ interface MetricInput {
   placeholder: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MilestoneValue = any;
+
+// Type guards for options
+function isBeltConfig(options: unknown): options is BeltConfig {
+  return options !== undefined && 
+    typeof options === 'object' && 
+    options !== null && 
+    'belts' in options && 
+    'stripeColor' in options;
+}
+
+function hasProperty<T extends object, K extends string>(
+  obj: T,
+  key: K
+): obj is T & Record<K, unknown> {
+  return key in obj;
+}
+
 export function DisciplineLogModal({ open, onOpenChange, config }: DisciplineLogModalProps) {
   const { logEvents, isLogging } = useDisciplineEvents(config.id);
   const [date, setDate] = useState<Date>(new Date());
   const [showSuccess, setShowSuccess] = useState(false);
+  
+  const detailConfig = DISCIPLINE_DETAIL_CONFIGS[config.id];
+  const milestoneFieldConfig = detailConfig?.milestoneFields?.[0];
   
   // Initialize metric inputs from config
   const [metricInputs, setMetricInputs] = useState<MetricInput[]>(() => 
@@ -56,11 +85,19 @@ export function DisciplineLogModal({ open, onOpenChange, config }: DisciplineLog
       }))
   );
 
-  // Add milestone as loggable item
-  const [milestoneInput, setMilestoneInput] = useState({
-    enabled: false,
-    value: '',
-  });
+  // Sport-specific milestone input
+  const [milestoneEnabled, setMilestoneEnabled] = useState(false);
+  const [milestoneValue, setMilestoneValue] = useState<MilestoneValue>(null);
+
+  // Reset form when modal closes
+  useEffect(() => {
+    if (!open) {
+      setMetricInputs(prev => prev.map(m => ({ ...m, enabled: false, value: '' })));
+      setMilestoneEnabled(false);
+      setMilestoneValue(null);
+      setDate(new Date());
+    }
+  }, [open]);
 
   function getPlaceholder(formatter: string): string {
     switch (formatter) {
@@ -85,6 +122,12 @@ export function DisciplineLogModal({ open, onOpenChange, config }: DisciplineLog
     );
   }
 
+  function serializeMilestoneValue(value: MilestoneValue): string {
+    if (!value) return '';
+    if (typeof value === 'string') return value;
+    return JSON.stringify(value);
+  }
+
   async function handleSubmit() {
     const events: DisciplineEventInput[] = [];
 
@@ -100,13 +143,13 @@ export function DisciplineLogModal({ open, onOpenChange, config }: DisciplineLog
       }
     }
 
-    // Add milestone if enabled
-    if (milestoneInput.enabled && milestoneInput.value) {
+    // Add milestone if enabled with sport-specific data
+    if (milestoneEnabled && milestoneValue) {
       events.push({
         disciplineId: config.id,
         eventType: config.milestone.eventType,
         value: 0,
-        label: milestoneInput.value,
+        label: serializeMilestoneValue(milestoneValue),
         recordedAt: date,
       });
     }
@@ -118,20 +161,134 @@ export function DisciplineLogModal({ open, onOpenChange, config }: DisciplineLog
           setTimeout(() => {
             setShowSuccess(false);
             onOpenChange(false);
-            // Reset form
-            setMetricInputs(prev => prev.map(m => ({ ...m, enabled: false, value: '' })));
-            setMilestoneInput({ enabled: false, value: '' });
           }, 1000);
         },
       });
     }
   }
 
-  const enabledCount = metricInputs.filter(m => m.enabled).length + (milestoneInput.enabled ? 1 : 0);
+  const enabledCount = metricInputs.filter(m => m.enabled).length + (milestoneEnabled ? 1 : 0);
+
+  // Render sport-specific milestone input
+  function renderMilestoneInput() {
+    if (!milestoneFieldConfig) {
+      // Fallback to generic text input
+      return (
+        <Input
+          type="text"
+          placeholder={getMilestonePlaceholder(config.milestone.type)}
+          value={typeof milestoneValue === 'string' ? milestoneValue : ''}
+          onChange={(e) => setMilestoneValue(e.target.value)}
+          className="mt-2"
+        />
+      );
+    }
+
+    const options = milestoneFieldConfig.options;
+
+    switch (milestoneFieldConfig.type) {
+      case 'belt_with_stripes':
+        if (isBeltConfig(options)) {
+          return (
+            <div className="mt-3">
+              <BeltWithStripesInput
+                value={milestoneValue as BeltValue | null}
+                onChange={setMilestoneValue}
+                config={options}
+              />
+            </div>
+          );
+        }
+        break;
+
+      case 'fight_record':
+        return (
+          <div className="mt-3">
+            <FightRecordInput
+              value={milestoneValue as FightRecordValue | null}
+              onChange={setMilestoneValue}
+            />
+          </div>
+        );
+
+      case 'race_time': {
+        const rawFormat = options && typeof options === 'object' && hasProperty(options, 'format') 
+          ? String(options.format) : 'mm:ss';
+        const validFormat = ['mm:ss', 'hh:mm:ss', 'mm:ss.ms'].includes(rawFormat) 
+          ? rawFormat as 'mm:ss' | 'hh:mm:ss' | 'mm:ss.ms' 
+          : 'mm:ss';
+        return (
+          <div className="mt-3">
+            <RaceTimeInput
+              value={milestoneValue as RaceTimeValue | null}
+              onChange={setMilestoneValue}
+              label={milestoneFieldConfig.label}
+              format={validFormat}
+            />
+          </div>
+        );
+      }
+
+      case 'pb_weight': {
+        const unitVal = options && typeof options === 'object' && hasProperty(options, 'unit')
+          ? String(options.unit) : 'kg';
+        return (
+          <div className="mt-3">
+            <PBWeightInput
+              value={milestoneValue}
+              onChange={setMilestoneValue}
+              label={milestoneFieldConfig.label}
+              unit={unitVal}
+            />
+          </div>
+        );
+      }
+
+      case 'skill_checklist': {
+        const skillsVal = options && typeof options === 'object' && hasProperty(options, 'skills')
+          ? (options.skills as string[]) : [];
+        return (
+          <div className="mt-3">
+            <SkillChecklistInput
+              value={milestoneValue as SkillChecklistValue | null}
+              onChange={setMilestoneValue}
+              skills={skillsVal}
+            />
+          </div>
+        );
+      }
+
+      case 'dropdown': {
+        const choicesVal = options && typeof options === 'object' && hasProperty(options, 'choices')
+          ? (options.choices as string[]) : [];
+        return (
+          <div className="mt-3">
+            <DropdownInput
+              value={typeof milestoneValue === 'string' ? milestoneValue : ''}
+              onChange={setMilestoneValue}
+              choices={choicesVal}
+              placeholder="Select..."
+            />
+          </div>
+        );
+      }
+    }
+
+    // Default fallback
+    return (
+      <Input
+        type="text"
+        placeholder={getMilestonePlaceholder(config.milestone.type)}
+        value={typeof milestoneValue === 'string' ? milestoneValue : ''}
+        onChange={(e) => setMilestoneValue(e.target.value)}
+        className="mt-2"
+      />
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Plus className="w-5 h-5" />
@@ -188,7 +345,7 @@ export function DisciplineLogModal({ open, onOpenChange, config }: DisciplineLog
                       input.enabled ? "border-primary bg-primary/5" : "border-border"
                     )}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between">
                       <span className="font-medium text-sm">{input.label}</span>
                       <Switch
                         checked={input.enabled}
@@ -209,30 +366,25 @@ export function DisciplineLogModal({ open, onOpenChange, config }: DisciplineLog
                   </div>
                 ))}
 
-                {/* Milestone Input */}
+                {/* Sport-Specific Milestone Input */}
                 <div 
                   className={cn(
                     "p-3 rounded-lg border transition-colors",
-                    milestoneInput.enabled ? "border-primary bg-primary/5" : "border-border"
+                    milestoneEnabled ? "border-primary bg-primary/5" : "border-border"
                   )}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium text-sm">{config.milestone.label}</span>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Trophy className="w-4 h-4 text-amber-500" />
+                      <span className="font-medium text-sm">{config.milestone.label}</span>
+                    </div>
                     <Switch
-                      checked={milestoneInput.enabled}
-                      onCheckedChange={(checked) => setMilestoneInput(prev => ({ ...prev, enabled: checked }))}
+                      checked={milestoneEnabled}
+                      onCheckedChange={setMilestoneEnabled}
                     />
                   </div>
                   
-                  {milestoneInput.enabled && (
-                    <Input
-                      type="text"
-                      placeholder={getMilestonePlaceholder(config.milestone.type)}
-                      value={milestoneInput.value}
-                      onChange={(e) => setMilestoneInput(prev => ({ ...prev, value: e.target.value }))}
-                      className="mt-2"
-                    />
-                  )}
+                  {milestoneEnabled && renderMilestoneInput()}
                 </div>
               </div>
             </div>
