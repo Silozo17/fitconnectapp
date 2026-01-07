@@ -74,6 +74,66 @@ async function fetchMaxMilestone(
 }
 
 /**
+ * Format belt value from JSON to human-readable string
+ */
+function formatBeltValue(value: string): string {
+  try {
+    const parsed = JSON.parse(value);
+    // Handle both beltId and direct belt name
+    const beltName = parsed.beltId 
+      ? parsed.beltId.charAt(0).toUpperCase() + parsed.beltId.slice(1)
+      : parsed.belt || 'Unknown';
+    const stripes = parsed.stripes || 0;
+    const stripesText = stripes > 0 
+      ? ` (${stripes} stripe${stripes > 1 ? 's' : ''})` 
+      : '';
+    return `${beltName} Belt${stripesText}`;
+  } catch {
+    // If not JSON, return as-is (might already be formatted)
+    return value;
+  }
+}
+
+/**
+ * Format fight record from JSON to human-readable string
+ */
+function formatFightRecord(value: string): string {
+  try {
+    const parsed = JSON.parse(value);
+    const wins = parsed.wins || 0;
+    const losses = parsed.losses || 0;
+    const draws = parsed.draws || 0;
+    const koWins = parsed.koWins || 0;
+    const record = `${wins}-${losses}-${draws}`;
+    const koText = koWins > 0 ? ` (${koWins} KO${koWins > 1 ? 's' : ''})` : '';
+    return record + koText;
+  } catch {
+    return value;
+  }
+}
+
+/**
+ * Format race time from JSON or string
+ */
+function formatRaceTime(value: string): string {
+  try {
+    const parsed = JSON.parse(value);
+    if (parsed.hours !== undefined || parsed.minutes !== undefined || parsed.seconds !== undefined) {
+      const h = parsed.hours || 0;
+      const m = parsed.minutes || 0;
+      const s = parsed.seconds || 0;
+      if (h > 0) {
+        return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+      }
+      return `${m}:${String(s).padStart(2, '0')}`;
+    }
+    return parsed.time || value;
+  } catch {
+    return value;
+  }
+}
+
+/**
  * Format milestone value based on type
  */
 function formatMilestoneValue(
@@ -84,15 +144,16 @@ function formatMilestoneValue(
 
   switch (type) {
     case 'belt':
-      return value;
+      return formatBeltValue(value);
     case 'pb':
-      return `${value}kg`;
+      // Try to parse as number, otherwise return as-is
+      const numValue = parseFloat(value);
+      return isNaN(numValue) ? value : `${numValue}kg`;
     case 'raceTime':
-      return value;
+      return formatRaceTime(value);
     case 'fightRecord':
-      return value;
+      return formatFightRecord(value);
     case 'date':
-      // Format date nicely
       try {
         const date = new Date(value);
         return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });

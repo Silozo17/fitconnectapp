@@ -5,45 +5,19 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { 
-  Plus, 
-  ChevronRight, 
-  MessageSquarePlus,
-  Trophy,
-  Swords,
-  Users,
-  PersonStanding,
-  Waves,
-  Bike,
-  Medal,
-  Dumbbell,
-  Flame,
-  Mountain,
-} from "lucide-react";
+import { Plus, ChevronRight, MessageSquarePlus, Trophy } from "lucide-react";
 import { useDisciplineWidgetData } from "@/hooks/useDisciplineWidgetData";
 import { DisciplineMetricChip } from "./DisciplineMetricChip";
 import { DisciplineLogModal } from "./DisciplineLogModal";
 import { DisciplineDetailsDrawer } from "./DisciplineDetailsDrawer";
 import { RequestDisciplineModal } from "./RequestDisciplineModal";
 import { Skeleton } from "@/components/ui/skeleton";
+import { getDisciplineIcon, getMilestoneIcon } from "@/config/disciplines/icons";
 
 interface DisciplineWidgetProps {
   disciplineId: string;
   className?: string;
 }
-
-// Map icon names to components
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Swords,
-  Users,
-  PersonStanding,
-  Waves,
-  Bike,
-  Medal,
-  Dumbbell,
-  Flame,
-  Mountain,
-};
 
 export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetProps) {
   const { data, isLoading, error } = useDisciplineWidgetData(disciplineId);
@@ -60,7 +34,8 @@ export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetPr
   }
 
   const { config, metrics, milestone, highlight } = data;
-  const IconComponent = iconMap[config.icon] || Dumbbell;
+  const IconComponent = getDisciplineIcon(disciplineId);
+  const MilestoneIcon = getMilestoneIcon(milestone.type);
 
   return (
     <>
@@ -108,7 +83,7 @@ export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetPr
             "border border-border/50"
           )}>
             <div className={cn("p-1.5 rounded-lg", config.theme.bgAccent)}>
-              <Trophy className={cn("w-4 h-4", config.theme.accent)} />
+              <MilestoneIcon className={cn("w-4 h-4", config.theme.accent)} />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">{milestone.label}</p>
