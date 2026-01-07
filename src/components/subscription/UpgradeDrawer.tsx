@@ -193,7 +193,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
             onClick={handleClose}
             className={cn(
               "absolute left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-full bg-background/50 backdrop-blur-sm transition-colors hover:bg-background/70",
-              isNativeMobile ? "top-[41px]" : "top-[26px]"
+              isNativeMobile ? "top-[44px]" : "top-[26px]"
             )}
             aria-label="Swipe down to close"
           >
@@ -205,7 +205,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
           {isNativeMobile && (
             <button
               onClick={handleRestorePurchases}
-              className="absolute left-4 top-[31px] z-20 rounded-full bg-background/50 px-3 py-2 text-xs font-medium text-foreground/70 backdrop-blur-sm transition-colors hover:bg-background/70"
+              className="absolute left-4 top-[51px] z-20 rounded-full bg-background/50 px-3 py-2 text-xs font-medium text-foreground/70 backdrop-blur-sm transition-colors hover:bg-background/70"
             >
               Restore
             </button>
