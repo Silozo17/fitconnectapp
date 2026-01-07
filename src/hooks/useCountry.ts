@@ -1,4 +1,4 @@
-import { useCountryContext, useOptionalCountryContext } from "@/contexts/CountryContext";
+import { useOptionalCountryContext } from "@/contexts/CountryContext";
 import { useOptionalLocaleRouting } from "@/contexts/LocaleRoutingContext";
 import { useOptionalAppLocale } from "@/contexts/AppLocaleContext";
 import { RouteLocationCode, LOCATION_TO_CURRENCY, LOCATION_TO_DATE_LOCALE } from "@/lib/locale-routing";
@@ -37,7 +37,21 @@ interface UseCountryReturn {
 export function useCountry(): UseCountryReturn {
   const localeRouting = useOptionalLocaleRouting();
   const appLocale = useOptionalAppLocale();
-  const context = useCountryContext();
+  const context = useOptionalCountryContext();
+  
+  // Provide safe defaults if context is not available (race condition during native cold start)
+  if (!context) {
+    return {
+      countryCode: 'gb',
+      isFromRoute: false,
+      isManualOverride: false,
+      isLoading: false,
+      currency: 'GBP',
+      dateLocale: 'en-GB',
+      setCountry: () => {},
+      resetToDetected: () => {},
+    };
+  }
   
   // Priority:
   // 1. LocaleRoutingContext (website routes - handles both locale-prefixed and stored preferences)

@@ -17,6 +17,7 @@ interface CityOption {
 export function useAvailableCities() {
   return useQuery({
     queryKey: ["available-cities"],
+    retry: 1, // Limit retries to prevent cascade failures
     queryFn: async (): Promise<CityOption[]> => {
       // Fetch coaches with both structured and legacy location data
       // Only include coaches with complete profiles (real coaches)
