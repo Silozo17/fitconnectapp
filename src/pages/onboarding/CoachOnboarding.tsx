@@ -10,8 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Check, Loader2, Crown, Zap, Sparkles, Star, Users, Dumbbell, Brain, TrendingUp, MessageSquare, Infinity, Headphones, Cog } from "lucide-react";
-import { openExternalUrl, shouldOpenExternally } from "@/lib/external-links";
+import { Check, Loader2, Crown, Zap, Sparkles, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel";
 import { toast } from "sonner";
@@ -26,14 +25,10 @@ import { COACH_TYPES, COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/c
 import { SUBSCRIPTION_TIERS, TierKey } from "@/lib/stripe-config";
 import { useTranslation } from "react-i18next";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
-import { useNativeIAP, SubscriptionTier, BillingInterval } from "@/hooks/useNativeIAP";
+import { SubscriptionTier, BillingInterval } from "@/hooks/useNativeIAP";
 import { useNativePricing } from "@/hooks/useNativePricing";
-import { triggerConfetti, confettiPresets } from "@/lib/confetti";
-import { triggerHaptic } from "@/lib/despia";
-import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
-import { FeaturesActivatedModal } from "@/components/subscription/FeaturesActivatedModal";
+import { UpgradeDrawer } from "@/components/subscription/UpgradeDrawer";
 import { useQueryClient } from "@tanstack/react-query";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 // Full steps array (for new users without client profile)
@@ -123,52 +118,6 @@ const CoachOnboarding = () => {
   
   // Store formData in a ref for the callback to access latest values
   const formDataRef = useRef<{ alsoClient: boolean }>({ alsoClient: false });
-  
-  // Features activated modal state for onboarding
-  const [showFeaturesModal, setShowFeaturesModal] = useState(false);
-  const [purchasedTier, setPurchasedTier] = useState<TierKey | null>(null);
-  
-  // Handle successful IAP purchase - show features modal FIRST, then navigate
-  const handleIAPSuccess = useCallback(async (tier: SubscriptionTier) => {
-    console.log('[CoachOnboarding] IAP Success callback fired:', tier);
-    
-    // Trigger confetti celebration FIRST (before any async work)
-    triggerConfetti(confettiPresets.medium);
-    triggerHaptic('success');
-    
-    // Clear stale caches BEFORE any queries
-    localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
-    localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
-    
-    // Invalidate and refetch critical queries (non-blocking)
-    queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'] });
-    queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
-    queryClient.invalidateQueries({ queryKey: ['feature-access'] });
-    queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
-    
-    // Non-blocking profile refresh - don't let errors block modal
-    refreshProfiles().catch(e => console.warn('[CoachOnboarding] Profile refresh failed (non-critical):', e));
-    
-    // Show features activated modal FIRST - navigation happens when user closes it
-    console.log('[CoachOnboarding] Showing FeaturesActivatedModal for tier:', tier);
-    setPurchasedTier(tier as TierKey);
-    setShowFeaturesModal(true);
-  }, [refreshProfiles, queryClient]);
-  
-  // Handle closing the features modal - navigate to dashboard
-  const handleFeaturesModalClose = useCallback(() => {
-    setShowFeaturesModal(false);
-    console.log('[CoachOnboarding] Features modal closed, navigating. alsoClient:', formDataRef.current.alsoClient);
-    if (formDataRef.current.alsoClient) {
-      navigate("/onboarding/client", { replace: true });
-    } else {
-      navigate("/dashboard/coach", { replace: true });
-    }
-  }, [navigate]);
-  
-  const { purchase: nativePurchase, state: iapState, dismissUnsuccessfulModal } = useNativeIAP({
-    onPurchaseComplete: handleIAPSuccess,
-  });
 
   // Step component state
   const [integrationsState, setIntegrationsState] = useState({ hasAnyConnection: false });
@@ -520,38 +469,9 @@ const CoachOnboarding = () => {
           display_name: displayName,
         })
         .eq("user_id", user.id);
-      // If paid tier selected, handle payment
-      if (isPaidTier) {
-        const tier = formData.subscriptionTier as SubscriptionTier;
-        
-        // On native mobile (iOS/Android), trigger native IAP directly
-        if (isNativeMobile && (tier === 'starter' || tier === 'pro' || tier === 'enterprise')) {
-          // PHASE 1 FIX: Profile is already saved with onboarding_completed: true above
-          // Set session/localStorage flags for additional safety
-          sessionStorage.setItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED, 'coach');
-          localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
-          
-          // Clear cached tier to ensure fresh data after purchase
-          localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
-          
-          console.log('[CoachOnboarding] Profile saved with onboarding_completed: true. Starting native IAP for tier:', tier);
-          
-          toast.success("Profile saved! Completing subscription...");
-          
-          // Start the IAP flow - NO FALLBACK TIMER
-          // The handleIAPSuccess callback handles navigation on success
-          // If purchase is cancelled/fails, user stays on paywall and can retry
-          await nativePurchase(tier, billingInterval);
-          
-          // IAP hook handles success/error and navigation via handleIAPSuccess callback
-          // Do NOT auto-navigate - wait for confirmed purchase success
-          return;
-        }
-        
-        // On web, redirect to web checkout
-        toast.success("Profile saved! Complete your subscription to unlock all features.");
-        navigate(`/subscribe?tier=${formData.subscriptionTier}&billing=${billingInterval}&from=onboarding`);
-      } else if (formData.alsoClient) {
+      // Note: Paid tier purchases are now handled by UpgradeDrawer
+      // handleComplete is only called for free tier (via handleContinueWithoutUpgrading)
+      if (formData.alsoClient) {
         // Set completion flag BEFORE navigation - dashboard will check this
         sessionStorage.setItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED, 'coach');
         
@@ -1001,224 +921,30 @@ const CoachOnboarding = () => {
         ) : null;
 
       case "Choose Your Plan": {
-        // Apple-style paywall - get ONLY paid tiers (no free plan card)
-        const paidTiers = getDisplayableTiers(true); // excludeFree = true
-        const isProcessingIAP = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
-        
-        // Dynamic benefits per tier
-        const tierBenefits = {
-          starter: [
-            { icon: Users, text: "Manage up to 10 clients" },
-            { icon: Dumbbell, text: "Workout plan builder" },
-            { icon: MessageSquare, text: "Client messaging & scheduling" },
-          ],
-          pro: [
-            { icon: Users, text: "Manage up to 50 clients" },
-            { icon: Brain, text: "AI workout & meal planners" },
-            { icon: TrendingUp, text: "Advanced analytics & insights" },
-          ],
-          enterprise: [
-            { icon: Infinity, text: "Unlimited clients" },
-            { icon: Headphones, text: "Priority support & account manager" },
-            { icon: Cog, text: "Custom integrations & white-label" },
-          ],
-        };
-        
-        // Use selected tier benefits or default to Pro
-        const selectedTierKey = (formData.subscriptionTier || 'pro') as keyof typeof tierBenefits;
-        const benefits = tierBenefits[selectedTierKey] || tierBenefits.pro;
-        
+        // Use UpgradeDrawer in onboarding mode - identical design to crown icon drawer
         return (
-          <div className="flex flex-col h-full">
-            {/* Hero Image */}
-            <div className="w-full aspect-[16/9] relative overflow-hidden rounded-xl mb-3 -mt-1">
-              <img 
-                src="https://ntgfihgneyoxxbwmtceq.supabase.co/storage/v1/object/public/website-images/iap_image.webp"
-                alt="Start your fitness coaching journey"
-                className="w-full h-full object-cover"
-              />
-            </div>
-
-            {/* Logo - compact */}
-            <div className="flex items-center justify-center gap-2 pb-3">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <Dumbbell className="w-5 h-5 text-primary-foreground" />
-              </div>
-              <span className="font-display font-bold text-lg">FitConnect</span>
-            </div>
-
-            {/* Title - compact */}
-            <div className="text-center mb-3">
-              <h2 className="font-display text-xl font-bold text-foreground">
-                Unlock all coaching features
-              </h2>
-              <p className="text-muted-foreground text-sm mt-1">
-                Start your 7-day free trial today
-              </p>
-            </div>
-
-            {/* Dynamic benefits list - compact */}
-            <div className="space-y-2 mb-3">
-              {benefits.map((benefit, idx) => {
-                const Icon = benefit.icon;
-                return (
-                  <div key={idx} className="flex items-center gap-3">
-                    <div className="w-7 h-7 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                      <Icon className="h-3.5 w-3.5 text-primary" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">{benefit.text}</p>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Billing toggle - always show Save badge */}
-            <div className="flex items-center justify-center gap-2 mb-3">
-              <span className={`text-sm font-medium transition-colors ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Monthly
-              </span>
-              <Switch 
-                checked={billingInterval === 'yearly'}
-                onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
-              />
-              <span className={`text-sm font-medium transition-colors ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Yearly
-              </span>
-              <Badge 
-                variant={billingInterval === 'yearly' ? 'default' : 'secondary'} 
-                className={`ml-1 text-xs ${billingInterval === 'monthly' ? 'opacity-60' : ''}`}
-              >
-                Save ~17%
-              </Badge>
-            </div>
-
-            {/* Tier cards - compact Apple-style */}
-            <div className="space-y-2 flex-1 min-h-0 overflow-y-auto">
-              {paidTiers.map((tier) => {
-                const Icon = tier.icon;
-                const isSelected = formData.subscriptionTier === tier.id;
-                const price = billingInterval === 'monthly' 
-                  ? nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'monthly')
-                  : nativePricing.getSubscriptionPrice(tier.id as SubscriptionTier, 'yearly');
-                const monthlyEquivalent = billingInterval === 'yearly' 
-                  ? Math.round(price / 12) 
-                  : price;
-                
-                return (
-                  <button
-                    key={tier.id}
-                    type="button"
-                    onClick={() => {
-                      handleInputChange("subscriptionTier", tier.id);
-                      setHasSelectedPlan(true);
-                    }}
-                    className={`w-full p-3 rounded-xl border-2 transition-all text-left flex items-center gap-3 ${
-                      isSelected 
-                        ? "border-primary bg-primary/5" 
-                        : "border-border hover:border-muted-foreground"
-                    }`}
-                  >
-                    {/* Radio-style indicator */}
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ${
-                      isSelected ? "border-primary bg-primary" : "border-muted-foreground"
-                    }`}>
-                      {isSelected && <Check className="w-3 h-3 text-primary-foreground" />}
-                    </div>
-                    
-                    {/* Tier icon */}
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
-                      isSelected ? "bg-primary" : "bg-secondary"
-                    }`}>
-                      <Icon className={`w-4 h-4 ${isSelected ? "text-primary-foreground" : "text-muted-foreground"}`} />
-                    </div>
-                    
-                    {/* Tier info */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground text-sm">{tier.name}</h3>
-                        {tier.popular && (
-                          <Badge variant="secondary" className="text-xs py-0">Popular</Badge>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground line-clamp-1">{tier.description}</p>
-                    </div>
-                    
-                    {/* Price */}
-                    <div className="text-right shrink-0">
-                      <span className="font-bold text-primary text-sm">
-                        {nativePricing.formatPrice(monthlyEquivalent)}
-                      </span>
-                      <span className="text-xs text-muted-foreground">/mo</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Purchase cancelled/failed alert - retry immediately available */}
-            {iapState.purchaseStatus === 'cancelled' && (
-              <Alert className="mb-2 border-muted bg-muted/50">
-                <AlertDescription className="text-sm text-muted-foreground text-center">
-                  Purchase cancelled. Select a plan to try again.
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {/* CTA Section - compact */}
-            <div className="mt-3 space-y-2">
-              <Button 
-                className="w-full py-5 text-base font-semibold"
-                onClick={handleComplete}
-                disabled={!hasSelectedPlan || isSubmitting || isNavigating || isProcessingIAP}
-              >
-                {(isSubmitting || isProcessingIAP) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Start 7-day free trial
-              </Button>
+          <UpgradeDrawer
+            open={true}
+            onOpenChange={(open) => {
+              if (!open) handleContinueWithoutUpgrading();
+            }}
+            coachId={coachProfileId || undefined}
+            mode="onboarding"
+            onSkip={handleContinueWithoutUpgrading}
+            onSuccess={(tier) => {
+              console.log('[CoachOnboarding] UpgradeDrawer onSuccess:', tier);
+              // Set flag before navigation
+              sessionStorage.setItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED, 'coach');
+              localStorage.setItem(STORAGE_KEYS.COACH_ONBOARDED, 'true');
               
-              <p className="text-xs text-center text-muted-foreground">
-                Cancel anytime. After 7 days, charged {billingInterval === 'monthly' ? 'monthly' : 'yearly'}.
-              </p>
-              
-              <button
-                type="button"
-                onClick={handleContinueWithoutUpgrading}
-                disabled={isSubmitting || isNavigating || isProcessingIAP}
-                className="w-full text-center text-sm text-muted-foreground hover:text-primary transition-colors py-1 disabled:opacity-50"
-              >
-                Continue without upgrading
-              </button>
-            </div>
-
-            {/* Consolidated legal footer - single paragraph */}
-            <p className="text-xs text-muted-foreground text-center mt-3 pb-1">
-              {isNativeMobile && (
-                <>
-                  <button 
-                    type="button"
-                    onClick={handleRestorePurchases}
-                    className="text-primary hover:underline"
-                  >
-                    Restore Purchases
-                  </button>
-                  {" · "}
-                </>
-              )}
-              By continuing, you agree to our{" "}
-              {shouldOpenExternally() ? (
-                <>
-                  <button onClick={() => openExternalUrl(`${window.location.origin}/terms`)} className="text-primary hover:underline">Terms</button>,{" "}
-                  <button onClick={() => openExternalUrl(`${window.location.origin}/privacy`)} className="text-primary hover:underline">Privacy</button>{" "}
-                  & <button onClick={() => openExternalUrl(`${window.location.origin}/eula`)} className="text-primary hover:underline">EULA</button>
-                </>
-              ) : (
-                <>
-                  <Link to="/terms" target="_blank" className="text-primary hover:underline">Terms</Link>,{" "}
-                  <Link to="/privacy" target="_blank" className="text-primary hover:underline">Privacy</Link>{" "}
-                  & <Link to="/eula" target="_blank" className="text-primary hover:underline">EULA</Link>
-                </>
-              )}.
-            </p>
-          </div>
+              // Navigate based on alsoClient preference
+              if (formData.alsoClient) {
+                navigate("/onboarding/client", { replace: true });
+              } else {
+                navigate("/dashboard/coach", { replace: true });
+              }
+            }}
+          />
         );
       }
 
@@ -1251,19 +977,6 @@ const CoachOnboarding = () => {
       >
         {renderStepContent()}
       </OnboardingLayout>
-
-      {/* IAP Unsuccessful Modal */}
-      <IAPUnsuccessfulDialog 
-        open={iapState.showUnsuccessfulModal} 
-        onOpenChange={dismissUnsuccessfulModal}
-      />
-      
-      {/* Features Activated Modal - shown before navigating to dashboard */}
-      <FeaturesActivatedModal
-        isOpen={showFeaturesModal}
-        onClose={handleFeaturesModalClose}
-        tier={purchasedTier || 'starter'}
-      />
     </>
   );
 };
