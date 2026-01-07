@@ -138,31 +138,32 @@ export default function Subscribe() {
           {tierData.description}. Get access to all the tools you need to grow your coaching business.
         </p>
 
-        {/* Tier Selector */}
-        <div className="mb-8">
+        {/* Tier Selector - Tabs style, no free tier */}
+        <div className="mb-6">
           <TierSelector
-            selectedTier={selectedTier}
+            selectedTier={selectedTier === "free" ? "starter" : selectedTier}
             onTierChange={handleTierChange}
             billingInterval={billingInterval}
-            includeFreeTier={true}
+            includeFreeTier={false}
+            variant="tabs"
           />
         </div>
 
-        {/* Features + Avatar Row */}
-        <div className="mb-8 flex items-start gap-4">
-          {/* Features on the left */}
+        {/* Features + Avatar Row - More compact */}
+        <div className="mb-6 flex items-start gap-4">
+          {/* Features on the left - limited to 4 */}
           <div className="flex-1">
-            <TierFeatures tier={selectedTier} />
+            <TierFeatures tier={selectedTier === "free" ? "starter" : selectedTier} maxFeatures={4} />
           </div>
           
-          {/* Avatar on the right, beside features */}
-          <div className="hidden md:block w-40 lg:w-48 h-56 lg:h-64 flex-shrink-0">
+          {/* Avatar on the right, beside features - smaller */}
+          <div className="hidden md:block w-32 lg:w-40 h-44 lg:h-52 flex-shrink-0">
             <div 
               key={selectedTier}
               className="w-full h-full animate-fade-in"
             >
               <img
-                src={getAvatarImageUrl(TIER_AVATARS[selectedTier])}
+                src={getAvatarImageUrl(TIER_AVATARS[selectedTier === "free" ? "starter" : selectedTier])}
                 alt={`${tierData.name} tier avatar`}
                 className="w-full h-full object-contain drop-shadow-2xl"
                 style={{ 
@@ -173,11 +174,11 @@ export default function Subscribe() {
           </div>
         </div>
 
-        {/* Billing Toggle */}
-        <div className="mb-8">
-          <p className="text-sm font-medium text-foreground mb-3">Choose billing cycle</p>
+        {/* Billing Toggle - More compact */}
+        <div className="mb-6">
+          <p className="text-xs font-medium text-muted-foreground mb-2">Billing cycle</p>
           <BillingToggle
-            selectedTier={selectedTier}
+            selectedTier={selectedTier === "free" ? "starter" : selectedTier}
             billingInterval={billingInterval}
             onIntervalChange={setBillingInterval}
           />
@@ -255,30 +256,6 @@ export default function Subscribe() {
           /* Show native IAP ONLY for native app environments */
           <div className="w-full">
             <NativeSubscriptionButtons currentTier={currentTier} />
-          </div>
-        ) : selectedTier === "free" ? (
-          /* Free tier confirmation panel */
-          <div className="w-full max-w-md mx-auto">
-            <div className="bg-gray-50 rounded-xl p-8 text-center">
-              <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle className="w-8 h-8 text-primary" />
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Free Plan Selected
-              </h3>
-              <p className="text-gray-600 text-sm mb-6">
-                Start with the free plan to explore FitConnect's core features. You can upgrade anytime.
-              </p>
-              <Button 
-                onClick={handleConfirmFreeTier}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-6"
-              >
-                Continue with Free Plan
-              </Button>
-              <p className="text-xs text-gray-500 mt-4">
-                No credit card required
-              </p>
-            </div>
           </div>
         ) : (
           <>

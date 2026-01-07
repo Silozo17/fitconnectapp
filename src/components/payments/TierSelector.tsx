@@ -14,18 +14,61 @@ interface TierSelectorProps {
   onTierChange: (tier: TierKey) => void;
   billingInterval: BillingInterval;
   includeFreeTier?: boolean;
+  /** Use "tabs" for compact horizontal layout, "radio" for vertical cards */
+  variant?: "radio" | "tabs";
 }
 
-export function TierSelector({ selectedTier, onTierChange, billingInterval, includeFreeTier = false }: TierSelectorProps) {
+export function TierSelector({ 
+  selectedTier, 
+  onTierChange, 
+  billingInterval, 
+  includeFreeTier = false,
+  variant = "radio"
+}: TierSelectorProps) {
   const pricing = useActivePricing();
   
-  // Exclude admin-only tiers (like founder) from selector, optionally include free tier
+  // Exclude admin-only tiers (like founder) and free tier from selector
   const displayTiers = (Object.keys(SUBSCRIPTION_TIERS) as TierKey[]).filter(key => {
     if (SUBSCRIPTION_TIERS[key].adminOnly) return false;
     if (key === "free" && !includeFreeTier) return false;
     return true;
   });
 
+  // Tabs variant - compact horizontal layout
+  if (variant === "tabs") {
+    return (
+      <div className="flex rounded-xl border border-border/50 bg-background/20 p-1 gap-1">
+        {displayTiers.map((tier) => {
+          const isSelected = selectedTier === tier;
+          const tierData = SUBSCRIPTION_TIERS[tier];
+          const TierIcon = TIER_ICONS[tier] || Rocket;
+          
+          return (
+            <button
+              key={tier}
+              onClick={() => onTierChange(tier)}
+              className={cn(
+                "flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition-all font-medium text-sm",
+                isSelected
+                  ? "bg-primary text-primary-foreground shadow-md"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+              )}
+            >
+              <TierIcon className="h-4 w-4" />
+              <span>{tierData.name}</span>
+              {tierData.highlighted && !isSelected && (
+                <span className="px-1.5 py-0.5 text-[9px] font-bold bg-accent text-accent-foreground rounded-full">
+                  ★
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // Radio variant - vertical cards (default)
   return (
     <div className="space-y-3">
       {displayTiers.map((tier) => {
@@ -105,16 +148,19 @@ export function TierSelector({ selectedTier, onTierChange, billingInterval, incl
 
 interface TierFeaturesProps {
   tier: TierKey;
+  /** Limit the number of features shown */
+  maxFeatures?: number;
 }
 
-export function TierFeatures({ tier }: TierFeaturesProps) {
+export function TierFeatures({ tier, maxFeatures }: TierFeaturesProps) {
   const tierData = SUBSCRIPTION_TIERS[tier];
+  const features = maxFeatures ? tierData.features.slice(0, maxFeatures) : tierData.features;
   
   return (
     <div className="space-y-3">
       <p className="text-muted-foreground text-sm">{tierData.description}</p>
       <ul className="space-y-2">
-        {tierData.features.map((feature, index) => (
+        {features.map((feature, index) => (
           <li key={index} className="flex items-start gap-3 text-sm">
             <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <span className="text-foreground/90">{feature}</span>
