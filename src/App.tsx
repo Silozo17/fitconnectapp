@@ -19,7 +19,7 @@ import { useAppInitialization } from "@/hooks/useAppInitialization";
 import { useDeferredMount } from "@/hooks/useDeferredMount";
 import { HydrationSignal } from "@/components/shared/HydrationSignal";
 import { isDespia } from "@/lib/despia";
-import { NativeSplashLoader } from "@/components/native/NativeSplashLoader";
+import { useEnvironment } from "@/hooks/useEnvironment";
 
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
@@ -326,51 +326,28 @@ function DespiaInitializer() {
   return null;
 }
 
-// Native splash screen wrapper - only shows in Despia environment
+// Native splash screen wrapper - signals HTML splash to hide when app is ready
+// Splash is rendered in index.html for instant display (no white flash)
 function NativeSplashWrapper({ children }: { children: React.ReactNode }) {
-  const [isAppReady, setIsAppReady] = useState(false);
-  const [splashDismissed, setSplashDismissed] = useState(false);
   const inDespia = isDespia();
+  const { isPWA } = useEnvironment();
+  const showNativeSplash = inDespia || isPWA;
   
-  // Mark as ready after initial mount + small delay for auth to initialize
   useEffect(() => {
-    if (!inDespia) return;
+    if (!showNativeSplash) return;
     
+    // Wait for app to be ready, then hide HTML splash
     const timeout = setTimeout(() => {
-      setIsAppReady(true);
-    }, 800); // Allow time for initial data fetch
+      if (typeof window !== 'undefined' && (window as any).__nativeSplash) {
+        (window as any).__nativeSplash.hide();
+      }
+    }, 800);
     
     return () => clearTimeout(timeout);
-  }, [inDespia]);
+  }, [showNativeSplash]);
   
-  const handleFadeComplete = useCallback(() => {
-    setSplashDismissed(true);
-  }, []);
-  
-  // If not in Despia, skip splash entirely
-  if (!inDespia) {
-    return <>{children}</>;
-  }
-  
-  return (
-    <>
-      {/* Always render children so they can initialize - hidden until splash dismissed */}
-      <div 
-        className={`transition-opacity duration-300 ${splashDismissed ? 'opacity-100' : 'opacity-0'}`}
-        style={{ visibility: splashDismissed ? 'visible' : 'hidden' }}
-      >
-        {children}
-      </div>
-      
-      {/* Show native splash until ready and faded */}
-      {!splashDismissed && (
-        <NativeSplashLoader 
-          isReady={isAppReady} 
-          onFadeComplete={handleFadeComplete} 
-        />
-      )}
-    </>
-  );
+  // Always render children - splash is in HTML layer
+  return <>{children}</>;
 }
 
 // Deferred non-critical trackers - don't block initial render
