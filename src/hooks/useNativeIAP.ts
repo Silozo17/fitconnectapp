@@ -453,8 +453,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     reconciliationAttemptedRef.current = false;
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      // PHASE 3 FIX: Reduce delay from 300ms to 0ms for faster confirmation
       const { data: reconcileResult, error } = await supabase.functions.invoke('verify-subscription-entitlement');
       
       // Accept success if we have any valid tier

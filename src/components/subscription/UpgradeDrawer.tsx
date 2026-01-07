@@ -68,9 +68,22 @@ interface UpgradeDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   coachId?: string;
+  /** Mode: 'upgrade' for normal drawer, 'onboarding' for coach onboarding paywall */
+  mode?: 'upgrade' | 'onboarding';
+  /** Called when user skips during onboarding (pulls down or clicks skip) */
+  onSkip?: () => void;
+  /** Called when purchase succeeds in onboarding mode (for custom navigation) */
+  onSuccess?: (tier: SubscriptionTier) => void;
 }
 
-export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProps) => {
+export const UpgradeDrawer = ({ 
+  open, 
+  onOpenChange, 
+  coachId,
+  mode = 'upgrade',
+  onSkip,
+  onSuccess,
+}: UpgradeDrawerProps) => {
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier>('pro');
   const [billingInterval, setBillingInterval] = useState<BillingInterval>('monthly');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -103,8 +116,13 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
     setPurchasedTier(tier as TierKey);
     setShowFeaturesModal(true);
     setIsSubmitting(false);
-    onOpenChange(false);
-  }, [queryClient, onOpenChange]);
+    
+    // In upgrade mode, close drawer immediately
+    // In onboarding mode, let the modal stay on screen (parent will handle navigation)
+    if (mode === 'upgrade') {
+      onOpenChange(false);
+    }
+  }, [queryClient, onOpenChange, mode]);
   
   const { state: iapState, purchase: iapPurchase, dismissUnsuccessfulModal, reconcileSubscription } = useNativeIAP({
     onPurchaseComplete: handleIAPSuccess,
@@ -175,7 +193,20 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
   };
 
   const handleClose = () => {
-    onOpenChange(false);
+    // In onboarding mode, closing the drawer = skipping subscription
+    if (mode === 'onboarding' && onSkip) {
+      onSkip();
+    } else {
+      onOpenChange(false);
+    }
+  };
+  
+  const handleFeaturesModalClose = () => {
+    setShowFeaturesModal(false);
+    // In onboarding mode, call the custom success handler after modal closes
+    if (mode === 'onboarding' && onSuccess && purchasedTier) {
+      onSuccess(purchasedTier as SubscriptionTier);
+    }
   };
   
   return (
@@ -362,6 +393,18 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
               Cancel anytime. After 7 days, charged {billingInterval === 'yearly' ? 'yearly' : 'monthly'}.
             </p>
 
+            {/* Continue without upgrading - only in onboarding mode */}
+            {mode === 'onboarding' && (
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={isProcessingIAP || isSubmitting}
+                className="w-full text-center text-[11px] text-muted-foreground hover:text-primary transition-colors py-1.5 disabled:opacity-50"
+              >
+                Continue without upgrading
+              </button>
+            )}
+
             {/* Legal footer */}
             <div className="space-y-1 text-center">
               {isNativeMobile && (
@@ -406,7 +449,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
       {/* Features Activated Modal */}
       <FeaturesActivatedModal
         isOpen={showFeaturesModal}
-        onClose={() => setShowFeaturesModal(false)}
+        onClose={handleFeaturesModalClose}
         tier={purchasedTier || 'starter'}
       />
     </>
