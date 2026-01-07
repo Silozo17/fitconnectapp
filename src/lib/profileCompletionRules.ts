@@ -61,7 +61,7 @@ export const PROFILE_COMPLETION_RULES: CompletionRule[] = [
     label: "Bio",
     weight: 10,
     check: (ctx) => !!ctx.profile.bio && ctx.profile.bio.length > 50,
-    isRequiredForVisibility: true,
+    isRequiredForVisibility: false,
   },
   {
     id: "specialisations",
