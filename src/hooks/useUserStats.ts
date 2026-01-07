@@ -359,7 +359,7 @@ export function useUserStats() {
           goalsAchieved: goalsAchievedResult.count || 0,
           stepsTotal: wearableTotals.steps,
           caloriesTotal: wearableTotals.calories,
-          distanceTotal: wearableTotals.distance,
+          distanceTotal: Math.round(wearableTotals.distance / 1000), // Convert meters to km
           activeMinutesTotal: wearableTotals.activeMinutes,
           wearableWorkoutCount: 0, // TODO: track workout-specific entries
           sleepHoursTotal: Math.round(wearableTotals.sleepMinutes / 60),
