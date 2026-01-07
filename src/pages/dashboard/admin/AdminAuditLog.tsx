@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Helmet } from "react-helmet-async";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -10,11 +9,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Download, RefreshCw, Search, Calendar as CalendarIcon, Eye, ChevronLeft, ChevronRight } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Download, RefreshCw, Search, Calendar as CalendarIcon, Eye, ChevronLeft, ChevronRight, Info } from "lucide-react";
 import { format, subDays, startOfDay, endOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useAuditLogsWithFilters } from "@/hooks/useAuditLog";
 import AuditLogDetailModal from "@/components/admin/AuditLogDetailModal";
+import { DashboardSectionHeader, ContentSection } from "@/components/shared";
 import type { AuditLog } from "@/hooks/useAuditLog";
 
 const ACTION_TYPES = [
@@ -148,120 +149,116 @@ const AdminAuditLog = () => {
       </Helmet>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Audit Log</h1>
-            <p className="text-muted-foreground">Track all administrative actions and changes</p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={() => refetch()}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
-            </Button>
-            <Button variant="outline" size="sm" onClick={handleExport}>
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
-          </div>
-        </div>
+        <DashboardSectionHeader
+          title="Audit Log"
+          description="Track all administrative actions and changes"
+          action={
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => refetch()}>
+                <RefreshCw className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Refresh</span>
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                <Download className="h-4 w-4 mr-2" />
+                <span className="hidden sm:inline">Export CSV</span>
+              </Button>
+            </div>
+          }
+          className="mb-0"
+        />
 
         {/* Filters */}
-        <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Filters</CardTitle>
-            <CardDescription>Filter audit logs by date, action type, or entity</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* Search */}
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder={t('auditLog.searchPlaceholder')}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-
-              {/* Action Type */}
-              <Select value={actionType} onValueChange={setActionType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Action Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ACTION_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Entity Type */}
-              <Select value={entityType} onValueChange={setEntityType}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Entity Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ENTITY_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              {/* Start Date */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "justify-start text-left font-normal",
-                      !startDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {startDate ? format(startDate, "PP") : "Start date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={startDate}
-                    onSelect={setStartDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-
-              {/* End Date */}
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      "justify-start text-left font-normal",
-                      !endDate && "text-muted-foreground"
-                    )}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {endDate ? format(endDate, "PP") : "End date"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={endDate}
-                    onSelect={setEndDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+        <ContentSection colorTheme="muted" withAccent>
+          <h3 className="font-semibold text-foreground mb-3">Filters</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Search */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder={t('auditLog.searchPlaceholder')}
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9"
+              />
             </div>
-          </CardContent>
-        </Card>
+
+            {/* Action Type */}
+            <Select value={actionType} onValueChange={setActionType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Action Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {ACTION_TYPES.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Entity Type */}
+            <Select value={entityType} onValueChange={setEntityType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Entity Type" />
+              </SelectTrigger>
+              <SelectContent>
+                {ENTITY_TYPES.map((type) => (
+                  <SelectItem key={type.value} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Start Date */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !startDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {startDate ? format(startDate, "PP") : "Start date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={setStartDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+
+            {/* End Date */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal",
+                    !endDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {endDate ? format(endDate, "PP") : "End date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={setEndDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </ContentSection>
 
         {/* Results Count */}
         <div className="flex items-center justify-between">
@@ -271,74 +268,100 @@ const AdminAuditLog = () => {
         </div>
 
         {/* Table */}
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-            <Table className="min-w-[900px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>Admin</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead className="hidden sm:table-cell">Entity Type</TableHead>
-                  <TableHead className="hidden md:table-cell">Entity ID</TableHead>
-                  <TableHead className="hidden md:table-cell">Changes</TableHead>
-                  <TableHead className="hidden lg:table-cell">Device</TableHead>
-                  <TableHead className="w-[50px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
+        <ContentSection colorTheme="blue" withAccent padding="none">
+          <div className="overflow-x-auto">
+            <TooltipProvider>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      Loading audit logs...
-                    </TableCell>
+                    <TableHead className="w-[80px]">Date</TableHead>
+                    <TableHead>Admin</TableHead>
+                    <TableHead className="w-[50px]">Action</TableHead>
+                    <TableHead className="hidden md:table-cell">Entity Type</TableHead>
+                    <TableHead className="hidden lg:table-cell">Entity ID</TableHead>
+                    <TableHead className="hidden lg:table-cell">Changes</TableHead>
+                    <TableHead className="hidden xl:table-cell">Device</TableHead>
+                    <TableHead className="w-[50px]"></TableHead>
                   </TableRow>
-                ) : logs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No audit logs found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  logs.map((log) => (
-                    <TableRow key={log.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedLog(log)}>
-                      <TableCell className="whitespace-nowrap">
-                        {format(new Date(log.created_at), "MMM d, HH:mm")}
-                      </TableCell>
-                      <TableCell>
-                        {log.admin?.display_name || log.admin?.first_name || "System"}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getActionBadgeVariant(log.action)}>
-                          {log.action.replace(/_/g, " ")}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="capitalize hidden sm:table-cell">
-                        {log.entity_type.replace(/_/g, " ")}
-                      </TableCell>
-                      <TableCell className="font-mono text-xs hidden md:table-cell">
-                        {log.entity_id ? `${log.entity_id.slice(0, 8)}...` : "-"}
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate hidden md:table-cell">
-                        {formatChanges(log)}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground hidden lg:table-cell">
-                        {parseUserAgent(log.user_agent)}
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedLog(log); }} aria-label="View log details">
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                        Loading audit logs...
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-            </div>
-          </CardContent>
-        </Card>
+                  ) : logs.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                        No audit logs found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    logs.map((log) => (
+                      <TableRow key={log.id} className="cursor-pointer hover:bg-muted/50" onClick={() => setSelectedLog(log)}>
+                        {/* Date - Compact */}
+                        <TableCell className="whitespace-nowrap">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-medium">{format(new Date(log.created_at), "MMM d")}</span>
+                            <span className="text-xs text-muted-foreground">{format(new Date(log.created_at), "HH:mm")}</span>
+                          </div>
+                        </TableCell>
+                        {/* Admin */}
+                        <TableCell className="font-medium">
+                          {log.admin?.display_name || log.admin?.first_name || "System"}
+                        </TableCell>
+                        {/* Action - Info icon with tooltip */}
+                        <TableCell>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className={cn(
+                                  "h-8 w-8",
+                                  log.action.includes("DELETE") && "text-destructive",
+                                  log.action.includes("CREATE") && "text-green-500",
+                                  (log.action.includes("UPDATE") || log.action.includes("STATUS")) && "text-blue-500"
+                                )}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <Info className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent side="right" className="max-w-xs">
+                              <div className="space-y-1">
+                                <p className="font-semibold">{log.action.replace(/_/g, " ")}</p>
+                                <p className="text-xs text-muted-foreground capitalize">{log.entity_type.replace(/_/g, " ")}</p>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableCell>
+                        <TableCell className="capitalize hidden md:table-cell">
+                          {log.entity_type.replace(/_/g, " ")}
+                        </TableCell>
+                        <TableCell className="font-mono text-xs hidden lg:table-cell">
+                          {log.entity_id ? `${log.entity_id.slice(0, 8)}...` : "-"}
+                        </TableCell>
+                        <TableCell className="max-w-[200px] truncate hidden lg:table-cell">
+                          {formatChanges(log)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground hidden xl:table-cell">
+                          {parseUserAgent(log.user_agent)}
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon" onClick={(e) => { e.stopPropagation(); setSelectedLog(log); }} aria-label="View log details">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </TooltipProvider>
+          </div>
+        </ContentSection>
 
         {/* Pagination */}
         {totalPages > 1 && (
