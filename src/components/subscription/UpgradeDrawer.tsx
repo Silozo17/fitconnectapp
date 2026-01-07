@@ -336,15 +336,6 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
               })}
             </div>
 
-            {/* IAP Cancelled Alert */}
-            {iapState.purchaseStatus === 'cancelled' && (
-              <Alert className="mb-2 border-amber-500/50 bg-amber-500/10">
-                <AlertDescription className="text-xs text-amber-200">
-                  Purchase was cancelled. Tap below to try again.
-                </AlertDescription>
-              </Alert>
-            )}
-
             {/* Primary CTA */}
             <Button
               onClick={handlePurchase}

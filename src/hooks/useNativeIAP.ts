@@ -554,24 +554,8 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     });
   }, [clearPurchaseTimeout]);
 
-  // Register callbacks on mount - simplified approach
-  useEffect(() => {
-    if (state.isAvailable) {
-      // Register callbacks with Despia
-      setIAPCallbacks({
-        onSuccess: handleIAPSuccess,
-        onError: handleIAPError,
-        onCancel: handleIAPCancel,
-        onPending: handleIAPPending,
-      });
-      console.log('[NativeIAP] IAP callbacks registered');
-    }
-
-    return () => {
-      setIAPCallbacks(null);
-      console.log('[NativeIAP] IAP callbacks cleared');
-    };
-  }, [state.isAvailable, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
+  // Note: Callbacks are registered just before purchase in the purchase() function
+  // This ensures they're always fresh and avoids race conditions
 
   /**
    * Trigger a purchase
