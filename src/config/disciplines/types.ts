@@ -120,3 +120,84 @@ export interface DisciplineWidgetData {
   highlight: string;
   isLoading: boolean;
 }
+
+// ============================================
+// SPORT-SPECIFIC DETAIL TYPES
+// ============================================
+
+// Belt system configuration
+export interface BeltOption {
+  id: string;
+  name: string;
+  color: string; // Tailwind bg class
+  textColor?: string; // Tailwind text class
+  maxStripes: number;
+}
+
+export interface BeltConfig {
+  belts: BeltOption[];
+  stripeColor: 'white' | 'black' | 'red';
+}
+
+// Sport-specific field types for detail logging
+export type DisciplineFieldType = 
+  | 'belt_with_stripes'      // BJJ, Karate, Judo
+  | 'fight_record'           // Boxing, MMA, Muay Thai, Kickboxing
+  | 'race_time'              // Running, Swimming, Cycling, Triathlon
+  | 'pb_weight'              // Powerlifting, CrossFit lifts
+  | 'benchmark_time'         // CrossFit WODs
+  | 'skill_checklist'        // Calisthenics skills
+  | 'dropdown'               // Generic dropdown
+  | 'event_date'             // Date of achievement
+  | 'number';                // Simple number input
+
+export interface DisciplineFieldConfig {
+  id: string;
+  label: string;
+  type: DisciplineFieldType;
+  options?: BeltConfig | {
+    format?: string;           // 'mm:ss', 'hh:mm:ss', 'mm:ss.ms'
+    unit?: string;             // 'kg', 'lbs', 'W', 'reps'
+    choices?: string[];        // For dropdowns
+    skills?: string[];         // For skill checklists
+    fields?: string[];         // For fight records: ['wins', 'losses', 'draws', 'ko_wins']
+  };
+}
+
+export interface DisciplineDetailConfig {
+  milestoneFields: DisciplineFieldConfig[];
+  additionalLogFields?: DisciplineFieldConfig[];
+}
+
+// Belt value stored in events
+export interface BeltValue {
+  beltId: string;
+  stripes: number;
+  achievedAt: string;
+}
+
+// Fight record value
+export interface FightRecordValue {
+  wins: number;
+  losses: number;
+  draws: number;
+  koWins?: number;
+  koLosses?: number;
+  nc?: number; // no contests
+}
+
+// Race time value
+export interface RaceTimeValue {
+  time: string; // formatted time string
+  distance?: string;
+  achievedAt: string;
+}
+
+// Skill checklist value
+export interface SkillChecklistValue {
+  skills: Array<{
+    skillId: string;
+    achieved: boolean;
+    achievedAt?: string;
+  }>;
+}
