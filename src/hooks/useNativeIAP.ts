@@ -13,6 +13,7 @@ import {
   registerIAPCallbacksWithId,
   unregisterIAPCallbacksWithId,
   setIAPCallbacks,
+  setPurchaseInFlight,
   triggerRevenueCatPurchase,
   getPlatformProductId,
   IAPSuccessData,
@@ -554,8 +555,53 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     });
   }, [clearPurchaseTimeout]);
 
-  // Note: Callbacks are registered just before purchase in the purchase() function
-  // This ensures they're always fresh and avoids race conditions
+  // Persistent callback registration during purchase lifecycle
+  // This ensures callbacks survive async delays from the native payment sheet
+  useEffect(() => {
+    if (!state.isAvailable) return;
+    
+    // Only keep callbacks registered during active purchase states
+    const isPurchasing = state.purchaseStatus === 'purchasing' || state.purchaseStatus === 'success';
+    
+    if (isPurchasing) {
+      // Keep callbacks registered during purchase flow
+      setIAPCallbacks({
+        onSuccess: handleIAPSuccess,
+        onError: handleIAPError,
+        onCancel: handleIAPCancel,
+        onPending: handleIAPPending,
+      });
+      console.log('[NativeIAP] IAP callbacks registered (purchase in progress)');
+    }
+    
+    return () => {
+      // Only clear callbacks if we're back to idle state
+      if (state.purchaseStatus === 'idle' || state.purchaseStatus === 'failed') {
+        setIAPCallbacks(null);
+        setPurchaseInFlight(false);
+        console.log('[NativeIAP] IAP callbacks cleared (idle state)');
+      }
+    };
+  }, [state.isAvailable, state.purchaseStatus, handleIAPSuccess, handleIAPError, handleIAPCancel, handleIAPPending]);
+
+  // 30-second stuck-state recovery timeout
+  // If still "purchasing" after 30s without any callback, reset to idle for retry
+  useEffect(() => {
+    if (state.purchaseStatus !== 'purchasing') return;
+    
+    const stuckTimeout = setTimeout(() => {
+      console.warn('[NativeIAP] Purchase stuck in "purchasing" state for 30s - resetting');
+      setPurchaseInFlight(false);
+      setState(prev => ({
+        ...prev,
+        purchaseStatus: 'idle',
+        error: null,
+      }));
+      toast.info('Purchase session expired. Please try again.');
+    }, 30000);
+    
+    return () => clearTimeout(stuckTimeout);
+  }, [state.purchaseStatus]);
 
   /**
    * Trigger a purchase
