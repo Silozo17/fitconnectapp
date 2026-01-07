@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { useTranslation } from "react-i18next";
 import AdminLayout from "@/components/admin/AdminLayout";
@@ -17,6 +17,7 @@ import { IntegrationHealthWidget } from "@/components/admin/widgets/IntegrationH
 import { IntegrationStatWidget } from "@/components/admin/widgets/IntegrationStatWidget";
 import { DashboardCustomizer } from "@/components/admin/DashboardCustomizer";
 import { DraggableWidgetGrid, WidgetItem } from "@/components/dashboard/DraggableWidgetGrid";
+import { StatsGrid } from "@/components/shared";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import type { WidgetDisplayFormat } from "@/lib/widget-formats";
@@ -164,6 +165,20 @@ const AdminDashboard = () => {
     config: w.config,
   }));
 
+  // Categorize widgets for grouped rendering
+  const { statWidgets, revenueWidgets, otherWidgets } = useMemo(() => {
+    const statTypes = ["stats_users", "stats_coaches", "stats_sessions", "stats_revenue", "stats_messages", "stats_reviews"];
+    const revenueTypes = ["revenue_mrr", "revenue_commissions", "revenue_active_subs", "revenue_tier_distribution"];
+    
+    const sorted = [...widgetItems].sort((a, b) => a.position - b.position);
+    
+    return {
+      statWidgets: sorted.filter(w => statTypes.includes(w.widget_type)),
+      revenueWidgets: sorted.filter(w => revenueTypes.includes(w.widget_type)),
+      otherWidgets: sorted.filter(w => !statTypes.includes(w.widget_type) && !revenueTypes.includes(w.widget_type)),
+    };
+  }, [widgetItems]);
+
   return (
     <>
       <Helmet>
@@ -227,14 +242,52 @@ const AdminDashboard = () => {
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : widgetItems.length > 0 ? (
-            <DraggableWidgetGrid
-              widgets={widgetItems.sort((a, b) => a.position - b.position)}
-              editMode={editMode}
-              onReorder={handleReorder}
-              onResize={handleResize}
-              renderWidget={renderWidget}
-              getSizeClasses={getSizeClasses}
-            />
+            editMode ? (
+              <DraggableWidgetGrid
+                widgets={widgetItems.sort((a, b) => a.position - b.position)}
+                editMode={editMode}
+                onReorder={handleReorder}
+                onResize={handleResize}
+                renderWidget={renderWidget}
+                getSizeClasses={getSizeClasses}
+              />
+            ) : (
+              <div className="space-y-6">
+                {/* Stat Widgets - 2 column grid */}
+                {statWidgets.length > 0 && (
+                  <StatsGrid columns={2}>
+                    {statWidgets.map(widget => (
+                      <div key={widget.id}>{renderWidget(widget)}</div>
+                    ))}
+                  </StatsGrid>
+                )}
+
+                {/* Quick Actions - full width */}
+                {otherWidgets.find(w => w.widget_type === "quick_actions") && (
+                  <QuickActionsWidget />
+                )}
+
+                {/* Revenue Widgets - 2 column grid */}
+                {revenueWidgets.length > 0 && (
+                  <StatsGrid columns={2}>
+                    {revenueWidgets.map(widget => (
+                      <div key={widget.id}>{renderWidget(widget)}</div>
+                    ))}
+                  </StatsGrid>
+                )}
+
+                {/* Other Widgets */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {otherWidgets
+                    .filter(w => w.widget_type !== "quick_actions")
+                    .map(widget => (
+                      <div key={widget.id} className={getSizeClasses(widget.size)}>
+                        {renderWidget(widget)}
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )
           ) : (
             <div className="text-center py-12 text-muted-foreground">
               <p>{t('admin.overview.noWidgets')}</p>

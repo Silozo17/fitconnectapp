@@ -537,9 +537,6 @@ const AdminVerification = () => {
                         </Avatar>
                         <div>
                           <p className="font-medium">{coach.display_name || "Unnamed Coach"}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {coach.coach_types?.join(", ") || "No types specified"}
-                          </p>
                           <p className="text-xs text-muted-foreground">
                             Submitted {format(new Date(coach.created_at), "MMM d, yyyy")}
                           </p>
