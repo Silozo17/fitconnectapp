@@ -10,6 +10,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNativeIAP } from "@/hooks/useNativeIAP";
 import { useNativePricing } from "@/hooks/useNativePricing";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
+import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { IAPUnsuccessfulDialog } from "@/components/iap/IAPUnsuccessfulDialog";
 import { FeaturesActivatedModal } from "@/components/subscription/FeaturesActivatedModal";
 import { openExternalUrl, shouldOpenExternally } from "@/lib/external-links";
@@ -80,6 +81,10 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
   const nativePricing = useNativePricing();
   const queryClient = useQueryClient();
   
+  // Fallback: Get coachId from hook if not provided as prop
+  const { data: profileCoachId, isLoading: isCoachIdLoading } = useCoachProfileId();
+  const effectiveCoachId = coachId || profileCoachId;
+  
   // Get dynamic benefits for selected tier
   const benefits = TIER_BENEFITS[selectedTier] || TIER_BENEFITS.pro;
   
@@ -113,15 +118,17 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
   
   const handlePurchase = async () => {
     console.log('[UpgradeDrawer] handlePurchase called', { 
-      coachId, 
+      coachId,
+      effectiveCoachId,
       isNativeMobile, 
       iapAvailable: iapState.isAvailable,
       selectedTier,
-      billingInterval
+      billingInterval,
+      windowIapSuccess: typeof (window as any).iapSuccess,
     });
     
-    if (!coachId) {
-      console.error('[UpgradeDrawer] No coachId provided');
+    if (!effectiveCoachId) {
+      console.error('[UpgradeDrawer] No coachId available (prop or hook)');
       toast.error('Unable to process purchase. Please try again.');
       return;
     }
@@ -152,7 +159,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
           body: {
             tier: selectedTier,
             interval: billingInterval,
-            coachId,
+            coachId: effectiveCoachId,
           },
         });
         
@@ -343,7 +350,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
             {/* Primary CTA */}
             <Button
               onClick={handlePurchase}
-              disabled={isSubmitting || isProcessingIAP}
+              disabled={isSubmitting || isProcessingIAP || (isNativeMobile && isCoachIdLoading && !effectiveCoachId)}
               className="mb-1.5 h-11 w-full rounded-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
             >
               {(isSubmitting || isProcessingIAP) ? (

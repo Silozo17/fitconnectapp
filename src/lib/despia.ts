@@ -342,145 +342,148 @@ export interface IAPCallbacks {
 }
 
 // ============================================================================
-// PHASE 1 FIX: Multi-listener IAP event bus
-// Store multiple callbacks with unique IDs to prevent collision between
-// subscription and boost IAP flows
+// IAP CALLBACK SYSTEM - SIMPLIFIED
+// Single listener pattern matching Despia documentation
 // ============================================================================
 
-// Map of listener ID -> callbacks
-const iapCallbackRegistry = new Map<string, IAPCallbacks>();
+// Current active callbacks - only one purchase flow at a time
+let currentIAPCallbacks: IAPCallbacks | null = null;
 let iapCallbacksInitialized = false;
 
 /**
- * Initialize global IAP callbacks that dispatch to all registered listeners
- * Only runs once when first listener registers
- * PHASE 4 FIX: Handles async callbacks safely with Promise.resolve().catch()
+ * Set the current IAP callbacks
+ * Call this BEFORE triggering a purchase
+ */
+export const setIAPCallbacks = (callbacks: IAPCallbacks | null): void => {
+  currentIAPCallbacks = callbacks;
+  console.log('[Despia IAP] Callbacks set:', callbacks ? 'active' : 'cleared');
+};
+
+/**
+ * Initialize global IAP callbacks that Despia will call
+ * These are simple window functions that dispatch to currentIAPCallbacks
  */
 const initializeGlobalIAPCallbacks = (): void => {
   if (iapCallbacksInitialized || typeof window === 'undefined') return;
   
   iapCallbacksInitialized = true;
   
-  // Global success handler - dispatches to ALL registered listeners
-  // Handles both sync and async callbacks safely
+  // iapSuccess - called by Despia when purchase succeeds
   (window as any).iapSuccess = (rawData: IAPSuccessData | string) => {
-    if (!isDespia()) return;
+    console.log('[Despia IAP] window.iapSuccess called with:', rawData);
     
-    // PHASE 4 FIX: Normalize payload - Despia may send JSON string in some cases
+    if (!isDespia()) {
+      console.warn('[Despia IAP] iapSuccess called outside Despia environment');
+      return;
+    }
+    
+    // Parse JSON string if needed
     let data: IAPSuccessData;
     if (typeof rawData === 'string') {
       try {
         data = JSON.parse(rawData);
-        console.log('[Despia IAP] Parsed JSON string payload');
       } catch {
-        console.error('[Despia IAP] Failed to parse string payload:', rawData);
-        // Trigger error handlers instead
-        iapCallbackRegistry.forEach((callbacks, id) => {
-          Promise.resolve(callbacks.onError?.('Invalid IAP response format')).catch(e => 
-            console.error(`[Despia IAP] Error in error handler for ${id}:`, e)
-          );
-        });
+        console.error('[Despia IAP] Failed to parse iapSuccess payload:', rawData);
+        currentIAPCallbacks?.onError?.('Invalid IAP response format');
         return;
       }
     } else {
       data = rawData;
     }
     
-    const listenerCount = iapCallbackRegistry.size;
-    console.log(`[Despia IAP] Purchase success - dispatching to ${listenerCount} listeners:`, data);
+    console.log('[Despia IAP] Purchase successful:', data);
     
-    iapCallbackRegistry.forEach((callbacks, id) => {
-      console.log(`[Despia IAP] Dispatching success to listener: ${id}`);
-      // PHASE 4 FIX: Use Promise.resolve to safely handle async callbacks
-      Promise.resolve(callbacks.onSuccess(data)).catch(e => {
-        console.error(`[Despia IAP] Error in success handler for ${id}:`, e);
-        // Optionally route to error UI
-        callbacks.onError?.(`Activation failed: ${e instanceof Error ? e.message : 'Unknown error'}`);
-      });
-    });
+    if (currentIAPCallbacks?.onSuccess) {
+      try {
+        currentIAPCallbacks.onSuccess(data);
+      } catch (e) {
+        console.error('[Despia IAP] Error in success handler:', e);
+      }
+    } else {
+      console.warn('[Despia IAP] No success callback registered');
+    }
   };
   
-  // Global cancel handler - dispatches to ALL registered listeners
+  // iapCancel - called by Despia when user cancels
   (window as any).iapCancel = () => {
+    console.log('[Despia IAP] window.iapCancel called');
+    
     if (!isDespia()) return;
     
-    console.log(`[Despia IAP] Purchase cancelled - dispatching to ${iapCallbackRegistry.size} listeners`);
-    
-    iapCallbackRegistry.forEach((callbacks, id) => {
-      console.log(`[Despia IAP] Dispatching cancel to listener: ${id}`);
+    if (currentIAPCallbacks?.onCancel) {
       try {
-        callbacks.onCancel?.();
+        currentIAPCallbacks.onCancel();
       } catch (e) {
-        console.error(`[Despia IAP] Error in cancel handler for ${id}:`, e);
+        console.error('[Despia IAP] Error in cancel handler:', e);
       }
-    });
+    }
   };
   
-  // Global error handler - dispatches to ALL registered listeners
+  // iapError - called by Despia when purchase fails
   (window as any).iapError = (error: string) => {
+    console.log('[Despia IAP] window.iapError called:', error);
+    
     if (!isDespia()) return;
     
-    console.error(`[Despia IAP] Purchase error - dispatching to ${iapCallbackRegistry.size} listeners:`, error);
-    
-    iapCallbackRegistry.forEach((callbacks, id) => {
-      console.log(`[Despia IAP] Dispatching error to listener: ${id}`);
+    if (currentIAPCallbacks?.onError) {
       try {
-        callbacks.onError?.(error);
+        currentIAPCallbacks.onError(error);
       } catch (e) {
-        console.error(`[Despia IAP] Error in error handler for ${id}:`, e);
+        console.error('[Despia IAP] Error in error handler:', e);
       }
-    });
+    }
   };
 
-  // Global pending handler - dispatches to ALL registered listeners
+  // iapPending - called by Despia for Ask to Buy
   (window as any).iapPending = () => {
+    console.log('[Despia IAP] window.iapPending called');
+    
     if (!isDespia()) return;
     
-    console.log(`[Despia IAP] Purchase pending - dispatching to ${iapCallbackRegistry.size} listeners`);
-    
-    iapCallbackRegistry.forEach((callbacks, id) => {
-      console.log(`[Despia IAP] Dispatching pending to listener: ${id}`);
+    if (currentIAPCallbacks?.onPending) {
       try {
-        callbacks.onPending?.();
+        currentIAPCallbacks.onPending();
       } catch (e) {
-        console.error(`[Despia IAP] Error in pending handler for ${id}:`, e);
+        console.error('[Despia IAP] Error in pending handler:', e);
       }
-    });
+    }
   };
   
-  console.log('[Despia IAP] Global callback handlers initialized');
+  console.log('[Despia IAP] Global callbacks initialized');
 };
 
+// Legacy multi-listener registry (kept for boost functionality)
+const iapCallbackRegistry = new Map<string, IAPCallbacks>();
+
 /**
- * Register callbacks for IAP events with a unique listener ID
- * Multiple listeners can coexist - all receive callbacks
- * 
- * @param id Unique identifier for this listener (e.g., 'subscription', 'boost')
- * @param callbacks The callback handlers
+ * Register callbacks with unique ID (legacy multi-listener API)
+ * @deprecated Use setIAPCallbacks for subscription purchases
  */
 export const registerIAPCallbacksWithId = (id: string, callbacks: IAPCallbacks): void => {
   initializeGlobalIAPCallbacks();
-  
   iapCallbackRegistry.set(id, callbacks);
-  console.log(`[Despia IAP] Registered listener: ${id} (total: ${iapCallbackRegistry.size})`);
+  // Also set as current callbacks for immediate use
+  currentIAPCallbacks = callbacks;
+  console.log(`[Despia IAP] Registered listener: ${id}`);
 };
 
 /**
- * Unregister callbacks for a specific listener ID
- * 
- * @param id The listener ID to unregister
+ * Unregister callbacks by ID (legacy multi-listener API)
  */
 export const unregisterIAPCallbacksWithId = (id: string): void => {
   const removed = iapCallbackRegistry.delete(id);
   if (removed) {
-    console.log(`[Despia IAP] Unregistered listener: ${id} (remaining: ${iapCallbackRegistry.size})`);
+    console.log(`[Despia IAP] Unregistered listener: ${id}`);
+  }
+  // Clear current if it was this listener
+  if (iapCallbackRegistry.size === 0) {
+    currentIAPCallbacks = null;
   }
 };
 
 /**
- * Register global callbacks for IAP events (legacy single-listener API)
- * @deprecated Use registerIAPCallbacksWithId for multi-listener support
- * Kept for backward compatibility - uses 'default' as listener ID
+ * Register global callbacks (legacy single-listener API)
+ * @deprecated Use setIAPCallbacks
  */
 export const registerIAPCallbacks = (callbacks: IAPCallbacks): void => {
   registerIAPCallbacksWithId('default', callbacks);
@@ -488,11 +491,12 @@ export const registerIAPCallbacks = (callbacks: IAPCallbacks): void => {
 
 /**
  * Cleanup IAP callbacks (legacy single-listener API)
- * @deprecated Use unregisterIAPCallbacksWithId for multi-listener support
+ * @deprecated Use setIAPCallbacks(null)
  */
 export const unregisterIAPCallbacks = (): void => {
   unregisterIAPCallbacksWithId('default');
 };
+
 
 /**
  * Android replacement mode for subscription upgrades/downgrades
@@ -529,6 +533,9 @@ export const triggerRevenueCatPurchase = (
     return false;
   }
   
+  // Ensure callbacks are initialized
+  initializeGlobalIAPCallbacks();
+  
   try {
     let command = `revenuecat://purchase?external_id=${encodeURIComponent(userId)}&product=${encodeURIComponent(productId)}`;
     
@@ -544,8 +551,9 @@ export const triggerRevenueCatPurchase = (
     }
     
     console.log('[Despia IAP] Triggering purchase:', command);
-    console.log(`[Despia IAP] Active listeners: ${Array.from(iapCallbackRegistry.keys()).join(', ')}`);
-    console.log('[Despia IAP] window.iapSuccess defined:', typeof (window as any).iapSuccess);
+    console.log('[Despia IAP] Callbacks registered:', currentIAPCallbacks ? 'yes' : 'no');
+    console.log('[Despia IAP] window.iapSuccess:', typeof (window as any).iapSuccess);
+    
     despia(command);
     return true;
   } catch (e) {
