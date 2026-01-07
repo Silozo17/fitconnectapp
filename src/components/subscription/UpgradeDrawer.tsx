@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { Check, ChevronDown, Loader2, Dumbbell, Users, Brain, TrendingUp, Infinity, Headphones, Cog, MessageSquare, Sparkles, Crown, Rocket } from "lucide-react";
+import { toast } from "sonner";
 import { Link } from "react-router-dom";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
@@ -111,16 +112,37 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
   }, [reconcileSubscription]);
   
   const handlePurchase = async () => {
-    if (!coachId) return;
+    console.log('[UpgradeDrawer] handlePurchase called', { 
+      coachId, 
+      isNativeMobile, 
+      iapAvailable: iapState.isAvailable,
+      selectedTier,
+      billingInterval
+    });
+    
+    if (!coachId) {
+      console.error('[UpgradeDrawer] No coachId provided');
+      toast.error('Unable to process purchase. Please try again.');
+      return;
+    }
     
     setIsSubmitting(true);
     
-    if (isNativeMobile && iapState.isAvailable) {
+    if (isNativeMobile) {
       // Native IAP flow
+      if (!iapState.isAvailable) {
+        console.error('[UpgradeDrawer] IAP not available on native device');
+        toast.error('In-app purchases are not available. Please reinstall the app.');
+        setIsSubmitting(false);
+        return;
+      }
+      
       try {
+        console.log('[UpgradeDrawer] Triggering iapPurchase', { selectedTier, billingInterval });
         await iapPurchase(selectedTier, billingInterval);
       } catch (error) {
         console.error('[UpgradeDrawer] IAP purchase failed:', error);
+        toast.error('Purchase failed. Please try again.');
         setIsSubmitting(false);
       }
     } else {
@@ -140,6 +162,7 @@ export const UpgradeDrawer = ({ open, onOpenChange, coachId }: UpgradeDrawerProp
         }
       } catch (error) {
         console.error('[UpgradeDrawer] Checkout creation failed:', error);
+        toast.error('Failed to start checkout. Please try again.');
       } finally {
         setIsSubmitting(false);
       }

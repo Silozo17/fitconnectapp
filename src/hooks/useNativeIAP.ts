@@ -98,14 +98,15 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
   const isFounder = isFounderFromDB || isFounderFromCache;
   
   const queryClient = useQueryClient();
-  const [state, setState] = useState<NativeIAPState>({
-    isAvailable: false,
+  // Initialize isAvailable synchronously to prevent race conditions
+  const [state, setState] = useState<NativeIAPState>(() => ({
+    isAvailable: isNativeIAPAvailable(),
     purchaseStatus: 'idle',
     isPolling: false,
     purchasedProductId: null,
     error: null,
     showUnsuccessfulModal: false,
-  });
+  }));
   
   const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const pollAttemptsRef = useRef(0);
@@ -118,11 +119,6 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       clearTimeout(purchaseTimeoutRef.current);
       purchaseTimeoutRef.current = null;
     }
-  }, []);
-
-  // Check availability on mount
-  useEffect(() => {
-    setState(prev => ({ ...prev, isAvailable: isNativeIAPAvailable() }));
   }, []);
 
   // Cleanup polling and timeout on unmount
