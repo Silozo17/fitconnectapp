@@ -144,61 +144,65 @@ export default function AdminChallenges() {
     const status = getChallengeStatus(challenge);
     
     return (
-      <div className="flex items-center justify-between p-4 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-        <div className="flex items-center gap-4">
-          <div className="p-2 rounded-lg bg-primary/10">
+      <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 gap-3 border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+        <div className="flex items-start gap-3 min-w-0 flex-1 pr-10 sm:pr-0">
+          <div className="p-2 rounded-lg bg-primary/10 shrink-0">
             <Trophy className="h-5 w-5 text-primary" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h3 className="font-medium">{challenge.title}</h3>
-              <Badge variant={status.variant}>{status.label}</Badge>
-              <Badge variant="outline" className="capitalize">{challenge.target_audience}</Badge>
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h3 className="font-medium truncate max-w-[180px] sm:max-w-none">{challenge.title}</h3>
+              <Badge variant={status.variant} className="text-xs">{status.label}</Badge>
+              <Badge variant="outline" className="capitalize text-xs hidden sm:inline-flex">{challenge.target_audience}</Badge>
               {(challenge.avatar_reward || challenge.badge_reward) && (
-                <Badge variant="outline" className="bg-primary/10 border-primary/30 text-primary gap-1">
+                <Badge variant="outline" className="bg-primary/10 border-primary/30 text-primary gap-1 text-xs">
                   <Gift className="h-3 w-3" />
-                  {challenge.reward_type === 'avatar' ? 'Avatar' : 'Badge'}
+                  <span className="hidden sm:inline">{challenge.reward_type === 'avatar' ? 'Avatar' : 'Badge'}</span>
                 </Badge>
               )}
             </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+            <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
               <span className="flex items-center gap-1">
-                <Target className="h-3 w-3" />
-                {challenge.target_value} {challenge.target_unit}
+                <Target className="h-3 w-3 shrink-0" />
+                <span className="truncate">{challenge.target_value} {challenge.target_unit}</span>
               </span>
               <span className="flex items-center gap-1">
-                <Calendar className="h-3 w-3" />
-                {format(new Date(challenge.start_date), 'MMM d')} - {format(new Date(challenge.end_date), 'MMM d, yyyy')}
+                <Calendar className="h-3 w-3 shrink-0" />
+                <span className="truncate">
+                  {format(new Date(challenge.start_date), 'MMM d')} - {format(new Date(challenge.end_date), 'MMM d')}
+                </span>
               </span>
               <span className="flex items-center gap-1">
-                <Users className="h-3 w-3" />
-                {challenge.participant_count} participants
+                <Users className="h-3 w-3 shrink-0" />
+                {challenge.participant_count} <span className="hidden sm:inline">participants</span>
               </span>
               <span className="text-primary font-medium">{challenge.xp_reward} XP</span>
             </div>
           </div>
         </div>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => setEditChallenge(challenge)}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </DropdownMenuItem>
-            <DropdownMenuItem 
-              className="text-destructive"
-              onClick={() => setDeleteId(challenge.id)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="absolute top-3 right-3 sm:relative sm:top-0 sm:right-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setEditChallenge(challenge)}>
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="text-destructive"
+                onClick={() => setDeleteId(challenge.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
     );
   };
