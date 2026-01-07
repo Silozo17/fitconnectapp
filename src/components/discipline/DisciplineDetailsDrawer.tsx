@@ -3,25 +3,21 @@
  */
 
 import { useState } from "react";
-import { Plus, Trophy, History, X, Swords, Users, PersonStanding, Waves, Bike, Medal, Dumbbell, Flame, Mountain } from "lucide-react";
+import { Plus, History, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useDisciplineWidgetData } from "@/hooks/useDisciplineWidgetData";
 import { DisciplineMetricCard } from "./DisciplineMetricCard";
 import { DisciplineLogModal } from "./DisciplineLogModal";
 import { getDisciplineDetailConfig } from "@/config/disciplines/detailConfigs";
+import { getDisciplineIcon, getMilestoneIcon } from "@/config/disciplines/icons";
 
 interface DisciplineDetailsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   disciplineId: string;
 }
-
-const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  Swords, Users, PersonStanding, Waves, Bike, Medal, Dumbbell, Flame, Mountain,
-};
 
 export function DisciplineDetailsDrawer({
   open,
@@ -36,7 +32,8 @@ export function DisciplineDetailsDrawer({
   if (!data) return null;
 
   const { config, metrics, milestone, highlight } = data;
-  const IconComponent = iconMap[config.icon] || Dumbbell;
+  const IconComponent = getDisciplineIcon(disciplineId);
+  const MilestoneIcon = getMilestoneIcon(milestone.type);
 
   // Generate placeholder weekly data for demo
   const generateWeeklyData = () => 
@@ -72,7 +69,7 @@ export function DisciplineDetailsDrawer({
             <p className="text-sm text-muted-foreground mt-2">{highlight}</p>
           </DrawerHeader>
 
-          <ScrollArea className="flex-1 px-5 py-4">
+          <div className="flex-1 overflow-y-auto scrollbar-hide px-5 py-4">
             {/* Metrics Grid - Styled Cards */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               {metrics.map((metric) => (
@@ -88,7 +85,7 @@ export function DisciplineDetailsDrawer({
             {/* Milestone Section */}
             <div className="mb-6">
               <div className="flex items-center gap-2 mb-3">
-                <Trophy className={cn("w-4 h-4", config.theme.accent)} />
+                <MilestoneIcon className={cn("w-4 h-4", config.theme.accent)} />
                 <h4 className="font-semibold">Milestone</h4>
               </div>
               <div className={cn(
@@ -131,7 +128,7 @@ export function DisciplineDetailsDrawer({
                 </div>
               </div>
             )}
-          </ScrollArea>
+          </div>
         </DrawerContent>
       </Drawer>
 
