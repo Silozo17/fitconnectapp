@@ -12,6 +12,7 @@ import { DisciplineMetricCard } from "./DisciplineMetricCard";
 import { DisciplineLogModal } from "./DisciplineLogModal";
 import { getDisciplineDetailConfig } from "@/config/disciplines/detailConfigs";
 import { getDisciplineIcon, getMilestoneIcon } from "@/config/disciplines/icons";
+import { formatMilestoneDisplay } from "@/utils/formatMilestoneDisplay";
 
 interface DisciplineDetailsDrawerProps {
   open: boolean;
@@ -45,7 +46,7 @@ export function DisciplineDetailsDrawer({
   return (
     <>
       <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh]">
+        <DrawerContent className="max-h-[90vh] flex flex-col">
           <DrawerHeader className="border-b border-border/30 pb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -94,7 +95,7 @@ export function DisciplineDetailsDrawer({
                 "border-border/30"
               )}>
                 <p className="text-sm text-muted-foreground mb-1">{milestone.label}</p>
-                <p className="text-lg font-semibold">{milestone.value || "Not set yet"}</p>
+                <p className="text-lg font-semibold">{formatMilestoneDisplay(milestone.value, milestone.type)}</p>
                 {milestone.achievedAt && (
                   <p className="text-xs text-muted-foreground mt-1">
                     Achieved: {new Date(milestone.achievedAt).toLocaleDateString()}
