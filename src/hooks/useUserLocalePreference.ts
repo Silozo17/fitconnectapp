@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuthSafe } from "@/contexts/AuthContext";
 import { 
   RouteLanguageCode, 
   RouteLocationCode, 
@@ -40,7 +40,9 @@ interface UseUserLocalePreferenceResult {
  * - Falls back to localStorage only
  */
 export function useUserLocalePreference(): UseUserLocalePreferenceResult {
-  const { user } = useAuth();
+  // Use safe auth hook to prevent crashes when AuthProvider is not yet ready
+  const auth = useAuthSafe();
+  const user = auth?.user ?? null;
   const queryClient = useQueryClient();
 
   // Fetch from DB for authenticated users
