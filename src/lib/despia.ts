@@ -545,6 +545,7 @@ export const triggerRevenueCatPurchase = (
     
     console.log('[Despia IAP] Triggering purchase:', command);
     console.log(`[Despia IAP] Active listeners: ${Array.from(iapCallbackRegistry.keys()).join(', ')}`);
+    console.log('[Despia IAP] window.iapSuccess defined:', typeof (window as any).iapSuccess);
     despia(command);
     return true;
   } catch (e) {
@@ -682,5 +683,16 @@ export const getCurrentScanningMode = (): ScanningMode => {
 export const isScanningModeActive = (): boolean => {
   return currentScanningMode === 'on' || currentScanningMode === 'auto';
 };
+
+// ============================================================================
+// MODULE INITIALIZATION
+// ============================================================================
+
+// Initialize global IAP callbacks immediately on module load
+// This ensures callbacks are always ready before any purchase attempt
+if (typeof window !== 'undefined') {
+  initializeGlobalIAPCallbacks();
+  console.log('[Despia] Module initialized - IAP callbacks ready');
+}
 
 export default despia;
