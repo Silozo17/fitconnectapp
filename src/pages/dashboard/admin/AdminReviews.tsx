@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { useAllReviews, useDeleteReview, useReviewDisputes, useUpdateReviewDispute } from "@/hooks/useAdminData";
 import { MessageSquare, Star, AlertTriangle, CheckCircle, XCircle, Search, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
+import { DashboardSectionHeader, MetricCard, ContentSection, StatsGrid } from "@/components/shared";
 
 const AdminReviews = () => {
   const { data: reviews, isLoading: reviewsLoading } = useAllReviews();
@@ -36,6 +36,10 @@ const AdminReviews = () => {
   const pendingDisputes = disputes?.filter((d: any) => d.status === "pending");
   const resolvedDisputes = disputes?.filter((d: any) => d.status !== "pending");
 
+  const averageRating = reviews?.length 
+    ? (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1) 
+    : "0";
+
   const handleResolveDispute = async (status: "approved" | "rejected") => {
     if (!selectedDispute) return;
     
@@ -45,7 +49,6 @@ const AdminReviews = () => {
       adminNotes,
     });
 
-    // If approved, delete the review
     if (status === "approved" && selectedDispute.review_id) {
       await deleteReview.mutateAsync(selectedDispute.review_id);
     }
@@ -85,53 +88,42 @@ const AdminReviews = () => {
 
       <AdminLayout>
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Reviews & Disputes</h1>
-            <p className="text-muted-foreground mt-1">Manage platform reviews and handle disputes</p>
-          </div>
+          <DashboardSectionHeader
+            title="Reviews & Disputes"
+            description="Manage platform reviews and handle disputes"
+          />
 
           {/* Stats */}
-          <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Total Reviews</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold">{reviews?.length || 0}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Average Rating</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2">
-                  <p className="text-2xl font-bold">
-                    {reviews?.length 
-                      ? (reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length).toFixed(1) 
-                      : "0"}
-                  </p>
-                  <Star className="h-5 w-5 text-yellow-500 fill-yellow-500" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Pending Disputes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold text-orange-500">{pendingDisputes?.length || 0}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Resolved Disputes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-2xl font-bold text-green-500">{resolvedDisputes?.length || 0}</p>
-              </CardContent>
-            </Card>
-          </div>
+          <StatsGrid columns={4}>
+            <MetricCard
+              icon={MessageSquare}
+              label="Total Reviews"
+              value={reviews?.length || 0}
+              color="blue"
+              size="sm"
+            />
+            <MetricCard
+              icon={Star}
+              label="Average Rating"
+              value={averageRating}
+              color="yellow"
+              size="sm"
+            />
+            <MetricCard
+              icon={AlertTriangle}
+              label="Pending Disputes"
+              value={pendingDisputes?.length || 0}
+              color="orange"
+              size="sm"
+            />
+            <MetricCard
+              icon={CheckCircle}
+              label="Resolved Disputes"
+              value={resolvedDisputes?.length || 0}
+              color="green"
+              size="sm"
+            />
+          </StatsGrid>
 
           <Tabs defaultValue="reviews" className="space-y-4">
             <TabsList>
@@ -147,12 +139,12 @@ const AdminReviews = () => {
             </TabsList>
 
             <TabsContent value="reviews" className="space-y-4">
-              <Card>
-                <CardHeader>
+              <ContentSection colorTheme="blue" withAccent padding="none">
+                <div className="p-4 border-b border-border">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
-                      <CardTitle>All Reviews</CardTitle>
-                      <CardDescription>View and moderate platform reviews</CardDescription>
+                      <h3 className="font-semibold">All Reviews</h3>
+                      <p className="text-sm text-muted-foreground">View and moderate platform reviews</p>
                     </div>
                     <div className="relative w-full sm:w-64">
                       <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -164,58 +156,58 @@ const AdminReviews = () => {
                       />
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent>
+                </div>
+                <div className="p-4">
                   {filteredReviews && filteredReviews.length > 0 ? (
                     <div className="overflow-x-auto -mx-4 sm:mx-0">
-                    <Table className="min-w-[700px]">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Client</TableHead>
-                          <TableHead>Coach</TableHead>
-                          <TableHead>Rating</TableHead>
-                          <TableHead className="w-[300px] hidden sm:table-cell">Review</TableHead>
-                          <TableHead className="hidden md:table-cell">Date</TableHead>
-                          <TableHead className="hidden sm:table-cell">Visibility</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredReviews.map((review: any) => (
-                          <TableRow key={review.id}>
-                            <TableCell>
-                              {review.client_profiles?.first_name} {review.client_profiles?.last_name}
-                            </TableCell>
-                            <TableCell>{review.coach_profiles?.display_name || "Unknown"}</TableCell>
-                            <TableCell>{renderStars(review.rating)}</TableCell>
-                            <TableCell className="max-w-[300px] truncate hidden sm:table-cell">
-                              {review.review_text || <span className="text-muted-foreground">No text</span>}
-                            </TableCell>
-                            <TableCell className="text-muted-foreground hidden md:table-cell">
-                              {format(new Date(review.created_at), "MMM d, yyyy")}
-                            </TableCell>
-                            <TableCell className="hidden sm:table-cell">
-                              <Badge variant={review.is_public ? "default" : "secondary"}>
-                                {review.is_public ? "Public" : "Private"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => {
-                                  if (confirm("Are you sure you want to delete this review?")) {
-                                    deleteReview.mutate(review.id);
-                                  }
-                                }}
-                              >
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            </TableCell>
+                      <Table className="min-w-[700px]">
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Client</TableHead>
+                            <TableHead>Coach</TableHead>
+                            <TableHead>Rating</TableHead>
+                            <TableHead className="w-[300px] hidden sm:table-cell">Review</TableHead>
+                            <TableHead className="hidden md:table-cell">Date</TableHead>
+                            <TableHead className="hidden sm:table-cell">Visibility</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                           </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                          {filteredReviews.map((review: any) => (
+                            <TableRow key={review.id}>
+                              <TableCell>
+                                {review.client_profiles?.first_name} {review.client_profiles?.last_name}
+                              </TableCell>
+                              <TableCell>{review.coach_profiles?.display_name || "Unknown"}</TableCell>
+                              <TableCell>{renderStars(review.rating)}</TableCell>
+                              <TableCell className="max-w-[300px] truncate hidden sm:table-cell">
+                                {review.review_text || <span className="text-muted-foreground">No text</span>}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground hidden md:table-cell">
+                                {format(new Date(review.created_at), "MMM d, yyyy")}
+                              </TableCell>
+                              <TableCell className="hidden sm:table-cell">
+                                <Badge variant={review.is_public ? "default" : "secondary"}>
+                                  {review.is_public ? "Public" : "Private"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => {
+                                    if (confirm("Are you sure you want to delete this review?")) {
+                                      deleteReview.mutate(review.id);
+                                    }
+                                  }}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
                     </div>
                   ) : (
                     <div className="text-center py-8 text-muted-foreground">
@@ -223,24 +215,24 @@ const AdminReviews = () => {
                       <p>No reviews found</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </ContentSection>
             </TabsContent>
 
             <TabsContent value="disputes" className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+              <ContentSection colorTheme="orange" withAccent padding="none">
+                <div className="p-4 border-b border-border">
+                  <div className="flex items-center gap-2">
                     <AlertTriangle className="h-5 w-5 text-orange-500" />
-                    Pending Disputes
-                  </CardTitle>
-                  <CardDescription>Review disputes that need your attention</CardDescription>
-                </CardHeader>
-                <CardContent>
+                    <h3 className="font-semibold">Pending Disputes</h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-1">Review disputes that need your attention</p>
+                </div>
+                <div className="p-4">
                   {pendingDisputes && pendingDisputes.length > 0 ? (
                     <div className="space-y-4">
                       {pendingDisputes.map((dispute: any) => (
-                        <div key={dispute.id} className="border rounded-lg p-4 space-y-3">
+                        <div key={dispute.id} className="border border-border rounded-lg p-4 space-y-3 bg-background/50">
                           <div className="flex items-start justify-between">
                             <div>
                               <p className="font-medium">{dispute.coach_profiles?.display_name} disputes a review</p>
@@ -291,16 +283,16 @@ const AdminReviews = () => {
                       <p className="text-sm">All disputes have been resolved</p>
                     </div>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+              </ContentSection>
 
               {resolvedDisputes && resolvedDisputes.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Resolved Disputes</CardTitle>
-                    <CardDescription>Previously handled disputes</CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                <ContentSection colorTheme="muted" padding="none">
+                  <div className="p-4 border-b border-border">
+                    <h3 className="font-semibold">Resolved Disputes</h3>
+                    <p className="text-sm text-muted-foreground">Previously handled disputes</p>
+                  </div>
+                  <div className="p-4">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -331,8 +323,8 @@ const AdminReviews = () => {
                         ))}
                       </TableBody>
                     </Table>
-                  </CardContent>
-                </Card>
+                  </div>
+                </ContentSection>
               )}
             </TabsContent>
           </Tabs>

@@ -3,7 +3,6 @@ import { Helmet } from "react-helmet-async";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { TrendingUp, CreditCard, Users, PoundSterling } from "lucide-react";
@@ -13,6 +12,7 @@ import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
 import { ComparisonStatCard } from "@/components/shared/ComparisonStatCard";
 import { useDateRangeAnalytics } from "@/hooks/useDateRangeAnalytics";
 import { format, eachDayOfInterval } from "date-fns";
+import { DashboardSectionHeader, ContentSection } from "@/components/shared";
 
 const COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(var(--secondary))", "hsl(var(--muted))"];
 
@@ -79,10 +79,9 @@ const AdminRevenue = () => {
         tierData
       };
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
-  // Memoize derived data to prevent unnecessary re-renders
   const stats = useMemo(() => data?.stats ?? { totalRevenue: 0, mrr: 0, commissionEarnings: 0, activeSubscriptions: 0 }, [data?.stats]);
   const comparison = useMemo(() => data?.comparison ?? null, [data?.comparison]);
   const transactions = useMemo(() => data?.transactions ?? [], [data?.transactions]);
@@ -95,10 +94,28 @@ const AdminRevenue = () => {
       <Helmet><title>Revenue | Admin</title></Helmet>
       <AdminLayout>
         <div className="space-y-6">
-          <div><h1 className="text-2xl font-bold">Revenue</h1><p className="text-muted-foreground">Track subscriptions and earnings</p></div>
-          <DateRangeFilter preset={dateRange.preset} startDate={dateRange.startDate} endDate={dateRange.endDate} compareMode={dateRange.compareMode} dateRangeLabel={dateRange.dateRangeLabel} comparisonLabel={dateRange.comparisonLabel} onPresetChange={dateRange.setPreset} onCustomRangeChange={dateRange.setCustomRange} onCompareModeChange={dateRange.setCompareMode} />
+          <DashboardSectionHeader
+            title="Revenue"
+            description="Track subscriptions and earnings"
+          />
 
-          {isLoading ? <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div> : (
+          <DateRangeFilter 
+            preset={dateRange.preset} 
+            startDate={dateRange.startDate} 
+            endDate={dateRange.endDate} 
+            compareMode={dateRange.compareMode} 
+            dateRangeLabel={dateRange.dateRangeLabel} 
+            comparisonLabel={dateRange.comparisonLabel} 
+            onPresetChange={dateRange.setPreset} 
+            onCustomRangeChange={dateRange.setCustomRange} 
+            onCompareModeChange={dateRange.setCompareMode} 
+          />
+
+          {isLoading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+            </div>
+          ) : (
             <>
               <div className="grid gap-4 grid-cols-2 xl:grid-cols-4">
                 <ComparisonStatCard title="Total Revenue" value={stats.totalRevenue} previousValue={comparison?.totalRevenue} icon={PoundSterling} format="currency" showComparison={showComp} />
@@ -108,11 +125,85 @@ const AdminRevenue = () => {
               </div>
 
               <div className="grid gap-6 grid-cols-1 xl:grid-cols-3">
-                <Card className="md:col-span-2"><CardHeader><CardTitle>Revenue Over Time</CardTitle></CardHeader><CardContent><div className="h-[300px]"><ResponsiveContainer width="100%" height="100%"><LineChart data={revenueData}><CartesianGrid strokeDasharray="3 3" className="stroke-muted" /><XAxis dataKey="date" className="text-xs" /><YAxis className="text-xs" /><Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} /><Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} /></LineChart></ResponsiveContainer></div></CardContent></Card>
-                <Card><CardHeader><CardTitle>Subscription Tiers</CardTitle></CardHeader><CardContent><div className="h-[300px]">{tierData.length > 0 ? <ResponsiveContainer width="100%" height="100%"><PieChart><Pie data={tierData} cx="50%" cy="50%" innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value" label={({ name, value }) => `${name}: ${value}`}>{tierData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}</Pie><Tooltip /></PieChart></ResponsiveContainer> : <div className="flex items-center justify-center h-full text-muted-foreground">No data</div>}</div></CardContent></Card>
+                <ContentSection colorTheme="green" withAccent className="md:col-span-2">
+                  <h3 className="font-semibold mb-4">Revenue Over Time</h3>
+                  <div className="h-[300px]">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={revenueData}>
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                        <XAxis dataKey="date" className="text-xs" />
+                        <YAxis className="text-xs" />
+                        <Tooltip 
+                          formatter={(v: number) => formatCurrency(v)} 
+                          contentStyle={{ backgroundColor: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "8px" }} 
+                        />
+                        <Line type="monotone" dataKey="revenue" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </div>
+                </ContentSection>
+
+                <ContentSection colorTheme="purple" withAccent>
+                  <h3 className="font-semibold mb-4">Subscription Tiers</h3>
+                  <div className="h-[300px]">
+                    {tierData.length > 0 ? (
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie 
+                            data={tierData} 
+                            cx="50%" 
+                            cy="50%" 
+                            innerRadius={60} 
+                            outerRadius={80} 
+                            paddingAngle={5} 
+                            dataKey="value" 
+                            label={({ name, value }) => `${name}: ${value}`}
+                          >
+                            {tierData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-muted-foreground">No data</div>
+                    )}
+                  </div>
+                </ContentSection>
               </div>
 
-              <Card><CardHeader><CardTitle>Recent Transactions</CardTitle></CardHeader><CardContent>{transactions.length === 0 ? <div className="text-center py-8 text-muted-foreground">No transactions</div> : <Table><TableHeader><TableRow><TableHead>Date</TableHead><TableHead>Type</TableHead><TableHead>Amount</TableHead><TableHead>Status</TableHead></TableRow></TableHeader><TableBody>{transactions.map(tx => <TableRow key={tx.id}><TableCell>{formatDisplayDate(tx.created_at)}</TableCell><TableCell className="capitalize">{tx.transaction_type}</TableCell><TableCell>{formatCurrency(tx.amount)}</TableCell><TableCell><Badge variant={tx.status === "completed" ? "default" : "secondary"}>{tx.status}</Badge></TableCell></TableRow>)}</TableBody></Table>}</CardContent></Card>
+              <ContentSection colorTheme="blue" withAccent padding="none">
+                <div className="p-4 border-b border-border">
+                  <h3 className="font-semibold">Recent Transactions</h3>
+                </div>
+                <div className="p-4">
+                  {transactions.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">No transactions</div>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Type</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Status</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {transactions.map(tx => (
+                          <TableRow key={tx.id}>
+                            <TableCell>{formatDisplayDate(tx.created_at)}</TableCell>
+                            <TableCell className="capitalize">{tx.transaction_type}</TableCell>
+                            <TableCell>{formatCurrency(tx.amount)}</TableCell>
+                            <TableCell>
+                              <Badge variant={tx.status === "completed" ? "default" : "secondary"}>{tx.status}</Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </div>
+              </ContentSection>
             </>
           )}
         </div>
