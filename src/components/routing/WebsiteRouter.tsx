@@ -8,6 +8,7 @@ import ScrollToTop from '@/components/shared/ScrollToTop';
 import { DashboardLocaleRedirect } from './DashboardLocaleRedirect';
 import { LocaleRouteWrapper } from './LocaleRouteWrapper';
 import IOSRestrictedRoute from './IOSRestrictedRoute';
+import { NativeAppGuard } from './NativeAppGuard';
 
 // Eagerly loaded pages (critical path)
 import Index from '@/pages/Index';
@@ -106,64 +107,66 @@ export function WebsiteRouter() {
   return (
     <LocaleRoutingProvider>
       <RouteRestorer />
-      <Suspense fallback={<PageLoadingSpinner />}>
-        <Routes>
-          {/* ====== NON-PREFIXED ROUTES FIRST ====== */}
-          {/* These must come BEFORE :locale to prevent "coaches" matching as a locale param */}
-          <Route path="/" element={<Index />} />
-          {/* Get-started redirects authenticated users to dashboard */}
-          <Route path="get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
-          {/* iOS-restricted: Coach marketplace routes */}
-          <Route path="coaches" element={<IOSRestrictedRoute restrictionType="coaches"><Coaches /></IOSRestrictedRoute>} />
-          <Route path="coaches/:id" element={<IOSRestrictedRoute restrictionType="coaches"><CoachDetail /></IOSRestrictedRoute>} />
-          <Route path="coaches/personal-trainers" element={<IOSRestrictedRoute restrictionType="coaches"><PersonalTrainers /></IOSRestrictedRoute>} />
-          <Route path="coaches/nutritionists" element={<IOSRestrictedRoute restrictionType="coaches"><Nutritionists /></IOSRestrictedRoute>} />
-          <Route path="coaches/boxing" element={<IOSRestrictedRoute restrictionType="coaches"><Boxing /></IOSRestrictedRoute>} />
-          <Route path="coaches/mma" element={<IOSRestrictedRoute restrictionType="coaches"><MMA /></IOSRestrictedRoute>} />
-          <Route path="about" element={<About />} />
-          <Route path="faq" element={<FAQ />} />
-          {/* iOS-restricted: Pricing with web subscription links */}
-          <Route path="pricing" element={<IOSRestrictedRoute restrictionType="pricing"><Pricing /></IOSRestrictedRoute>} />
-          <Route path="for-coaches" element={<ForCoaches />} />
-          <Route path="how-it-works" element={<HowItWorks />} />
-          <Route path="privacy" element={<Privacy />} />
-          <Route path="terms" element={<Terms />} />
-          <Route path="eula" element={<Eula />} />
-          <Route path="success-stories" element={<SuccessStories />} />
-          <Route path="contact" element={<Contact />} />
-          <Route path="community" element={<Community />} />
-          <Route path="leaderboards" element={<Navigate to="/community" replace />} />
-          <Route path="avatars" element={<Navigate to="/community?tab=avatars" replace />} />
-          {/* iOS-restricted: Marketplace routes */}
-          <Route path="marketplace" element={<IOSRestrictedRoute restrictionType="marketplace"><Marketplace /></IOSRestrictedRoute>} />
-          <Route path="marketplace/:productId" element={<IOSRestrictedRoute restrictionType="marketplace"><MarketplaceProduct /></IOSRestrictedRoute>} />
-          <Route path="marketplace/bundles/:bundleId" element={<IOSRestrictedRoute restrictionType="marketplace"><MarketplaceBundle /></IOSRestrictedRoute>} />
-          {/* iOS-restricted: Checkout */}
-          <Route path="checkout" element={<IOSRestrictedRoute restrictionType="checkout"><Checkout /></IOSRestrictedRoute>} />
-          <Route path="blog" element={<Blog />} />
-          <Route path="blog/:slug" element={<BlogPost />} />
-          <Route path="install" element={<Install />} />
-          <Route path="trust-and-verification" element={<TrustAndVerification />} />
-          
-          {/* ====== LOCALE-PREFIXED PROTECTED ROUTES ====== */}
-          {/* Redirect locale-prefixed protected routes to plain routes */}
-          <Route path=":locale/dashboard/*" element={<DashboardLocaleRedirect />} />
-          <Route path=":locale/onboarding/*" element={<DashboardLocaleRedirect />} />
-          <Route path=":locale/docs/*" element={<DashboardLocaleRedirect />} />
-          <Route path=":locale/auth" element={<DashboardLocaleRedirect />} />
-          <Route path=":locale/subscribe/*" element={<DashboardLocaleRedirect />} />
-          
-          {/* ====== LOCALE-PREFIXED WEBSITE ROUTES (LAST) ====== */}
-          {/* This catches valid locale URLs like /gb-en/coaches */}
-          <Route path=":locale" element={<LocaleRouteWrapper />}>
-            <Route index element={<PageRoutesOutlet />} />
-            <Route path="*" element={<PageRoutesOutlet />} />
-          </Route>
-          
-          {/* ====== 404 FALLBACK ====== */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Suspense>
+      <NativeAppGuard>
+        <Suspense fallback={<PageLoadingSpinner />}>
+          <Routes>
+            {/* ====== NON-PREFIXED ROUTES FIRST ====== */}
+            {/* These must come BEFORE :locale to prevent "coaches" matching as a locale param */}
+            <Route path="/" element={<Index />} />
+            {/* Get-started redirects authenticated users to dashboard */}
+            <Route path="get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
+            {/* iOS-restricted: Coach marketplace routes */}
+            <Route path="coaches" element={<IOSRestrictedRoute restrictionType="coaches"><Coaches /></IOSRestrictedRoute>} />
+            <Route path="coaches/:id" element={<IOSRestrictedRoute restrictionType="coaches"><CoachDetail /></IOSRestrictedRoute>} />
+            <Route path="coaches/personal-trainers" element={<IOSRestrictedRoute restrictionType="coaches"><PersonalTrainers /></IOSRestrictedRoute>} />
+            <Route path="coaches/nutritionists" element={<IOSRestrictedRoute restrictionType="coaches"><Nutritionists /></IOSRestrictedRoute>} />
+            <Route path="coaches/boxing" element={<IOSRestrictedRoute restrictionType="coaches"><Boxing /></IOSRestrictedRoute>} />
+            <Route path="coaches/mma" element={<IOSRestrictedRoute restrictionType="coaches"><MMA /></IOSRestrictedRoute>} />
+            <Route path="about" element={<About />} />
+            <Route path="faq" element={<FAQ />} />
+            {/* iOS-restricted: Pricing with web subscription links */}
+            <Route path="pricing" element={<IOSRestrictedRoute restrictionType="pricing"><Pricing /></IOSRestrictedRoute>} />
+            <Route path="for-coaches" element={<ForCoaches />} />
+            <Route path="how-it-works" element={<HowItWorks />} />
+            <Route path="privacy" element={<Privacy />} />
+            <Route path="terms" element={<Terms />} />
+            <Route path="eula" element={<Eula />} />
+            <Route path="success-stories" element={<SuccessStories />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="community" element={<Community />} />
+            <Route path="leaderboards" element={<Navigate to="/community" replace />} />
+            <Route path="avatars" element={<Navigate to="/community?tab=avatars" replace />} />
+            {/* iOS-restricted: Marketplace routes */}
+            <Route path="marketplace" element={<IOSRestrictedRoute restrictionType="marketplace"><Marketplace /></IOSRestrictedRoute>} />
+            <Route path="marketplace/:productId" element={<IOSRestrictedRoute restrictionType="marketplace"><MarketplaceProduct /></IOSRestrictedRoute>} />
+            <Route path="marketplace/bundles/:bundleId" element={<IOSRestrictedRoute restrictionType="marketplace"><MarketplaceBundle /></IOSRestrictedRoute>} />
+            {/* iOS-restricted: Checkout */}
+            <Route path="checkout" element={<IOSRestrictedRoute restrictionType="checkout"><Checkout /></IOSRestrictedRoute>} />
+            <Route path="blog" element={<Blog />} />
+            <Route path="blog/:slug" element={<BlogPost />} />
+            <Route path="install" element={<Install />} />
+            <Route path="trust-and-verification" element={<TrustAndVerification />} />
+            
+            {/* ====== LOCALE-PREFIXED PROTECTED ROUTES ====== */}
+            {/* Redirect locale-prefixed protected routes to plain routes */}
+            <Route path=":locale/dashboard/*" element={<DashboardLocaleRedirect />} />
+            <Route path=":locale/onboarding/*" element={<DashboardLocaleRedirect />} />
+            <Route path=":locale/docs/*" element={<DashboardLocaleRedirect />} />
+            <Route path=":locale/auth" element={<DashboardLocaleRedirect />} />
+            <Route path=":locale/subscribe/*" element={<DashboardLocaleRedirect />} />
+            
+            {/* ====== LOCALE-PREFIXED WEBSITE ROUTES (LAST) ====== */}
+            {/* This catches valid locale URLs like /gb-en/coaches */}
+            <Route path=":locale" element={<LocaleRouteWrapper />}>
+              <Route index element={<PageRoutesOutlet />} />
+              <Route path="*" element={<PageRoutesOutlet />} />
+            </Route>
+            
+            {/* ====== 404 FALLBACK ====== */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </NativeAppGuard>
       <ScrollToTop />
     </LocaleRoutingProvider>
   );
