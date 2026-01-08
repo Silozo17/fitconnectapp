@@ -224,7 +224,6 @@ const ClientFindCoaches = () => {
                     coach={coach}
                     onBook={handleBook}
                     onRequestConnection={handleRequestConnection}
-                    linkPrefix="/dashboard/client/find-coaches"
                   />
                 ))}
               </div>
