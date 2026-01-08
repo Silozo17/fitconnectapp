@@ -44,7 +44,7 @@ type Step = 'select' | 'preview';
 
 export default function DisciplineSetup() {
   const navigate = useNavigate();
-  const { addDiscipline, isUpdating } = useClientDisciplines();
+  const { addDiscipline, isUpdating, isReady } = useClientDisciplines();
   const [step, setStep] = useState<Step>('select');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
@@ -85,7 +85,7 @@ export default function DisciplineSetup() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10">
+      <div className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-10 pt-safe-status">
         <div className="container max-w-4xl mx-auto px-4 py-4 flex items-center gap-4">
           <Button variant="ghost" size="icon" onClick={handleBack}>
             <ArrowLeft className="w-5 h-5" />
@@ -146,7 +146,7 @@ export default function DisciplineSetup() {
             </div>
 
             {/* Continue Button */}
-            <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t border-border">
+            <div className="fixed bottom-0 left-0 right-0 p-4 pb-safe-bottom bg-background/80 backdrop-blur-sm border-t border-border">
               <div className="container max-w-4xl mx-auto">
                 <Button 
                   className="w-full"
@@ -185,7 +185,7 @@ export default function DisciplineSetup() {
               <Button 
                 className="flex-1"
                 onClick={handleConfirm}
-                disabled={isUpdating}
+                disabled={isUpdating || !isReady}
               >
                 {isUpdating ? 'Saving...' : 'Confirm'}
                 <Check className="w-4 h-4 ml-2" />
