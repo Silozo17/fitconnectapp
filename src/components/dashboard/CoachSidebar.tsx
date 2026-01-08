@@ -44,7 +44,8 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { Rarity } from "@/lib/avatar-utils";
 import { useFeatureAccess } from "@/hooks/useFeatureAccess";
-import { FeatureKey } from "@/lib/feature-config";
+import { FeatureKey, getMinimumTierForFeature } from "@/lib/feature-config";
+import { SUBSCRIPTION_TIERS } from "@/lib/stripe-config";
 import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import {
@@ -272,11 +273,17 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     });
   }, []);
 
+  const getTierLabel = (feature: FeatureKey): string => {
+    const tier = getMinimumTierForFeature(feature);
+    return SUBSCRIPTION_TIERS[tier]?.name || tier;
+  };
+
   const renderMenuItem = (item: MenuItem, indented = false, isCollapsed = false, isMobile = false) => {
     const isActive = isItemActive(item.path);
     const badgeCount = getBadgeCount(item.badgeKey);
     const isLocked = item.requiredFeature && !hasFeature(item.requiredFeature);
     const title = t(item.titleKey);
+    const tierLabel = item.requiredFeature ? getTierLabel(item.requiredFeature) : "";
 
     // For mobile, use button with optimized navigation
     const handleClick = isMobile ? () => handleMobileNavigation(item.path) : undefined;
@@ -331,7 +338,12 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
         >
           <item.icon className="w-4 h-4 flex-shrink-0" />
           <span className="font-medium text-sm flex-1">{title}</span>
-          {isLocked && <Lock className="w-3.5 h-3.5 text-warning" />}
+          {isLocked && (
+            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-warning/15 text-warning border border-warning/20">
+              <Lock className="w-2.5 h-2.5" />
+              {tierLabel}
+            </span>
+          )}
           {badgeCount > 0 && !isLocked && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
         </button>
       );
@@ -353,7 +365,12 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
         <span className="font-medium text-sm flex-1">{title}</span>
-        {isLocked && <Lock className="w-3.5 h-3.5 text-warning" />}
+        {isLocked && (
+          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-warning/15 text-warning border border-warning/20">
+            <Lock className="w-2.5 h-2.5" />
+            {tierLabel}
+          </span>
+        )}
         {badgeCount > 0 && !isLocked && <SidebarBadge count={badgeCount} variant={item.badgeVariant} />}
       </Link>
     );
