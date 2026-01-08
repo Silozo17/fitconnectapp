@@ -5,7 +5,7 @@ export const useCoachLinkPrefix = () => {
   
   // If inside client dashboard, use internal route (handles both /dashboard/client and /dashboard/client/*)
   if (location.pathname === "/dashboard/client" || location.pathname.startsWith("/dashboard/client/")) {
-    return "/dashboard/client/coach";
+    return "/dashboard/client/coaches";
   }
   
   // Default to public route

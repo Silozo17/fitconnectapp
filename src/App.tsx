@@ -38,6 +38,7 @@ import { WebsiteLocaleWrapper } from "./components/routing/WebsiteLocaleWrapper"
 
 // Website Router
 import { WebsiteRouter } from "./components/routing/WebsiteRouter";
+import ClientCoachRedirect from "./components/routing/ClientCoachRedirect";
 
 // Auth page (not lazy - critical path)
 import Auth from '@/pages/Auth';
@@ -1518,13 +1519,15 @@ const App = () => (
                                     </Suspense>
                                   </ProtectedRoute>
                                 } />
-                                <Route path="client/coach/:username" element={
+                                <Route path="client/coaches/:username" element={
                                   <ProtectedRoute allowedRoles={["client"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
                                       <ClientCoachProfile />
                                     </Suspense>
                                   </ProtectedRoute>
                                 } />
+                                {/* Redirect old singular route to plural for backwards compatibility */}
+                                <Route path="client/coach/:username" element={<ClientCoachRedirect />} />
                                 <Route path="client/marketplace" element={
                                   <ProtectedRoute allowedRoles={["client"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
