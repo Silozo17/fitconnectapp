@@ -21,7 +21,7 @@ export function useClientDisciplines() {
   const queryClient = useQueryClient();
 
   // Get client profile ID first
-  const { data: clientProfile } = useQuery({
+  const { data: clientProfile, isLoading: isLoadingProfile } = useQuery({
     queryKey: ['client-profile-id', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -36,7 +36,7 @@ export function useClientDisciplines() {
     enabled: !!user?.id,
   });
 
-  const { data: disciplines, isLoading } = useQuery({
+  const { data: disciplines, isLoading: isLoadingDisciplines } = useQuery({
     queryKey: ['client-disciplines', clientProfile?.id],
     queryFn: async (): Promise<ClientDiscipline[]> => {
       if (!clientProfile?.id) return [];
@@ -192,7 +192,8 @@ export function useClientDisciplines() {
   return {
     disciplines: disciplines || [],
     primaryDiscipline,
-    isLoading,
+    isLoading: isLoadingProfile || isLoadingDisciplines,
+    isReady: !!clientProfile?.id,
     addDiscipline: addDisciplineMutation.mutate,
     removeDiscipline: removeDisciplineMutation.mutate,
     setPrimary: setPrimaryMutation.mutate,
