@@ -7,7 +7,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useMicroWinDetection } from "@/hooks/useMicroWinDetection";
 import { useAutoAwardClientBadges } from "@/hooks/useAutoAwardClientBadges";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
-import { useSelectedDiscipline } from "@/hooks/useSelectedDiscipline";
+import { useClientDisciplines } from "@/hooks/useClientDisciplines";
 import { getDailyTip } from "@/lib/daily-tips";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 
@@ -85,8 +85,8 @@ const ClientOverview = () => {
   // Micro-win detection (triggers celebrations on dashboard mount)
   useMicroWinDetection();
   
-  // Get selected discipline for widget
-  const { discipline: selectedDiscipline, isLoading: isDisciplineLoading } = useSelectedDiscipline();
+  // Get client disciplines for widget(s)
+  const { disciplines, isLoading: isDisciplineLoading, hasDisciplines } = useClientDisciplines();
   
   const { 
     data: stats, 
@@ -192,17 +192,31 @@ const ClientOverview = () => {
         </Suspense>
       </WidgetErrorBoundary>
 
-      {/* Section: My Discipline */}
+      {/* Section: My Discipline(s) */}
       {!isDisciplineLoading && (
-        selectedDiscipline ? (
+        hasDisciplines ? (
           <>
             <DashboardSectionHeader 
-              title="My Discipline" 
+              title={disciplines.length > 1 ? "My Disciplines" : "My Discipline"}
               description="Your training at a glance" 
             />
-            <WidgetErrorBoundary widgetName="DisciplineWidget" silent>
-              <DisciplineWidget disciplineId={selectedDiscipline} className="mb-11" />
-            </WidgetErrorBoundary>
+            {disciplines.length === 1 ? (
+              <WidgetErrorBoundary widgetName="DisciplineWidget" silent>
+                <DisciplineWidget disciplineId={disciplines[0].discipline_id} className="mb-11" />
+              </WidgetErrorBoundary>
+            ) : (
+              <div className="mb-11 -mx-5 md:mx-0">
+                <Carousel3D gap={16}>
+                  {disciplines.map((d) => (
+                    <Carousel3DItem key={d.id} className="w-[320px] md:w-[360px]">
+                      <WidgetErrorBoundary widgetName="DisciplineWidget" silent>
+                        <DisciplineWidget disciplineId={d.discipline_id} />
+                      </WidgetErrorBoundary>
+                    </Carousel3DItem>
+                  ))}
+                </Carousel3D>
+              </div>
+            )}
           </>
         ) : (
           <>
