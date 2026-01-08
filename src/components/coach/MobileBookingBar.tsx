@@ -1,4 +1,4 @@
-import { MessageSquare, Calendar, Loader2 } from "lucide-react";
+import { MessageSquare, Calendar, Loader2, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
@@ -8,6 +8,7 @@ interface MobileBookingCardProps {
   currency: CurrencyCode;
   onMessage: () => void;
   onBook: () => void;
+  onRequestConnection: () => void;
   isMessageLoading?: boolean;
   isClient?: boolean;
 }
@@ -17,6 +18,7 @@ export function MobileBookingCard({
   currency,
   onMessage,
   onBook,
+  onRequestConnection,
   isMessageLoading,
   isClient,
 }: MobileBookingCardProps) {
@@ -60,6 +62,19 @@ export function MobileBookingCard({
           >
             <Calendar className="h-4 w-4" />
             <span className="ml-2">Book</span>
+          </Button>
+        </div>
+
+        {/* Request Connection */}
+        <div className="mt-3 pt-3 border-t border-border/50">
+          <Button
+            variant="ghost"
+            className="w-full rounded-xl"
+            size="sm"
+            onClick={onRequestConnection}
+          >
+            <UserPlus className="h-4 w-4 mr-2" />
+            Request Connection
           </Button>
         </div>
       </CardContent>

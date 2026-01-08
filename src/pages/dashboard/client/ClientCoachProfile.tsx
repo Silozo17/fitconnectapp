@@ -174,6 +174,7 @@ const ClientCoachProfile = () => {
             currency={(coach.currency as any) || 'GBP'}
             onMessage={handleMessageCoach}
             onBook={() => setShowBookingModal(true)}
+            onRequestConnection={() => setShowRequestModal(true)}
             isMessageLoading={startingConversation}
             isClient={isClient}
           />
