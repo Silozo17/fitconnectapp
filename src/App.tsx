@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { AdminProvider } from "@/contexts/AdminContext";
@@ -1220,6 +1220,26 @@ const App = () => (
                                 </WebsiteLocaleWrapper>
                               } />
 
+                              {/* Top-level Onboarding Routes - these are the canonical paths */}
+                              <Route path="/onboarding/coach" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachOnboarding />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/onboarding/client" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientOnboarding />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+
                               {/* Review Handler Route - must be before dashboard routes */}
                               <Route path="/review-handler" element={
                                 <ProtectedRoute allowedRoles={["client"]}>
@@ -1353,21 +1373,9 @@ const App = () => (
                                   </ProtectedRoute>
                                 } />
                                 
-                                {/* Onboarding Routes */}
-                                <Route path="onboarding/client" element={
-                                  <ProtectedRoute allowedRoles={["client"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <ClientOnboarding />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                } />
-                                <Route path="onboarding/coach" element={
-                                  <ProtectedRoute allowedRoles={["coach"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <CoachOnboarding />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                } />
+                                {/* Onboarding Redirects - redirect old paths to canonical top-level routes */}
+                                <Route path="onboarding/client" element={<Navigate to="/onboarding/client" replace />} />
+                                <Route path="onboarding/coach" element={<Navigate to="/onboarding/coach" replace />} />
                                 
                                 {/* Client Dashboard Routes */}
                                 <Route path="client" element={
