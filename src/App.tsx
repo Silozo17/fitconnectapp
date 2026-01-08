@@ -1407,6 +1407,13 @@ const App = () => (
                                     </Suspense>
                                   </ProtectedRoute>
                                 } />
+                                <Route path="client/messages/:id" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientMessages />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
                                 <Route path="client/plans" element={
                                   <ProtectedRoute allowedRoles={["client"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
@@ -1608,6 +1615,13 @@ const App = () => (
                                   </ProtectedRoute>
                                 } />
                                 <Route path="coach/messages" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachMessages />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/messages/:id" element={
                                   <ProtectedRoute allowedRoles={["coach"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
                                       <CoachMessages />
