@@ -101,31 +101,45 @@ export const UpgradeDrawer = ({
   // Get dynamic benefits for selected tier
   const benefits = TIER_BENEFITS[selectedTier] || TIER_BENEFITS.pro;
   
-  // Handle successful IAP purchase
-  const handleIAPSuccess = useCallback(async (tier: SubscriptionTier) => {
+  // Handle IMMEDIATE success - fires the moment Apple confirms transaction
+  // This provides instant UI feedback before any polling/verification
+  const handleImmediateSuccess = useCallback((tier: SubscriptionTier) => {
+    console.log('[UpgradeDrawer] Immediate success - closing drawer and showing celebration');
+    
+    // Celebrate immediately - Apple has already confirmed the transaction
     triggerConfetti(confettiPresets.medium);
     triggerHaptic('success');
     
+    // Close drawer immediately for instant feedback
+    onOpenChange(false);
+    
+    // Show features modal immediately
+    setPurchasedTier(tier as TierKey);
+    setShowFeaturesModal(true);
+    setIsSubmitting(false);
+  }, [onOpenChange]);
+  
+  // Handle database confirmation (called after polling/webhook confirms DB update)
+  const handlePurchaseComplete = useCallback(async (tier: SubscriptionTier) => {
+    console.log('[UpgradeDrawer] Database confirmed - invalidating queries');
+    
     localStorage.removeItem(STORAGE_KEYS.CACHED_TIER);
     
+    // Refresh queries now that DB is confirmed
     queryClient.invalidateQueries({ queryKey: ['coach-onboarding-status'] });
     queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
     queryClient.invalidateQueries({ queryKey: ['feature-access'] });
     queryClient.invalidateQueries({ queryKey: ['coach-profile'] });
     
-    setPurchasedTier(tier as TierKey);
-    setShowFeaturesModal(true);
-    setIsSubmitting(false);
-    
-    // In upgrade mode, close drawer immediately
-    // In onboarding mode, let the modal stay on screen (parent will handle navigation)
-    if (mode === 'upgrade') {
-      onOpenChange(false);
+    // In onboarding mode, call the custom success handler
+    if (mode === 'onboarding' && onSuccess) {
+      onSuccess(tier);
     }
-  }, [queryClient, onOpenChange, mode]);
+  }, [queryClient, mode, onSuccess]);
   
   const { state: iapState, purchase: iapPurchase, dismissUnsuccessfulModal, reconcileSubscription } = useNativeIAP({
-    onPurchaseComplete: handleIAPSuccess,
+    onPurchaseComplete: handlePurchaseComplete,
+    onImmediateSuccess: handleImmediateSuccess,
   });
   
   const isProcessingIAP = iapState.purchaseStatus === 'purchasing' || iapState.isPolling;
