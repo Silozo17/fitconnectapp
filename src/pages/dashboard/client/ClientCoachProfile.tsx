@@ -29,9 +29,9 @@ import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProd
 import { CoachQualificationsSection } from "@/components/coach/CoachQualificationsSection";
 
 const ClientCoachProfile = () => {
-  const { coachSlug } = useParams<{ coachSlug: string }>();
+  const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
-  const { data: coach, isLoading, error } = useCoachById(coachSlug || "");
+  const { data: coach, isLoading, error } = useCoachById(username || "");
   
   const coachId = coach?.id;
   const { data: availability = [] } = useCoachAvailability(coachId || "");
