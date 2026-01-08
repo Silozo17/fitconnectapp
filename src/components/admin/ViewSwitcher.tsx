@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { useTranslation } from "react-i18next";
 import { useAdminView } from "@/contexts/AdminContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
+import { requestCloseMobileNav } from "@/lib/mobile-nav";
 
 // Routes that exist in multiple views - maps route segment to which views support it
 const ROUTE_EQUIVALENTS: Record<string, Record<string, boolean>> = {
@@ -57,7 +58,12 @@ const ViewSwitcher = () => {
   // Determine if user is admin (can see admin view option)
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
 
+  const [, startTransition] = useTransition();
+
   const handleViewChange = (value: string) => {
+    // Close mobile nav immediately before any navigation/modal
+    requestCloseMobileNav();
+
     // Check if trying to create a new profile
     if (value === "create-client") {
       // Use BecomeClientModal for confirmation + onboarding flow
@@ -77,13 +83,14 @@ const ViewSwitcher = () => {
     // Get current page and check if it exists in target view
     const currentPage = getCurrentPage(location.pathname);
     
-    if (currentPage && ROUTE_EQUIVALENTS[currentPage]?.[viewMode]) {
-      // Same page exists in target view - navigate there
-      navigate(`/dashboard/${viewMode}/${currentPage}`);
-    } else {
-      // Fallback to dashboard home for that view
-      navigate(`/dashboard/${viewMode}`);
-    }
+    const targetPath = currentPage && ROUTE_EQUIVALENTS[currentPage]?.[viewMode]
+      ? `/dashboard/${viewMode}/${currentPage}`
+      : `/dashboard/${viewMode}`;
+
+    // Use startTransition so navigation doesn't block the UI (allows drawer to close first)
+    startTransition(() => {
+      navigate(targetPath);
+    });
   };
 
   if (isLoadingProfiles) {

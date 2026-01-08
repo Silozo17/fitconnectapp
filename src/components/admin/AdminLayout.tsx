@@ -1,8 +1,10 @@
-import { ReactNode, useState } from "react";
+import { ReactNode, useState, useEffect } from "react";
+import { flushSync } from "react-dom";
 import AdminSidebar from "./AdminSidebar";
 import AdminHeader from "./AdminHeader";
 import PlatformBackground from "@/components/shared/PlatformBackground";
 import MobileBottomNav from "@/components/navigation/MobileBottomNav";
+import { MOBILE_NAV_CLOSE_EVENT } from "@/lib/mobile-nav";
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -10,6 +12,15 @@ interface AdminLayoutProps {
 
 const AdminLayout = ({ children }: AdminLayoutProps) => {
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Listen for global close event (e.g., from ViewSwitcher) and close immediately
+  useEffect(() => {
+    const handleCloseRequest = () => {
+      flushSync(() => setMobileOpen(false));
+    };
+    window.addEventListener(MOBILE_NAV_CLOSE_EVENT, handleCloseRequest);
+    return () => window.removeEventListener(MOBILE_NAV_CLOSE_EVENT, handleCloseRequest);
+  }, []);
 
   return (
     <>

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, memo } from "react";
+import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -19,6 +20,7 @@ import ClientProfileSummary from "@/components/dashboard/client/ClientProfileSum
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { MOBILE_NAV_CLOSE_EVENT } from "@/lib/mobile-nav";
 
 interface ClientDashboardLayoutProps {
   children: React.ReactNode;
@@ -73,6 +75,15 @@ const ClientDashboardLayoutInner = memo(({
       localStorage.setItem(STORAGE_KEYS.CLIENT_ONBOARDED, 'true');
     }
   }, [onboardingStatus?.isOnboarded, isKnownOnboarded]);
+
+  // Listen for global close event (e.g., from ViewSwitcher) and close immediately
+  useEffect(() => {
+    const handleCloseRequest = () => {
+      flushSync(() => setMobileOpen(false));
+    };
+    window.addEventListener(MOBILE_NAV_CLOSE_EVENT, handleCloseRequest);
+    return () => window.removeEventListener(MOBILE_NAV_CLOSE_EVENT, handleCloseRequest);
+  }, []);
 
   useEffect(() => {
     if (!isLoading && onboardingStatus && !onboardingStatus.isOnboarded && !onboardingStatus.error && !justCompletedOnboarding && !isKnownOnboarded) {
