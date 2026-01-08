@@ -42,7 +42,7 @@ const DashboardHeader = memo(({ subscriptionTier, coachId, onMenuToggle }: Dashb
     return SUBSCRIPTION_TIERS[normalizedTier]?.name || "Free";
   }, [subscriptionTier]);
 
-  const handleProfileClick = useCallback(() => navigate("/dashboard/profile"), [navigate]);
+  const handleProfileClick = useCallback(() => navigate("/dashboard/my-profile"), [navigate]);
   const handleSignOut = useCallback(() => signOut(), [signOut]);
 
   return (

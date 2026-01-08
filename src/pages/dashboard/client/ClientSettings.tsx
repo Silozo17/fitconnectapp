@@ -319,7 +319,7 @@ const ClientSettings = () => {
                           {t('profile.personalInfoDesc')}
                         </p>
                       </div>
-                      <Button variant="outline" className="rounded-xl" onClick={() => navigate("/dashboard/profile")}>
+                      <Button variant="outline" className="rounded-xl" onClick={() => navigate("/dashboard/my-profile")}>
                         <User className="w-4 h-4 mr-2" />
                         {t('profile.myProfile')}
                       </Button>
