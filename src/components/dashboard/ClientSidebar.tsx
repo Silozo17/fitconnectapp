@@ -222,7 +222,10 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
     });
   }, [location.pathname]);
 
-  // Remove auto-close on navigation for desktop - let optimized mobile handler manage it
+  // Close mobile sidebar on route change - ensures loading is visible
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname, setMobileOpen]);
 
   const getBadgeCount = (badgeKey?: BadgeKey): number => {
     switch (badgeKey) {

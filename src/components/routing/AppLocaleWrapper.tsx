@@ -2,6 +2,7 @@ import { Suspense, ReactNode } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppLocaleProvider } from '@/contexts/AppLocaleContext';
 import PageLoadingSpinner from '@/components/shared/PageLoadingSpinner';
+import { ErrorBoundary } from '@/components/shared/ErrorBoundary';
 
 interface AppLocaleWrapperProps {
   children?: ReactNode;
@@ -27,9 +28,11 @@ export function AppLocaleWrapper({ children }: AppLocaleWrapperProps) {
       {children ? (
         children
       ) : (
-        <Suspense fallback={<PageLoadingSpinner />}>
-          <Outlet />
-        </Suspense>
+        <ErrorBoundary>
+          <Suspense fallback={<PageLoadingSpinner />}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
       )}
     </AppLocaleProvider>
   );

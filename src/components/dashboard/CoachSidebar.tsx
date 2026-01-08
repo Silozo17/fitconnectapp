@@ -218,7 +218,10 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
     });
   }, [location.pathname]);
 
-  // Remove auto-close on navigation for desktop - let optimized mobile handler manage it
+  // Close mobile sidebar on route change - ensures loading is visible
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname, setMobileOpen]);
 
   const getBadgeCount = useCallback((badgeKey?: BadgeKey): number => {
     switch (badgeKey) {

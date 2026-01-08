@@ -25,7 +25,7 @@ export default function PageLoadingSpinner() {
           
           {/* Center icon */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center animate-bounce-subtle">
+            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <Dumbbell className="w-5 h-5 text-primary" />
             </div>
           </div>

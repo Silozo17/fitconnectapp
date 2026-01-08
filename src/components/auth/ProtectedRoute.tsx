@@ -17,6 +17,7 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   const { user, allRoles, loading } = useAuth();
   const location = useLocation();
   const [hasTimedOut, setHasTimedOut] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   // Timeout protection: if roles don't load in 5s, proceed anyway
   useEffect(() => {
@@ -30,6 +31,14 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
     return () => clearTimeout(timeout);
   }, [user, allRoles.length, hasTimedOut]);
 
+  // Small delay to ensure lazy components have time to initialize
+  useEffect(() => {
+    if (!loading && user && (allRoles.length > 0 || hasTimedOut)) {
+      const timer = setTimeout(() => setIsReady(true), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [loading, user, allRoles.length, hasTimedOut]);
+
   // Show spinner during initial auth loading
   if (loading) {
     return <PageLoadingSpinner />;
@@ -37,6 +46,11 @@ const ProtectedRoute = ({ children, allowedRoles }: ProtectedRouteProps) => {
   
   // If user exists but roles haven't loaded yet, wait (with timeout protection)
   if (user && allRoles.length === 0 && !hasTimedOut) {
+    return <PageLoadingSpinner />;
+  }
+
+  // Wait for ready state to prevent 404/error flash
+  if (user && !isReady) {
     return <PageLoadingSpinner />;
   }
 
