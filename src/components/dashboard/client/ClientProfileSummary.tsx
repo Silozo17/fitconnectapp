@@ -125,6 +125,9 @@ const ClientProfileSummary = () => {
           <ChevronRight className="w-3 h-3 ml-1" />
         </Button>
       </div>
+
+      {/* Bottom spacer to avoid notch overlap */}
+      <div className="h-[50px] shrink-0" aria-hidden="true" />
     </div>
   );
 };

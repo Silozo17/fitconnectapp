@@ -170,6 +170,9 @@ const CoachProfileSummary = () => {
           <ChevronRight className="w-4 h-4 ml-1" />
         </Button>
       </div>
+
+      {/* Bottom spacer to avoid notch overlap */}
+      <div className="h-[50px] shrink-0" aria-hidden="true" />
     </div>
   );
 };
