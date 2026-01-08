@@ -9,7 +9,7 @@ export const useMarketplaceLinkPrefix = () => {
   const location = useLocation();
   
   if (location.pathname.startsWith("/dashboard/client/")) {
-    return "/dashboard/client/marketplace";
+    return "/dashboard/client/marketplace/product";
   }
   
   return "/marketplace";
@@ -20,7 +20,7 @@ export const useMarketplaceLinkPrefix = () => {
  */
 export const getMarketplaceLinkPrefix = (pathname: string) => {
   if (pathname.startsWith("/dashboard/client/")) {
-    return "/dashboard/client/marketplace";
+    return "/dashboard/client/marketplace/product";
   }
   return "/marketplace";
 };
