@@ -37,10 +37,10 @@ const NotchCoachEarnings = () => {
   const isPositive = revenueChange >= 0;
 
   return (
-    <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
+    <button onClick={handleClick} className="w-full p-3 rounded-2xl text-left transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-primary/20 shadow-lg">
       <div className="flex items-center gap-2 mb-1">
-        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-          <Wallet className="w-4 h-4 text-primary" />
+        <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shadow-inner">
+          <Wallet className="w-5 h-5 text-primary" />
         </div>
         <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
           {t("dashboard.earnings", "Earnings")}

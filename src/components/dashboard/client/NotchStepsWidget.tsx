@@ -81,15 +81,6 @@ const NotchStepsWidget = () => {
         </p>
       </div>
       
-      {/* Progress percentage badge */}
-      <div className={cn(
-        "px-2 py-1 rounded-lg text-xs font-bold",
-        progress >= 100 
-          ? "bg-green-500/20 text-green-400" 
-          : "bg-muted/50 text-muted-foreground"
-      )}>
-        {Math.round(progress)}%
-      </div>
     </button>
   );
 };
