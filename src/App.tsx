@@ -20,6 +20,7 @@ import { useDeferredMount } from "@/hooks/useDeferredMount";
 import { HydrationSignal } from "@/components/shared/HydrationSignal";
 import { isDespia } from "@/lib/despia";
 import { useEnvironment } from "@/hooks/useEnvironment";
+import { setupQueryLogging } from "@/lib/query-logger";
 
 import ScrollRestoration from "./components/shared/ScrollRestoration";
 import { ReloadPrompt } from "./components/pwa/ReloadPrompt";
@@ -411,6 +412,9 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Setup React Query logging for debug console
+setupQueryLogging(queryClient);
 
 const App = () => (
   <ErrorBoundary>

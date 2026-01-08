@@ -12,7 +12,18 @@ type DebugEventType =
   | 'fetch'       // API/network requests
   | 'interaction' // User interactions (scroll, focus, input)
   | 'performance' // Performance metrics
-  | 'mutation';   // Data mutations
+  | 'mutation'    // Data mutations
+  // NEW event types
+  | 'toast'       // User-facing notifications
+  | 'modal'       // Dialog open/close events
+  | 'storage'     // localStorage/sessionStorage operations
+  | 'subscription' // Real-time subscriptions
+  | 'payment'     // Payment-related events
+  | 'ai'          // AI feature usage
+  | 'media'       // File upload/download
+  | 'booking'     // Session/booking events
+  | 'onboarding'  // Onboarding flow tracking
+  | 'cache';      // Query cache events
 
 interface DebugLogEvent {
   eventType: DebugEventType;
@@ -119,6 +130,17 @@ const getLogColor = (eventType: DebugEventType): string => {
     case 'interaction': return 'color: #14b8a6; font-weight: bold;'; // teal
     case 'performance': return 'color: #eab308; font-weight: bold;'; // yellow
     case 'mutation': return 'color: #f43f5e; font-weight: bold;'; // rose
+    // NEW event type colors
+    case 'toast': return 'color: #22c55e; font-weight: bold;'; // green-500
+    case 'modal': return 'color: #a855f7; font-weight: bold;'; // purple-500
+    case 'storage': return 'color: #64748b; font-weight: bold;'; // slate-500
+    case 'subscription': return 'color: #0ea5e9; font-weight: bold;'; // sky-500
+    case 'payment': return 'color: #84cc16; font-weight: bold;'; // lime-500
+    case 'ai': return 'color: #d946ef; font-weight: bold;'; // fuchsia-500
+    case 'media': return 'color: #f97316; font-weight: bold;'; // orange-500
+    case 'booking': return 'color: #06b6d4; font-weight: bold;'; // cyan-500
+    case 'onboarding': return 'color: #8b5cf6; font-weight: bold;'; // violet-500
+    case 'cache': return 'color: #78716c; font-weight: bold;'; // stone-500
     default: return 'color: #6b7280; font-weight: bold;'; // gray
   }
 };
@@ -189,6 +211,97 @@ export const debugLogger = {
   // Data mutation events
   mutation: (table: string, operation: string, data?: Record<string, unknown>) =>
     logDebugEvent({ eventType: 'mutation', eventName: `${table}:${operation}`, eventData: data }),
+
+  // ========== NEW METHODS ==========
+
+  // Toast notification events
+  toast: (type: 'success' | 'error' | 'info' | 'warning', message: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'toast', 
+      eventName: `${type}: ${message.slice(0, 50)}`,
+      eventData: { type, message, ...data }
+    }),
+
+  // Modal/Dialog events
+  modal: (name: string, action: 'open' | 'close' | 'confirm' | 'cancel', data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'modal', 
+      eventName: `${name}:${action}`,
+      eventData: { name, action, ...data }
+    }),
+
+  // Storage events (localStorage/sessionStorage)
+  storage: (key: string, action: 'get' | 'set' | 'remove', data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'storage', 
+      eventName: `${action}:${key}`,
+      eventData: { key, action, ...data }
+    }),
+
+  // Real-time subscription events
+  subscription: (channel: string, event: 'subscribe' | 'unsubscribe' | 'message' | 'error', data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'subscription', 
+      eventName: `${channel}:${event}`,
+      eventData: { channel, event, ...data }
+    }),
+
+  // Payment events
+  payment: (action: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'payment', 
+      eventName: action,
+      eventData: data
+    }),
+
+  // AI feature usage
+  ai: (feature: string, status: 'start' | 'success' | 'error', data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'ai', 
+      eventName: `${feature}:${status}`,
+      eventData: { feature, status, ...data }
+    }),
+
+  // Media/file events
+  media: (action: 'upload' | 'download' | 'delete' | 'view', fileType: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'media', 
+      eventName: `${action}:${fileType}`,
+      eventData: { action, fileType, ...data }
+    }),
+
+  // Booking/session events
+  booking: (action: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'booking', 
+      eventName: action,
+      eventData: data
+    }),
+
+  // Onboarding flow events
+  onboarding: (step: string, action: 'enter' | 'complete' | 'skip' | 'error', data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'onboarding', 
+      eventName: `${step}:${action}`,
+      eventData: { step, action, ...data }
+    }),
+
+  // Cache events (query cache hits/misses)
+  cache: (key: string, hit: boolean, data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'cache', 
+      eventName: `${hit ? 'hit' : 'miss'}:${key}`,
+      eventData: { key, hit, ...data }
+    }),
+
+  // View/profile switching (for AdminContext)
+  viewSwitch: (fromView: string, toView: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ 
+      eventType: 'state', 
+      eventName: `view_switch:${fromView}→${toView}`,
+      component: 'AdminContext',
+      eventData: { fromView, toView, ...data }
+    }),
     
   // Force immediate flush (useful before navigation/unload)
   flush: flushLogs,

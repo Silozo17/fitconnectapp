@@ -31,6 +31,21 @@ const EVENT_TYPE_COLORS: Record<string, string> = {
   query: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
   lifecycle: "bg-pink-500/20 text-pink-400 border-pink-500/30",
   click: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  fetch: "bg-indigo-500/20 text-indigo-400 border-indigo-500/30",
+  interaction: "bg-teal-500/20 text-teal-400 border-teal-500/30",
+  performance: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+  mutation: "bg-rose-500/20 text-rose-400 border-rose-500/30",
+  // NEW event types
+  toast: "bg-emerald-500/20 text-emerald-400 border-emerald-500/30",
+  modal: "bg-violet-500/20 text-violet-400 border-violet-500/30",
+  storage: "bg-slate-500/20 text-slate-400 border-slate-500/30",
+  subscription: "bg-sky-500/20 text-sky-400 border-sky-500/30",
+  payment: "bg-lime-500/20 text-lime-400 border-lime-500/30",
+  ai: "bg-fuchsia-500/20 text-fuchsia-400 border-fuchsia-500/30",
+  media: "bg-orange-500/20 text-orange-400 border-orange-500/30",
+  booking: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
+  onboarding: "bg-violet-500/20 text-violet-400 border-violet-500/30",
+  cache: "bg-stone-500/20 text-stone-400 border-stone-500/30",
 };
 
 export function DebugLogViewer() {
@@ -174,19 +189,33 @@ export function DebugLogViewer() {
             className="w-48"
           />
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder="Event type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-80">
               <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="error">🔴 Error</SelectItem>
+              <SelectItem value="performance">⚠️ Performance</SelectItem>
               <SelectItem value="navigation">Navigation</SelectItem>
               <SelectItem value="auth">Auth</SelectItem>
               <SelectItem value="render">Render</SelectItem>
-              <SelectItem value="error">Error</SelectItem>
               <SelectItem value="state">State</SelectItem>
               <SelectItem value="query">Query</SelectItem>
               <SelectItem value="lifecycle">Lifecycle</SelectItem>
               <SelectItem value="click">Click</SelectItem>
+              <SelectItem value="fetch">Fetch</SelectItem>
+              <SelectItem value="interaction">Interaction</SelectItem>
+              <SelectItem value="mutation">Mutation</SelectItem>
+              <SelectItem value="toast">Toast</SelectItem>
+              <SelectItem value="modal">Modal</SelectItem>
+              <SelectItem value="storage">Storage</SelectItem>
+              <SelectItem value="subscription">Subscription</SelectItem>
+              <SelectItem value="payment">Payment</SelectItem>
+              <SelectItem value="ai">AI</SelectItem>
+              <SelectItem value="media">Media</SelectItem>
+              <SelectItem value="booking">Booking</SelectItem>
+              <SelectItem value="onboarding">Onboarding</SelectItem>
+              <SelectItem value="cache">Cache</SelectItem>
             </SelectContent>
           </Select>
           <Select value={filterSession} onValueChange={setFilterSession}>
