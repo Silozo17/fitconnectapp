@@ -38,33 +38,33 @@ const NotchLeaderboardWidget = () => {
   return (
     <button
       onClick={handleClick}
-      className="w-full glass-subtle rounded-lg p-3 text-left hover:bg-accent/10 transition-colors group"
+      className="w-full rounded-2xl p-3 text-left transition-all duration-200 hover:scale-[1.01] bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-amber-500/20 shadow-lg group"
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-md bg-amber-500/20">
-            <Icon className="w-4 h-4 text-amber-500" />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center">
+            <Icon className="w-5 h-5 text-amber-500 drop-shadow-[0_0_6px_hsl(38_92%_50%/0.5)]" />
           </div>
           <div>
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wide font-medium">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
               {hasLocalRank ? stats.localArea : 'Global'} Rank
             </p>
-            <p className="text-sm font-bold text-foreground">
+            <p className="text-lg font-bold text-foreground">
               #{hasLocalRank ? stats.localRank : stats.leaderboardRank}
-              <span className="text-muted-foreground font-normal">
+              <span className="text-sm text-muted-foreground font-normal ml-0.5">
                 /{hasLocalRank ? stats.localTotal : stats.totalLeaderboardUsers}
               </span>
             </p>
           </div>
         </div>
         
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           {hasLocalRank && (
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-[10px] px-2 py-1 rounded-lg bg-muted/50 text-muted-foreground font-medium">
               Global #{stats.leaderboardRank}
             </span>
           )}
-          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
         </div>
       </div>
     </button>

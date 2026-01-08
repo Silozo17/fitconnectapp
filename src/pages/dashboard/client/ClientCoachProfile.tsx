@@ -27,6 +27,7 @@ import { CoachAboutSection } from "@/components/coach/CoachAboutSection";
 import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisplay";
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
 import { CoachQualificationsSection } from "@/components/coach/CoachQualificationsSection";
+import { MobileBookingBar } from "@/components/coach/MobileBookingBar";
 
 const ClientCoachProfile = () => {
   const { username } = useParams<{ username: string }>();
@@ -109,7 +110,7 @@ const ClientCoachProfile = () => {
       </div>
 
       {/* Main Content */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid lg:grid-cols-3 gap-8 pb-24 lg:pb-0">
         {/* Main Content Column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Hero Section */}
@@ -168,9 +169,9 @@ const ClientCoachProfile = () => {
           <CoachReviewsSection coachId={coach.id} />
         </div>
 
-        {/* Sidebar - Booking Card */}
-        <div className="lg:col-span-1 order-first lg:order-last">
-          <Card className="rounded-3xl lg:sticky lg:top-24 shadow-lg border-border/50">
+        {/* Sidebar - Booking Card (hidden on mobile) */}
+        <div className="hidden lg:block lg:col-span-1 order-first lg:order-last">
+          <Card className="rounded-3xl lg:sticky lg:top-24 shadow-lg border-border/50 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl">
             <CardContent className="p-6">
               {/* Price Display */}
               <div className="text-center mb-6 pb-6 border-b border-border">
@@ -270,6 +271,16 @@ const ClientCoachProfile = () => {
           </Card>
         </div>
       </div>
+
+      {/* Mobile Booking Bar */}
+      <MobileBookingBar
+        hourlyRate={coach.hourly_rate}
+        currency={(coach.currency as any) || 'GBP'}
+        onMessage={handleMessageCoach}
+        onBook={() => setShowBookingModal(true)}
+        isMessageLoading={startingConversation}
+        isClient={isClient}
+      />
 
       <RequestConnectionModal
         open={showRequestModal}

@@ -22,69 +22,73 @@ const NotchStepsWidget = () => {
   const progress = Math.min(100, (steps / DAILY_STEP_GOAL) * 100);
   
   // Check if we've loaded data at least once (even if empty)
-  // This prevents infinite loading animation when there's no data
   const hasLoadedOnce = !isLoading && data !== undefined;
   
   // Calculate circumference for circular progress
-  const radius = 20;
+  const radius = 18;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <button onClick={handleClick} className="w-full glass-subtle flex items-center gap-3 p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
-      {/* Circular Progress Ring */}
+    <button 
+      onClick={handleClick} 
+      className="w-full flex items-center gap-3 p-3 rounded-2xl text-left transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-primary/20 shadow-lg"
+    >
+      {/* Circular Progress Ring with glow */}
       <div className="relative w-12 h-12 flex-shrink-0">
-        <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+        <svg className="w-full h-full -rotate-90" viewBox="0 0 44 44">
           {/* Background circle */}
           <circle
-            cx="24"
-            cy="24"
+            cx="22"
+            cy="22"
             r={radius}
             fill="none"
-            stroke="hsl(var(--muted))"
-            strokeWidth="4"
+            stroke="hsl(var(--muted)/0.3)"
+            strokeWidth="3"
           />
-          {/* Progress circle */}
+          {/* Progress circle with glow */}
           <circle
-            cx="24"
-            cy="24"
+            cx="22"
+            cy="22"
             r={radius}
             fill="none"
             stroke="hsl(var(--primary))"
-            strokeWidth="4"
+            strokeWidth="3"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={strokeDashoffset}
-            className="transition-all duration-500 ease-out"
+            className="transition-all duration-500 ease-out drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]"
           />
         </svg>
-        {/* Center icon */}
+        {/* Center icon with background */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <Footprints className="w-4 h-4 text-primary" />
+          <div className="w-7 h-7 rounded-lg bg-primary/20 flex items-center justify-center">
+            <Footprints className="w-3.5 h-3.5 text-primary" />
+          </div>
         </div>
       </div>
       
       {/* Steps count and label */}
       <div className="flex-1 min-w-0">
         <p className={cn(
-          "text-lg font-bold text-foreground tabular-nums",
+          "text-xl font-bold text-foreground tabular-nums tracking-tight",
           isLoading && !hasLoadedOnce && "animate-pulse"
         )}>
           {isLoading && !hasLoadedOnce ? "—" : steps.toLocaleString()}
         </p>
-        <p className="text-xs text-muted-foreground">
-          {t("stats.stepsToday", "Steps today")}
+        <p className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">
+          {t("stats.stepsToday", "Steps")}
         </p>
       </div>
       
-      {/* Progress percentage */}
-      <div className="text-right">
-        <span className={cn(
-          "text-sm font-medium",
-          progress >= 100 ? "text-green-500" : "text-muted-foreground"
-        )}>
-          {Math.round(progress)}%
-        </span>
+      {/* Progress percentage badge */}
+      <div className={cn(
+        "px-2 py-1 rounded-lg text-xs font-bold",
+        progress >= 100 
+          ? "bg-green-500/20 text-green-400" 
+          : "bg-muted/50 text-muted-foreground"
+      )}>
+        {Math.round(progress)}%
       </div>
     </button>
   );

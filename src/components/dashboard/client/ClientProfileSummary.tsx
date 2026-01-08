@@ -42,38 +42,40 @@ const ClientProfileSummary = () => {
   return (
     <div className="h-full flex flex-col">
       {/* Avatar, Name and BMI Section */}
-      <div className="flex items-center gap-3 mb-3">
+      <div className="flex items-center gap-3 mb-4 p-3 rounded-2xl bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-border/30">
         <UserAvatar
           src={selectedAvatar ? undefined : profile?.avatar_url}
           avatarSlug={selectedAvatar?.slug}
           avatarRarity={selectedAvatar?.rarity}
           name={displayName}
           size="md"
-          className="shrink-0 border-2 border-primary/30"
+          className="shrink-0 ring-2 ring-primary/40 shadow-lg"
         />
         
         <div className="flex-1 min-w-0">
-          <h2 className="text-base font-semibold text-foreground truncate">
+          <h2 className="text-lg font-bold text-foreground truncate">
             {displayName}
           </h2>
           
           {/* Level and XP Progress */}
           <div className="flex items-center gap-1.5 mt-0.5">
-            <span className="text-xs font-medium text-primary">
+            <span className="text-xs font-bold text-primary">
               Lv.{xpData?.current_level || 1}
             </span>
             <span className="text-[10px] text-muted-foreground">•</span>
-            <span className="text-[10px] text-muted-foreground truncate">
+            <span className="text-[11px] text-muted-foreground truncate font-medium">
               {levelTitle}
             </span>
           </div>
           
-          {/* XP Progress Bar */}
-          <div className="mt-1">
-            <Progress 
-              value={xpProgress} 
-              className="h-1 bg-muted"
-            />
+          {/* XP Progress Bar with gradient */}
+          <div className="mt-1.5">
+            <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
+              <div 
+                className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-500"
+                style={{ width: `${xpProgress}%` }}
+              />
+            </div>
           </div>
         </div>
 
@@ -107,7 +109,7 @@ const ClientProfileSummary = () => {
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 rounded-xl border-border/30 hover:border-primary/40 text-xs"
+          className="flex-1 rounded-xl border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-xs font-medium transition-all"
           onClick={() => handleNavigate("/dashboard/client/settings")}
         >
           {t("profile.viewProfile", "View Profile")}
@@ -116,7 +118,7 @@ const ClientProfileSummary = () => {
         <Button
           variant="outline"
           size="sm"
-          className="flex-1 rounded-xl border-border/30 hover:border-primary/40 text-xs"
+          className="flex-1 rounded-xl border-primary/20 hover:border-primary/40 hover:bg-primary/5 text-xs font-medium transition-all"
           onClick={() => handleNavigate("/dashboard/client/achievements")}
         >
           {t("profile.achievements", "Achievements")}
