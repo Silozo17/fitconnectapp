@@ -40,6 +40,7 @@ const ClientDashboardLayoutInner = memo(({
   const { data: onboardingStatus, isLoading } = useClientOnboardingStatus();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const { isOpen: profilePanelOpen } = useProfilePanel();
   const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('client');
 
@@ -120,6 +121,7 @@ const ClientDashboardLayoutInner = memo(({
           onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
           mobileOpen={mobileOpen}
           setMobileOpen={setMobileOpen}
+          onNavigating={setIsNavigating}
         />
 
         <div className={`transition-all duration-300 h-full flex flex-col overflow-hidden ${sidebarCollapsed ? "xl:ml-16" : "xl:ml-64"}`}>
@@ -140,6 +142,12 @@ const ClientDashboardLayoutInner = memo(({
             aria-label={title}
             tabIndex={-1}
           >
+            {/* Navigation loading overlay */}
+            {isNavigating && (
+              <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+                <PageLoadingSpinner />
+              </div>
+            )}
             {children}
           </main>
         </div>

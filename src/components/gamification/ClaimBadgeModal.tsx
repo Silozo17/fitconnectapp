@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Trophy, X } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/hooks/useGamification';
 import { ShareAchievementButton } from './ShareAchievementButton';
@@ -87,14 +87,6 @@ export function ClaimBadgeModal({
           'absolute inset-0 bg-gradient-to-br opacity-50',
           RARITY_GRADIENTS[rarity]
         )} />
-
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute right-3 top-3 z-20 rounded-full p-1.5 bg-background/50 hover:bg-background/80 transition-colors"
-        >
-          <X className="h-4 w-4 text-muted-foreground" />
-        </button>
 
         {/* Content */}
         <div className="relative z-10 flex flex-col items-center p-8 pt-10">

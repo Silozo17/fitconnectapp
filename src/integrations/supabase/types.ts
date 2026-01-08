@@ -1462,6 +1462,55 @@ export type Database = {
           },
         ]
       }
+      client_disciplines: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          discipline_id: string
+          id: string
+          is_primary: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          discipline_id: string
+          id?: string
+          is_primary?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          discipline_id?: string
+          id?: string
+          is_primary?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_disciplines_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_disciplines_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_disciplines_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_engagement_history: {
         Row: {
           client_id: string

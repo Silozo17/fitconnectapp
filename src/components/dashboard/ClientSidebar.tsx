@@ -155,9 +155,10 @@ interface ClientSidebarProps {
   onToggle: () => void;
   mobileOpen: boolean;
   setMobileOpen: (open: boolean) => void;
+  onNavigating?: (isPending: boolean) => void;
 }
 
-const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: ClientSidebarProps) => {
+const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen, onNavigating }: ClientSidebarProps) => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
@@ -172,6 +173,11 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
   // State for web-only feature dialog
   const [showWebOnlyDialog, setShowWebOnlyDialog] = useState(false);
   const [blockedFeatureName, setBlockedFeatureName] = useState("");
+
+  // Notify parent when navigation is pending (for loading overlay)
+  useEffect(() => {
+    onNavigating?.(isPending);
+  }, [isPending, onNavigating]);
 
   // Optimized mobile navigation - close sheet first, then navigate
   const handleMobileNavigation = useCallback((path: string) => {

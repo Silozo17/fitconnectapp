@@ -329,13 +329,15 @@ export function BadgeGrid() {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {filterBadges(cat)
                 .sort((a, b) => {
-                  const rarityDiff = (RARITY_ORDER[a.rarity] || 0) - (RARITY_ORDER[b.rarity] || 0);
-                  if (rarityDiff !== 0) return rarityDiff;
+                  // Earned badges come first
                   const aEarned = earnedBadgeIds.has(a.id);
                   const bEarned = earnedBadgeIds.has(b.id);
                   if (aEarned && !bEarned) return -1;
                   if (!aEarned && bEarned) return 1;
-                  return 0;
+                  // Within same earned status, sort by rarity (rarer first = higher RARITY_ORDER)
+                  const rarityA = RARITY_ORDER[a.rarity] || 0;
+                  const rarityB = RARITY_ORDER[b.rarity] || 0;
+                  return rarityB - rarityA;
                 })
                 .map(badge => {
                   const isEarned = earnedBadgeIds.has(badge.id);

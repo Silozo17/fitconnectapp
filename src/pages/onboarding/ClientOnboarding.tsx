@@ -13,6 +13,7 @@ import { Loader2, Flame, Activity, Flower2, Weight, Target, Heart, Sparkles, Dum
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
 import WearablesOnboardingStep from "@/components/onboarding/WearablesOnboardingStep";
+import { DisciplineSelectionStep } from "@/components/onboarding/DisciplineSelectionStep";
 import { AvatarSelectionStep } from "@/components/onboarding/AvatarSelectionStep";
 import { OnboardingLayout } from "@/components/onboarding/OnboardingLayout";
 import { LocationAutocomplete } from "@/components/shared/LocationAutocomplete";
@@ -20,7 +21,7 @@ import type { PlaceLocationData } from "@/types/location";
 import { useTranslation } from "react-i18next";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 
-const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Dietary Info", "Connect Devices", "Privacy & Location", "Choose Avatar"];
+const STEPS = ["Personal Info", "Body Metrics", "Fitness Goals", "Choose Discipline", "Dietary Info", "Connect Devices", "Privacy & Location", "Choose Avatar"];
 
 const FITNESS_GOALS: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "weight_loss", label: "Weight Loss", icon: Flame },
@@ -93,6 +94,7 @@ const ClientOnboarding = () => {
     heightCm: "",
     weightKg: "",
     fitnessGoals: [] as string[],
+    selectedDiscipline: null as string | null, // New field for discipline
     dietaryRestrictions: [] as string[],
     allergies: [] as string[],
     // Privacy & Location fields
@@ -346,6 +348,7 @@ const ClientOnboarding = () => {
           first_name: formData.firstName || null,
           last_name: formData.lastName || null,
           date_of_birth: formData.dateOfBirth || null, // Age auto-calculated by trigger
+          selected_discipline: formData.selectedDiscipline || null,
           gender: formData.gender || null,
           activity_level: formData.activityLevel || 'moderate',
           height_cm: formData.heightCm ? parseFloat(formData.heightCm) : null,
@@ -430,8 +433,8 @@ const ClientOnboarding = () => {
 
   // Determine footer actions based on current step
   const getFooterActions = () => {
-    // Last step (Avatar - now step 6)
-    if (currentStep === 6) {
+    // Last step (Avatar - now step 7)
+    if (currentStep === 7) {
       return {
         primary: {
           label: "Complete Setup",
@@ -647,8 +650,17 @@ const ClientOnboarding = () => {
           </div>
         );
 
-      // Step 3: Dietary Info
+      // Step 3: Choose Discipline (optional)
       case 3:
+        return (
+          <DisciplineSelectionStep
+            selectedId={formData.selectedDiscipline}
+            onSelect={(id) => handleInputChange("selectedDiscipline", id || "")}
+          />
+        );
+
+      // Step 4: Dietary Info
+      case 4:
         return (
           <div className="space-y-5">
             <div className="mb-4">
@@ -700,16 +712,16 @@ const ClientOnboarding = () => {
           </div>
         );
 
-      // Step 4: Connect Devices (Wearables)
-      case 4:
+      // Step 5: Connect Devices (Wearables)
+      case 5:
         return (
           <WearablesOnboardingStep
             onStateChange={setWearablesState}
           />
         );
 
-      // Step 5: Privacy & Location
-      case 5:
+      // Step 6: Privacy & Location
+      case 6:
         return (
           <div className="space-y-5">
             <div className="mb-4">

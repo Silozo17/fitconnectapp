@@ -240,7 +240,13 @@ export function LocationLeaderboard({ timeFrame = 'alltime' }: LocationLeaderboa
       {/* Location Permission Banner - Show when only approximate location */}
       {shouldShowLocationPrompt && (
         <LocationPermissionPrompt
-          onRequestLocation={requestPreciseLocation}
+          onRequestLocation={async () => {
+            const success = await requestPreciseLocation();
+            if (success) {
+              dismissLocationPrompt(); // Immediately hide prompt on success
+            }
+            return success;
+          }}
           isLoading={isRequestingPrecise}
           error={locationError}
           variant="banner"

@@ -509,29 +509,6 @@ const ClientSettings = () => {
                   </CardContent>
                 </Card>
 
-                {/* Allergies */}
-                <Card className="rounded-3xl border-warning/30">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <AlertTriangle className="w-5 h-5 text-warning" />
-                      {t('health.allergies.title')}
-                    </CardTitle>
-                    <CardDescription>{t('health.allergies.description')}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <HealthTagInput
-                      tags={profile?.allergies || []}
-                      onChange={(tags) => updateField("allergies", tags)}
-                      suggestions={ALLERGY_SUGGESTIONS}
-                      placeholder={t('health.allergies.placeholder')}
-                      variant="warning"
-                    />
-                    <p className="text-xs text-muted-foreground mt-3 flex items-center gap-1">
-                      <Info className="w-3 h-3" />
-                      {t('health.allergies.coachNotice')}
-                    </p>
-                  </CardContent>
-                </Card>
 
                 {/* Medical Conditions */}
                 <Card className="rounded-3xl border-destructive/30">
