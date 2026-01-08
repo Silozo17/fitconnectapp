@@ -558,7 +558,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
                     size="icon"
                     className="h-9 w-9 text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent"
                     onClick={() => {
-                      navigate("/dashboard/profile");
+                      navigate("/dashboard/my-profile");
                       setMobileOpen(false);
                     }}
                   >

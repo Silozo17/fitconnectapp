@@ -80,7 +80,7 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
                     variant="ghost" 
                     size="icon" 
                     className="h-9 w-9 rounded-xl"
-                    onClick={() => navigate("/dashboard/profile")}
+                    onClick={() => navigate("/dashboard/my-profile")}
                   >
                     <User className="w-4 h-4" />
                   </Button>

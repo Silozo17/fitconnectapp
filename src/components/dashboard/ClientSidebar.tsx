@@ -551,7 +551,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen }: Clien
                     size="icon"
                     className="h-9 w-9"
                     onClick={() => {
-                      navigate("/dashboard/profile");
+                      navigate("/dashboard/my-profile");
                       setMobileOpen(false);
                     }}
                   >

@@ -593,7 +593,7 @@ const CoachSettings = () => {
                           {t('profile.personalInfoDesc')}
                         </p>
                       </div>
-                      <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/profile")}>
+                      <Button variant="outline" size="sm" onClick={() => navigate("/dashboard/my-profile")}>
                         <User className="w-4 h-4 mr-2" />
                         {t('profile.myProfile')}
                       </Button>
