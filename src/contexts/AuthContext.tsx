@@ -5,6 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 import { STORAGE_KEYS, clearSessionStorage } from "@/lib/storage-keys";
 import { getNativeCache, setNativeCache, clearUserNativeCache, CACHE_KEYS, CACHE_TTL } from "@/lib/native-cache";
 import { recordBootStage, BOOT_STAGES } from "@/lib/boot-stages";
+import { debugLogger } from "@/lib/debug-logger";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
 
@@ -91,6 +92,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         console.log('[Auth] State change:', event, !!session);
+        debugLogger.auth('onAuthStateChange', { 
+          event, 
+          hasSession: !!session, 
+          userId: session?.user?.id,
+          email: session?.user?.email 
+        });
         recordBootStage(BOOT_STAGES.AUTH_STATE_RECEIVED);
         
         // Basic JWT validation - check for corrupted tokens
@@ -130,6 +137,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           
           if (cachedRole && cachedAllRoles?.length) {
             console.log('[Auth] Restored roles from native cache:', cachedAllRoles);
+            debugLogger.auth('role_from_cache', { cachedRole, cachedAllRoles });
             recordBootStage(BOOT_STAGES.ROLE_FROM_CACHE);
             setRole(cachedRole);
             setAllRoles(cachedAllRoles);
@@ -140,6 +148,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           if (!roleResolved && session.user.user_metadata?.role) {
             const metadataRole = session.user.user_metadata.role as AppRole;
             console.log('[Auth] Using role from user_metadata:', metadataRole);
+            debugLogger.auth('role_from_metadata', { metadataRole });
             recordBootStage(BOOT_STAGES.ROLE_FROM_METADATA);
             setRole(metadataRole);
             setAllRoles([metadataRole]);
@@ -150,10 +159,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Use setTimeout to not block the auth state update
           setTimeout(() => fetchUserRole(session.user.id), 0);
         } else {
+          debugLogger.auth('no_session', { event });
           setRole(null);
           setAllRoles([]);
         }
         
+        debugLogger.state('AuthContext', 'loading', false, true);
         setLoading(false);
       }
     );
@@ -166,6 +177,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setLoading((currentLoading) => {
         if (currentLoading) {
           console.warn('[Auth] Loading timeout reached - assuming no authenticated user');
+          debugLogger.auth('loading_timeout', { afterMs: 4000 });
           recordBootStage(BOOT_STAGES.AUTH_LOADING_TIMEOUT);
           return false;
         }
@@ -257,14 +269,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signOut = useCallback(async () => {
+    debugLogger.auth('signOut_start', { userId: user?.id });
     if (user?.id) clearUserNativeCache(user.id);
     clearSessionStorage();
     setPending2FA(false);
     
     try {
       await supabase.auth.signOut();
+      debugLogger.auth('signOut_complete');
     } catch (error) {
       console.error("Sign out error:", error);
+      debugLogger.error('signOut_error', error, 'AuthContext');
     }
     
     setSession(null);
