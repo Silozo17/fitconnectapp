@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
   UsersRound, DollarSign, BarChart3,
   MessageSquare, Shield, Trophy, FileText, LogOut, User, Rocket,
-  MessageSquarePlus, Plug, ClipboardList
+  MessageSquarePlus, Plug, ClipboardList, Bug
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -60,6 +60,7 @@ const getPlatformNavItems = (t: (key: string) => string): NavItem[] => [
   { title: t('sidebar.feedback'), url: "/dashboard/admin/feedback", icon: MessageSquarePlus, badgeKey: "feedback" },
   { title: t('sidebar.reviewsDisputes'), url: "/dashboard/admin/reviews", icon: MessageSquare },
   { title: t('sidebar.auditLog'), url: "/dashboard/admin/audit", icon: ClipboardList },
+  { title: "Debug Console", url: "/dashboard/admin/debug", icon: Bug },
 ];
 
 const getBottomNavItems = (t: (key: string) => string): NavItem[] => [

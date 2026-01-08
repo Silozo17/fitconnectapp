@@ -1,6 +1,18 @@
 import { supabase } from "@/integrations/supabase/client";
 
-type DebugEventType = 'navigation' | 'auth' | 'render' | 'click' | 'error' | 'state' | 'query' | 'lifecycle';
+type DebugEventType = 
+  | 'navigation' 
+  | 'auth' 
+  | 'render' 
+  | 'click' 
+  | 'error' 
+  | 'state' 
+  | 'query' 
+  | 'lifecycle'
+  | 'fetch'       // API/network requests
+  | 'interaction' // User interactions (scroll, focus, input)
+  | 'performance' // Performance metrics
+  | 'mutation';   // Data mutations
 
 interface DebugLogEvent {
   eventType: DebugEventType;
@@ -103,6 +115,10 @@ const getLogColor = (eventType: DebugEventType): string => {
     case 'state': return 'color: #f59e0b; font-weight: bold;'; // amber
     case 'query': return 'color: #06b6d4; font-weight: bold;'; // cyan
     case 'lifecycle': return 'color: #ec4899; font-weight: bold;'; // pink
+    case 'fetch': return 'color: #6366f1; font-weight: bold;'; // indigo
+    case 'interaction': return 'color: #14b8a6; font-weight: bold;'; // teal
+    case 'performance': return 'color: #eab308; font-weight: bold;'; // yellow
+    case 'mutation': return 'color: #f43f5e; font-weight: bold;'; // rose
     default: return 'color: #6b7280; font-weight: bold;'; // gray
   }
 };
@@ -157,6 +173,22 @@ export const debugLogger = {
   // Lifecycle events (effects, cleanup, etc.)
   lifecycle: (component: string, eventName: string, data?: Record<string, unknown>) =>
     logDebugEvent({ eventType: 'lifecycle', eventName, component, eventData: data }),
+
+  // Fetch/API events
+  fetch: (url: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ eventType: 'fetch', eventName: url, eventData: data }),
+
+  // User interaction events (scroll, focus, input)
+  interaction: (action: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ eventType: 'interaction', eventName: action, eventData: data }),
+
+  // Performance metrics
+  performance: (metric: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ eventType: 'performance', eventName: metric, eventData: data }),
+
+  // Data mutation events
+  mutation: (table: string, operation: string, data?: Record<string, unknown>) =>
+    logDebugEvent({ eventType: 'mutation', eventName: `${table}:${operation}`, eventData: data }),
     
   // Force immediate flush (useful before navigation/unload)
   flush: flushLogs,
