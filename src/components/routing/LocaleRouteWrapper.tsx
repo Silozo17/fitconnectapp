@@ -1,4 +1,4 @@
-import { Outlet, useParams } from 'react-router-dom';
+import { Outlet, useParams, Navigate, useLocation } from 'react-router-dom';
 import { useEffect, useMemo, useState } from 'react';
 import { useLocale } from '@/contexts/LocaleContext';
 import {
@@ -19,7 +19,8 @@ import i18n from '@/i18n';
  * Format: /{location}-{language}/ where location = country, language = i18n
  */
 export function LocaleRouteWrapper() {
-  const { locale } = useParams<{ locale: string }>();
+  const { locale, '*': wildcardPath } = useParams<{ locale: string; '*': string }>();
+  const location = useLocation();
   const { setCurrency, setLocale } = useLocale();
   const [isI18nReady, setIsI18nReady] = useState(false);
   
@@ -38,6 +39,14 @@ export function LocaleRouteWrapper() {
       location: loc as RouteLocationCode,
     };
   }, [locale]);
+  
+  // If locale param is invalid (e.g., "coaches" matched as :locale), redirect to the path without locale
+  // This is a safeguard - primary fix is route ordering in WebsiteRouter
+  if (!parsedLocale && locale) {
+    // Build the redirect path: remove the invalid locale prefix
+    const remainingPath = wildcardPath ? `/${wildcardPath}` : '/';
+    return <Navigate to={remainingPath + location.search + location.hash} replace />;
+  }
   
   // Apply locale settings when valid - wait for i18n to be ready
   useEffect(() => {
