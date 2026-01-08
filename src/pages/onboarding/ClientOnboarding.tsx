@@ -830,8 +830,8 @@ const ClientOnboarding = () => {
           </div>
         );
 
-      // Step 6: Choose Avatar (LAST - now has gender available)
-      case 6:
+      // Step 7: Choose Avatar (LAST - now has gender available)
+      case 7:
         return (
           <AvatarSelectionStep
             selectedAvatarId={formData.selectedAvatarId}
