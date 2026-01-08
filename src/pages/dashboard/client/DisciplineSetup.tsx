@@ -44,10 +44,13 @@ type Step = 'select' | 'preview';
 
 export default function DisciplineSetup() {
   const navigate = useNavigate();
-  const { addDiscipline, isUpdating, isReady } = useClientDisciplines();
+  const { addDiscipline, isUpdating, isReady, isLoading, clientProfileId } = useClientDisciplines();
   const [step, setStep] = useState<Step>('select');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
+
+  // Debug logging
+  console.log('[DisciplineSetup] isReady:', isReady, 'isLoading:', isLoading, 'clientProfileId:', clientProfileId);
 
   const selectedConfig = selectedId ? getDisciplineConfig(selectedId) : null;
 

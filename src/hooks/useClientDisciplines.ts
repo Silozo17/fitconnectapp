@@ -21,7 +21,7 @@ export function useClientDisciplines() {
   const queryClient = useQueryClient();
 
   // Get client profile ID first
-  const { data: clientProfile, isLoading: isLoadingProfile } = useQuery({
+  const { data: clientProfile, isLoading: isLoadingProfile, error: profileError } = useQuery({
     queryKey: ['client-profile-id', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
@@ -29,12 +29,21 @@ export function useClientDisciplines() {
         .from('client_profiles')
         .select('id')
         .eq('user_id', user.id)
-        .single();
-      if (error) throw error;
+        .maybeSingle();
+      if (error) {
+        console.error('Error fetching client profile:', error);
+        throw error;
+      }
       return data;
     },
     enabled: !!user?.id,
+    retry: 2,
   });
+
+  // Debug logging
+  if (profileError) {
+    console.error('[useClientDisciplines] Profile query error:', profileError);
+  }
 
   const { data: disciplines, isLoading: isLoadingDisciplines } = useQuery({
     queryKey: ['client-disciplines', clientProfile?.id],
@@ -189,11 +198,14 @@ export function useClientDisciplines() {
     },
   });
 
+  const isReady = !isLoadingProfile && !!clientProfile?.id;
+
   return {
     disciplines: disciplines || [],
     primaryDiscipline,
     isLoading: isLoadingProfile || isLoadingDisciplines,
-    isReady: !!clientProfile?.id,
+    isReady,
+    clientProfileId: clientProfile?.id || null,
     addDiscipline: addDisciplineMutation.mutate,
     removeDiscipline: removeDisciplineMutation.mutate,
     setPrimary: setPrimaryMutation.mutate,
