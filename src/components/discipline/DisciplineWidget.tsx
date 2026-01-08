@@ -3,6 +3,7 @@
  */
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Plus, ChevronRight, MessageSquarePlus, Trophy } from "lucide-react";
@@ -21,6 +22,7 @@ interface DisciplineWidgetProps {
 }
 
 export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetProps) {
+  const navigate = useNavigate();
   const { data, isLoading, error } = useDisciplineWidgetData(disciplineId);
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
@@ -49,7 +51,7 @@ export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetPr
         <div className={cn("h-1 bg-gradient-to-r", config.theme.gradient)} />
 
         <div className="p-5">
-          {/* Header: Icon + Name */}
+          {/* Header: Icon + Name + Add Button */}
           <div className="flex items-center gap-3 mb-3">
             <div className={cn(
               "p-2.5 rounded-xl bg-gradient-to-br",
@@ -57,7 +59,19 @@ export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetPr
             )}>
               <IconComponent className={cn("w-5 h-5", config.theme.accent)} />
             </div>
-            <h3 className="font-semibold text-lg">{config.name}</h3>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-lg">{config.name}</h3>
+            </div>
+            <button
+              onClick={() => navigate('/dashboard/client/discipline-setup')}
+              className={cn(
+                "p-1.5 rounded-lg transition-colors",
+                "hover:bg-primary/10 text-muted-foreground hover:text-primary"
+              )}
+              title="Add another discipline"
+            >
+              <Plus className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Highlight */}
