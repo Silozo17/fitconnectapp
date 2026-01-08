@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { DISCIPLINE_LIST, DISCIPLINE_CATEGORIES, getDisciplineConfig } from "@/config/disciplines/catalog";
 import { DisciplineConfig } from "@/config/disciplines/types";
-import { useSelectedDiscipline } from "@/hooks/useSelectedDiscipline";
+import { useClientDisciplines } from "@/hooks/useClientDisciplines";
 import { DisciplineWidget } from "@/components/discipline/DisciplineWidget";
 import { RequestDisciplineModal } from "@/components/discipline/RequestDisciplineModal";
 
@@ -44,7 +44,7 @@ type Step = 'select' | 'preview';
 
 export default function DisciplineSetup() {
   const navigate = useNavigate();
-  const { setDiscipline, isUpdating } = useSelectedDiscipline();
+  const { addDiscipline, isUpdating } = useClientDisciplines();
   const [step, setStep] = useState<Step>('select');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
@@ -63,11 +63,14 @@ export default function DisciplineSetup() {
 
   function handleConfirm() {
     if (selectedId) {
-      setDiscipline(selectedId, {
-        onSuccess: () => {
-          navigate('/dashboard/client');
-        },
-      });
+      addDiscipline(
+        { disciplineId: selectedId, isPrimary: true },
+        {
+          onSuccess: () => {
+            navigate('/dashboard/client');
+          },
+        }
+      );
     }
   }
 
