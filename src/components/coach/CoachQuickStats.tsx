@@ -34,18 +34,17 @@ function StatItem({ icon, label, value, highlight, rarity, className }: StatItem
   return (
     <div 
       className={cn(
-        "flex items-center gap-3 px-4 py-3 rounded-xl bg-muted/50 border border-border/50",
-        highlight && !rarity && "bg-primary/5 border-primary/20",
-        rarity && rarityConfig?.bg,
+        "flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-border/30 transition-all duration-200 hover:scale-[1.02]",
+        highlight && !rarity && "border-primary/30 shadow-[0_0_12px_hsl(var(--primary)/0.15)]",
         rarity && rarityConfig?.border,
-        rarity === 'legendary' && "shadow-[0_0_12px_hsl(var(--primary)/0.3)]",
-        rarity === 'epic' && "shadow-[0_0_8px_hsl(280_100%_70%/0.2)]",
+        rarity === 'legendary' && "shadow-[0_0_16px_hsl(var(--primary)/0.4)] border-primary/40",
+        rarity === 'epic' && "shadow-[0_0_12px_hsl(280_100%_70%/0.3)] border-purple-500/30",
         className
       )}
     >
       <div className={cn(
-        "flex items-center justify-center w-10 h-10 rounded-lg",
-        highlight && !rarity ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground",
+        "flex items-center justify-center w-10 h-10 rounded-xl",
+        highlight && !rarity ? "bg-primary/20 text-primary" : "bg-muted/50 text-muted-foreground",
         rarity && rarityConfig?.bg,
         rarity && rarityConfig?.color
       )}>
@@ -53,10 +52,10 @@ function StatItem({ icon, label, value, highlight, rarity, className }: StatItem
       </div>
       <div className="flex flex-col">
         <span className={cn(
-          "text-sm font-semibold text-foreground",
+          "text-sm font-bold text-foreground",
           rarity && rarityConfig?.color
         )}>{value}</span>
-        <span className="text-xs text-muted-foreground">{label}</span>
+        <span className="text-[11px] text-muted-foreground uppercase tracking-wide font-medium">{label}</span>
       </div>
     </div>
   );

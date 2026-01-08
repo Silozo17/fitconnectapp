@@ -132,16 +132,19 @@ const NotchNearestBadge = () => {
 
   if (!nearestBadge) {
     return (
-      <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
+      <button 
+        onClick={handleClick} 
+        className="w-full p-3 rounded-2xl text-left transition-all duration-200 hover:scale-[1.01] bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-primary/20 shadow-lg"
+      >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-primary" />
+          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.5)]" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-sm font-semibold text-foreground">
               {t("badges.keepGoing", "Keep going!")}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-[11px] text-muted-foreground uppercase tracking-wide">
               {t("badges.moreBadgesAhead", "More badges to unlock")}
             </p>
           </div>
@@ -152,13 +155,23 @@ const NotchNearestBadge = () => {
 
   const { badge, progress } = nearestBadge;
   const rarityColor = RARITY_COLORS[badge.rarity] || "text-slate-400";
+  const rarityBg = badge.rarity === "legendary" ? "border-amber-500/30" :
+                   badge.rarity === "epic" ? "border-purple-500/30" :
+                   badge.rarity === "rare" ? "border-blue-500/30" :
+                   "border-slate-500/20";
 
   return (
-    <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
+    <button 
+      onClick={handleClick} 
+      className={cn(
+        "w-full p-3 rounded-2xl text-left transition-all duration-200 hover:scale-[1.01] bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border shadow-lg",
+        rarityBg
+      )}
+    >
       <div className="flex items-center gap-3">
         {/* Badge icon */}
         <div className={cn(
-          "w-10 h-10 rounded-lg flex items-center justify-center",
+          "w-10 h-10 rounded-xl flex items-center justify-center",
           badge.rarity === "legendary" ? "bg-amber-500/20" :
           badge.rarity === "epic" ? "bg-purple-500/20" :
           badge.rarity === "rare" ? "bg-blue-500/20" :
@@ -170,24 +183,37 @@ const NotchNearestBadge = () => {
         {/* Badge info */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-foreground truncate">
+            <p className="text-sm font-semibold text-foreground truncate">
               {badge.name}
             </p>
-            <span className={cn("text-[10px] uppercase font-medium", rarityColor)}>
+            <span className={cn("text-[10px] uppercase font-bold px-1.5 py-0.5 rounded", rarityColor, 
+              badge.rarity === "legendary" ? "bg-amber-500/20" :
+              badge.rarity === "epic" ? "bg-purple-500/20" :
+              badge.rarity === "rare" ? "bg-blue-500/20" :
+              "bg-slate-500/20"
+            )}>
               {badge.rarity}
             </span>
           </div>
           
-          {/* Progress bar */}
+          {/* Progress bar with rarity-colored gradient */}
           <div className="mt-1.5">
-            <Progress 
-              value={progress?.percentage || 0} 
-              className="h-1.5 bg-muted"
-            />
+            <div className="h-1.5 bg-muted/50 rounded-full overflow-hidden">
+              <div 
+                className={cn(
+                  "h-full rounded-full transition-all duration-500",
+                  badge.rarity === "legendary" ? "bg-gradient-to-r from-amber-500 to-yellow-400" :
+                  badge.rarity === "epic" ? "bg-gradient-to-r from-purple-500 to-pink-400" :
+                  badge.rarity === "rare" ? "bg-gradient-to-r from-blue-500 to-cyan-400" :
+                  "bg-gradient-to-r from-slate-500 to-slate-400"
+                )}
+                style={{ width: `${progress?.percentage || 0}%` }}
+              />
+            </div>
           </div>
           
-          <p className="text-[10px] text-muted-foreground mt-0.5">
-            {progress?.current}/{progress?.target} {t("badges.toUnlock", "to unlock")}
+          <p className="text-[10px] text-muted-foreground mt-1">
+            <span className="font-semibold text-foreground">{progress?.current}</span>/{progress?.target} {t("badges.toUnlock", "to unlock")}
           </p>
         </div>
       </div>
