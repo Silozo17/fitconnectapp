@@ -61,12 +61,8 @@ const ViewSwitcher = () => {
   const [, startTransition] = useTransition();
 
   const handleViewChange = (value: string) => {
-    // Close mobile nav immediately before any navigation/modal
-    requestCloseMobileNav();
-
-    // Check if trying to create a new profile
+    // Check if trying to create a new profile - DON'T close nav for modal actions
     if (value === "create-client") {
-      // Use BecomeClientModal for confirmation + onboarding flow
       setBecomeClientModalOpen(true);
       return;
     }
@@ -74,6 +70,9 @@ const ViewSwitcher = () => {
       setBecomeCoachModalOpen(true);
       return;
     }
+
+    // Only close mobile nav when actually navigating (not when opening modals)
+    requestCloseMobileNav();
 
     const viewMode = value as "admin" | "client" | "coach";
     const profileId = availableProfiles[viewMode] || null;
