@@ -27,7 +27,7 @@ import { CoachAboutSection } from "@/components/coach/CoachAboutSection";
 import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisplay";
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
 import { CoachQualificationsSection } from "@/components/coach/CoachQualificationsSection";
-import { MobileBookingBar } from "@/components/coach/MobileBookingBar";
+import { MobileBookingCard } from "@/components/coach/MobileBookingBar";
 
 const ClientCoachProfile = () => {
   const { username } = useParams<{ username: string }>();
@@ -110,7 +110,7 @@ const ClientCoachProfile = () => {
       </div>
 
       {/* Main Content */}
-      <div className="grid lg:grid-cols-3 gap-8 pb-24 lg:pb-0">
+      <div className="grid lg:grid-cols-3 gap-8">
         {/* Main Content Column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Hero Section */}
@@ -167,6 +167,16 @@ const ClientCoachProfile = () => {
 
           {/* Reviews Section */}
           <CoachReviewsSection coachId={coach.id} />
+
+          {/* Mobile Booking Card - shows at bottom of content on mobile */}
+          <MobileBookingCard
+            hourlyRate={coach.hourly_rate}
+            currency={(coach.currency as any) || 'GBP'}
+            onMessage={handleMessageCoach}
+            onBook={() => setShowBookingModal(true)}
+            isMessageLoading={startingConversation}
+            isClient={isClient}
+          />
         </div>
 
         {/* Sidebar - Booking Card (hidden on mobile) */}
@@ -272,15 +282,6 @@ const ClientCoachProfile = () => {
         </div>
       </div>
 
-      {/* Mobile Booking Bar */}
-      <MobileBookingBar
-        hourlyRate={coach.hourly_rate}
-        currency={(coach.currency as any) || 'GBP'}
-        onMessage={handleMessageCoach}
-        onBook={() => setShowBookingModal(true)}
-        isMessageLoading={startingConversation}
-        isClient={isClient}
-      />
 
       <RequestConnectionModal
         open={showRequestModal}

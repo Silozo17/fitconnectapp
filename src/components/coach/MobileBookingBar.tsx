@@ -1,8 +1,9 @@
 import { MessageSquare, Calendar, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, type CurrencyCode } from "@/lib/currency";
 
-interface MobileBookingBarProps {
+interface MobileBookingCardProps {
   hourlyRate: number | null;
   currency: CurrencyCode;
   onMessage: () => void;
@@ -11,60 +12,57 @@ interface MobileBookingBarProps {
   isClient?: boolean;
 }
 
-export function MobileBookingBar({
+export function MobileBookingCard({
   hourlyRate,
   currency,
   onMessage,
   onBook,
   isMessageLoading,
   isClient,
-}: MobileBookingBarProps) {
+}: MobileBookingCardProps) {
   if (!isClient) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 lg:hidden z-50">
-      {/* Glassmorphic background */}
-      <div className="glass-nav border-t border-border/50 px-4 py-3 pb-safe-bottom">
-        <div className="flex items-center gap-3">
-          {/* Price */}
-          <div className="flex-shrink-0">
-            {hourlyRate ? (
-              <p className="text-lg font-bold text-foreground">
+    <Card className="lg:hidden rounded-3xl shadow-lg border-border/50 bg-gradient-to-br from-card/90 to-card/60 backdrop-blur-xl">
+      <CardContent className="p-5">
+        {/* Price Display */}
+        <div className="text-center mb-4 pb-4 border-b border-border/50">
+          {hourlyRate ? (
+            <>
+              <p className="text-3xl font-bold text-foreground">
                 {formatCurrency(hourlyRate, currency)}
-                <span className="text-xs text-muted-foreground font-normal">/session</span>
               </p>
-            ) : (
-              <p className="text-sm text-muted-foreground">Contact for pricing</p>
-            )}
-          </div>
-
-          {/* Buttons */}
-          <div className="flex-1 flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex-1 rounded-xl h-10"
-              onClick={onMessage}
-              disabled={isMessageLoading}
-            >
-              {isMessageLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <MessageSquare className="h-4 w-4" />
-              )}
-              <span className="ml-1.5 hidden sm:inline">Message</span>
-            </Button>
-            <Button
-              size="sm"
-              className="flex-1 rounded-xl h-10"
-              onClick={onBook}
-            >
-              <Calendar className="h-4 w-4" />
-              <span className="ml-1.5">Book</span>
-            </Button>
-          </div>
+              <p className="text-sm text-muted-foreground mt-1">per session</p>
+            </>
+          ) : (
+            <p className="text-muted-foreground">Contact for pricing</p>
+          )}
         </div>
-      </div>
-    </div>
+
+        {/* Buttons */}
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            className="flex-1 rounded-xl h-12"
+            onClick={onMessage}
+            disabled={isMessageLoading}
+          >
+            {isMessageLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <MessageSquare className="h-4 w-4" />
+            )}
+            <span className="ml-2">Message</span>
+          </Button>
+          <Button
+            className="flex-1 rounded-xl h-12"
+            onClick={onBook}
+          >
+            <Calendar className="h-4 w-4" />
+            <span className="ml-2">Book</span>
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
