@@ -108,21 +108,8 @@ export function WebsiteRouter() {
       <RouteRestorer />
       <Suspense fallback={<PageLoadingSpinner />}>
         <Routes>
-          {/* Redirect locale-prefixed protected routes to plain routes */}
-          <Route path=":locale/dashboard/*" element={<DashboardLocaleRedirect />} />
-          <Route path=":locale/onboarding/*" element={<DashboardLocaleRedirect />} />
-          <Route path=":locale/docs/*" element={<DashboardLocaleRedirect />} />
-          <Route path=":locale/auth" element={<DashboardLocaleRedirect />} />
-          <Route path=":locale/subscribe/*" element={<DashboardLocaleRedirect />} />
-          
-          {/* Locale-prefixed website routes */}
-          <Route path=":locale" element={<LocaleRouteWrapper />}>
-            <Route index element={<PageRoutesOutlet />} />
-            <Route path="*" element={<PageRoutesOutlet />} />
-          </Route>
-          
-          {/* Non-prefixed routes (root level) */}
-          {/* Homepage is public - authenticated users can visit it on web */}
+          {/* ====== NON-PREFIXED ROUTES FIRST ====== */}
+          {/* These must come BEFORE :locale to prevent "coaches" matching as a locale param */}
           <Route path="/" element={<Index />} />
           {/* Get-started redirects authenticated users to dashboard */}
           <Route path="get-started" element={<GuestOnlyRoute><GetStarted /></GuestOnlyRoute>} />
@@ -158,6 +145,22 @@ export function WebsiteRouter() {
           <Route path="install" element={<Install />} />
           <Route path="trust-and-verification" element={<TrustAndVerification />} />
           
+          {/* ====== LOCALE-PREFIXED PROTECTED ROUTES ====== */}
+          {/* Redirect locale-prefixed protected routes to plain routes */}
+          <Route path=":locale/dashboard/*" element={<DashboardLocaleRedirect />} />
+          <Route path=":locale/onboarding/*" element={<DashboardLocaleRedirect />} />
+          <Route path=":locale/docs/*" element={<DashboardLocaleRedirect />} />
+          <Route path=":locale/auth" element={<DashboardLocaleRedirect />} />
+          <Route path=":locale/subscribe/*" element={<DashboardLocaleRedirect />} />
+          
+          {/* ====== LOCALE-PREFIXED WEBSITE ROUTES (LAST) ====== */}
+          {/* This catches valid locale URLs like /gb-en/coaches */}
+          <Route path=":locale" element={<LocaleRouteWrapper />}>
+            <Route index element={<PageRoutesOutlet />} />
+            <Route path="*" element={<PageRoutesOutlet />} />
+          </Route>
+          
+          {/* ====== 404 FALLBACK ====== */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
