@@ -55,6 +55,8 @@ interface NativeIAPState {
 
 interface UseNativeIAPOptions {
   onPurchaseComplete?: (tier: SubscriptionTier) => void;
+  /** Called IMMEDIATELY when Apple confirms transaction - for instant UI feedback */
+  onImmediateSuccess?: (tier: SubscriptionTier) => void;
 }
 
 interface UseNativeIAPReturn {
@@ -413,6 +415,14 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
       tier = 'enterprise';
     }
 
+    console.log('[NativeIAP] Apple confirmed transaction - firing immediate success callback');
+    
+    // INSTANT FEEDBACK: Fire immediately BEFORE any polling/verification
+    // Apple has already validated the transaction at this point - trust it for UX
+    if (options?.onImmediateSuccess) {
+      options.onImmediateSuccess(tier);
+    }
+
     setState(prev => ({
       ...prev,
       purchasedProductId: data.planID,
@@ -585,8 +595,9 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
   // 30-second stuck-state recovery timeout
   // If still "purchasing" after 30s without any callback, reset to idle for retry
+  // FIX: Don't fire timeout while polling is active - polling has its own max attempts
   useEffect(() => {
-    if (state.purchaseStatus !== 'purchasing') return;
+    if (state.purchaseStatus !== 'purchasing' || state.isPolling) return;
     
     const stuckTimeout = setTimeout(() => {
       console.warn('[NativeIAP] Purchase stuck in "purchasing" state for 30s - resetting');
@@ -600,7 +611,7 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
     }, 30000);
     
     return () => clearTimeout(stuckTimeout);
-  }, [state.purchaseStatus]);
+  }, [state.purchaseStatus, state.isPolling]);
 
   /**
    * Trigger a purchase
