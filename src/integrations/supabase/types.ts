@@ -8445,6 +8445,10 @@ export type Database = {
       }
     }
     Functions: {
+      admin_update_coach_tier: {
+        Args: { p_coach_id: string; p_new_tier: string }
+        Returns: undefined
+      }
       award_xp: {
         Args: {
           p_amount: number
