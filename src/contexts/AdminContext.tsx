@@ -13,6 +13,7 @@ import {
   getViewModeFromPath,
   validateRouteForRole,
 } from "@/lib/view-restoration";
+import { debugLogger } from "@/lib/debug-logger";
 
 interface AvailableProfiles {
   admin?: string;
@@ -305,11 +306,17 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   }, [location.pathname, availableProfiles, isLoadingProfiles, isAdminUser, activeProfileType]);
 
   const setActiveProfile = useCallback((type: ViewMode, profileId: string | null) => {
+    const prevType = activeProfileType;
     setActiveProfileType(type);
     setActiveProfileId(profileId);
     setViewModeState(type);
     saveRoute(`/dashboard/${type}`);
-  }, []);
+    
+    // Log view switch for debugging
+    if (prevType !== type) {
+      debugLogger.viewSwitch(prevType, type, { profileId });
+    }
+  }, [activeProfileType]);
 
   const setViewMode = useCallback((mode: ViewMode) => {
     setViewModeState(mode);

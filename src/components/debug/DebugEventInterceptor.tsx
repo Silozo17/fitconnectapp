@@ -1,6 +1,7 @@
 import { useEffect, useRef, ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 import { debugLogger } from "@/lib/debug-logger";
+import { patchGlobalToast } from "@/lib/toast-interceptor";
 
 interface DebugEventInterceptorProps {
   children: ReactNode;
@@ -35,9 +36,21 @@ export const DebugEventInterceptor = ({ children }: DebugEventInterceptorProps) 
   const location = useLocation();
   const prevLocationRef = useRef(location.pathname);
   const originalFetchRef = useRef<typeof fetch | null>(null);
+  const originalLocalStorageSetItem = useRef<typeof localStorage.setItem | null>(null);
+  const originalLocalStorageRemoveItem = useRef<typeof localStorage.removeItem | null>(null);
+  const hasPatched = useRef(false);
 
   useEffect(() => {
     if (!isDebugEnabled()) return;
+    
+    // Only patch once
+    if (hasPatched.current) return;
+    hasPatched.current = true;
+
+    // ============================================
+    // 0. PATCH TOAST NOTIFICATIONS
+    // ============================================
+    patchGlobalToast();
 
     // ============================================
     // 1. CLICK EVENT INTERCEPTOR
@@ -134,6 +147,16 @@ export const DebugEventInterceptor = ({ children }: DebugEventInterceptorProps) 
             duration,
             ok: response.ok,
           });
+
+          // Log slow requests as performance issues
+          if (duration > 500) {
+            debugLogger.performance(`slow_fetch:${url.split('?')[0]}`, {
+              duration,
+              threshold: 500,
+              method,
+              status: response.status,
+            });
+          }
           
           return response;
         } catch (error) {
@@ -150,11 +173,119 @@ export const DebugEventInterceptor = ({ children }: DebugEventInterceptorProps) 
       };
     }
 
+    // ============================================
+    // 7. LOCALSTORAGE INTERCEPTOR
+    // ============================================
+    if (!originalLocalStorageSetItem.current) {
+      originalLocalStorageSetItem.current = localStorage.setItem.bind(localStorage);
+      originalLocalStorageRemoveItem.current = localStorage.removeItem.bind(localStorage);
+
+      localStorage.setItem = (key: string, value: string) => {
+        // Skip logging debug-related keys to avoid noise
+        if (!key.includes('debug')) {
+          debugLogger.storage(key, 'set', { 
+            size: value.length,
+            preview: value.slice(0, 100),
+          });
+        }
+        return originalLocalStorageSetItem.current!(key, value);
+      };
+
+      localStorage.removeItem = (key: string) => {
+        if (!key.includes('debug')) {
+          debugLogger.storage(key, 'remove');
+        }
+        return originalLocalStorageRemoveItem.current!(key);
+      };
+    }
+
+    // ============================================
+    // 8. KEYBOARD SHORTCUTS TRACKING
+    // ============================================
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only log keyboard shortcuts (with modifiers) or escape key
+      if (e.metaKey || e.ctrlKey || e.altKey || e.key === 'Escape') {
+        debugLogger.interaction("keyboard_shortcut", {
+          key: e.key,
+          meta: e.metaKey,
+          ctrl: e.ctrlKey,
+          alt: e.altKey,
+          shift: e.shiftKey,
+          target: (e.target as HTMLElement)?.tagName || 'unknown',
+        });
+      }
+    };
+
+    // ============================================
+    // 9. SCROLL DEPTH TRACKING
+    // ============================================
+    let lastScrollDepth = 0;
+    const handleScroll = () => {
+      const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+      if (scrollHeight <= 0) return;
+      
+      const scrollDepth = Math.round((window.scrollY / scrollHeight) * 100);
+      const depthMilestone = Math.floor(scrollDepth / 25) * 25; // 0, 25, 50, 75, 100
+      
+      if (depthMilestone > lastScrollDepth && depthMilestone > 0) {
+        debugLogger.interaction("scroll_depth", {
+          depth: depthMilestone,
+          scrollY: Math.round(window.scrollY),
+        });
+        lastScrollDepth = depthMilestone;
+      }
+    };
+
+    // Debounced scroll handler
+    let scrollTimeout: ReturnType<typeof setTimeout> | null = null;
+    const debouncedScroll = () => {
+      if (scrollTimeout) clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(handleScroll, 200);
+    };
+
+    // ============================================
+    // 10. MODAL/DIALOG TRACKING
+    // ============================================
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            // Check for dialog/modal elements
+            const dialog = node.querySelector('[role="dialog"], [role="alertdialog"], [data-state="open"]');
+            if (dialog || node.getAttribute('role') === 'dialog' || node.getAttribute('role') === 'alertdialog') {
+              const dialogName = 
+                node.getAttribute('aria-label') || 
+                node.querySelector('h2, h3, [role="heading"]')?.textContent?.trim().slice(0, 30) ||
+                'unknown';
+              debugLogger.modal(dialogName, 'open');
+            }
+          }
+        });
+        
+        mutation.removedNodes.forEach((node) => {
+          if (node instanceof HTMLElement) {
+            const dialog = node.querySelector('[role="dialog"], [role="alertdialog"]');
+            if (dialog || node.getAttribute('role') === 'dialog' || node.getAttribute('role') === 'alertdialog') {
+              const dialogName = 
+                node.getAttribute('aria-label') || 
+                node.querySelector('h2, h3, [role="heading"]')?.textContent?.trim().slice(0, 30) ||
+                'unknown';
+              debugLogger.modal(dialogName, 'close');
+            }
+          }
+        });
+      });
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
     // Add event listeners
     document.addEventListener("click", handleClick, true);
     document.addEventListener("submit", handleSubmit, true);
     document.addEventListener("focusin", handleFocusIn);
     document.addEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener("keydown", handleKeyDown, true);
+    window.addEventListener("scroll", debouncedScroll, { passive: true });
     window.addEventListener("error", handleError);
     window.addEventListener("unhandledrejection", handleUnhandledRejection);
 
@@ -163,19 +294,32 @@ export const DebugEventInterceptor = ({ children }: DebugEventInterceptorProps) 
       document.removeEventListener("submit", handleSubmit, true);
       document.removeEventListener("focusin", handleFocusIn);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
+      document.removeEventListener("keydown", handleKeyDown, true);
+      window.removeEventListener("scroll", debouncedScroll);
       window.removeEventListener("error", handleError);
       window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+      observer.disconnect();
       
       // Restore original fetch
       if (originalFetchRef.current) {
         window.fetch = originalFetchRef.current;
         originalFetchRef.current = null;
       }
+
+      // Restore original localStorage
+      if (originalLocalStorageSetItem.current) {
+        localStorage.setItem = originalLocalStorageSetItem.current;
+        originalLocalStorageSetItem.current = null;
+      }
+      if (originalLocalStorageRemoveItem.current) {
+        localStorage.removeItem = originalLocalStorageRemoveItem.current;
+        originalLocalStorageRemoveItem.current = null;
+      }
     };
   }, []);
 
   // ============================================
-  // 7. NAVIGATION TRACKING
+  // 11. NAVIGATION TRACKING
   // ============================================
   useEffect(() => {
     if (!isDebugEnabled()) return;

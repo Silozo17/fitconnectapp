@@ -4,6 +4,7 @@ import { useAdminView } from "@/contexts/AdminContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { requestCloseMobileNav } from "@/lib/mobile-nav";
+import { debugLogger } from "@/lib/debug-logger";
 
 // Routes that exist in multiple views - maps route segment to which views support it
 const ROUTE_EQUIVALENTS: Record<string, Record<string, boolean>> = {
@@ -63,10 +64,12 @@ const ViewSwitcher = () => {
   const handleViewChange = (value: string) => {
     // Check if trying to create a new profile - DON'T close nav for modal actions
     if (value === "create-client") {
+      debugLogger.modal('BecomeClientModal', 'open', { trigger: 'ViewSwitcher' });
       setBecomeClientModalOpen(true);
       return;
     }
     if (value === "create-coach") {
+      debugLogger.modal('BecomeCoachModal', 'open', { trigger: 'ViewSwitcher' });
       setBecomeCoachModalOpen(true);
       return;
     }
