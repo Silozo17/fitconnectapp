@@ -7876,6 +7876,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_debug_logs: {
+        Row: {
+          component: string | null
+          created_at: string | null
+          event_data: Json | null
+          event_name: string
+          event_type: string
+          id: string
+          route: string | null
+          session_id: string
+          timestamp: string | null
+          user_id: string | null
+        }
+        Insert: {
+          component?: string | null
+          created_at?: string | null
+          event_data?: Json | null
+          event_name: string
+          event_type: string
+          id?: string
+          route?: string | null
+          session_id: string
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          component?: string | null
+          created_at?: string | null
+          event_data?: Json | null
+          event_name?: string
+          event_type?: string
+          id?: string
+          route?: string | null
+          session_id?: string
+          timestamp?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null

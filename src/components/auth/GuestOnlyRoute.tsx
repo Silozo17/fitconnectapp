@@ -5,6 +5,7 @@ import { useRef, useEffect, useState } from "react";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 import { isAdminRole } from "@/lib/role-utils";
 import { recordBootStage, BOOT_STAGES } from "@/lib/boot-stages";
+import { debugLogger } from "@/lib/debug-logger";
 
 interface GuestOnlyRouteProps {
   children: React.ReactNode;
@@ -45,13 +46,20 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
   if (user && !pending2FA) {
     hasRenderedContent.current = true;
     
+    let redirectTo = "/dashboard/client";
     if (isAdminRole(role)) {
-      return <Navigate to="/dashboard/admin" replace />;
+      redirectTo = "/dashboard/admin";
     } else if (role === "coach") {
-      return <Navigate to="/dashboard/coach" replace />;
-    } else {
-      return <Navigate to="/dashboard/client" replace />;
+      redirectTo = "/dashboard/coach";
     }
+    
+    debugLogger.navigation(window.location.pathname, redirectTo, { 
+      reason: 'GuestOnlyRoute_authenticated',
+      role,
+      userId: user.id
+    });
+    
+    return <Navigate to={redirectTo} replace />;
   }
 
   // Show loading only if:
@@ -62,6 +70,7 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
   }
 
   if (loading && !guestTimeoutReached) {
+    debugLogger.state('GuestOnlyRoute', 'showing_spinner', true, { loading, guestTimeoutReached, isSignupInProgress });
     // Brief initial grace period (100ms) to prevent flash on fast auth resolution
     const timeSinceMount = Date.now() - mountTimeRef.current;
     if (timeSinceMount < 100) {
@@ -75,6 +84,11 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
   // - Auth resolved with no user, OR
   // - Timeout reached (assume no user)
   if (!hasRenderedContent.current) {
+    debugLogger.render('GuestOnlyRoute', 'showing_guest_content', { 
+      guestTimeoutReached, 
+      loading,
+      hasUser: !!user 
+    });
     recordBootStage(BOOT_STAGES.GUEST_ROUTE_RENDERED);
   }
   hasRenderedContent.current = true;

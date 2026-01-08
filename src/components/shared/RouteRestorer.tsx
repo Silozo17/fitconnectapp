@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { isDespia } from "@/lib/despia";
 import { getBestDashboardRoute, saveRoute } from "@/lib/view-restoration";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
+import { debugLogger } from "@/lib/debug-logger";
 
 /**
  * Simplified RouteRestorer
@@ -30,6 +31,14 @@ const RouteRestorer = () => {
 
   // Handle native app: redirect authenticated users from /get-started to dashboard
   useEffect(() => {
+    debugLogger.lifecycle('RouteRestorer', 'effect_run', { 
+      loading, 
+      hasRestored: hasRestored.current,
+      hasUser: !!user,
+      role,
+      currentPath: location.pathname
+    });
+    
     if (loading || hasRestored.current) return;
     if (!user || !role) return;
 
@@ -43,6 +52,7 @@ const RouteRestorer = () => {
       if (role === "client") {
         const cachedValue = localStorage.getItem(STORAGE_KEYS.CLIENT_ONBOARDED);
         if (cachedValue === 'false') {
+          debugLogger.navigation(currentPath, '/onboarding/client', { reason: 'client_not_onboarded' });
           navigate("/onboarding/client", { replace: true });
           hasRestored.current = true;
           return;
@@ -51,6 +61,7 @@ const RouteRestorer = () => {
 
       // Navigate to dashboard
       const targetRoute = getBestDashboardRoute(role);
+      debugLogger.navigation(currentPath, targetRoute, { reason: 'native_app_restore', role });
       navigate(targetRoute, { replace: true });
     }
 
