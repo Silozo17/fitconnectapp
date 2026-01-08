@@ -21,9 +21,9 @@ const NotchNextSession = () => {
 
   if (isLoading) {
     return (
-      <div className="glass-subtle p-3 rounded-xl animate-pulse">
+      <div className="p-3 rounded-2xl animate-pulse bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-cyan-500/20 shadow-lg">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-lg bg-muted" />
+          <div className="w-10 h-10 rounded-xl bg-muted" />
           <div className="h-3 w-16 bg-muted rounded" />
         </div>
         <div className="h-5 w-24 bg-muted rounded" />
@@ -33,10 +33,10 @@ const NotchNextSession = () => {
 
   if (!nextSession) {
     return (
-      <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
+      <button onClick={handleClick} className="w-full p-3 rounded-2xl text-left transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-cyan-500/20 shadow-lg">
         <div className="flex items-center gap-2 mb-1">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-            <Calendar className="w-4 h-4 text-cyan-500" />
+          <div className="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center shadow-inner">
+            <Calendar className="w-5 h-5 text-cyan-500" />
           </div>
           <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
             {t("dashboard.nextSession", "Next Session")}
@@ -50,10 +50,10 @@ const NotchNextSession = () => {
   }
 
   return (
-    <button onClick={handleClick} className="w-full glass-subtle p-3 rounded-xl text-left hover:bg-accent/10 transition-colors">
+    <button onClick={handleClick} className="w-full p-3 rounded-2xl text-left transition-all duration-200 hover:scale-[1.02] bg-gradient-to-br from-card/80 to-card/40 backdrop-blur-xl border border-cyan-500/20 shadow-lg">
       <div className="flex items-center gap-2 mb-1">
-        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
-          <Clock className="w-4 h-4 text-cyan-500" />
+        <div className="w-10 h-10 rounded-xl bg-cyan-500/15 flex items-center justify-center shadow-inner">
+          <Clock className="w-5 h-5 text-cyan-500" />
         </div>
         <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">
           {t("dashboard.nextSession", "Next Session")}

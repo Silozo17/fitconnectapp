@@ -85,12 +85,12 @@ const NotchCoachMiniStats = () => {
             key={item.label}
             onClick={() => handleClick(item.route)}
             className={cn(
-              "glass-subtle flex flex-col items-center justify-center py-2 px-1 rounded-lg hover:bg-accent/10 transition-colors",
+              "flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200 hover:scale-105 bg-gradient-to-br from-card/60 to-card/30 backdrop-blur-lg border border-border/30",
               isLoading && "animate-pulse"
             )}
           >
-            <div className={cn("p-1 rounded-md mb-0.5", item.bgColor)}>
-              <Icon className={cn("w-3 h-3", item.color)} />
+            <div className={cn("w-7 h-7 rounded-lg flex items-center justify-center mb-1", item.bgColor)}>
+              <Icon className={cn("w-3.5 h-3.5", item.color)} />
             </div>
             <span className="text-sm font-bold text-foreground">
               {isLoading ? "-" : item.value}
