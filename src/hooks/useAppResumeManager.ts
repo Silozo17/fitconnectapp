@@ -2,7 +2,7 @@
  * Simplified App Resume Manager
  * 
  * Handles app resume/visibility events with a simple debounced approach.
- * Removed: priority system, staggered delays, handler registration.
+ * Includes native app route protection on resume.
  * 
  * The old system had 300+ lines for something that React Query 
  * and Supabase handle automatically.
@@ -10,9 +10,27 @@
 
 import { useEffect, useRef, useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { isDespia } from '@/lib/despia';
+import { getBestDashboardRoute, getSavedViewState } from '@/lib/view-restoration';
 
 const RESUME_DEBOUNCE_MS = 2000;
+
+/**
+ * Routes that are considered "public" website pages
+ * Native app users should never land on these after resume
+ */
+const PUBLIC_ROUTES = ['/', '/coaches', '/about', '/faq', '/pricing', '/for-coaches', 
+  '/how-it-works', '/success-stories', '/contact', '/community', '/marketplace', 
+  '/blog', '/install', '/trust-and-verification'];
+
+function isPublicRoute(pathname: string): boolean {
+  if (pathname === '/') return true;
+  return PUBLIC_ROUTES.some(route => 
+    route !== '/' && (pathname === route || pathname.startsWith(route + '/'))
+  );
+}
 
 /**
  * Simple app resume hook - handles visibility changes
@@ -20,8 +38,7 @@ const RESUME_DEBOUNCE_MS = 2000;
  * What it does:
  * 1. Starts Supabase auto-refresh on visibility
  * 2. Invalidates stale React Query data
- * 
- * That's it. No priority queues, no handler registration.
+ * 3. Redirects native app users away from public pages on resume
  */
 export function useSimpleAppResume() {
   const queryClient = useQueryClient();
@@ -41,6 +58,22 @@ export function useSimpleAppResume() {
     queryClient.invalidateQueries({ 
       predicate: (query) => query.isStale()
     });
+
+    // Native app route protection on resume
+    if (isDespia() && isPublicRoute(window.location.pathname)) {
+      // Check if user is authenticated via session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          // User is authenticated but on a public page - redirect to dashboard
+          const savedRoute = getSavedViewState()?.route;
+          const targetRoute = savedRoute || getBestDashboardRoute(null);
+          window.location.replace(targetRoute);
+        } else {
+          // Not authenticated - redirect to get-started
+          window.location.replace('/get-started');
+        }
+      });
+    }
   }, [queryClient]);
 
   useEffect(() => {
