@@ -207,8 +207,19 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
 
     setTierChangePending(true);
     try {
-      if (newTier === "free") {
-        // Revoke any existing grant and set to free
+      // CRITICAL: For founder tier, ALWAYS use edge function (even without active grant)
+      // The protect_founder_tier trigger blocks direct updates, so we must use the RPC
+      if (originalTier === "founder" && newTier !== "founder") {
+        await revokeGrantedPlan.mutateAsync({
+          grantId: activeGrant?.id || "direct-admin-change",
+          coachId: coach.id,
+          tier: originalTier,
+          coachName: coach.display_name || undefined,
+          targetTier: newTier,
+        });
+        toast.success(`Coach tier changed to ${newTier}`);
+      } else if (newTier === "free") {
+        // Revoke any existing grant and set to free (non-founder case)
         if (activeGrant) {
           await revokeGrantedPlan.mutateAsync({
             grantId: activeGrant.id,
@@ -217,7 +228,7 @@ const EditCoachModal = ({ coach, open, onClose, onSaved }: EditCoachModalProps) 
             coachName: coach.display_name || undefined,
           });
         } else {
-          // Just update the profile directly if no grant exists
+          // Direct update is OK for non-founder tiers
           await supabase
             .from("coach_profiles")
             .update({ subscription_tier: "free" })
