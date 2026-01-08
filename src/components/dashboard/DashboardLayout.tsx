@@ -1,4 +1,5 @@
 import { useState, useEffect, memo, useCallback, useMemo } from "react";
+import { flushSync } from "react-dom";
 import { useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,6 +22,7 @@ import CoachProfileSummary from "@/components/dashboard/coach/CoachProfileSummar
 import { DiscoverModal } from "@/components/discover/DiscoverModal";
 import PageLoadingSpinner from "@/components/shared/PageLoadingSpinner";
 import { ErrorBoundary } from "@/components/shared/ErrorBoundary";
+import { MOBILE_NAV_CLOSE_EVENT } from "@/lib/mobile-nav";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -66,6 +68,15 @@ const DashboardLayoutInner = memo(({ children, title = "Coach Dashboard", descri
   
   useCoachProfileRealtime();
   usePlatformSubscriptionRealtime();
+
+  // Listen for global close event (e.g., from ViewSwitcher) and close immediately
+  useEffect(() => {
+    const handleCloseRequest = () => {
+      flushSync(() => setMobileOpen(false));
+    };
+    window.addEventListener(MOBILE_NAV_CLOSE_EVENT, handleCloseRequest);
+    return () => window.removeEventListener(MOBILE_NAV_CLOSE_EVENT, handleCloseRequest);
+  }, []);
 
   const handleToggleSidebar = useCallback(() => {
     setSidebarCollapsed(prev => !prev);
