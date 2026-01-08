@@ -65,24 +65,28 @@ Deno.serve(async (req) => {
     // Parse request body
     const { grantId, coachId, currentTier, targetTier = "free" } = await req.json();
 
-    if (!grantId || !coachId) {
-      return errorResponse("Missing required fields: grantId, coachId", 400);
+    if (!coachId) {
+      return errorResponse("Missing required field: coachId", 400);
     }
 
     logStep("Revoking plan", { grantId, coachId, currentTier, targetTier });
 
-    // Step 1: Deactivate the grant record
-    const { error: grantError } = await supabaseAdmin
-      .from("admin_granted_subscriptions")
-      .update({ is_active: false })
-      .eq("id", grantId);
+    // Step 1: Deactivate the grant record (if a real grant ID was provided)
+    if (grantId && grantId !== "direct-admin-change") {
+      const { error: grantError } = await supabaseAdmin
+        .from("admin_granted_subscriptions")
+        .update({ is_active: false })
+        .eq("id", grantId);
 
-    if (grantError) {
-      logStep("Failed to deactivate grant", { error: grantError.message });
-      return errorResponse(`Failed to deactivate grant: ${grantError.message}`, 500);
+      if (grantError) {
+        logStep("Failed to deactivate grant (might not exist)", { error: grantError.message });
+        // Don't fail - grant might not exist, continue with tier update
+      } else {
+        logStep("Grant deactivated");
+      }
+    } else {
+      logStep("No grant to deactivate (direct admin change)");
     }
-
-    logStep("Grant deactivated");
 
     // Step 2: Use the admin_update_coach_tier function to bypass founder protection
     const { error: tierError } = await supabaseAdmin.rpc("admin_update_coach_tier", {
