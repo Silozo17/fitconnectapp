@@ -374,23 +374,24 @@ export const useRevokeGrantedPlan = () => {
   const logAction = useLogAdminAction();
   
   return useMutation({
-    mutationFn: async ({ grantId, coachId, tier, coachName }: { 
+    mutationFn: async ({ grantId, coachId, tier, coachName, targetTier = "free" }: { 
       grantId: string; 
       coachId: string;
       tier?: string;
       coachName?: string;
+      targetTier?: string;
     }) => {
-      const { error } = await supabase
-        .from("admin_granted_subscriptions")
-        .update({ is_active: false })
-        .eq("id", grantId);
+      // Use edge function to bypass founder protection trigger
+      const { error } = await supabase.functions.invoke("admin-revoke-plan", {
+        body: { 
+          grantId, 
+          coachId, 
+          currentTier: tier,
+          targetTier,
+        }
+      });
+      
       if (error) throw error;
-
-      // Reset coach's subscription tier to free
-      await supabase
-        .from("coach_profiles")
-        .update({ subscription_tier: "free" })
-        .eq("id", coachId);
 
       // Log the action
       await logAction.log({
@@ -401,7 +402,7 @@ export const useRevokeGrantedPlan = () => {
           coach: coachName || coachId, 
           tier: tier || "unknown" 
         },
-        newValues: { tier: "free" },
+        newValues: { tier: targetTier },
       });
     },
     onSuccess: () => {
