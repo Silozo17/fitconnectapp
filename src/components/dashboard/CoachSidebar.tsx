@@ -156,7 +156,7 @@ const menuGroups: MenuGroup[] = [
     icon: BarChart3,
     collapsible: true,
     items: [
-      { titleKey: "navigation.coach.packageAnalytics", icon: BarChart3, path: "/dashboard/coach/analytics/packages", requiredFeature: "package_analytics" },
+      { titleKey: "navigation.coach.packageAnalytics", icon: BarChart3, path: "/dashboard/coach/package-analytics", requiredFeature: "package_analytics" },
       { titleKey: "navigation.coach.earnings", icon: DollarSign, path: "/dashboard/coach/earnings", requiredFeature: "basic_analytics" },
     ],
   },
