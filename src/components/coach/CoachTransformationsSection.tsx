@@ -26,7 +26,7 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
   return (
     <>
       <div 
-        className="overflow-hidden cursor-pointer rounded-xl bg-muted/30 hover:bg-muted/50 transition-all duration-300 hover:scale-[1.02]"
+        className="cursor-pointer hover:bg-muted/20 transition-colors duration-200 py-4 border-b border-border/30 last:border-b-0"
         onClick={() => setShowDetail(true)}
       >
         {/* Before/After Images */}

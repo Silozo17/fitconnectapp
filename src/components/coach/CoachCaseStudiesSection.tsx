@@ -18,7 +18,7 @@ function CaseStudyCard({ caseStudy }: { caseStudy: PublicCaseStudy }) {
   return (
     <>
       <div 
-        className="cursor-pointer rounded-xl bg-muted/30 p-4 hover:bg-muted/50 transition-all duration-300 hover:scale-[1.01]"
+        className="cursor-pointer hover:bg-muted/20 transition-colors duration-200 py-3 border-b border-border/30 last:border-b-0"
         onClick={() => setShowDetail(true)}
       >
         <div className="flex items-start gap-3">
