@@ -1,10 +1,18 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Package } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import ProductCard from "@/components/marketplace/ProductCard";
 import { DigitalProduct } from "@/hooks/useDigitalProducts";
 import { useTranslation } from "@/hooks/useTranslation";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CoachDigitalProductsSectionProps {
   coachId: string;
@@ -37,21 +45,17 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-5 w-5" />
-            {t('profile.digitalProducts')}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="aspect-[16/9] bg-muted animate-pulse rounded-lg" />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <ContentSection colorTheme="purple">
+        <ContentSectionHeader
+          icon={Package}
+          title={t('profile.digitalProducts')}
+        />
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="aspect-[16/9] rounded-lg" />
+          ))}
+        </div>
+      </ContentSection>
     );
   }
 
@@ -60,20 +64,41 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          {t('profile.digitalProducts')} ({products.length})
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} compact />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <ContentSection colorTheme="purple">
+      <ContentSectionHeader
+        icon={Package}
+        title={`${t('profile.digitalProducts')} (${products.length})`}
+      />
+      
+      <div className="pt-4">
+        {products.length <= 3 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} compact />
+            ))}
+          </div>
+        ) : (
+          <Carousel
+            opts={{
+              align: "start",
+              loop: products.length > 3,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-3">
+              {products.map((product) => (
+                <CarouselItem key={product.id} className="pl-3 basis-1/2 md:basis-1/3">
+                  <ProductCard product={product} compact />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <CarouselPrevious className="static translate-y-0" />
+              <CarouselNext className="static translate-y-0" />
+            </div>
+          </Carousel>
+        )}
+      </div>
+    </ContentSection>
   );
 }

@@ -1,5 +1,5 @@
-import { Package, RefreshCcw, Check } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Package, Check } from "lucide-react";
+import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useCoachPackages, useCoachSubscriptionPlans } from "@/hooks/usePackages";
@@ -27,15 +27,16 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-40" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-32 w-full" />
-          <Skeleton className="h-32 w-full" />
-        </CardContent>
-      </Card>
+      <ContentSection colorTheme="green">
+        <ContentSectionHeader
+          icon={Package}
+          title={t('profile.pricingPackages')}
+        />
+        <div className="space-y-4 pt-4">
+          <Skeleton className="h-32 w-full rounded-xl" />
+          <Skeleton className="h-32 w-full rounded-xl" />
+        </div>
+      </ContentSection>
     );
   }
 
@@ -44,14 +45,13 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          {t('profile.pricingPackages')}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <ContentSection colorTheme="green">
+      <ContentSectionHeader
+        icon={Package}
+        title={t('profile.pricingPackages')}
+      />
+      
+      <div className="pt-4">
         <Tabs defaultValue={hasPackages ? "packages" : "subscriptions"}>
           <TabsList className="mb-4">
             {hasPackages && (
@@ -67,7 +67,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
           </TabsList>
 
           {hasPackages && (
-            <TabsContent value="packages" className="space-y-4">
+            <TabsContent value="packages" className="space-y-3">
               {packages.map((pkg) => {
                 const pkgCurrency = (pkg.currency as CurrencyCode) || 'GBP';
                 const convertedPrice = convertForViewer(pkg.price, pkgCurrency);
@@ -76,7 +76,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                 return (
                   <div
                     key={pkg.id}
-                    className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                    className="bg-muted/30 rounded-xl p-4 hover:bg-muted/40 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -120,7 +120,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
           )}
 
           {hasPlans && (
-            <TabsContent value="subscriptions" className="space-y-4">
+            <TabsContent value="subscriptions" className="space-y-3">
               {plans.map((plan) => {
                 const planCurrency = (plan.currency as CurrencyCode) || 'GBP';
                 const convertedPrice = convertForViewer(plan.price, planCurrency);
@@ -128,7 +128,7 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                 return (
                   <div
                     key={plan.id}
-                    className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors"
+                    className="bg-muted/30 rounded-xl p-4 hover:bg-muted/40 transition-colors"
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
@@ -185,8 +185,8 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
             </TabsContent>
           )}
         </Tabs>
-      </CardContent>
-    </Card>
+      </div>
+    </ContentSection>
   );
 };
 

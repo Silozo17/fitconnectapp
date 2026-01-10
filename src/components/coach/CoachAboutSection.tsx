@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { User, Target, ChevronDown, ChevronUp } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface CoachAboutSectionProps {
@@ -33,14 +32,12 @@ export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps)
   // If only one section has content, show simple layout
   if (!hasWhoIWorkWith && hasBio) {
     return (
-      <Card className="overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10">
-              <User className="h-5 w-5 text-primary" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground">{t('profile.aboutMe')}</h2>
-          </div>
+      <ContentSection colorTheme="primary">
+        <ContentSectionHeader
+          icon={User}
+          title={t('profile.aboutMe')}
+        />
+        <div className="pt-4">
           <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
             {displayBio}
           </p>
@@ -64,33 +61,31 @@ export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps)
               )}
             </Button>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </ContentSection>
     );
   }
 
   if (!hasBio && hasWhoIWorkWith) {
     return (
-      <Card className="overflow-hidden">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-accent/10">
-              <Target className="h-5 w-5 text-accent-foreground" />
-            </div>
-            <h2 className="text-xl font-semibold text-foreground">{t('profile.whoIWorkWith')}</h2>
-          </div>
+      <ContentSection colorTheme="blue">
+        <ContentSectionHeader
+          icon={Target}
+          title={t('profile.whoIWorkWith')}
+        />
+        <div className="pt-4">
           <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
             {whoIWorkWith}
           </p>
-        </CardContent>
-      </Card>
+        </div>
+      </ContentSection>
     );
   }
 
   // Both sections have content - use tabs
   return (
-    <Card className="overflow-hidden">
-      <CardContent className="p-6">
+    <ContentSection colorTheme="primary">
+      <div className="pt-2">
         <Tabs defaultValue="about" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="about" className="flex items-center gap-2">
@@ -135,7 +130,7 @@ export function CoachAboutSection({ bio, whoIWorkWith }: CoachAboutSectionProps)
             </p>
           </TabsContent>
         </Tabs>
-      </CardContent>
-    </Card>
+      </div>
+    </ContentSection>
   );
 }

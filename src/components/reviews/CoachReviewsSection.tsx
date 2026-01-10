@@ -1,9 +1,16 @@
 import { Star, MessageSquareText } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import ReviewCard from "./ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 interface CoachReviewsSectionProps {
   coachId: string;
@@ -16,27 +23,26 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <Skeleton className="h-6 w-32" />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
-        </CardContent>
-      </Card>
+      <ContentSection colorTheme="orange">
+        <ContentSectionHeader
+          icon={MessageSquareText}
+          title={t('profile.reviews')}
+        />
+        <div className="space-y-4 pt-4">
+          <Skeleton className="h-24 w-full rounded-2xl" />
+          <Skeleton className="h-24 w-full rounded-2xl" />
+        </div>
+      </ContentSection>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquareText className="h-5 w-5" />
-            {t('profile.reviews')}
-          </CardTitle>
-          {reviews.length > 0 && (
+    <ContentSection colorTheme="orange">
+      <ContentSectionHeader
+        icon={MessageSquareText}
+        title={t('profile.reviews')}
+        badge={
+          reviews.length > 0 ? (
             <div className="flex items-center gap-2">
               <div className="flex items-center gap-1 bg-amber-500/10 px-3 py-1.5 rounded-full">
                 <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
@@ -46,10 +52,11 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
                 ({reviews.length} {reviews.length !== 1 ? t('profile.reviewPlural') : t('profile.review')})
               </span>
             </div>
-          )}
-        </div>
-      </CardHeader>
-      <CardContent>
+          ) : null
+        }
+      />
+      
+      <div className="pt-4">
         {reviews.length === 0 ? (
           <div className="text-center py-8">
             <MessageSquareText className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
@@ -58,15 +65,37 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
               {t('profile.beFirstReview')}
             </p>
           </div>
-        ) : (
-          <div className="space-y-4">
+        ) : reviews.length <= 2 ? (
+          // Show as stack for 1-2 reviews
+          <div className="space-y-3">
             {reviews.map((review) => (
               <ReviewCard key={review.id} review={review} />
             ))}
           </div>
+        ) : (
+          // Carousel for 3+ reviews
+          <Carousel
+            opts={{
+              align: "start",
+              loop: reviews.length > 3,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-3">
+              {reviews.map((review) => (
+                <CarouselItem key={review.id} className="pl-3 basis-full sm:basis-1/2 lg:basis-1/3">
+                  <ReviewCard review={review} className="h-full" />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex items-center justify-center gap-2 mt-4">
+              <CarouselPrevious className="static translate-y-0" />
+              <CarouselNext className="static translate-y-0" />
+            </div>
+          </Carousel>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </ContentSection>
   );
 };
 
