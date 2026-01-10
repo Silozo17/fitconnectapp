@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { parseSimpleMarkdown } from "@/lib/markdown-utils";
 
 interface Props {
   open: boolean;
@@ -66,9 +67,12 @@ export function CaseStudyPreview({ open, onOpenChange, caseStudy }: Props) {
                 <Separator />
                 <div>
                   <h3 className="font-semibold mb-2">{t("caseStudies.fullNarrative")}</h3>
-                  <div className="prose prose-sm dark:prose-invert max-w-none">
-                    {caseStudy.generated_narrative}
-                  </div>
+                  <div 
+                    className="prose prose-sm dark:prose-invert max-w-none"
+                    dangerouslySetInnerHTML={{ 
+                      __html: parseSimpleMarkdown(caseStudy.generated_narrative) 
+                    }}
+                  />
                 </div>
               </>
             )}

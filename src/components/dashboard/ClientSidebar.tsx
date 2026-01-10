@@ -141,7 +141,6 @@ const menuGroupsConfig: MenuGroup[] = [
       { titleKey: "navigation.client.tools", icon: Calculator, path: "/dashboard/client/tools" },
       { titleKey: "navigation.client.shopping", icon: ShoppingCart, path: "/dashboard/client/grocery" },
       { titleKey: "navigation.client.receipts", icon: Receipt, path: "/dashboard/client/receipts" },
-      { titleKey: "navigation.client.integrations", icon: Plug, path: "/dashboard/client/integrations" },
       { titleKey: "navigation.client.favourites", icon: Heart, path: "/dashboard/client/favourites" },
       // Hidden for now - uncomment to restore: { titleKey: "Debug", icon: Bug, path: "/debug" },
     ],

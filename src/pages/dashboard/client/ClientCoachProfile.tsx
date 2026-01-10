@@ -28,6 +28,8 @@ import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisp
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
 import { CoachQualificationsSection } from "@/components/coach/CoachQualificationsSection";
 import { MobileBookingCard } from "@/components/coach/MobileBookingBar";
+import { CoachTransformationsSection } from "@/components/coach/CoachTransformationsSection";
+import { CoachCaseStudiesSection } from "@/components/coach/CoachCaseStudiesSection";
 
 const ClientCoachProfile = () => {
   const { username } = useParams<{ username: string }>();
@@ -155,6 +157,12 @@ const ClientCoachProfile = () => {
 
           {/* Gallery Section */}
           <CoachGallerySection coachId={coach.id} />
+
+          {/* Transformations Section */}
+          <CoachTransformationsSection coachId={coach.id} />
+
+          {/* Case Studies Section */}
+          <CoachCaseStudiesSection coachId={coach.id} />
 
           {/* Pricing & Packages */}
           <CoachPricingSection coachId={coach.id} />
