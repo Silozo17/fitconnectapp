@@ -114,7 +114,7 @@ const MyProfile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background p-6 pt-safe-status">
       <div className="max-w-3xl mx-auto space-y-6">
         {/* Back Button */}
         <Button
@@ -126,7 +126,7 @@ const MyProfile = () => {
               navigate("/dashboard");
             }
           }}
-          className="mb-2"
+          className="mb-2 mt-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back

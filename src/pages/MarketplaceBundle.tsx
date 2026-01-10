@@ -98,8 +98,8 @@ export default function MarketplaceBundle() {
         schema={[bundleSchema, breadcrumbSchema]}
       />
       <PageLayout title={bundle.title} description={bundle.description || "Digital bundle from FitConnect"}>
-        <div className="min-h-screen bg-background">
-          <div className="container mx-auto px-4 pt-24 md:pt-28 pb-8">
+        <div className="min-h-screen bg-background pt-safe-status">
+          <div className="container mx-auto px-4 pt-16 md:pt-24 pb-8">
             {/* Back Button */}
             <Button
               variant="ghost"

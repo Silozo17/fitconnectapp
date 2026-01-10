@@ -151,9 +151,9 @@ const CoachDetail = () => {
       ]}
       schema={[coachSchema, breadcrumbSchema]}
     >
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background pt-safe-status">
           {/* Back Button */}
-          <div className="container mx-auto px-4 pt-24 pb-4">
+          <div className="container mx-auto px-4 pt-16 md:pt-24 pb-4">
             <Button variant="ghost" asChild size="sm">
               <Link to="/coaches">
                 <ArrowLeft className="h-4 w-4 mr-2" />
