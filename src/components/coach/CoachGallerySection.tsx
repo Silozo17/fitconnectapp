@@ -34,7 +34,7 @@ export function CoachGallerySection({ coachId }: CoachGallerySectionProps) {
           icon={ImageIcon}
           title={t('profile.gallery') || 'Gallery'}
         />
-        <div className="grid grid-cols-4 md:grid-cols-5 gap-2 pt-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 pt-4">
           {[1, 2, 3, 4].map((i) => (
             <Skeleton key={i} className="aspect-square rounded-lg" />
           ))}
@@ -50,7 +50,7 @@ export function CoachGallerySection({ coachId }: CoachGallerySectionProps) {
           icon={ImageIcon}
           title={`${t('profile.gallery') || 'Gallery'} (${galleryImages?.length || 0})`}
         />
-        <div className="grid grid-cols-4 md:grid-cols-5 gap-2 pt-4">
+        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 pt-4">
           {galleryImages?.map((image) => (
             <button
               key={image.id}

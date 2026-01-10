@@ -56,7 +56,7 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
         }
       />
       
-      <div className="pt-4">
+      <div className="pt-4 overflow-hidden">
         {reviews.length === 0 ? (
           <div className="text-center py-8">
             <MessageSquareText className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
@@ -79,11 +79,11 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
               align: "start",
               loop: reviews.length > 3,
             }}
-            className="w-full"
+            className="w-full max-w-full"
           >
-            <CarouselContent className="-ml-3">
+            <CarouselContent className="-ml-2">
               {reviews.map((review) => (
-                <CarouselItem key={review.id} className="pl-3 basis-full sm:basis-1/2 lg:basis-1/3">
+                <CarouselItem key={review.id} className="pl-2 basis-[85%] sm:basis-1/2 lg:basis-1/3">
                   <ReviewCard review={review} className="h-full" />
                 </CarouselItem>
               ))}
