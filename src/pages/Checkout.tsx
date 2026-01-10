@@ -66,7 +66,7 @@ export default function Checkout() {
   // Validate required params
   if (!type || !itemId) {
     return (
-      <div className="min-h-screen bg-[#0D0D14] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0D0D14] flex items-center justify-center p-4 pt-safe-status">
         <div className="bg-card rounded-xl p-8 max-w-md text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Invalid Checkout</h1>
           <p className="text-muted-foreground mb-6">
@@ -100,7 +100,7 @@ export default function Checkout() {
   // Error state
   if (error || !item) {
     return (
-      <div className="min-h-screen bg-[#0D0D14] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#0D0D14] flex items-center justify-center p-4 pt-safe-status">
         <div className="bg-card rounded-xl p-8 max-w-md text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Product Not Found</h1>
           <p className="text-muted-foreground mb-6">
@@ -119,7 +119,7 @@ export default function Checkout() {
   return (
     <div className="min-h-screen flex flex-col md:flex-row relative overflow-hidden">
       {/* Left Side - Dark */}
-      <div className="w-full md:w-1/2 bg-[#0D0D14] p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col relative overflow-hidden">
+      <div className="w-full md:w-1/2 bg-[#0D0D14] p-6 sm:p-8 md:p-10 lg:p-12 pt-safe-status flex flex-col relative overflow-hidden">
         
         {/* Back Link */}
         <button
@@ -338,7 +338,7 @@ export default function Checkout() {
       {/* Mobile Checkout Sheet */}
       {showMobileCheckout && user && (
         <div className="md:hidden fixed inset-0 z-50 bg-white overflow-auto">
-          <div className="p-4 border-b sticky top-0 bg-white">
+          <div className="p-4 border-b sticky top-0 bg-white pt-safe-status">
             <button
               onClick={() => setShowMobileCheckout(false)}
               className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"

@@ -560,7 +560,7 @@ const Auth = () => {
 
       <div className="h-dvh bg-background flex overflow-hidden">
         {/* Left side - Form */}
-        <div className="flex-1 flex items-center justify-center p-4 sm:p-8 overflow-y-auto">
+        <div className="flex-1 flex items-center justify-center p-4 sm:p-8 pt-safe-status overflow-y-auto">
           <div className="w-full max-w-md">
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2 mb-4 sm:mb-8">
