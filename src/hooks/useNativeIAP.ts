@@ -534,15 +534,26 @@ export const useNativeIAP = (options?: UseNativeIAPOptions): UseNativeIAPReturn 
 
   /**
    * Handle IAP error callback from Despia
+   * Detects "Product Not Found" errors (products still in Apple review) and shows helpful message
    */
   const handleIAPError = useCallback((error: string) => {
     console.error('[NativeIAP] IAP Error:', error);
     clearPurchaseTimeout();
     triggerHaptic('error');
+    
+    // Detect "Product Not Found" errors - indicates products are still in Apple review
+    const isProductNotFound = error.toLowerCase().includes('product not found') || 
+                              error.toLowerCase().includes('product_not_found') ||
+                              error.toLowerCase().includes('no products found');
+    
+    const displayError = isProductNotFound 
+      ? 'PRODUCT_IN_REVIEW' // Special marker for custom UI handling
+      : error;
+    
     setState(prev => ({
       ...prev,
       purchaseStatus: 'failed',
-      error,
+      error: displayError,
       showUnsuccessfulModal: true,
     }));
   }, [clearPurchaseTimeout]);

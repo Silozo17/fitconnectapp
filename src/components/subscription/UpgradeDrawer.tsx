@@ -476,6 +476,7 @@ export const UpgradeDrawer = ({
       <IAPUnsuccessfulDialog 
         open={iapState.showUnsuccessfulModal} 
         onOpenChange={dismissUnsuccessfulModal}
+        error={iapState.error}
       />
       
       {/* Features Activated Modal */}
