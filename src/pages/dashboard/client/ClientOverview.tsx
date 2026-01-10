@@ -194,13 +194,13 @@ const ClientOverview = () => {
 
       {/* Section: My Discipline(s) */}
       {isDisciplineLoading ? (
-        /* Show skeleton while loading - don't show setup CTA prematurely */
+        /* Show skeleton while loading - match widget height to prevent layout shift */
         <div className="mb-11">
           <DashboardSectionHeader 
             title="My Discipline" 
             description="Loading your training..." 
           />
-          <div className="h-48 bg-muted/20 rounded-2xl animate-pulse" />
+          <div className="h-[340px] bg-muted/20 rounded-2xl animate-pulse" />
         </div>
       ) : hasDisciplines ? (
         <>
