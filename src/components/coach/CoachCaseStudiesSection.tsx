@@ -1,8 +1,8 @@
 import { usePublicCoachCaseStudies, PublicCaseStudy } from "@/hooks/usePublicCoachShowcases";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { FileText, ChevronRight } from "lucide-react";
+import { FileText, ChevronRight, BookOpen } from "lucide-react";
+import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -118,20 +118,17 @@ export function CoachCaseStudiesSection({ coachId }: Props) {
   if (isLoading || caseStudies.length === 0) return null;
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          Success Stories
-          <Badge variant="secondary" className="ml-2">{caseStudies.length}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {caseStudies.map((caseStudy) => (
-            <CaseStudyCard key={caseStudy.id} caseStudy={caseStudy} />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <ContentSection colorTheme="purple" padding="lg">
+      <ContentSectionHeader
+        icon={BookOpen}
+        title="Success Stories"
+        badge={<Badge variant="secondary">{caseStudies.length}</Badge>}
+      />
+      <div className="pt-4 space-y-3">
+        {caseStudies.map((caseStudy) => (
+          <CaseStudyCard key={caseStudy.id} caseStudy={caseStudy} />
+        ))}
+      </div>
+    </ContentSection>
   );
 }
