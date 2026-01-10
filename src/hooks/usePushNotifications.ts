@@ -1,7 +1,8 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { getDespiaRuntime, isDespia } from "@/lib/despia";
+import { isDespia } from "@/lib/despia";
+import despia from "despia-native";
 
 interface PushRegistrationResult {
   success: boolean;
@@ -34,16 +35,11 @@ export const usePushNotifications = () => {
     setIsRegistering(true);
 
     try {
-      const runtime = getDespiaRuntime();
-      if (!runtime) {
-        throw new Error("Despia runtime not available");
-      }
-
       // Get OneSignal player ID from Despia native runtime
       console.log("[Push] Getting OneSignal player ID...");
-      const result = await runtime("getonesignalplayerid://", ["onesignalplayerid"]);
+      const result = await despia("getonesignalplayerid://", ["onesignalplayerid"]);
       console.log("[Push] Player ID result:", JSON.stringify(result));
-
+      
       if (!result?.onesignalplayerid) {
         throw new Error("Failed to get OneSignal player ID - result was empty");
       }
@@ -142,11 +138,8 @@ export const usePushNotifications = () => {
     if (!user || !isDespia()) return;
 
     try {
-      const runtime = getDespiaRuntime();
-      if (!runtime) return;
-
       console.log("[Push] Setting OneSignal external user ID:", user.id);
-      await runtime(`setonesignalplayerid://?user_id=${user.id}`);
+      await despia(`setonesignalplayerid://?user_id=${user.id}`);
       console.log("[Push] External user ID set successfully");
     } catch (error) {
       console.error("[Push] Failed to set external user ID:", error);
@@ -173,11 +166,8 @@ export const usePushNotifications = () => {
 
       // Step 1: Always set external user ID first (links user to device in OneSignal)
       try {
-        const runtime = getDespiaRuntime();
-        if (runtime) {
-          await runtime(`setonesignalplayerid://?user_id=${user.id}`);
-          console.log("[Push] External user ID set successfully");
-        }
+        await despia(`setonesignalplayerid://?user_id=${user.id}`);
+        console.log("[Push] External user ID set successfully");
       } catch (error) {
         console.error("[Push] Failed to set external user ID:", error);
         // Continue anyway - registration can still work

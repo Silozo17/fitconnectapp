@@ -5,8 +5,8 @@
  * iOS shows ONE unified permission dialog.
  */
 
+import despia from 'despia-native';
 import { supabase } from '@/integrations/supabase/client';
-import { getDespiaRuntime } from '@/lib/despia';
 
 // All HealthKit types we need - request together for single permission dialog
 // NOTE: HKQuantityTypeIdentifierAppleExerciseTime excluded - returns time units 
@@ -43,12 +43,7 @@ export const connectAndSyncHealthKit = async (
   }
 
   // ONE call with ALL types - triggers SINGLE permission dialog
-  const runtime = getDespiaRuntime();
-  if (!runtime) {
-    return { connected: false, dataPoints: 0 };
-  }
-
-  const response = await runtime(
+  const response = await despia(
     `healthkit://read?types=${HEALTHKIT_TYPES}&days=${days}`,
     ['healthkitResponse']
   );
