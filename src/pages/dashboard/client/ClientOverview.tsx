@@ -193,40 +193,47 @@ const ClientOverview = () => {
       </WidgetErrorBoundary>
 
       {/* Section: My Discipline(s) */}
-      {!isDisciplineLoading && (
-        hasDisciplines ? (
-          <>
-            <DashboardSectionHeader 
-              title={disciplines.length > 1 ? "My Disciplines" : "My Discipline"}
-              description="Your training at a glance" 
-            />
-            {disciplines.length === 1 ? (
-              <WidgetErrorBoundary widgetName="DisciplineWidget" silent>
-                <DisciplineWidget disciplineId={disciplines[0].discipline_id} className="mb-11" />
-              </WidgetErrorBoundary>
-            ) : (
-              <div className="mb-11 -mx-5 md:mx-0">
-                <Carousel3D gap={16}>
-                  {disciplines.map((d) => (
-                    <Carousel3DItem key={d.id} className="w-[320px] md:w-[360px]">
-                      <WidgetErrorBoundary widgetName="DisciplineWidget" silent>
-                        <DisciplineWidget disciplineId={d.discipline_id} />
-                      </WidgetErrorBoundary>
-                    </Carousel3DItem>
-                  ))}
-                </Carousel3D>
-              </div>
-            )}
-          </>
-        ) : (
-          <>
-            <DashboardSectionHeader 
-              title="Track Your Discipline" 
-              description="Set up personalized sport tracking" 
-            />
-            <DisciplineSetupCTA className="mb-11" />
-          </>
-        )
+      {isDisciplineLoading ? (
+        /* Show skeleton while loading - don't show setup CTA prematurely */
+        <div className="mb-11">
+          <DashboardSectionHeader 
+            title="My Discipline" 
+            description="Loading your training..." 
+          />
+          <div className="h-48 bg-muted/20 rounded-2xl animate-pulse" />
+        </div>
+      ) : hasDisciplines ? (
+        <>
+          <DashboardSectionHeader 
+            title={disciplines.length > 1 ? "My Disciplines" : "My Discipline"}
+            description="Your training at a glance" 
+          />
+          {disciplines.length === 1 ? (
+            <WidgetErrorBoundary widgetName="DisciplineWidget" silent>
+              <DisciplineWidget disciplineId={disciplines[0].discipline_id} className="mb-11" />
+            </WidgetErrorBoundary>
+          ) : (
+            <div className="mb-11 -mx-5 md:mx-0">
+              <Carousel3D gap={16}>
+                {disciplines.map((d) => (
+                  <Carousel3DItem key={d.id} className="w-[320px] md:w-[360px]">
+                    <WidgetErrorBoundary widgetName="DisciplineWidget" silent>
+                      <DisciplineWidget disciplineId={d.discipline_id} />
+                    </WidgetErrorBoundary>
+                  </Carousel3DItem>
+                ))}
+              </Carousel3D>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <DashboardSectionHeader 
+            title="Track Your Discipline" 
+            description="Set up personalized sport tracking" 
+          />
+          <DisciplineSetupCTA className="mb-11" />
+        </>
       )}
 
       {/* Section: Daily Readiness */}

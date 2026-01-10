@@ -20,7 +20,7 @@ export function useClientDisciplines() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Get client profile ID first
+  // Get client profile ID first - with stable caching to prevent flickers
   const { data: clientProfile, isLoading: isLoadingProfile, error: profileError } = useQuery({
     queryKey: ['client-profile-id', user?.id],
     queryFn: async () => {
@@ -37,7 +37,9 @@ export function useClientDisciplines() {
       return data;
     },
     enabled: !!user?.id,
-    retry: 2,
+    retry: 3, // Increased retries for resilience
+    staleTime: 5 * 60 * 1000, // 5 minutes - prevent unnecessary refetches
+    gcTime: 10 * 60 * 1000, // 10 minutes cache
   });
 
   // Debug logging
@@ -99,8 +101,8 @@ export function useClientDisciplines() {
       return data;
     },
     onSuccess: () => {
+      // Only invalidate discipline-related queries, NOT the profile query
       queryClient.invalidateQueries({ queryKey: ['client-disciplines'] });
-      queryClient.invalidateQueries({ queryKey: ['selected-discipline'] });
       queryClient.invalidateQueries({ queryKey: ['discipline-widget'] });
       toast.success('Discipline added!');
     },
