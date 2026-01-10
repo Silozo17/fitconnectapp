@@ -55,6 +55,10 @@ export function useDisciplineWidgetData(disciplineId: string | null) {
     },
     enabled: !!disciplineId && !!user?.id,
     staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep cache for 10 minutes
     refetchOnWindowFocus: false,
+    refetchOnMount: false, // Don't refetch on every render
+    retry: 2, // Retry twice on network errors
+    placeholderData: (previousData) => previousData, // Show stale data immediately
   });
 }

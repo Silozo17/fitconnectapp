@@ -142,10 +142,12 @@ export function Carousel3D({
             return (
               <div
                 key={index}
-                className="flex-shrink-0 transition-transform duration-150 ease-out"
+                className="flex-shrink-0"
                 style={{ 
                   zIndex,
                   transform: `scale(${scale})`,
+                  willChange: 'transform',
+                  transition: 'transform 200ms ease-out',
                 }}
               >
                 {cloneElement(child as React.ReactElement<any>, {

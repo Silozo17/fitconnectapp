@@ -2,7 +2,7 @@
  * DisciplineWidget - Compact discipline tracking card
  */
 
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,8 @@ interface DisciplineWidgetProps {
   className?: string;
 }
 
-export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetProps) {
+// Memoize to prevent re-renders during carousel scroll
+export const DisciplineWidget = memo(function DisciplineWidget({ disciplineId, className }: DisciplineWidgetProps) {
   const navigate = useNavigate();
   const { data, isLoading, error } = useDisciplineWidgetData(disciplineId);
   const [logModalOpen, setLogModalOpen] = useState(false);
@@ -157,7 +158,7 @@ export function DisciplineWidget({ disciplineId, className }: DisciplineWidgetPr
       />
     </>
   );
-}
+});
 
 function DisciplineWidgetSkeleton({ className }: { className?: string }) {
   return (
