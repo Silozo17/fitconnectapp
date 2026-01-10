@@ -1,7 +1,8 @@
 import { usePublicCoachShowcases, PublicShowcase } from "@/hooks/usePublicCoachShowcases";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { TrendingDown, Clock, Percent } from "lucide-react";
+import { TrendingDown, Clock, Percent, TrendingUp } from "lucide-react";
+import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -175,20 +176,17 @@ export function CoachTransformationsSection({ coachId }: Props) {
   if (isLoading || showcases.length === 0) return null;
 
   return (
-    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          Client Transformations
-          <Badge variant="secondary" className="ml-2">{showcases.length}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid sm:grid-cols-2 gap-4">
-          {showcases.map((showcase) => (
-            <TransformationCard key={showcase.id} showcase={showcase} />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
+    <ContentSection colorTheme="green" padding="lg">
+      <ContentSectionHeader
+        icon={TrendingUp}
+        title="Client Transformations"
+        badge={<Badge variant="secondary">{showcases.length}</Badge>}
+      />
+      <div className="pt-4 grid sm:grid-cols-2 gap-4">
+        {showcases.map((showcase) => (
+          <TransformationCard key={showcase.id} showcase={showcase} />
+        ))}
+      </div>
+    </ContentSection>
   );
 }
