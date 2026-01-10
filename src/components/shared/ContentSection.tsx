@@ -107,7 +107,7 @@ export const ContentSection = memo(({
   return (
     <div
       className={cn(
-        "relative bg-gradient-to-br rounded-2xl border overflow-hidden",
+        "relative bg-gradient-to-br rounded-2xl border overflow-hidden max-w-full",
         styles.bg,
         styles.border,
         paddingStyles[padding],

@@ -5,13 +5,6 @@ import { ContentSection, ContentSectionHeader } from "@/components/shared/Conten
 import ProductCard from "@/components/marketplace/ProductCard";
 import { DigitalProduct } from "@/hooks/useDigitalProducts";
 import { useTranslation } from "@/hooks/useTranslation";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface CoachDigitalProductsSectionProps {
@@ -50,9 +43,9 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
           icon={Package}
           title={t('profile.digitalProducts')}
         />
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-4">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="aspect-[16/9] rounded-lg" />
+            <Skeleton key={i} className="h-32 rounded-lg" />
           ))}
         </div>
       </ContentSection>
@@ -70,34 +63,12 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
         title={`${t('profile.digitalProducts')} (${products.length})`}
       />
       
-      <div className="pt-4 overflow-hidden">
-        {products.length <= 3 ? (
-          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} compact />
-            ))}
-          </div>
-        ) : (
-          <Carousel
-            opts={{
-              align: "start",
-              loop: products.length > 3,
-            }}
-            className="w-full max-w-full"
-          >
-            <CarouselContent className="-ml-2">
-              {products.map((product) => (
-                <CarouselItem key={product.id} className="pl-2 basis-[75%] xs:basis-1/2 md:basis-1/3">
-                  <ProductCard product={product} compact />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            <div className="flex items-center justify-center gap-2 mt-4">
-              <CarouselPrevious className="static translate-y-0" />
-              <CarouselNext className="static translate-y-0" />
-            </div>
-          </Carousel>
-        )}
+      <div className="pt-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-3">
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} compact />
+          ))}
+        </div>
       </div>
     </ContentSection>
   );

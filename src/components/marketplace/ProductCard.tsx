@@ -116,7 +116,7 @@ export default function ProductCard({ product, viewMode = "grid", compact = fals
         className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group min-w-0"
         onClick={() => navigate(productUrl)}
       >
-        <div className="aspect-[16/9] relative overflow-hidden">
+        <div className="h-24 sm:h-28 relative overflow-hidden">
           {product.cover_image_url ? (
             <img src={product.cover_image_url} alt={product.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
           ) : (
