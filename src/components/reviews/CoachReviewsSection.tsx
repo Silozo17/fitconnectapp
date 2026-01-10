@@ -1,4 +1,3 @@
-import { useRef, useCallback, useEffect, useState } from "react";
 import { Star, MessageSquareText } from "lucide-react";
 import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
@@ -6,8 +5,7 @@ import ReviewCard from "./ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
-import useEmblaCarousel from "embla-carousel-react";
-import Autoplay from "embla-carousel-autoplay";
+import { useState } from "react";
 
 interface CoachReviewsSectionProps {
   coachId: string;
@@ -19,34 +17,7 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
   const averageRating = calculateAverageRating(reviews);
   const [showAll, setShowAll] = useState(false);
 
-  // Create autoplay plugin with pause on hover/touch
-  const autoplayPlugin = useRef(
-    Autoplay({
-      delay: 2000,
-      stopOnInteraction: false,
-      stopOnMouseEnter: true,
-      stopOnFocusIn: true,
-    })
-  );
-
-  // Direct Embla usage - no negative margin gutter pattern
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    {
-      align: "start",
-      loop: true,
-      containScroll: "trimSnaps",
-    },
-    [autoplayPlugin.current]
-  );
-
-  // Pause on pointer down, resume on pointer up
-  const handlePointerDown = useCallback(() => {
-    autoplayPlugin.current?.stop?.();
-  }, []);
-
-  const handlePointerUp = useCallback(() => {
-    autoplayPlugin.current?.reset?.();
-  }, []);
+  const displayedReviews = showAll ? reviews : reviews.slice(0, 3);
 
   if (isLoading) {
     return (
@@ -92,50 +63,27 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
               {t('profile.beFirstReview')}
             </p>
           </div>
-        ) : showAll ? (
-          <div className="space-y-3">
-            {reviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
-            <Button 
-              variant="ghost" 
-              className="w-full"
-              onClick={() => setShowAll(false)}
-            >
-              Show less
-            </Button>
-          </div>
         ) : (
           <div className="space-y-3">
-            {/* Carousel viewport - strict overflow containment, no negative margins */}
-            <div 
-              className="w-full overflow-hidden"
-              ref={emblaRef}
-              onPointerDown={handlePointerDown}
-              onPointerUp={handlePointerUp}
-              onPointerLeave={handlePointerUp}
-              onPointerCancel={handlePointerUp}
-            >
-              {/* Carousel track - simple flex, no negative margin gutter */}
-              <div className="flex w-full">
-                {reviews.map((review) => (
-                  <div 
-                    key={review.id} 
-                    className="min-w-0 shrink-0 grow-0 basis-full"
-                  >
-                    <ReviewCard review={review} />
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            {reviews.length > 1 && (
+            {displayedReviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+            {reviews.length > 3 && !showAll && (
               <Button 
                 variant="ghost" 
                 className="w-full"
                 onClick={() => setShowAll(true)}
               >
                 View all {reviews.length} reviews
+              </Button>
+            )}
+            {showAll && reviews.length > 3 && (
+              <Button 
+                variant="ghost" 
+                className="w-full"
+                onClick={() => setShowAll(false)}
+              >
+                Show less
               </Button>
             )}
           </div>
