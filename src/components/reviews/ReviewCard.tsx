@@ -17,7 +17,7 @@ const ReviewCard = ({ review, className }: ReviewCardProps) => {
     : "Anonymous";
 
   return (
-    <div className={cn("py-3 border-b border-border/30 last:border-b-0", className)}>
+    <div className={cn("bg-muted/30 rounded-2xl p-4", className)}>
       <div className="flex items-start gap-3">
         <UserAvatar
           src={review.client?.avatar_url}

@@ -1,5 +1,7 @@
 import { usePublicCoachCaseStudies, PublicCaseStudy } from "@/hooks/usePublicCoachShowcases";
-import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { FileText, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,27 +19,29 @@ function CaseStudyCard({ caseStudy }: { caseStudy: PublicCaseStudy }) {
 
   return (
     <>
-      <div 
-        className="cursor-pointer hover:bg-muted/20 transition-colors duration-200 py-3 border-b border-border/30 last:border-b-0"
+      <Card 
+        className="cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.01] border-border/50"
         onClick={() => setShowDetail(true)}
       >
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-            <FileText className="h-5 w-5 text-primary" />
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+              <FileText className="h-5 w-5 text-primary" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground line-clamp-1 mb-1">
+                {caseStudy.title}
+              </h3>
+              {content.summary && (
+                <p className="text-sm text-muted-foreground line-clamp-2">
+                  {content.summary}
+                </p>
+              )}
+            </div>
+            <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
           </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground line-clamp-1 mb-1">
-              {caseStudy.title}
-            </h3>
-            {content.summary && (
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {content.summary}
-              </p>
-            )}
-          </div>
-          <ChevronRight className="h-5 w-5 text-muted-foreground shrink-0" />
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Case Study Detail Modal */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
@@ -114,16 +118,20 @@ export function CoachCaseStudiesSection({ coachId }: Props) {
   if (isLoading || caseStudies.length === 0) return null;
 
   return (
-    <ContentSection colorTheme="purple">
-      <ContentSectionHeader
-        icon={FileText}
-        title={`Success Stories (${caseStudies.length})`}
-      />
-      <div className="space-y-3 pt-4">
-        {caseStudies.map((caseStudy) => (
-          <CaseStudyCard key={caseStudy.id} caseStudy={caseStudy} />
-        ))}
-      </div>
-    </ContentSection>
+    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          Success Stories
+          <Badge variant="secondary" className="ml-2">{caseStudies.length}</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {caseStudies.map((caseStudy) => (
+            <CaseStudyCard key={caseStudy.id} caseStudy={caseStudy} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

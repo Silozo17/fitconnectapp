@@ -1,6 +1,7 @@
 import { usePublicCoachShowcases, PublicShowcase } from "@/hooks/usePublicCoachShowcases";
-import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
-import { TrendingUp, TrendingDown, Clock, Percent } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { TrendingDown, Clock, Percent } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -25,8 +26,8 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
 
   return (
     <>
-      <div 
-        className="cursor-pointer hover:bg-muted/20 transition-colors duration-200 py-4 border-b border-border/30 last:border-b-0"
+      <Card 
+        className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-border/50"
         onClick={() => setShowDetail(true)}
       >
         {/* Before/After Images */}
@@ -39,7 +40,7 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
                   alt="Before" 
                   className="w-full h-full object-cover"
                 />
-                <span className="absolute bottom-2 left-2 px-2 py-1 rounded-full text-xs font-medium bg-background/80 text-foreground">Before</span>
+                <Badge className="absolute bottom-2 left-2 bg-background/80 text-foreground">Before</Badge>
               </div>
             )}
             {showcase.after_photo_url && (
@@ -49,18 +50,18 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
                   alt="After" 
                   className="w-full h-full object-cover"
                 />
-                <span className="absolute bottom-2 right-2 px-2 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground">After</span>
+                <Badge className="absolute bottom-2 right-2 bg-primary text-primary-foreground">After</Badge>
               </div>
             )}
           </div>
         )}
 
-        <div className="p-4">
+        <CardContent className="p-4">
           <div className="flex items-start justify-between gap-2 mb-3">
             <h3 className="font-semibold text-foreground line-clamp-1">{showcase.title || showcase.display_name || "Transformation"}</h3>
-            <span className="shrink-0 px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+            <Badge variant="secondary" className="shrink-0">
               {goalTypeLabels[goalType] || "Fitness"}
-            </span>
+            </Badge>
           </div>
 
           {showcase.description && (
@@ -92,8 +93,8 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
               )}
             </div>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Detail Modal */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
@@ -113,7 +114,7 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
                         alt="Before" 
                         className="w-full h-full object-cover"
                       />
-                      <span className="absolute bottom-2 left-2 px-2 py-1 rounded-full text-xs font-medium bg-background/80">Before</span>
+                      <Badge className="absolute bottom-2 left-2 bg-background/80">Before</Badge>
                     </div>
                   )}
                   {showcase.after_photo_url && (
@@ -123,15 +124,15 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
                         alt="After" 
                         className="w-full h-full object-cover"
                       />
-                      <span className="absolute bottom-2 right-2 px-2 py-1 rounded-full text-xs font-medium bg-primary text-primary-foreground">After</span>
+                      <Badge className="absolute bottom-2 right-2 bg-primary">After</Badge>
                     </div>
                   )}
                 </div>
               )}
 
-              <span className="inline-block px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+              <Badge variant="secondary">
                 {goalTypeLabels[goalType] || "Fitness"}
-              </span>
+              </Badge>
 
               {showcase.description && (
                 <p className="text-muted-foreground">{showcase.description}</p>
@@ -174,16 +175,20 @@ export function CoachTransformationsSection({ coachId }: Props) {
   if (isLoading || showcases.length === 0) return null;
 
   return (
-    <ContentSection colorTheme="green">
-      <ContentSectionHeader
-        icon={TrendingUp}
-        title={`Client Transformations (${showcases.length})`}
-      />
-      <div className="grid sm:grid-cols-2 gap-4 pt-4">
-        {showcases.map((showcase) => (
-          <TransformationCard key={showcase.id} showcase={showcase} />
-        ))}
-      </div>
-    </ContentSection>
+    <Card className="border-border/50 bg-card/50 backdrop-blur-sm">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          Client Transformations
+          <Badge variant="secondary" className="ml-2">{showcases.length}</Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid sm:grid-cols-2 gap-4">
+          {showcases.map((showcase) => (
+            <TransformationCard key={showcase.id} showcase={showcase} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
