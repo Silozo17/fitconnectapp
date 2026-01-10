@@ -93,25 +93,33 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
           </div>
         ) : (
           <div className="space-y-3">
-            <Carousel
-              opts={{
-                align: "start",
-                loop: true,
-              }}
-              plugins={[autoplayPlugin.current]}
-              className="w-full"
+            <div 
+              className="w-full max-w-full overflow-hidden"
+              onPointerDown={() => autoplayPlugin.current?.stop?.()}
+              onPointerUp={() => autoplayPlugin.current?.reset?.()}
+              onPointerLeave={() => autoplayPlugin.current?.reset?.()}
+              onPointerCancel={() => autoplayPlugin.current?.reset?.()}
             >
-              <CarouselContent className="-ml-2 md:-ml-3">
-                {reviews.map((review) => (
-                  <CarouselItem 
-                    key={review.id} 
-                    className="pl-2 md:pl-3 basis-full"
-                  >
-                    <ReviewCard review={review} />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
+              <Carousel
+                opts={{
+                  align: "start",
+                  loop: true,
+                }}
+                plugins={[autoplayPlugin.current]}
+                className="w-full max-w-full"
+              >
+                <CarouselContent className="ml-0 gap-0">
+                  {reviews.map((review) => (
+                    <CarouselItem 
+                      key={review.id} 
+                      className="pl-0 basis-full"
+                    >
+                      <ReviewCard review={review} />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+              </Carousel>
+            </div>
             
             {reviews.length > 1 && (
               <Button 
