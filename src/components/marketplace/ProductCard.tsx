@@ -113,7 +113,7 @@ export default function ProductCard({ product, viewMode = "grid", compact = fals
   if (compact) {
     return (
       <Card 
-        className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group"
+        className="overflow-hidden hover:border-primary/50 transition-all cursor-pointer group min-w-0"
         onClick={() => navigate(productUrl)}
       >
         <div className="aspect-[16/9] relative overflow-hidden">
@@ -124,9 +124,9 @@ export default function ProductCard({ product, viewMode = "grid", compact = fals
               <Package className="w-8 h-8 text-primary/40" />
             </div>
           )}
-          <Badge variant="secondary" className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-xs">
+          <Badge variant="secondary" className="absolute top-2 left-2 bg-background/80 backdrop-blur-sm text-xs max-w-[calc(100%-1rem)] truncate">
             {getContentIcon(product.content_type)}
-            <span className="ml-1">{contentType?.label}</span>
+            <span className="ml-1 truncate">{contentType?.label}</span>
           </Badge>
           {hasDiscount && (
             <Badge className="absolute top-2 right-2 bg-destructive text-destructive-foreground text-xs">
@@ -137,21 +137,19 @@ export default function ProductCard({ product, viewMode = "grid", compact = fals
             <Badge className="absolute top-2 right-2 bg-green-500 text-white text-xs">FREE</Badge>
           )}
         </div>
-        <CardContent className="p-3">
-          <h3 className="font-semibold text-sm line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors">
+        <CardContent className="p-3 min-w-0">
+          <h3 className="font-semibold text-sm line-clamp-2 min-h-[2.5rem] group-hover:text-primary transition-colors break-words">
             {product.title}
           </h3>
-          <div className="flex items-center justify-between mt-2">
-            <div className="text-right flex items-center gap-1">
-              {hasDiscount && (
-                <span className="text-xs text-muted-foreground line-through">
-                  {formatCurrency(product.compare_at_price!, product.currency as CurrencyCode)}
-                </span>
-              )}
-              <span className="text-sm font-bold text-primary">
-                {product.price === 0 ? "Free" : formatCurrency(product.price, product.currency as CurrencyCode)}
+          <div className="flex items-center justify-end mt-2 gap-1 flex-wrap">
+            {hasDiscount && (
+              <span className="text-xs text-muted-foreground line-through">
+                {formatCurrency(product.compare_at_price!, product.currency as CurrencyCode)}
               </span>
-            </div>
+            )}
+            <span className="text-sm font-bold text-primary">
+              {product.price === 0 ? "Free" : formatCurrency(product.price, product.currency as CurrencyCode)}
+            </span>
           </div>
         </CardContent>
       </Card>

@@ -144,17 +144,19 @@ export const ContentSectionHeader = memo(({
   className,
 }: ContentSectionHeaderProps) => {
   return (
-    <div className={cn("flex items-start justify-between mb-3", className)}>
-      <div className="flex items-center gap-2">
+    <div className={cn("flex items-start justify-between gap-2 flex-wrap mb-3", className)}>
+      <div className="flex items-center gap-2 min-w-0 flex-1">
         {Icon && (
-          <div className="p-2 rounded-xl bg-primary/15">
+          <div className="p-2 rounded-xl bg-primary/15 shrink-0">
             <Icon className="w-4 h-4 text-primary" />
           </div>
         )}
-        <h3 className="font-semibold text-foreground text-base">{title}</h3>
-        {badge}
+        <h3 className="font-semibold text-foreground text-base truncate">{title}</h3>
       </div>
-      {action}
+      <div className="flex items-center gap-2 shrink-0">
+        {badge}
+        {action}
+      </div>
     </div>
   );
 });

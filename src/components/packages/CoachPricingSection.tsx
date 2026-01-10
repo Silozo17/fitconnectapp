@@ -51,20 +51,22 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
         title={t('profile.pricingPackages')}
       />
       
-      <div className="pt-4">
+      <div className="pt-4 overflow-hidden">
         <Tabs defaultValue={hasPackages ? "packages" : "subscriptions"}>
-          <TabsList className="mb-4">
-            {hasPackages && (
-              <TabsTrigger value="packages">
-                {t('profile.sessionPackages')}
-              </TabsTrigger>
-            )}
-            {hasPlans && (
-              <TabsTrigger value="subscriptions">
-                {t('profile.subscriptions')}
-              </TabsTrigger>
-            )}
-          </TabsList>
+          <div className="overflow-x-auto -mx-1 px-1">
+            <TabsList className="mb-4 w-full sm:w-auto">
+              {hasPackages && (
+                <TabsTrigger value="packages" className="flex-1 sm:flex-none text-sm">
+                  {t('profile.sessionPackages')}
+                </TabsTrigger>
+              )}
+              {hasPlans && (
+                <TabsTrigger value="subscriptions" className="flex-1 sm:flex-none text-sm">
+                  {t('profile.subscriptions')}
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
 
           {hasPackages && (
             <TabsContent value="packages" className="space-y-3">
@@ -78,14 +80,14 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                     key={pkg.id}
                     className="bg-muted/30 rounded-xl p-4 hover:bg-muted/40 transition-colors"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-semibold text-foreground">{pkg.name}</h4>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-semibold text-foreground break-words">{pkg.name}</h4>
                         {pkg.description && (
-                          <p className="text-sm text-muted-foreground">{pkg.description}</p>
+                          <p className="text-sm text-muted-foreground break-words">{pkg.description}</p>
                         )}
                       </div>
-                      <Badge variant="secondary">{t('profile.sessions', { count: pkg.session_count })}</Badge>
+                      <Badge variant="secondary" className="shrink-0">{t('profile.sessions', { count: pkg.session_count })}</Badge>
                     </div>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
                       <div className="min-w-0">
@@ -130,14 +132,14 @@ const CoachPricingSection = ({ coachId, onSelectPackage, onSelectPlan }: CoachPr
                     key={plan.id}
                     className="bg-muted/30 rounded-xl p-4 hover:bg-muted/40 transition-colors"
                   >
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-semibold text-foreground">{plan.name}</h4>
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-semibold text-foreground break-words">{plan.name}</h4>
                         {plan.description && (
-                          <p className="text-sm text-muted-foreground">{plan.description}</p>
+                          <p className="text-sm text-muted-foreground break-words">{plan.description}</p>
                         )}
                       </div>
-                      <Badge variant="outline" className="capitalize">
+                      <Badge variant="outline" className="capitalize shrink-0">
                         {plan.billing_period}
                       </Badge>
                     </div>

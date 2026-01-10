@@ -71,9 +71,9 @@ export function CoachQualificationsSection({ coachId }: CoachQualificationsSecti
                 expired && "opacity-60"
               )}
             >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-medium text-foreground">
+              <div className="flex-1 min-w-0 overflow-hidden">
+                <div className="flex items-start gap-2 flex-wrap">
+                  <span className="font-medium text-foreground break-words min-w-0">
                     {qual.name}
                   </span>
                   {qual.is_verified && (

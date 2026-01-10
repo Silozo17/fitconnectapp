@@ -70,9 +70,9 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
         title={`${t('profile.digitalProducts')} (${products.length})`}
       />
       
-      <div className="pt-4">
+      <div className="pt-4 overflow-hidden">
         {products.length <= 3 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-3">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} compact />
             ))}
@@ -83,11 +83,11 @@ export function CoachDigitalProductsSection({ coachId }: CoachDigitalProductsSec
               align: "start",
               loop: products.length > 3,
             }}
-            className="w-full"
+            className="w-full max-w-full"
           >
-            <CarouselContent className="-ml-3">
+            <CarouselContent className="-ml-2">
               {products.map((product) => (
-                <CarouselItem key={product.id} className="pl-3 basis-1/2 md:basis-1/3">
+                <CarouselItem key={product.id} className="pl-2 basis-[75%] xs:basis-1/2 md:basis-1/3">
                   <ProductCard product={product} compact />
                 </CarouselItem>
               ))}
