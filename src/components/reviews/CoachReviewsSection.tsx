@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Star, MessageSquareText } from "lucide-react";
 import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
@@ -6,6 +7,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import Autoplay from "embla-carousel-autoplay";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "@/components/ui/carousel";
 
 interface CoachReviewsSectionProps {
   coachId: string;
@@ -17,7 +24,15 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
   const averageRating = calculateAverageRating(reviews);
   const [showAll, setShowAll] = useState(false);
 
-  const displayedReviews = showAll ? reviews : reviews.slice(0, 3);
+  // Create autoplay plugin with pause on hover/touch
+  const autoplayPlugin = useRef(
+    Autoplay({
+      delay: 2000,
+      stopOnInteraction: false,
+      stopOnMouseEnter: true,
+      stopOnFocusIn: true,
+    })
+  );
 
   if (isLoading) {
     return (
@@ -63,27 +78,48 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
               {t('profile.beFirstReview')}
             </p>
           </div>
-        ) : (
+        ) : showAll ? (
           <div className="space-y-3">
-            {displayedReviews.map((review) => (
+            {reviews.map((review) => (
               <ReviewCard key={review.id} review={review} />
             ))}
-            {reviews.length > 3 && !showAll && (
+            <Button 
+              variant="ghost" 
+              className="w-full"
+              onClick={() => setShowAll(false)}
+            >
+              Show less
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <Carousel
+              opts={{
+                align: "start",
+                loop: true,
+              }}
+              plugins={[autoplayPlugin.current]}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-3">
+                {reviews.map((review) => (
+                  <CarouselItem 
+                    key={review.id} 
+                    className="pl-2 md:pl-3 basis-full"
+                  >
+                    <ReviewCard review={review} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+            
+            {reviews.length > 1 && (
               <Button 
                 variant="ghost" 
                 className="w-full"
                 onClick={() => setShowAll(true)}
               >
                 View all {reviews.length} reviews
-              </Button>
-            )}
-            {showAll && reviews.length > 3 && (
-              <Button 
-                variant="ghost" 
-                className="w-full"
-                onClick={() => setShowAll(false)}
-              >
-                Show less
               </Button>
             )}
           </div>
