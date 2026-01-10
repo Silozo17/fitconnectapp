@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useCallback, useEffect, useState } from "react";
 import { Star, MessageSquareText } from "lucide-react";
 import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
@@ -6,13 +6,8 @@ import ReviewCard from "./ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 
 interface CoachReviewsSectionProps {
   coachId: string;
@@ -33,6 +28,25 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
       stopOnFocusIn: true,
     })
   );
+
+  // Direct Embla usage - no negative margin gutter pattern
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    {
+      align: "start",
+      loop: true,
+      containScroll: "trimSnaps",
+    },
+    [autoplayPlugin.current]
+  );
+
+  // Pause on pointer down, resume on pointer up
+  const handlePointerDown = useCallback(() => {
+    autoplayPlugin.current?.stop?.();
+  }, []);
+
+  const handlePointerUp = useCallback(() => {
+    autoplayPlugin.current?.reset?.();
+  }, []);
 
   if (isLoading) {
     return (
@@ -93,32 +107,26 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
           </div>
         ) : (
           <div className="space-y-3">
+            {/* Carousel viewport - strict overflow containment, no negative margins */}
             <div 
-              className="w-full max-w-full overflow-hidden"
-              onPointerDown={() => autoplayPlugin.current?.stop?.()}
-              onPointerUp={() => autoplayPlugin.current?.reset?.()}
-              onPointerLeave={() => autoplayPlugin.current?.reset?.()}
-              onPointerCancel={() => autoplayPlugin.current?.reset?.()}
+              className="w-full overflow-hidden"
+              ref={emblaRef}
+              onPointerDown={handlePointerDown}
+              onPointerUp={handlePointerUp}
+              onPointerLeave={handlePointerUp}
+              onPointerCancel={handlePointerUp}
             >
-              <Carousel
-                opts={{
-                  align: "start",
-                  loop: true,
-                }}
-                plugins={[autoplayPlugin.current]}
-                className="w-full max-w-full"
-              >
-                <CarouselContent className="ml-0 gap-0">
-                  {reviews.map((review) => (
-                    <CarouselItem 
-                      key={review.id} 
-                      className="pl-0 basis-full"
-                    >
-                      <ReviewCard review={review} />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
+              {/* Carousel track - simple flex, no negative margin gutter */}
+              <div className="flex w-full">
+                {reviews.map((review) => (
+                  <div 
+                    key={review.id} 
+                    className="min-w-0 shrink-0 grow-0 basis-full"
+                  >
+                    <ReviewCard review={review} />
+                  </div>
+                ))}
+              </div>
             </div>
             
             {reviews.length > 1 && (
