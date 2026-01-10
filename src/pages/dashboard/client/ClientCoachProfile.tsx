@@ -28,8 +28,12 @@ import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisp
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
 import { CoachQualificationsSection } from "@/components/coach/CoachQualificationsSection";
 import { MobileBookingCard } from "@/components/coach/MobileBookingBar";
+import { useOverflowDebug } from "@/hooks/useOverflowDebug";
 
 const ClientCoachProfile = () => {
+  // DEV ONLY: Overflow debugging - add ?debugOverflow=1 to URL to enable
+  useOverflowDebug({ enabled: import.meta.env.DEV });
+  
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
   const { data: coach, isLoading, error } = useCoachById(username || "");
