@@ -29,6 +29,8 @@ import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisp
 import { CoachSocialLinksSection } from "@/components/coach/CoachSocialLinksSection";
 import { CoachDigitalProductsSection } from "@/components/coach/CoachDigitalProductsSection";
 import { CoachQualificationsSection } from "@/components/coach/CoachQualificationsSection";
+import { CoachTransformationsSection } from "@/components/coach/CoachTransformationsSection";
+import { CoachCaseStudiesSection } from "@/components/coach/CoachCaseStudiesSection";
 import { useExchangeRates } from "@/hooks/useExchangeRates";
 import { getDisplayLocation } from "@/lib/location-utils";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -210,16 +212,22 @@ const CoachDetail = () => {
               {/* 6. Gallery Section */}
               <CoachGallerySection coachId={coach.id} />
 
-              {/* 7. Pricing & Packages */}
+              {/* 7. Transformations Section */}
+              <CoachTransformationsSection coachId={coach.id} />
+
+              {/* 8. Case Studies Section */}
+              <CoachCaseStudiesSection coachId={coach.id} />
+
+              {/* 9. Pricing & Packages */}
               <CoachPricingSection coachId={coach.id} />
 
-              {/* 8. Group Classes */}
+              {/* 10. Group Classes */}
               <CoachGroupClassesSection coachId={coach.id} />
 
-              {/* 9. Digital Products */}
+              {/* 11. Digital Products */}
               <CoachDigitalProductsSection coachId={coach.id} />
 
-              {/* 10. Reviews Section */}
+              {/* 12. Reviews Section */}
               <CoachReviewsSection coachId={coach.id} />
             </div>
 
