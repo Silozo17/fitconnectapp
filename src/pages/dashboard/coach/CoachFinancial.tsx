@@ -252,79 +252,71 @@ export default function CoachFinancial() {
 
           {/* Invoices Tab */}
           <TabsContent value="invoices" className="space-y-4">
-            <Card variant="glass" className="relative overflow-hidden glass-card">
-              {/* White accent line for invoices */}
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
-              <CardHeader>
-                <CardTitle>{t("financial.tabs.invoices")}</CardTitle>
-                <CardDescription>{t("financial.manageInvoices")}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {!invoices?.length ? (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-                    <p className="text-muted-foreground">{t("financial.noInvoices")}</p>
-                    <Button
-                      variant="outline"
-                      className="mt-3"
-                      onClick={() => setShowInvoiceModal(true)}
-                    >
-                      {t("financial.createFirstInvoice")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {invoices.map((invoice) => (
-                      <InvoiceRow
-                        key={invoice.id}
-                        invoice={invoice}
-                        onUpdateStatus={(status) =>
-                          updateStatus.mutate({ invoiceId: invoice.id, status })
-                        }
-                        onDelete={() => setDeleteTarget({ type: "invoice", id: invoice.id })}
-                      />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">{t("financial.tabs.invoices")}</h3>
+                <p className="text-sm text-muted-foreground">{t("financial.manageInvoices")}</p>
+              </div>
+              {!invoices?.length ? (
+                <div className="text-center py-8">
+                  <FileText className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-muted-foreground">{t("financial.noInvoices")}</p>
+                  <Button
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => setShowInvoiceModal(true)}
+                  >
+                    {t("financial.createFirstInvoice")}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {invoices.map((invoice) => (
+                    <InvoiceRow
+                      key={invoice.id}
+                      invoice={invoice}
+                      onUpdateStatus={(status) =>
+                        updateStatus.mutate({ invoiceId: invoice.id, status })
+                      }
+                      onDelete={() => setDeleteTarget({ type: "invoice", id: invoice.id })}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           {/* Expenses Tab */}
           <TabsContent value="expenses" className="space-y-4">
-            <Card variant="glass" className="relative overflow-hidden glass-card">
-              {/* White accent line for expenses */}
-              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-white/20 via-white/10 to-transparent" />
-              <CardHeader>
-                <CardTitle>{t("financial.tabs.expenses")}</CardTitle>
-                <CardDescription>{t("financial.trackExpenses")}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {!expenses?.length ? (
-                  <div className="text-center py-8">
-                    <Receipt className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
-                    <p className="text-muted-foreground">{t("financial.noExpenses")}</p>
-                    <Button
-                      variant="outline"
-                      className="mt-3"
-                      onClick={() => setShowExpenseModal(true)}
-                    >
-                      {t("financial.addFirstExpense")}
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-3">
-                    {expenses.map((expense) => (
-                      <ExpenseRow
-                        key={expense.id}
-                        expense={expense}
-                        onDelete={() => setDeleteTarget({ type: "expense", id: expense.id })}
-                      />
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold">{t("financial.tabs.expenses")}</h3>
+                <p className="text-sm text-muted-foreground">{t("financial.trackExpenses")}</p>
+              </div>
+              {!expenses?.length ? (
+                <div className="text-center py-8">
+                  <Receipt className="h-12 w-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-muted-foreground">{t("financial.noExpenses")}</p>
+                  <Button
+                    variant="outline"
+                    className="mt-3"
+                    onClick={() => setShowExpenseModal(true)}
+                  >
+                    {t("financial.addFirstExpense")}
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {expenses.map((expense) => (
+                    <ExpenseRow
+                      key={expense.id}
+                      expense={expense}
+                      onDelete={() => setDeleteTarget({ type: "expense", id: expense.id })}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
           {/* Reports Tab */}

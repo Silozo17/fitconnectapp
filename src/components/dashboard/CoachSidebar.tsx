@@ -142,15 +142,6 @@ const menuGroups: MenuGroup[] = [
     ],
   },
   {
-    id: "gamification",
-    labelKey: "navigation.coach.gamification",
-    icon: Trophy,
-    collapsible: true,
-    items: [
-      { titleKey: "navigation.coach.achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
-    ],
-  },
-  {
     id: "analytics",
     labelKey: "navigation.coach.analytics",
     icon: BarChart3,
@@ -158,6 +149,15 @@ const menuGroups: MenuGroup[] = [
     items: [
       { titleKey: "navigation.coach.packageAnalytics", icon: BarChart3, path: "/dashboard/coach/package-analytics", requiredFeature: "package_analytics" },
       { titleKey: "navigation.coach.earnings", icon: DollarSign, path: "/dashboard/coach/earnings", requiredFeature: "basic_analytics" },
+    ],
+  },
+  {
+    id: "gamification",
+    labelKey: "navigation.coach.gamification",
+    icon: Trophy,
+    collapsible: true,
+    items: [
+      { titleKey: "navigation.coach.achievements", icon: Trophy, path: "/dashboard/coach/achievements" },
     ],
   },
 ];
