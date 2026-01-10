@@ -642,11 +642,6 @@ const ClientSettings = () => {
             {/* Integrations Tab */}
             {selectedTab === "integrations" && (
               <div className="space-y-6">
-                {/* Health Data Widget */}
-                <HealthDataWidget />
-
-                <Separator />
-
                 {/* Wearable Devices */}
                 <div className="space-y-4">
                   <div>
