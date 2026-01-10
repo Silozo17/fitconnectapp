@@ -49,7 +49,7 @@ const ReviewCard = ({ review, className }: ReviewCardProps) => {
 
           {/* Review Text */}
           {review.review_text && (
-            <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap">
+            <p className="text-sm text-muted-foreground mt-2 whitespace-pre-wrap break-words">
               {review.review_text}
             </p>
           )}
