@@ -115,7 +115,6 @@ const menuGroups: MenuGroup[] = [
       { titleKey: "navigation.coach.wearableInsights", icon: Activity, path: "/dashboard/coach/wearables", requiredFeature: "wearable_dashboard" },
       { titleKey: "navigation.coach.clientComparison", icon: Users2, path: "/dashboard/coach/compare", requiredFeature: "client_comparison_analytics" },
       { titleKey: "navigation.coach.aiRecommendations", icon: Sparkles, path: "/dashboard/coach/ai-recommendations", requiredFeature: "ai_plan_recommendations" },
-      { titleKey: "navigation.coach.caseStudies", icon: FileText, path: "/dashboard/coach/case-studies", requiredFeature: "case_study_generator" },
     ],
   },
   {
@@ -138,7 +137,7 @@ const menuGroups: MenuGroup[] = [
       { titleKey: "navigation.coach.financial", icon: Receipt, path: "/dashboard/coach/financial", requiredFeature: "advanced_reporting" },
       { titleKey: "navigation.coach.reviews", icon: Star, path: "/dashboard/coach/reviews" }, // Free tier - no requiredFeature
       { titleKey: "navigation.coach.transformations", icon: ImageIcon, path: "/dashboard/coach/showcase", requiredFeature: "client_outcomes_showcase" },
-      { titleKey: "navigation.coach.integrations", icon: Settings, path: "/dashboard/coach/integrations", requiredFeature: "custom_integrations" },
+      { titleKey: "navigation.coach.caseStudies", icon: FileText, path: "/dashboard/coach/case-studies", requiredFeature: "case_study_generator" },
     ],
   },
   {
