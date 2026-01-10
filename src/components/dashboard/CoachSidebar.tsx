@@ -534,7 +534,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-2 space-y-2 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
+          <nav className="flex-1 p-2 pr-3 space-y-2 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
             {menuGroups.map((group, index) => (
               <div key={group.id}>
                 {index > 0 && <div className="my-2 border-t border-sidebar-border/50" />}
