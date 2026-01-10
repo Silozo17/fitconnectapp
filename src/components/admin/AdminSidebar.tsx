@@ -213,7 +213,7 @@ const AdminSidebar = ({ mobileOpen, setMobileOpen }: AdminSidebarProps) => {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 p-2 space-y-1 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
+          <nav className="flex-1 p-2 pr-3 space-y-1 overflow-y-auto overflow-x-hidden touch-pan-y overscroll-y-contain">
             {mainNavItems.map((item) => renderNavItem(item, false))}
 
             <div className="pt-4 pb-2">
