@@ -80,6 +80,8 @@
   },
 
   "profile": {
+    "qualifications": "Qualifications & Certifications",
+    "gallery": "Gallery",
     "experience": "Experience",
     "years": "{{count}} years",
     "newCoach": "New Coach",

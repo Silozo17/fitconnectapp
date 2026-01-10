@@ -109,7 +109,7 @@ export function CoachQuickStats({
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+    <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
       {stats.filter(s => s.show).map((stat, index) => (
         <StatItem key={index} {...stat} />
       ))}

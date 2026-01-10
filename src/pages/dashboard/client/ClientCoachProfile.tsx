@@ -114,13 +114,13 @@ const ClientCoachProfile = () => {
         {/* Main Content Column */}
         <div className="lg:col-span-2 space-y-6">
           {/* Hero Section */}
-          <Card className="rounded-3xl overflow-hidden border-0 shadow-lg">
+          <div className="rounded-3xl overflow-hidden shadow-lg">
             <CoachHeroSection 
               coach={coach}
               averageRating={averageRating}
               reviewCount={reviews.length}
             />
-          </Card>
+          </div>
 
           {/* Quick Stats */}
           <CoachQuickStats
