@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import despia from 'despia-native';
+import { getDespiaRuntime } from '@/lib/despia';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Copy, Check } from 'lucide-react';
@@ -13,12 +13,20 @@ export default function Debug() {
   const readSteps = async () => {
     setLoading(true);
     setResponse('Reading...');
-    
-    const result = await despia(
+
+    const runtime = getDespiaRuntime();
+    if (!runtime) {
+      setResponse('Native HealthKit debug is only available in the native app runtime.');
+      setLoading(false);
+      toast({ title: 'Not available on web preview' });
+      return;
+    }
+
+    const result = await runtime(
       'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=7',
       ['healthkitResponse']
     );
-    
+
     setResponse(JSON.stringify(result, null, 2));
     setLoading(false);
   };
@@ -26,14 +34,22 @@ export default function Debug() {
   const testParsing = async () => {
     setLoading(true);
     const logs: string[] = [];
-    
+
+    const runtime = getDespiaRuntime();
+    if (!runtime) {
+      setResponse('Native HealthKit debug is only available in the native app runtime.');
+      setLoading(false);
+      toast({ title: 'Not available on web preview' });
+      return;
+    }
+
     logs.push('1. Calling Despia SDK...');
-    
-    const res = await despia(
+
+    const res = await runtime(
       'healthkit://read?types=HKQuantityTypeIdentifierStepCount&days=7',
       ['healthkitResponse']
     );
-    
+
     logs.push(`2. Raw response type: ${typeof res}`);
     logs.push(`3. Raw response: ${JSON.stringify(res, null, 2)}`);
     
