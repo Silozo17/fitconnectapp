@@ -142,8 +142,11 @@ export const usePushNotifications = () => {
     if (!user || !isDespia()) return;
 
     try {
+      const runtime = getDespiaRuntime();
+      if (!runtime) return;
+
       console.log("[Push] Setting OneSignal external user ID:", user.id);
-      await despia(`setonesignalplayerid://?user_id=${user.id}`);
+      await runtime(`setonesignalplayerid://?user_id=${user.id}`);
       console.log("[Push] External user ID set successfully");
     } catch (error) {
       console.error("[Push] Failed to set external user ID:", error);
@@ -170,8 +173,11 @@ export const usePushNotifications = () => {
 
       // Step 1: Always set external user ID first (links user to device in OneSignal)
       try {
-        await despia(`setonesignalplayerid://?user_id=${user.id}`);
-        console.log("[Push] External user ID set successfully");
+        const runtime = getDespiaRuntime();
+        if (runtime) {
+          await runtime(`setonesignalplayerid://?user_id=${user.id}`);
+          console.log("[Push] External user ID set successfully");
+        }
       } catch (error) {
         console.error("[Push] Failed to set external user ID:", error);
         // Continue anyway - registration can still work
