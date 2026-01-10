@@ -1,8 +1,7 @@
 import { useEffect, useCallback, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { isDespia } from "@/lib/despia";
-import despia from "despia-native";
+import { getDespiaRuntime, isDespia } from "@/lib/despia";
 
 interface PushRegistrationResult {
   success: boolean;
@@ -35,11 +34,16 @@ export const usePushNotifications = () => {
     setIsRegistering(true);
 
     try {
+      const runtime = getDespiaRuntime();
+      if (!runtime) {
+        throw new Error("Despia runtime not available");
+      }
+
       // Get OneSignal player ID from Despia native runtime
       console.log("[Push] Getting OneSignal player ID...");
-      const result = await despia("getonesignalplayerid://", ["onesignalplayerid"]);
+      const result = await runtime("getonesignalplayerid://", ["onesignalplayerid"]);
       console.log("[Push] Player ID result:", JSON.stringify(result));
-      
+
       if (!result?.onesignalplayerid) {
         throw new Error("Failed to get OneSignal player ID - result was empty");
       }

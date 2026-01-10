@@ -5,26 +5,43 @@
  * Only invoke native features when running inside the Despia environment.
  */
 
-import despia from 'despia-native';
+export type DespiaRuntime = (url: string, responseKeys?: string[]) => any;
+
+const getGlobalDespiaRuntime = (): DespiaRuntime | null => {
+  const fn = (globalThis as any)?.despia;
+  return typeof fn === "function" ? (fn as DespiaRuntime) : null;
+};
+
+// A callable wrapper used throughout this file.
+// It throws if called when the native runtime isn't available.
+const despia: DespiaRuntime = (url, responseKeys) => {
+  const fn = getGlobalDespiaRuntime();
+  if (!fn) throw new Error("[Despia] Runtime not available");
+  return fn(url, responseKeys);
+};
 
 /**
  * Check if the app is running inside the Despia native environment
  * Uses user agent string check as per official Despia documentation
  */
 export const isDespia = (): boolean => {
-  if (typeof navigator === 'undefined') return false;
-  return navigator.userAgent.toLowerCase().includes('despia');
+  if (typeof navigator === "undefined") return false;
+  return navigator.userAgent.toLowerCase().includes("despia");
 };
 
 /**
  * Get the Despia runtime instance (only use when isDespia() returns true)
  */
-export const getDespiaRuntime = () => {
-  if (!isDespia()) {
-    console.warn('Despia runtime accessed outside of Despia environment');
+export const getDespiaRuntime = (): DespiaRuntime | null => {
+  if (!isDespia()) return null;
+
+  const runtime = getGlobalDespiaRuntime();
+  if (!runtime) {
+    console.warn("[Despia] Runtime not available yet");
     return null;
   }
-  return despia;
+
+  return runtime;
 };
 
 /**
@@ -33,12 +50,11 @@ export const getDespiaRuntime = () => {
  * @param fallback Optional fallback for non-Despia environments
  */
 export const withDespia = <T>(
-  callback: (runtime: typeof despia) => T,
+  callback: (runtime: DespiaRuntime) => T,
   fallback?: () => T
 ): T | undefined => {
-  if (isDespia()) {
-    return callback(despia);
-  }
+  const runtime = getDespiaRuntime();
+  if (runtime) return callback(runtime);
   return fallback?.();
 };
 
@@ -132,18 +148,18 @@ export const configureStatusBar = (): void => {
   // Android WebView needs time to set up the window.despia observer
   setTimeout(() => {
     try {
-      // Verify despia function exists and is callable
-      if (typeof despia !== 'function') {
-        console.warn('[Despia] SDK not available, skipping status bar config');
+      const runtime = getGlobalDespiaRuntime();
+      if (!runtime) {
+        console.warn('[Despia] Runtime not available, skipping status bar config');
         return;
       }
-      
+
       // Set status bar background to dark (#0D0D14 = RGB 13, 13, 20)
-      despia('statusbarcolor://{13, 13, 20}');
-      
+      runtime('statusbarcolor://{13, 13, 20}');
+
       // Set status bar icons/text to white for visibility on dark background
-      despia('statusbartextcolor://{white}');
-      
+      runtime('statusbartextcolor://{white}');
+
       console.log('[Despia] Status bar configured successfully');
     } catch (e) {
       // Non-fatal: status bar styling is cosmetic, app should continue
