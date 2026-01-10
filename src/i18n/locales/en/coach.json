@@ -1236,6 +1236,16 @@
     "createFirstInvoice": "Create your first invoice",
     "noExpenses": "No expenses recorded",
     "addFirstExpense": "Add your first expense",
+    "manageInvoices": "Create, send, and track client invoices",
+    "trackExpenses": "Log and categorise business expenses",
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    },
     "tabs": {
       "invoices": "Invoices",
       "expenses": "Expenses",
