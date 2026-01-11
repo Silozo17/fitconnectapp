@@ -6,6 +6,13 @@ import { ThemedCard } from "@/components/shared/ThemedCard";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext,
+} from "@/components/ui/carousel";
 
 interface Props {
   coachId: string;
@@ -34,7 +41,7 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
       >
         {/* Before/After Images */}
         {(showcase.before_photo_url || showcase.after_photo_url) && (
-          <div className="relative h-48 grid grid-cols-2 -mx-4 -mt-4 mb-4">
+          <div className="relative aspect-square grid grid-cols-2 -mx-4 -mt-4 mb-4">
             {showcase.before_photo_url && (
               <div className="relative">
                 <img 
@@ -181,11 +188,23 @@ export function CoachTransformationsSection({ coachId }: Props) {
         title="Client Transformations"
         badge={<Badge variant="secondary">{showcases.length}</Badge>}
       />
-      <div className="grid sm:grid-cols-2 gap-4">
-        {showcases.map((showcase) => (
-          <TransformationCard key={showcase.id} showcase={showcase} />
-        ))}
-      </div>
+      <Carousel
+        opts={{
+          align: "start",
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-4">
+          {showcases.map((showcase) => (
+            <CarouselItem key={showcase.id} className="pl-4 basis-[280px] sm:basis-[300px]">
+              <TransformationCard showcase={showcase} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="left-2" />
+        <CarouselNext className="right-2" />
+      </Carousel>
     </div>
   );
 }
