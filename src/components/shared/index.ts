@@ -7,11 +7,17 @@ export { DashboardSectionHeader } from "./DashboardSectionHeader";
 export { MetricCard } from "./MetricCard";
 export type { MetricCardColor } from "./MetricCard";
 export { ContentSection, ContentSectionHeader } from "./ContentSection";
+export type { ContentSectionColor } from "./ContentSection";
 export { StatsGrid } from "./StatsGrid";
+export { IconBadge } from "./IconBadge";
+export type { IconBadgeColor, IconBadgeSize } from "./IconBadge";
 
 // Layout components - Legacy (for gradual migration)
+/** @deprecated Use ContentSection instead */
 export { SectionHeader } from "./SectionHeader";
+/** @deprecated Use ContentSection instead */
 export { ContentCard } from "./ContentCard";
+/** @deprecated Use MetricCard instead */
 export { StatCard, StatCardGrid } from "./StatCard";
 
 // Status & indicators

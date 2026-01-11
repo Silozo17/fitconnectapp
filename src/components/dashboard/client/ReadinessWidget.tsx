@@ -1,7 +1,9 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { Progress } from "@/components/ui/progress";
+import { ContentSection } from "@/components/shared/ContentSection";
 import { Battery, Moon, Heart, Activity, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -17,13 +19,13 @@ const readinessExplanation = {
   howToImprove: "Prioritize 7-9 hours of sleep and allow rest after intense training days.",
 };
 
-export function ReadinessWidget({ className }: ReadinessWidgetProps) {
+export const ReadinessWidget = memo(function ReadinessWidget({ className }: ReadinessWidgetProps) {
   const { t } = useTranslation("dashboard");
   const { readiness, isLoading, hasData } = useReadinessScore();
 
   if (isLoading) {
     return (
-      <div className={cn("relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+      <ContentSection className={className} padding="lg">
         <div className="flex items-center gap-3 mb-4">
           <ShimmerSkeleton className="h-12 w-12 rounded-2xl" />
           <div className="space-y-2">
@@ -32,14 +34,13 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
           </div>
         </div>
         <ShimmerSkeleton className="h-3 w-full rounded-full" />
-      </div>
+      </ContentSection>
     );
   }
 
   if (!hasData || !readiness) {
     return (
-      <div className={cn("relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
+      <ContentSection className={className} padding="lg">
         <div className="flex items-center gap-3 mb-4">
           <div className="p-3 rounded-2xl bg-muted/50">
             <Battery className="h-5 w-5 text-muted-foreground" />
@@ -55,7 +56,7 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
             Sync your wearable to see your readiness score
           </p>
         </div>
-      </div>
+      </ContentSection>
     );
   }
 
@@ -66,10 +67,7 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
   };
 
   return (
-    <div className={cn("relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
-
+    <ContentSection className={className} padding="lg">
       {/* Score display */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
@@ -125,9 +123,9 @@ export function ReadinessWidget({ className }: ReadinessWidgetProps) {
           {readiness.recommendation}
         </p>
       </div>
-    </div>
+    </ContentSection>
   );
-}
+});
 
 // Export readiness level for use in section description
 export function useReadinessLevel() {

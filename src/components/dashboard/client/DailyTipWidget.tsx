@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
 import { getDailyTip } from "@/lib/daily-tips";
@@ -44,7 +44,7 @@ interface DailyTipWidgetProps {
   };
 }
 
-export function DailyTipWidget({ className, context }: DailyTipWidgetProps) {
+export const DailyTipWidget = memo(function DailyTipWidget({ className, context }: DailyTipWidgetProps) {
   const { t } = useTranslation("dashboard");
   const [isOpen, setIsOpen] = useState(false);
 
@@ -116,6 +116,6 @@ export function DailyTipWidget({ className, context }: DailyTipWidgetProps) {
       </Collapsible>
     </AccentCard>
   );
-}
+});
 
 export default DailyTipWidget;

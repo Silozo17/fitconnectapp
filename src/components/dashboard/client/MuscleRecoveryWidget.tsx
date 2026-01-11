@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -23,7 +24,7 @@ const muscleEmoji: Record<string, string> = {
   calves: '🦶',
 };
 
-export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
+export const MuscleRecoveryWidget = memo(function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
   const { muscleStatus, readyToTrain, stillRecovering, isLoading, hasData } = useMuscleRecovery();
 
   if (isLoading) {
@@ -136,4 +137,4 @@ export function MuscleRecoveryWidget({ className }: MuscleRecoveryWidgetProps) {
       </AccentCardContent>
     </AccentCard>
   );
-}
+});

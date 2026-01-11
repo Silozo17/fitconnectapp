@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Settings } from 'lucide-react';
 import { useClientProfileData, calculateBMI } from '@/hooks/useClientProfileData';
 import { BMICircle } from '@/components/stats/BMICircle';
 
-export function BMIWidget() {
+export const BMIWidget = memo(function BMIWidget() {
   const { data: profile, isLoading } = useClientProfileData();
   
   if (isLoading) {
@@ -61,4 +62,4 @@ export function BMIWidget() {
       </CardContent>
     </Card>
   );
-}
+});
