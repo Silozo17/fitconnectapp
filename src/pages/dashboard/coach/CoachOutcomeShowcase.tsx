@@ -126,6 +126,13 @@ export default function CoachOutcomeShowcase() {
     if (!item.isExternal && item.consentStatus !== "granted") {
       return;
     }
+    
+    // Require at least one photo to publish
+    if (!item.isPublished && !item.beforePhotoUrl && !item.afterPhotoUrl) {
+      toast.error(t("showcase.needsPhotosError", "Please add at least one photo before publishing"));
+      return;
+    }
+    
     updateShowcase.mutate({
       showcaseId: item.id,
       isPublished: !item.isPublished,
@@ -559,7 +566,10 @@ export default function CoachOutcomeShowcase() {
                       <Switch
                         checked={item.isPublished}
                         onCheckedChange={() => handleTogglePublish(item)}
-                        disabled={!item.isExternal && item.consentStatus !== "granted"}
+                        disabled={
+                          (!item.isExternal && item.consentStatus !== "granted") ||
+                          (!item.isPublished && !item.beforePhotoUrl && !item.afterPhotoUrl)
+                        }
                         aria-label={t("showcase.togglePublish", "Toggle publish")}
                       />
                       <Label className="text-xs text-muted-foreground">
@@ -567,7 +577,9 @@ export default function CoachOutcomeShowcase() {
                           ? t("showcase.published", "Published") 
                           : (!item.isExternal && item.consentStatus !== "granted")
                             ? t("showcase.awaitingConsent", "Awaiting consent")
-                            : t("showcase.unpublished", "Unpublished")}
+                            : (!item.beforePhotoUrl && !item.afterPhotoUrl)
+                              ? t("showcase.needsPhotos", "Add photos to publish")
+                              : t("showcase.unpublished", "Unpublished")}
                       </Label>
                     </div>
                     <div className="flex items-center gap-1">
