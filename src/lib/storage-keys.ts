@@ -78,6 +78,10 @@ export const STORAGE_KEYS = {
   MARKETPLACE_LOCATION_FILTER: 'fc_marketplace_location_filter',
   /** User location data */
   USER_LOCATION: 'fc_user_location',
+  /** Last known location (persisted across sessions for instant marketplace) */
+  LAST_KNOWN_LOCATION: 'fc_last_known_location',
+  /** Whether we've asked for location permission */
+  LOCATION_PERMISSION_ASKED: 'fc_location_permission_asked',
   
   // =====================
   // UI State

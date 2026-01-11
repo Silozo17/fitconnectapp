@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, SlidersHorizontal, Users, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,21 @@ import { useCountry } from "@/hooks/useCountry";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { CoachCardSkeleton } from "@/components/dashboard/CoachCardSkeleton";
+import { STORAGE_KEYS, getStorage } from "@/lib/storage-keys";
+
+// Type for saved location from pre-fetch
+interface SavedLocation {
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  countryCode: string | null;
+  county: string | null;
+  lat?: number | null;
+  lng?: number | null;
+  accuracyLevel: 'approximate' | 'precise' | 'manual';
+  savedAt: number;
+}
+
 const ClientFindCoaches = () => {
   const { t } = useTranslation("client");
   const [searchQuery, setSearchQuery] = useState("");
@@ -30,7 +45,26 @@ const ClientFindCoaches = () => {
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
 
-  // Get auto-detected user location
+  // Get pre-cached location immediately (from background pre-fetch)
+  const cachedLocation = useMemo(() => {
+    const saved = getStorage<SavedLocation>(STORAGE_KEYS.LAST_KNOWN_LOCATION);
+    if (saved) {
+      return {
+        city: saved.city,
+        region: saved.region,
+        country: saved.country,
+        countryCode: saved.countryCode,
+        county: saved.county,
+        displayLocation: saved.city || saved.region || saved.county,
+        accuracyLevel: saved.accuracyLevel,
+        lat: saved.lat,
+        lng: saved.lng,
+      };
+    }
+    return null;
+  }, []);
+
+  // Get auto-detected user location (may still be loading)
   const { location: autoLocation, isLoading: autoLocationLoading } = useUserLocation();
 
   // Manual location filter (persisted for session)
@@ -56,14 +90,32 @@ const ClientFindCoaches = () => {
    */
   const effectiveCountryCode = manualCountryCode ?? userCountryPreference ?? contextCountryCode;
 
-  // Determine effective location for city-level ranking (manual overrides auto)
-  const effectiveLocation = isManualSelection
-    ? manualLocation
-    : autoLocationLoading
-      ? null
-      : autoLocation;
+  /**
+   * Effective location priority:
+   * 1. Manual selection (user explicitly chose)
+   * 2. Cached location (from pre-fetch - available immediately)
+   * 3. Auto location (if loaded and no cache)
+   */
+  const effectiveLocation = useMemo(() => {
+    if (isManualSelection && manualLocation) {
+      return manualLocation;
+    }
+    // Use cached location if available and auto is still loading
+    if (cachedLocation && autoLocationLoading) {
+      return cachedLocation;
+    }
+    // Once auto loads, prefer it (may be fresher)
+    if (!autoLocationLoading && autoLocation) {
+      return autoLocation;
+    }
+    // Fall back to cache
+    return cachedLocation;
+  }, [isManualSelection, manualLocation, cachedLocation, autoLocation, autoLocationLoading]);
 
-  // Defer fetching until auto-location is resolved (prevents double-render with reordering)
+  // Only defer if we have NO location data at all
+  const shouldDeferFetch = !effectiveLocation;
+
+  // Fetch coaches - enabled immediately if we have any location data
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
@@ -73,11 +125,11 @@ const ClientFindCoaches = () => {
     userLocation: effectiveLocation,
     enableLocationRanking: true,
     countryCode: effectiveCountryCode,
-    enabled: !autoLocationLoading, // Only fetch when location is resolved
+    enabled: !shouldDeferFetch, // Fetch as soon as we have any location
   });
 
-  // Unified loading: show loader until both location AND coaches are ready
-  const isFullyLoading = autoLocationLoading || isLoading;
+  // Unified loading: show loader only if we're still loading AND have no coaches data
+  const isFullyLoading = shouldDeferFetch || (isLoading && !coaches?.length);
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);

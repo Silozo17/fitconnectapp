@@ -5,6 +5,7 @@ import { Helmet } from "react-helmet-async";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClientOnboardingStatus } from "@/hooks/useOnboardingStatus";
 import { useDiscoverModal } from "@/hooks/useDiscoverModal";
+import { useCoachPreFetch } from "@/hooks/useCoachPreFetch";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 // OPTIMIZED: Moved useAutoAwardClientBadges to specific pages (ClientOverview, ClientAchievements)
 // to prevent 3 database queries on every navigation
@@ -43,6 +44,9 @@ const ClientDashboardLayoutInner = memo(({
   const [isNavigating, setIsNavigating] = useState(false);
   const { isOpen: profilePanelOpen } = useProfilePanel();
   const { shouldShow: showDiscover, markAsSeen: markDiscoverSeen } = useDiscoverModal('client');
+  
+  // PERFORMANCE: Pre-fetch coaches in background for instant Find Coaches page
+  useCoachPreFetch();
 
   // PERFORMANCE: Check localStorage for known-onboarded users to skip DB check
   const isKnownOnboarded = useMemo(() => {

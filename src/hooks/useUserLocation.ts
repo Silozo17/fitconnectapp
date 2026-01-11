@@ -3,12 +3,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { CONSENT_STORAGE_KEY, CookieConsent } from "@/types/consent";
 import { LocationAccuracyLevel } from "@/types/location";
 import { useAuthSafe } from "@/contexts/AuthContext";
-import { STORAGE_KEYS } from "@/lib/storage-keys";
+import { STORAGE_KEYS, setStorage } from "@/lib/storage-keys";
 
 const MANUAL_LOCATION_KEY = STORAGE_KEYS.MANUAL_LOCATION;
 const SESSION_PRECISE_KEY = STORAGE_KEYS.SESSION_PRECISE_LOCATION;
 const PROMPT_DISMISSED_KEY = STORAGE_KEYS.LOCATION_PROMPT_DISMISSED;
 const IP_LOCATION_CACHE_KEY = STORAGE_KEYS.IP_LOCATION_CACHE;
+const LAST_KNOWN_LOCATION_KEY = STORAGE_KEYS.LAST_KNOWN_LOCATION;
 const LOCATION_EXPIRY_DAYS = 7;
 const IP_CACHE_MINUTES = 30; // Cache IP-based location for 30 minutes
 const GEO_TIMEOUT_MS = 10000; // 10 seconds for precise location
@@ -131,6 +132,25 @@ const setCachedIPLocation = (data: CachedIPLocation['data']): void => {
   }
 };
 
+// Save to last known location for pre-fetch system
+const saveLastKnownLocation = (location: LocationData): void => {
+  try {
+    setStorage(LAST_KNOWN_LOCATION_KEY, {
+      city: location.city,
+      region: location.region,
+      country: location.country,
+      countryCode: location.countryCode,
+      county: location.county,
+      lat: location.lat || null,
+      lng: location.lng || null,
+      accuracyLevel: location.accuracyLevel,
+      savedAt: Date.now(),
+    });
+  } catch {
+    // Ignore storage errors
+  }
+};
+
 // Default UK location (approximate - no city shown)
 const defaultLocation: LocationData = {
   city: null,
@@ -215,7 +235,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
       const manualLocation = getStoredManualLocation();
       if (manualLocation) {
         if (isMounted) {
-          setLocation({
+          const resolvedLocation: LocationData = {
             city: manualLocation.city,
             region: manualLocation.region,
             country: manualLocation.country,
@@ -223,7 +243,9 @@ export const useUserLocation = (): UseUserLocationReturn => {
             county: manualLocation.county,
             displayLocation: manualLocation.displayLocation || manualLocation.city,
             accuracyLevel: 'manual',
-          });
+          };
+          setLocation(resolvedLocation);
+          saveLastKnownLocation(resolvedLocation);
           setIsLoading(false);
           initialFetchDoneRef.current = true;
         }
@@ -234,6 +256,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
       if (memoryPreciseLocation) {
         if (isMounted) {
           setLocation(memoryPreciseLocation);
+          saveLastKnownLocation(memoryPreciseLocation);
           setIsLoading(false);
           initialFetchDoneRef.current = true;
         }
@@ -251,7 +274,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
 
           if (profile?.location_accuracy === 'precise' && profile.city) {
             if (isMounted) {
-              setLocation({
+              const resolvedLocation: LocationData = {
                 city: profile.city,
                 region: null,
                 country: profile.country,
@@ -261,7 +284,9 @@ export const useUserLocation = (): UseUserLocationReturn => {
                 accuracyLevel: 'precise',
                 lat: profile.location_lat,
                 lng: profile.location_lng,
-              });
+              };
+              setLocation(resolvedLocation);
+              saveLastKnownLocation(resolvedLocation);
               setIsLoading(false);
               initialFetchDoneRef.current = true;
             }
@@ -289,7 +314,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
         if (cachedIP) {
           // Use cached IP location
           if (isMounted) {
-            setLocation({
+            const resolvedLocation: LocationData = {
               city: null,
               region: cachedIP.region || null,
               country: cachedIP.country || "United Kingdom",
@@ -297,7 +322,9 @@ export const useUserLocation = (): UseUserLocationReturn => {
               county: null,
               displayLocation: null,
               accuracyLevel: 'approximate',
-            });
+            };
+            setLocation(resolvedLocation);
+            saveLastKnownLocation(resolvedLocation);
             setIsLoading(false);
             initialFetchDoneRef.current = true;
           }
@@ -317,7 +344,7 @@ export const useUserLocation = (): UseUserLocationReturn => {
         
         // For IP-based (approximate), we don't show city to avoid inaccuracy
         if (isMounted) {
-          setLocation({
+          const resolvedLocation: LocationData = {
             city: null, // Don't show IP-based city (inaccurate)
             region: data?.region || null,
             country: data?.country || "United Kingdom",
@@ -325,7 +352,9 @@ export const useUserLocation = (): UseUserLocationReturn => {
             county: null,
             displayLocation: null, // No display location for approximate
             accuracyLevel: 'approximate',
-          });
+          };
+          setLocation(resolvedLocation);
+          saveLastKnownLocation(resolvedLocation);
           setIsLoading(false);
           initialFetchDoneRef.current = true;
         }
