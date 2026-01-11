@@ -87,11 +87,11 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
               ))}
             </div>
 
-            {/* Show more/less buttons */}
+            {/* Show more/less buttons - Desktop only since mobile carousel shows all */}
             {reviews.length > 3 && !showAll && (
               <Button 
                 variant="ghost" 
-                className="w-full mt-3"
+                className="w-full mt-3 hidden md:flex"
                 onClick={() => setShowAll(true)}
               >
                 View all {reviews.length} reviews
@@ -100,7 +100,7 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
             {showAll && reviews.length > 3 && (
               <Button 
                 variant="ghost" 
-                className="w-full mt-3"
+                className="w-full mt-3 hidden md:flex"
                 onClick={() => setShowAll(false)}
               >
                 Show less

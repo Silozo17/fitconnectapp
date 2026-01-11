@@ -29,7 +29,7 @@ const CaseStudyCard = memo(function CaseStudyCard({ caseStudy }: { caseStudy: Pu
             <FileText className="h-5 w-5 text-purple-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-foreground line-clamp-1 mb-1">
+            <h3 className="font-semibold text-foreground mb-1">
               {caseStudy.title}
             </h3>
             {content.summary && (
@@ -128,7 +128,7 @@ export function CoachCaseStudiesSection({ coachId }: Props) {
       <div className="md:hidden -mx-5">
         <Carousel3D gap={12} showPagination={caseStudies.length > 2}>
           {caseStudies.map((caseStudy) => (
-            <Carousel3DItem key={caseStudy.id} className="w-[280px]">
+            <Carousel3DItem key={caseStudy.id} className="w-[300px]">
               <CaseStudyCard caseStudy={caseStudy} />
             </Carousel3DItem>
           ))}
