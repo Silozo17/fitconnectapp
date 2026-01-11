@@ -6,13 +6,7 @@ import { ThemedCard } from "@/components/shared/ThemedCard";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
+import { Carousel3D, Carousel3DItem } from "@/components/ui/carousel-3d";
 
 interface Props {
   coachId: string;
@@ -36,7 +30,7 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
     <>
       <ThemedCard 
         colorTheme="green"
-        className="overflow-hidden"
+        className="overflow-hidden h-full"
         onClick={() => setShowDetail(true)}
       >
         {/* Before/After Images */}
@@ -182,29 +176,21 @@ export function CoachTransformationsSection({ coachId }: Props) {
   if (isLoading || showcases.length === 0) return null;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 overflow-x-clip">
       <ContentSectionHeader
         icon={TrendingUp}
         title="Client Transformations"
         badge={<Badge variant="secondary">{showcases.length}</Badge>}
       />
-      <Carousel
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-        className="w-full"
-      >
-        <CarouselContent className="-ml-4">
+      <div className="-mx-5">
+        <Carousel3D gap={16} showPagination={showcases.length > 2}>
           {showcases.map((showcase) => (
-            <CarouselItem key={showcase.id} className="pl-4 basis-[280px] sm:basis-[300px]">
+            <Carousel3DItem key={showcase.id} className="w-[320px]">
               <TransformationCard showcase={showcase} />
-            </CarouselItem>
+            </Carousel3DItem>
           ))}
-        </CarouselContent>
-        <CarouselPrevious className="left-2" />
-        <CarouselNext className="right-2" />
-      </Carousel>
+        </Carousel3D>
+      </div>
     </div>
   );
 }
