@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { parseSimpleMarkdown } from "@/lib/markdown-utils";
+import { Carousel3D, Carousel3DItem } from "@/components/ui/carousel-3d";
 
 interface Props {
   coachId: string;
@@ -122,7 +123,20 @@ export function CoachCaseStudiesSection({ coachId }: Props) {
         title="Success Stories"
         badge={<Badge variant="secondary">{caseStudies.length}</Badge>}
       />
-      <div className="space-y-3">
+      
+      {/* Mobile: 3D Carousel */}
+      <div className="md:hidden -mx-5">
+        <Carousel3D gap={12} showPagination={caseStudies.length > 2}>
+          {caseStudies.map((caseStudy) => (
+            <Carousel3DItem key={caseStudy.id} className="w-[280px]">
+              <CaseStudyCard caseStudy={caseStudy} />
+            </Carousel3DItem>
+          ))}
+        </Carousel3D>
+      </div>
+
+      {/* Desktop: List */}
+      <div className="hidden md:block space-y-3">
         {caseStudies.map((caseStudy) => (
           <CaseStudyCard key={caseStudy.id} caseStudy={caseStudy} />
         ))}

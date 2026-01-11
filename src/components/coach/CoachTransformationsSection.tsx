@@ -6,7 +6,7 @@ import { ThemedCard } from "@/components/shared/ThemedCard";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
+import { Carousel3D, Carousel3DItem } from "@/components/ui/carousel-3d";
 interface Props {
   coachId: string;
 }
@@ -181,7 +181,20 @@ export function CoachTransformationsSection({ coachId }: Props) {
         title="Client Transformations"
         badge={<Badge variant="secondary">{showcases.length}</Badge>}
       />
-      <div className="grid sm:grid-cols-2 gap-4">
+      
+      {/* Mobile: 3D Carousel */}
+      <div className="md:hidden -mx-5">
+        <Carousel3D gap={12} showPagination={showcases.length > 2}>
+          {showcases.map((showcase) => (
+            <Carousel3DItem key={showcase.id} className="w-[280px]">
+              <TransformationCard showcase={showcase} />
+            </Carousel3DItem>
+          ))}
+        </Carousel3D>
+      </div>
+
+      {/* Desktop: Grid */}
+      <div className="hidden md:grid sm:grid-cols-2 gap-4">
         {showcases.map((showcase) => (
           <TransformationCard key={showcase.id} showcase={showcase} />
         ))}
