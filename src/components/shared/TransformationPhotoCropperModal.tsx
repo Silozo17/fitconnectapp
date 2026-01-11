@@ -14,6 +14,10 @@ import { useTranslation } from "react-i18next";
 
 const Cropper = lazy(() => import("react-easy-crop"));
 
+// 4:5 portrait aspect ratio for transformation photos
+const ASPECT = 4 / 5;
+const OUTPUT_WIDTH = 800;
+
 interface TransformationPhotoCropperModalProps {
   open: boolean;
   onClose: () => void;
@@ -67,7 +71,7 @@ export function TransformationPhotoCropperModal({
 
     try {
       setIsProcessing(true);
-      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
+      const croppedBlob = await getCroppedImg(imageSrc, croppedAreaPixels, OUTPUT_WIDTH, ASPECT);
       if (croppedBlob) {
         onCropComplete(croppedBlob);
       }
@@ -102,7 +106,7 @@ export function TransformationPhotoCropperModal({
                 image={imageSrc}
                 crop={crop}
                 zoom={zoom}
-                aspect={4 / 5}
+                aspect={ASPECT}
                 onCropChange={onCropChange}
                 onZoomChange={onZoomChange}
                 onCropComplete={onCropAreaChange}
