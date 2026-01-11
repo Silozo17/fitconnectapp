@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Crown, TrendingUp, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -25,7 +26,7 @@ function formatCurrency(amount: number, compact = false): string {
   }).format(amount);
 }
 
-export function ClientLTVWidget() {
+export const ClientLTVWidget = memo(function ClientLTVWidget() {
   const { data, isLoading } = useClientLTV();
   const navigate = useNavigate();
 
@@ -178,4 +179,4 @@ export function ClientLTVWidget() {
       </CardContent>
     </Card>
   );
-}
+});

@@ -1,4 +1,5 @@
-import { TrendingUp, TrendingDown, DollarSign, PieChart } from "lucide-react";
+import { memo } from "react";
+import { TrendingUp, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,7 +10,7 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer } from "recharts";
+import { Area, AreaChart, XAxis, YAxis } from "recharts";
 
 function formatCurrency(amount: number, compact = false): string {
   if (compact && amount >= 1000) {
@@ -23,7 +24,7 @@ function formatCurrency(amount: number, compact = false): string {
   }).format(amount);
 }
 
-export function RevenueForecastWidget() {
+export const RevenueForecastWidget = memo(function RevenueForecastWidget() {
   const { data, isLoading } = useRevenueForecasting();
 
   if (isLoading) {
@@ -191,4 +192,4 @@ export function RevenueForecastWidget() {
       </CardContent>
     </Card>
   );
-}
+});

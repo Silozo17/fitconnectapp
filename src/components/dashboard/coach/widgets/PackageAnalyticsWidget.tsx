@@ -1,9 +1,11 @@
+import { memo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { usePackageAnalytics } from "@/hooks/usePackageAnalytics";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Package, TrendingUp, Users, Percent } from "lucide-react";
+import { Package, TrendingUp, Percent } from "lucide-react";
+import { IconBadge } from "@/components/shared/IconBadge";
 
-export function PackageAnalyticsWidget() {
+export const PackageAnalyticsWidget = memo(function PackageAnalyticsWidget() {
   const { data: analytics, isLoading } = usePackageAnalytics();
 
   if (isLoading) {
@@ -21,10 +23,8 @@ export function PackageAnalyticsWidget() {
   if (!analytics || analytics.packages.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
-          <Package className="w-6 h-6 text-muted-foreground" />
-        </div>
-        <p className="text-sm font-medium text-foreground">No package data</p>
+        <IconBadge icon={Package} color="muted" size="lg" />
+        <p className="text-sm font-medium text-foreground mt-3">No package data</p>
         <p className="text-xs text-muted-foreground mt-1">
           Create packages to see analytics
         </p>
@@ -122,4 +122,4 @@ export function PackageAnalyticsWidget() {
       )}
     </div>
   );
-}
+});

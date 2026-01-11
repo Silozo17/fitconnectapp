@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Star, ArrowRight } from "lucide-react";
@@ -11,7 +12,7 @@ interface ReviewsWidgetProps {
   isLoading?: boolean;
 }
 
-export function ReviewsWidget({ averageRating, totalReviews, isLoading }: ReviewsWidgetProps) {
+export const ReviewsWidget = memo(function ReviewsWidget({ averageRating, totalReviews, isLoading }: ReviewsWidgetProps) {
   const { t } = useTranslation("coach");
 
   return (
@@ -52,4 +53,4 @@ export function ReviewsWidget({ averageRating, totalReviews, isLoading }: Review
       </div>
     </ContentSection>
   );
-}
+});

@@ -1,12 +1,12 @@
-import { TrendingDown, AlertTriangle, CheckCircle2, ChevronRight } from "lucide-react";
+import { memo } from "react";
+import { TrendingDown, CheckCircle2, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { usePlateauDetection } from "@/hooks/usePlateauDetection";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
+import { IconBadge } from "@/components/shared/IconBadge";
 
-export function PlateauDetectionWidget() {
+export const PlateauDetectionWidget = memo(function PlateauDetectionWidget() {
   const { data: plateaus = [], isLoading } = usePlateauDetection();
 
   if (isLoading) {
@@ -23,10 +23,8 @@ export function PlateauDetectionWidget() {
   if (activePlateaus.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center mb-3">
-          <CheckCircle2 className="w-6 h-6 text-success" />
-        </div>
-        <p className="text-sm font-medium text-foreground">No plateaus detected</p>
+        <IconBadge icon={CheckCircle2} color="green" size="lg" />
+        <p className="text-sm font-medium text-foreground mt-3">No plateaus detected</p>
         <p className="text-xs text-muted-foreground mt-1">
           All clients are making progress
         </p>
@@ -67,9 +65,7 @@ export function PlateauDetectionWidget() {
           className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-warning" />
-            </div>
+            <IconBadge icon={TrendingDown} color="orange" />
             <div>
               <p className="text-sm font-medium text-foreground">
                 {plateau.clientName}
@@ -96,4 +92,4 @@ export function PlateauDetectionWidget() {
       )}
     </div>
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo, useState } from "react";
 import { CreditCard, AlertCircle } from "lucide-react";
 import { usePendingPayments } from "@/hooks/usePendingPayments";
 import { PaymentRequestCard } from "@/components/payments/PaymentRequestCard";
@@ -6,7 +7,6 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-export function PendingPaymentsSection() {
+export const PendingPaymentsSection = memo(function PendingPaymentsSection() {
   const { t } = useTranslation("client");
   const { data: pendingPayments, isLoading } = usePendingPayments();
   const queryClient = useQueryClient();
@@ -118,4 +118,4 @@ export function PendingPaymentsSection() {
       </Dialog>
     </>
   );
-}
+});

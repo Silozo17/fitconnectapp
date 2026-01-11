@@ -1,10 +1,12 @@
-import { TrendingUp, Package, ChevronRight, Sparkles } from "lucide-react";
+import { memo } from "react";
+import { Package, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useUpsellOpportunities } from "@/hooks/useUpsellOpportunities";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import { IconBadge } from "@/components/shared/IconBadge";
 
-export function UpsellInsightsWidget() {
+export const UpsellInsightsWidget = memo(function UpsellInsightsWidget() {
   const { data: opportunities = [], isLoading } = useUpsellOpportunities();
 
   if (isLoading) {
@@ -19,10 +21,8 @@ export function UpsellInsightsWidget() {
   if (opportunities.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
-          <Package className="w-6 h-6 text-muted-foreground" />
-        </div>
-        <p className="text-sm font-medium text-foreground">No opportunities</p>
+        <IconBadge icon={Package} color="muted" size="lg" />
+        <p className="text-sm font-medium text-foreground mt-3">No opportunities</p>
         <p className="text-xs text-muted-foreground mt-1">
           Check back as clients progress
         </p>
@@ -80,7 +80,7 @@ export function UpsellInsightsWidget() {
           className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-lg">
+            <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-lg">
               {getTypeIcon(opportunity.suggestionType)}
             </div>
             <div className="min-w-0 flex-1">
@@ -108,4 +108,4 @@ export function UpsellInsightsWidget() {
       )}
     </div>
   );
-}
+});
