@@ -1,4 +1,4 @@
-import { ReactNode, useCallback, useEffect, useState, Children, cloneElement, isValidElement } from "react";
+import { ReactNode, useCallback, useEffect, useState, useRef, Children, cloneElement, isValidElement } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { cn } from "@/lib/utils";
 
@@ -29,17 +29,57 @@ export function Carousel3D({
     skipSnaps: false,
   });
   
-  const [scrollProgress, setScrollProgress] = useState(0);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [slidesCount, setSlidesCount] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Use refs for scroll progress to avoid state updates during scroll
+  const scrollProgressRef = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const rafIdRef = useRef<number | null>(null);
+  const snapListRef = useRef<number[]>([]);
+
+  // Update visual transforms directly without React state
+  const updateVisuals = useCallback(() => {
+    if (!containerRef.current || !emblaApi) return;
+    
+    const items = containerRef.current.querySelectorAll<HTMLElement>('[data-carousel-item]');
+    const snapList = snapListRef.current;
+    const progress = scrollProgressRef.current;
+    
+    items.forEach((item, index) => {
+      const scrollSnap = snapList[index] || 0;
+      const distance = (scrollSnap - progress) * snapList.length;
+      const absDistance = Math.abs(distance);
+      
+      // Calculate scale: 1 (center) to 0.85 (edges)
+      const scale = 1 - Math.min(absDistance * 0.075, 0.15);
+      
+      // Calculate dim: 0 (center) to 0.6 (edges)
+      const dimAmount = Math.min(2, absDistance) * 0.3;
+      
+      // Calculate z-index
+      const zIndex = 10 - Math.round(absDistance);
+      
+      // Apply directly to DOM - no React state update
+      item.style.transform = `scale(${scale})`;
+      item.style.zIndex = String(zIndex);
+      item.style.setProperty('--carousel-dim', String(dimAmount));
+    });
+  }, [emblaApi]);
 
   const onScroll = useCallback(() => {
     if (!emblaApi) return;
-    const progress = emblaApi.scrollProgress();
-    setScrollProgress(progress);
-    setSelectedIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
+    
+    scrollProgressRef.current = emblaApi.scrollProgress();
+    
+    // Cancel any pending RAF and request a new one
+    if (rafIdRef.current !== null) {
+      cancelAnimationFrame(rafIdRef.current);
+    }
+    
+    rafIdRef.current = requestAnimationFrame(updateVisuals);
+  }, [emblaApi, updateVisuals]);
 
   const scrollTo = useCallback((index: number) => {
     if (emblaApi) emblaApi.scrollTo(index);
@@ -50,15 +90,23 @@ export function Carousel3D({
   useEffect(() => {
     if (!emblaApi) return;
     
-    // Use actual children count for pagination, not scroll snaps
+    // Cache snap list - only recalculate on reInit
+    snapListRef.current = emblaApi.scrollSnapList();
     setSlidesCount(childArray.length);
-    onScroll();
+    
+    // Initial visual update
+    scrollProgressRef.current = emblaApi.scrollProgress();
+    updateVisuals();
+    setSelectedIndex(emblaApi.selectedScrollSnap());
     
     emblaApi.on("scroll", onScroll);
-    emblaApi.on("reInit", onScroll);
+    emblaApi.on("reInit", () => {
+      snapListRef.current = emblaApi.scrollSnapList();
+      onScroll();
+    });
     emblaApi.on("select", () => setSelectedIndex(emblaApi.selectedScrollSnap()));
     
-    // Drag state detection for smoother transitions
+    // Drag state detection
     const onPointerDown = () => setIsDragging(true);
     const onPointerUp = () => setIsDragging(false);
     const onSettle = () => setIsDragging(false);
@@ -68,63 +116,25 @@ export function Carousel3D({
     emblaApi.on("settle", onSettle);
     
     return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
       emblaApi.off("scroll", onScroll);
-      emblaApi.off("reInit", onScroll);
       emblaApi.off("pointerDown", onPointerDown);
       emblaApi.off("pointerUp", onPointerUp);
       emblaApi.off("settle", onSettle);
     };
-  }, [emblaApi, onScroll, childArray.length]);
-
-  // Calculate dim amount for internal overlay - NO opacity on wrapper to preserve backdrop-filter
-  const getDimAmount = (index: number): number => {
-    if (!emblaApi) return 0;
-    
-    const snapList = emblaApi.scrollSnapList();
-    const scrollSnap = snapList[index] || 0;
-    
-    // Distance from current scroll position
-    const distance = (scrollSnap - scrollProgress) * snapList.length;
-    const absDistance = Math.abs(distance);
-    const clampedAbsDistance = Math.min(2, absDistance);
-    
-    // Return dim amount (0 = no dim, 0.6 = max dim)
-    return clampedAbsDistance * 0.3;
-  };
-
-  // Calculate scale for 3D effect - center card is larger, others shrink
-  const getScale = (index: number): number => {
-    if (!emblaApi) return 1;
-    
-    const snapList = emblaApi.scrollSnapList();
-    const scrollSnap = snapList[index] || 0;
-    const distance = (scrollSnap - scrollProgress) * snapList.length;
-    const absDistance = Math.abs(distance);
-    
-    // Scale from 1 (center) to 0.85 (edges)
-    const scale = 1 - Math.min(absDistance * 0.075, 0.15);
-    return scale;
-  };
-  
-  const getZIndex = (index: number): number => {
-    if (!emblaApi) return 10;
-    
-    const snapList = emblaApi.scrollSnapList();
-    const scrollSnap = snapList[index] || 0;
-    const distance = (scrollSnap - scrollProgress) * snapList.length;
-    const absDistance = Math.abs(distance);
-    
-    return 10 - Math.round(absDistance);
-  };
+  }, [emblaApi, onScroll, updateVisuals, childArray.length]);
 
   return (
     <div className={cn("relative", className)}>
-      {/* Carousel viewport - single overflow container to preserve backdrop-filter */}
+      {/* Carousel viewport */}
       <div 
         ref={emblaRef} 
-        className="overflow-x-clip"
+        className="overflow-x-clip carousel-3d-viewport"
       >
         <div 
+          ref={containerRef}
           className="flex items-center pt-4 pb-8"
           style={{ 
             gap: `${gap}px`, 
@@ -135,26 +145,22 @@ export function Carousel3D({
           {childArray.map((child, index) => {
             if (!isValidElement(child)) return null;
             
-            const dimAmount = getDimAmount(index);
-            const zIndex = getZIndex(index);
-            const scale = getScale(index);
-            
             return (
               <div
                 key={index}
-                className="flex-shrink-0"
+                data-carousel-item
+                className={cn(
+                  "flex-shrink-0 carousel-3d-item",
+                  // Only apply transition when NOT dragging
+                  !isDragging && "carousel-3d-item--settling"
+                )}
                 style={{ 
-                  zIndex,
-                  transform: `scale(${scale})`,
                   willChange: 'transform',
-                  transition: 'transform 200ms ease-out',
                 }}
               >
                 {cloneElement(child as React.ReactElement<any>, {
-                  'data-dim-amount': dimAmount,
                   style: {
                     ...(child.props?.style || {}),
-                    '--carousel-dim': dimAmount,
                   } as React.CSSProperties,
                 })}
               </div>

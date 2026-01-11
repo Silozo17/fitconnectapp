@@ -1556,3 +1556,48 @@ html.native-ios {
 html.native-ios #root {
   will-change: opacity;
 }
+
+/* ========================================
+   CAROUSEL 3D PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+/* Carousel viewport GPU acceleration */
+.carousel-3d-viewport {
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Carousel item base - NO transition during drag for instant response */
+.carousel-3d-item {
+  transform-origin: center center;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Only apply smooth transition when settling after drag release */
+.carousel-3d-item--settling {
+  transition: transform 180ms ease-out;
+}
+
+/* Native iOS specific: aggressive performance optimizations */
+html.native-ios .carousel-3d-viewport {
+  -webkit-transform: translateZ(0);
+}
+
+html.native-ios .carousel-3d-item {
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* Disable all transitions on native iOS during interaction */
+html.native-ios .carousel-3d-item:not(.carousel-3d-item--settling) {
+  transition: none !important;
+}
+
+/* Reduced motion: disable all carousel transitions */
+@media (prefers-reduced-motion: reduce) {
+  .carousel-3d-item,
+  .carousel-3d-item--settling {
+    transition: none !important;
+  }
+}
