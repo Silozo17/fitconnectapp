@@ -133,16 +133,7 @@ const ClientCoachProfile = () => {
             averageRating={averageRating}
           />
 
-          {/* About Section */}
-          <CoachAboutSection 
-            bio={coach.bio}
-            whoIWorkWith={coach.who_i_work_with}
-          />
-
-          {/* Qualifications & Certifications */}
-          <CoachQualificationsSection coachId={coach.id} />
-
-          {/* Social Media Links */}
+          {/* Social Media Links - Above About */}
           <CoachSocialLinksDisplay 
             socialLinks={{
               facebook_url: coach.facebook_url,
@@ -154,6 +145,15 @@ const ClientCoachProfile = () => {
               youtube_url: coach.youtube_url,
             }}
           />
+
+          {/* About Section */}
+          <CoachAboutSection 
+            bio={coach.bio}
+            whoIWorkWith={coach.who_i_work_with}
+          />
+
+          {/* Qualifications & Certifications */}
+          <CoachQualificationsSection coachId={coach.id} />
 
           {/* Gallery Section */}
           <CoachGallerySection coachId={coach.id} />
