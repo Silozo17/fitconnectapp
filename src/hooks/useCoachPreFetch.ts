@@ -33,6 +33,10 @@ interface SavedLocation {
 
 // Check if browser supports permissions API
 const checkGeolocationPermission = async (): Promise<'granted' | 'denied' | 'prompt'> => {
+  // iOS WebKit doesn't support 'geolocation' in Permissions API - skip to avoid errors
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) return 'prompt';
+  
   if (!navigator.permissions) return 'prompt';
   try {
     const result = await navigator.permissions.query({ name: 'geolocation' });
@@ -277,12 +281,21 @@ export const useCoachPreFetch = () => {
           }
         } else if (permissionStatus === 'prompt') {
           // Permission not yet asked - check if we should prompt on first app open
-          const hasAskedBefore = localStorage.getItem(STORAGE_KEYS.LOCATION_PERMISSION_ASKED);
+          let hasAskedBefore: string | null = null;
+          try {
+            hasAskedBefore = localStorage.getItem(STORAGE_KEYS.LOCATION_PERMISSION_ASKED);
+          } catch {
+            // Storage access failed (private browsing, iOS restrictions, etc.)
+          }
           
           if (!hasAskedBefore && !savedLocation) {
             // First time user without saved location - mark as asked but don't block
             // The actual prompt will be shown via shouldShowLocationPrompt in useUserLocation
-            localStorage.setItem(STORAGE_KEYS.LOCATION_PERMISSION_ASKED, 'pending');
+            try {
+              localStorage.setItem(STORAGE_KEYS.LOCATION_PERMISSION_ASKED, 'pending');
+            } catch {
+              // Ignore storage write errors
+            }
           }
           
           // Fall back to IP-based location if no saved location
@@ -312,14 +325,18 @@ export const useCoachPreFetch = () => {
 
         hasFetchedRef.current = true;
       } catch (err) {
-        console.error('[CoachPreFetch] Error:', err);
+        // Non-fatal: log but don't crash the app
+        console.error('[CoachPreFetch] Pre-fetch error (non-fatal):', err);
+        hasFetchedRef.current = true; // Prevent retries
       } finally {
         isProcessingRef.current = false;
       }
     };
 
-    // Small delay to let the main UI render first
-    const timeoutId = setTimeout(runPreFetch, 100);
+    // Small delay to let the main UI render first - longer on native for WebView init
+    const isNative = typeof navigator !== 'undefined' && /Despia/.test(navigator.userAgent);
+    const delay = isNative ? 300 : 100;
+    const timeoutId = setTimeout(runPreFetch, delay);
     return () => clearTimeout(timeoutId);
   }, [contextCountryCode, user, prefetchCoaches, saveLocation]);
 
