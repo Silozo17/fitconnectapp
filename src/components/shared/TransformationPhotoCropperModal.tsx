@@ -84,6 +84,9 @@ export function TransformationPhotoCropperModal({
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{t("showcase.cropPhoto", "Crop Photo")}</DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            {t("showcase.cropAspectRatioNote", "Ideal aspect ratio: 4:5 (portrait). Adjust the crop area to frame your transformation photo.")}
+          </p>
         </DialogHeader>
 
         <div className="relative aspect-[4/5] w-full bg-muted rounded-lg overflow-hidden">

@@ -35,7 +35,7 @@ const TransformationCard = memo(function TransformationCard({ showcase }: { show
       >
         {/* Before/After Images */}
         {(showcase.before_photo_url || showcase.after_photo_url) && (
-          <div className="relative h-48 grid grid-cols-2 -mx-4 -mt-4 mb-4">
+          <div className="relative h-48 grid grid-cols-2 -mx-4 -mt-4 mb-[5px]">
             {showcase.before_photo_url && (
               <div className="relative">
                 <img 
@@ -56,14 +56,18 @@ const TransformationCard = memo(function TransformationCard({ showcase }: { show
                 <Badge className="absolute bottom-2 right-2 bg-primary text-primary-foreground">After</Badge>
               </div>
             )}
+            {/* Goal type badge - positioned top-right of image area */}
+            <Badge 
+              variant="secondary" 
+              className="absolute top-2 right-2 bg-background/80 backdrop-blur-sm shrink-0"
+            >
+              {goalTypeLabels[goalType] || "Fitness"}
+            </Badge>
           </div>
         )}
 
-        <div className="flex items-start justify-between gap-2 mb-3">
-          <h3 className="font-semibold text-foreground line-clamp-1">{showcase.title || showcase.display_name || "Transformation"}</h3>
-          <Badge variant="secondary" className="shrink-0">
-            {goalTypeLabels[goalType] || "Fitness"}
-          </Badge>
+        <div className="flex items-start justify-between gap-2 mb-3 pt-[5px]">
+          <h3 className="font-semibold text-foreground">{showcase.title || showcase.display_name || "Transformation"}</h3>
         </div>
 
         {showcase.description && (
