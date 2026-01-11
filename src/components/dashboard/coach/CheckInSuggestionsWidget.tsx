@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { MessageCircle, Zap, Clock, Send, ChevronRight, Sparkles } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -36,7 +36,7 @@ interface CheckInItemProps {
   onAICompose?: (suggestion: CheckInSuggestion) => void;
 }
 
-function CheckInItem({ suggestion, onAICompose }: CheckInItemProps) {
+const CheckInItem = memo(function CheckInItem({ suggestion, onAICompose }: CheckInItemProps) {
   const navigate = useNavigate();
   const config = priorityConfig[suggestion.priority];
   const Icon = config.icon;
@@ -112,9 +112,9 @@ function CheckInItem({ suggestion, onAICompose }: CheckInItemProps) {
       <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0 sm:group-hover:hidden" />
     </div>
   );
-}
+});
 
-export function CheckInSuggestionsWidget() {
+export const CheckInSuggestionsWidget = memo(function CheckInSuggestionsWidget() {
   const { data: suggestions, isLoading } = useSmartCheckInSuggestions();
   const navigate = useNavigate();
   const [aiComposerOpen, setAiComposerOpen] = useState(false);
@@ -235,4 +235,4 @@ export function CheckInSuggestionsWidget() {
       )}
     </>
   );
-}
+});

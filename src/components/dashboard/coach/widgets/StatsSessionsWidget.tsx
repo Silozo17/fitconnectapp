@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Calendar } from "lucide-react";
 import { MetricCard } from "@/components/shared/MetricCard";
@@ -8,7 +9,7 @@ interface StatsSessionsWidgetProps {
   isLoading?: boolean;
 }
 
-export function StatsSessionsWidget({ sessionsThisWeek, isLoading }: StatsSessionsWidgetProps) {
+export const StatsSessionsWidget = memo(function StatsSessionsWidget({ sessionsThisWeek, isLoading }: StatsSessionsWidgetProps) {
   const { t } = useTranslation("coach");
 
   if (isLoading) {
@@ -25,4 +26,4 @@ export function StatsSessionsWidget({ sessionsThisWeek, isLoading }: StatsSessio
       description={t("stats.thisWeek")}
     />
   );
-}
+});

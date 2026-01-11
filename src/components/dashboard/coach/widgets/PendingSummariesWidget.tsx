@@ -1,11 +1,13 @@
+import { memo } from "react";
 import { FileText, Clock, ChevronRight, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { usePendingSummaries } from "@/hooks/useSummaryGeneration";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
+import { IconBadge } from "@/components/shared/IconBadge";
 
-export function PendingSummariesWidget() {
+export const PendingSummariesWidget = memo(function PendingSummariesWidget() {
   const { data: pendingSummaries = [], isLoading } = usePendingSummaries();
 
   if (isLoading) {
@@ -20,10 +22,8 @@ export function PendingSummariesWidget() {
   if (pendingSummaries.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
-          <FileText className="w-6 h-6 text-muted-foreground" />
-        </div>
-        <p className="text-sm font-medium text-foreground">No pending summaries</p>
+        <IconBadge icon={FileText} color="muted" size="lg" />
+        <p className="text-sm font-medium text-foreground mt-3">No pending summaries</p>
         <p className="text-xs text-muted-foreground mt-1">
           Generate summaries from client profiles
         </p>
@@ -40,9 +40,7 @@ export function PendingSummariesWidget() {
           className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-primary" />
-            </div>
+            <IconBadge icon={Sparkles} color="primary" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground truncate">
                 {summary.clientName}
@@ -68,4 +66,4 @@ export function PendingSummariesWidget() {
       )}
     </div>
   );
-}
+});

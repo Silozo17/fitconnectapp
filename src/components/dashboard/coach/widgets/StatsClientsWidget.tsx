@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Users } from "lucide-react";
 import { MetricCard } from "@/components/shared/MetricCard";
@@ -8,7 +9,7 @@ interface StatsClientsWidgetProps {
   isLoading?: boolean;
 }
 
-export function StatsClientsWidget({ activeClients, isLoading }: StatsClientsWidgetProps) {
+export const StatsClientsWidget = memo(function StatsClientsWidget({ activeClients, isLoading }: StatsClientsWidgetProps) {
   const { t } = useTranslation("coach");
 
   if (isLoading) {
@@ -24,4 +25,4 @@ export function StatsClientsWidget({ activeClients, isLoading }: StatsClientsWid
       size="default"
     />
   );
-}
+});

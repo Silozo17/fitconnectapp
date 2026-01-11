@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -11,7 +11,7 @@ interface WeeklyVolumeWidgetProps {
   className?: string;
 }
 
-export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
+export const WeeklyVolumeWidget = memo(function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
   const { data: logs, isLoading } = useTrainingLogs();
 
   const volumeData = useMemo(() => {
@@ -161,4 +161,4 @@ export function WeeklyVolumeWidget({ className }: WeeklyVolumeWidgetProps) {
       </AccentCardContent>
     </AccentCard>
   );
-}
+});

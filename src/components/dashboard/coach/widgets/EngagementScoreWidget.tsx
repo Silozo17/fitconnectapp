@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { TrendingUp, TrendingDown, Minus, Activity } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -26,7 +27,7 @@ function getProgressColor(score: number): string {
   return "bg-destructive";
 }
 
-function ClientEngagementItem({ client }: { client: ClientEngagementData }) {
+const ClientEngagementItem = memo(function ClientEngagementItem({ client }: { client: ClientEngagementData }) {
   const navigate = useNavigate();
   const trend = trendConfig[client.trend];
   const TrendIcon = trend.icon;
@@ -63,9 +64,9 @@ function ClientEngagementItem({ client }: { client: ClientEngagementData }) {
       </div>
     </div>
   );
-}
+});
 
-export function EngagementScoreWidget() {
+export const EngagementScoreWidget = memo(function EngagementScoreWidget() {
   const { data: clients, isLoading } = useClientEngagementScore();
   const navigate = useNavigate();
 
@@ -139,4 +140,4 @@ export function EngagementScoreWidget() {
       </CardContent>
     </Card>
   );
-}
+});

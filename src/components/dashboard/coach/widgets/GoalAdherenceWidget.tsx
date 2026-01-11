@@ -1,11 +1,12 @@
-import { Target, AlertCircle, CheckCircle2, ChevronRight, TrendingUp, TrendingDown } from "lucide-react";
+import { memo } from "react";
+import { CheckCircle2, ChevronRight, TrendingDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useOffTrackGoals } from "@/hooks/useGoalAdherence";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import { IconBadge } from "@/components/shared/IconBadge";
 
-export function GoalAdherenceWidget() {
+export const GoalAdherenceWidget = memo(function GoalAdherenceWidget() {
   const { data: offTrackGoals = [], isLoading } = useOffTrackGoals();
 
   if (isLoading) {
@@ -20,10 +21,8 @@ export function GoalAdherenceWidget() {
   if (offTrackGoals.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
-        <div className="w-12 h-12 rounded-full bg-success/20 flex items-center justify-center mb-3">
-          <CheckCircle2 className="w-6 h-6 text-success" />
-        </div>
-        <p className="text-sm font-medium text-foreground">All goals on track</p>
+        <IconBadge icon={CheckCircle2} color="green" size="lg" />
+        <p className="text-sm font-medium text-foreground mt-3">All goals on track</p>
         <p className="text-xs text-muted-foreground mt-1">
           Clients are progressing well
         </p>
@@ -40,9 +39,7 @@ export function GoalAdherenceWidget() {
           className="flex items-center justify-between p-3 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-warning/20 flex items-center justify-center">
-              <TrendingDown className="w-5 h-5 text-warning" />
-            </div>
+            <IconBadge icon={TrendingDown} color="orange" />
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-foreground truncate">
                 {item.clientName}
@@ -68,4 +65,4 @@ export function GoalAdherenceWidget() {
       )}
     </div>
   );
-}
+});

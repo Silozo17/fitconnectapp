@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Star } from "lucide-react";
 import { MetricCard } from "@/components/shared/MetricCard";
@@ -9,7 +10,7 @@ interface StatsRatingWidgetProps {
   isLoading?: boolean;
 }
 
-export function StatsRatingWidget({ averageRating, totalReviews, isLoading }: StatsRatingWidgetProps) {
+export const StatsRatingWidget = memo(function StatsRatingWidget({ averageRating, totalReviews, isLoading }: StatsRatingWidgetProps) {
   const { t } = useTranslation("coach");
 
   if (isLoading) {
@@ -26,4 +27,4 @@ export function StatsRatingWidget({ averageRating, totalReviews, isLoading }: St
       description={totalReviews > 0 ? `${totalReviews} ${t("stats.reviews")}` : undefined}
     />
   );
-}
+});

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { AlertTriangle, TrendingDown, TrendingUp, Minus, Clock, ChevronRight } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEnhancedChurnPrediction, Trajectory, EnhancedChurnData } from "@/hooks/useEnhancedChurnPrediction";
 import { cn } from "@/lib/utils";
 import { useNavigate } from "react-router-dom";
-import { format } from "date-fns";
 
 const trajectoryConfig: Record<Trajectory, { icon: typeof TrendingUp; color: string; label: string }> = {
   improving: { icon: TrendingUp, color: "text-success", label: "Improving" },
@@ -21,7 +21,7 @@ const urgencyConfig = {
   monitor: { color: "bg-muted text-muted-foreground", label: "Monitor" },
 };
 
-function ChurnClientItem({ client }: { client: EnhancedChurnData }) {
+const ChurnClientItem = memo(function ChurnClientItem({ client }: { client: EnhancedChurnData }) {
   const navigate = useNavigate();
   const trajectory = trajectoryConfig[client.trajectory];
   const urgency = urgencyConfig[client.urgency];
@@ -78,9 +78,9 @@ function ChurnClientItem({ client }: { client: EnhancedChurnData }) {
       <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
     </div>
   );
-}
+});
 
-export function EnhancedChurnWidget() {
+export const EnhancedChurnWidget = memo(function EnhancedChurnWidget() {
   const { data: clients, isLoading } = useEnhancedChurnPrediction();
   const navigate = useNavigate();
 
@@ -164,4 +164,4 @@ export function EnhancedChurnWidget() {
       </CardContent>
     </Card>
   );
-}
+});

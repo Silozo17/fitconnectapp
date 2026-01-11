@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { 
@@ -6,7 +7,6 @@ import {
   MessageSquare, 
   Users, 
   DollarSign, 
-  Star, 
   Package, 
   Zap,
   ClipboardList
@@ -21,7 +21,7 @@ interface QuickActionsWidgetProps {
   unreadMessages?: number;
 }
 
-export function QuickActionsWidget({ 
+export const QuickActionsWidget = memo(function QuickActionsWidget({ 
   onAddClient, 
   activeClients = 0,
   unreadMessages = 0 
@@ -150,4 +150,4 @@ export function QuickActionsWidget({
       </div>
     </>
   );
-}
+});
