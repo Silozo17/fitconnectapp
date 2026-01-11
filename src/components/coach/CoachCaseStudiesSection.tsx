@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { FileText, ChevronRight, BookOpen } from "lucide-react";
 import { ContentSectionHeader } from "@/components/shared/ContentSection";
 import { ThemedCard } from "@/components/shared/ThemedCard";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -14,7 +14,7 @@ interface Props {
   coachId: string;
 }
 
-function CaseStudyCard({ caseStudy }: { caseStudy: PublicCaseStudy }) {
+const CaseStudyCard = memo(function CaseStudyCard({ caseStudy }: { caseStudy: PublicCaseStudy }) {
   const [showDetail, setShowDetail] = useState(false);
   const content = caseStudy.content || {};
 
@@ -109,7 +109,7 @@ function CaseStudyCard({ caseStudy }: { caseStudy: PublicCaseStudy }) {
       </Dialog>
     </>
   );
-}
+});
 
 export function CoachCaseStudiesSection({ coachId }: Props) {
   const { data: caseStudies = [], isLoading } = usePublicCoachCaseStudies(coachId);
