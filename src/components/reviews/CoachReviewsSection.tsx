@@ -1,11 +1,12 @@
 import { Star, MessageSquareText } from "lucide-react";
-import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
+import { ContentSectionHeader } from "@/components/shared/ContentSection";
 import { useCoachReviews, calculateAverageRating } from "@/hooks/useReviews";
 import ReviewCard from "./ReviewCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { ThemedCard } from "@/components/shared/ThemedCard";
 
 interface CoachReviewsSectionProps {
   coachId: string;
@@ -21,21 +22,21 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
 
   if (isLoading) {
     return (
-      <ContentSection colorTheme="orange">
+      <div className="space-y-4">
         <ContentSectionHeader
           icon={MessageSquareText}
           title={t('profile.reviews')}
         />
-        <div className="space-y-3 pt-4">
+        <div className="space-y-3">
           <Skeleton className="h-24 w-full rounded-2xl" />
           <Skeleton className="h-24 w-full rounded-2xl" />
         </div>
-      </ContentSection>
+      </div>
     );
   }
 
   return (
-    <ContentSection colorTheme="orange">
+    <div className="space-y-4">
       <ContentSectionHeader
         icon={MessageSquareText}
         title={t('profile.reviews')}
@@ -54,15 +55,17 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
         }
       />
       
-      <div className="pt-4">
+      <div>
         {reviews.length === 0 ? (
-          <div className="text-center py-8">
-            <MessageSquareText className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-            <p className="text-muted-foreground">{t('profile.noReviewsEmpty')}</p>
-            <p className="text-sm text-muted-foreground">
-              {t('profile.beFirstReview')}
-            </p>
-          </div>
+          <ThemedCard colorTheme="orange">
+            <div className="text-center py-4">
+              <MessageSquareText className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
+              <p className="text-muted-foreground">{t('profile.noReviewsEmpty')}</p>
+              <p className="text-sm text-muted-foreground">
+                {t('profile.beFirstReview')}
+              </p>
+            </div>
+          </ThemedCard>
         ) : (
           <div className="space-y-3">
             {displayedReviews.map((review) => (
@@ -89,7 +92,7 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
           </div>
         )}
       </div>
-    </ContentSection>
+    </div>
   );
 };
 

@@ -2,6 +2,7 @@ import { Star } from "lucide-react";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { ThemedCard } from "@/components/shared/ThemedCard";
 import type { Review } from "@/hooks/useReviews";
 
 interface ReviewCardProps {
@@ -17,7 +18,7 @@ const ReviewCard = ({ review, className }: ReviewCardProps) => {
     : "Anonymous";
 
   return (
-    <div className={cn("bg-muted/30 rounded-2xl p-4", className)}>
+    <ThemedCard colorTheme="orange" className={className}>
       <div className="flex items-start gap-3">
         <UserAvatar
           src={review.client?.avatar_url}
@@ -55,7 +56,7 @@ const ReviewCard = ({ review, className }: ReviewCardProps) => {
           )}
         </div>
       </div>
-    </div>
+    </ThemedCard>
   );
 };
 
