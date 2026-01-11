@@ -6,7 +6,6 @@ import { ThemedCard } from "@/components/shared/ThemedCard";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Carousel3D, Carousel3DItem } from "@/components/ui/carousel-3d";
 
 interface Props {
   coachId: string;
@@ -30,12 +29,12 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
     <>
       <ThemedCard 
         colorTheme="green"
-        className="overflow-hidden h-full"
+        className="overflow-hidden"
         onClick={() => setShowDetail(true)}
       >
         {/* Before/After Images */}
         {(showcase.before_photo_url || showcase.after_photo_url) && (
-          <div className="relative aspect-square grid grid-cols-2 -mx-4 -mt-4 mb-4">
+          <div className="relative h-48 grid grid-cols-2 -mx-4 -mt-4 mb-4">
             {showcase.before_photo_url && (
               <div className="relative">
                 <img 
@@ -176,20 +175,16 @@ export function CoachTransformationsSection({ coachId }: Props) {
   if (isLoading || showcases.length === 0) return null;
 
   return (
-    <div className="space-y-4 overflow-x-clip">
+    <div className="space-y-4">
       <ContentSectionHeader
         icon={TrendingUp}
         title="Client Transformations"
         badge={<Badge variant="secondary">{showcases.length}</Badge>}
       />
-      <div className="-mx-5">
-        <Carousel3D gap={16} showPagination={showcases.length > 2}>
-          {showcases.map((showcase) => (
-            <Carousel3DItem key={showcase.id} className="w-[320px]">
-              <TransformationCard showcase={showcase} />
-            </Carousel3DItem>
-          ))}
-        </Carousel3D>
+      <div className="grid sm:grid-cols-2 gap-4">
+        {showcases.map((showcase) => (
+          <TransformationCard key={showcase.id} showcase={showcase} />
+        ))}
       </div>
     </div>
   );
