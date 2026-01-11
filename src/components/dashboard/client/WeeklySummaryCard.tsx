@@ -17,6 +17,7 @@ import {
   Dumbbell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { parseSimpleMarkdown } from "@/lib/markdown-utils";
 
 interface WeeklyData {
   habitsCompleted: number;
@@ -130,7 +131,10 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
             <RefreshCw className={cn("w-4 h-4", isRefetching && "animate-spin")} />
           </Button>
         </div>
-        <p className="text-sm text-muted-foreground leading-relaxed">{summary}</p>
+        <div 
+          className="text-sm text-muted-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none [&_p]:mb-2 [&_p:last-child]:mb-0"
+          dangerouslySetInnerHTML={{ __html: parseSimpleMarkdown(summary) }}
+        />
 
         {/* Expandable section */}
         <Button

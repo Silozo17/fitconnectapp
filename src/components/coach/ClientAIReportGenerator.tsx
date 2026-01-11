@@ -30,6 +30,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { parseSimpleMarkdown } from "@/lib/markdown-utils";
 
 interface ClientAIReportGeneratorProps {
   open: boolean;
@@ -190,7 +191,10 @@ export const ClientAIReportGenerator = ({
             <Card>
               <CardContent className="pt-4">
                 <h4 className="font-medium mb-2">{t("clientDetail.reports.sections.summary", "Summary")}</h4>
-                <p className="text-muted-foreground">{generatedReport.summary}</p>
+                <div 
+                  className="text-muted-foreground prose prose-sm dark:prose-invert max-w-none [&_p]:mb-2 [&_p:last-child]:mb-0"
+                  dangerouslySetInnerHTML={{ __html: parseSimpleMarkdown(generatedReport.summary) }}
+                />
               </CardContent>
             </Card>
 

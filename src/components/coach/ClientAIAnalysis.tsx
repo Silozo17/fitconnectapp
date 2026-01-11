@@ -8,6 +8,7 @@ import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
+import { parseSimpleMarkdown } from "@/lib/markdown-utils";
 
 interface ClientAIAnalysisProps {
   clientId: string;
@@ -144,7 +145,10 @@ export const ClientAIAnalysis = ({ clientId, clientName }: ClientAIAnalysisProps
                 <Target className="w-4 h-4" />
                 Summary
               </h4>
-              <p className="text-sm text-muted-foreground">{report.summary}</p>
+              <div 
+                className="text-sm text-muted-foreground prose prose-sm dark:prose-invert max-w-none [&_p]:mb-2 [&_p:last-child]:mb-0"
+                dangerouslySetInnerHTML={{ __html: parseSimpleMarkdown(report.summary) }}
+              />
             </div>
 
             {/* Trends */}

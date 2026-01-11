@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import type { Notification } from "@/hooks/useNotifications";
+import { parseSimpleMarkdown } from "@/lib/markdown-utils";
 
 interface NotificationItemProps {
   notification: Notification;
@@ -141,9 +142,10 @@ export const NotificationItem = ({
             <X className="h-3 w-3" />
           </Button>
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-2 mt-0.5">
-          {notification.message}
-        </p>
+        <div 
+          className="text-xs text-muted-foreground line-clamp-2 mt-0.5 [&_p]:mb-0 [&_strong]:font-semibold"
+          dangerouslySetInnerHTML={{ __html: parseSimpleMarkdown(notification.message) }}
+        />
         <p className="text-xs text-muted-foreground mt-1">
           {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
         </p>
