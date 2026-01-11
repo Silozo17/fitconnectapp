@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
+import { ContentSection } from "@/components/shared/ContentSection";
 import {
   TrendingUp,
   TrendingDown,
@@ -41,7 +42,7 @@ interface WeeklySummaryData {
   weeklyData: WeeklyData;
 }
 
-export function WeeklySummaryCard({ className }: { className?: string }) {
+export const WeeklySummaryCard = memo(function WeeklySummaryCard({ className }: { className?: string }) {
   const { user } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -112,10 +113,7 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
   return (
     <div className={cn("space-y-3", className)}>
       {/* Main AI Summary Card */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50">
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
-        
+      <ContentSection colorTheme="primary">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-primary" />
@@ -192,7 +190,7 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
             )}
           </div>
         )}
-      </div>
+      </ContentSection>
 
       {/* Stats Cards - 4 separate small cards matching HealthMetricCard style */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -259,7 +257,7 @@ export function WeeklySummaryCard({ className }: { className?: string }) {
       </div>
     </div>
   );
-}
+});
 
 // Export summary for sentinel description
 export function useWeeklySummary() {
