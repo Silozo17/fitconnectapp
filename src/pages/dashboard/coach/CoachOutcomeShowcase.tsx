@@ -468,11 +468,15 @@ export default function CoachOutcomeShowcase() {
             {showcases.map((item) => (
               <Card key={item.id} variant="glass" className="overflow-hidden">
                 {/* Photo Section */}
-                <div className="relative aspect-[16/9] bg-secondary/50 flex items-center justify-center">
+                <div className="relative bg-secondary/50">
                   {item.beforePhotoUrl && item.afterPhotoUrl ? (
-                    <div className="flex w-full h-full">
-                      <img src={item.beforePhotoUrl} alt="Before" className="flex-1 object-cover" />
-                      <img src={item.afterPhotoUrl} alt="After" className="flex-1 object-cover" />
+                    <div className="grid grid-cols-2 gap-0.5">
+                      <div className="aspect-[4/5]">
+                        <img src={item.beforePhotoUrl} alt="Before" className="w-full h-full object-cover" />
+                      </div>
+                      <div className="aspect-[4/5]">
+                        <img src={item.afterPhotoUrl} alt="After" className="w-full h-full object-cover" />
+                      </div>
                     </div>
                   ) : (
                     <div className="text-center">

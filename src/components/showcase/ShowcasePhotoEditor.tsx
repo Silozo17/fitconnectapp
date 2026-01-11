@@ -143,7 +143,7 @@ export function ShowcasePhotoEditor({
           <Label className="text-xs text-muted-foreground">
             {t("showcase.before", "Before")}
           </Label>
-          <div className="relative aspect-square rounded-lg border border-border bg-secondary/30 overflow-hidden">
+          <div className="relative aspect-[4/5] rounded-lg border border-border bg-secondary/30 overflow-hidden">
             {currentBeforePhoto ? (
               <>
                 <img
@@ -207,7 +207,7 @@ export function ShowcasePhotoEditor({
           <Label className="text-xs text-muted-foreground">
             {t("showcase.after", "After")}
           </Label>
-          <div className="relative aspect-square rounded-lg border border-border bg-secondary/30 overflow-hidden">
+          <div className="relative aspect-[4/5] rounded-lg border border-border bg-secondary/30 overflow-hidden">
             {currentAfterPhoto ? (
               <>
                 <img

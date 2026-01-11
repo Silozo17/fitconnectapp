@@ -35,9 +35,9 @@ const TransformationCard = memo(function TransformationCard({ showcase }: { show
       >
         {/* Before/After Images */}
         {(showcase.before_photo_url || showcase.after_photo_url) && (
-          <div className="relative h-48 grid grid-cols-2 -mx-4 -mt-4 mb-[5px]">
+          <div className="relative grid grid-cols-2 -mx-4 -mt-4 mb-[5px]">
             {showcase.before_photo_url && (
-              <div className="relative">
+              <div className="relative aspect-[4/5]">
                 <img 
                   src={showcase.before_photo_url} 
                   alt="Before" 
@@ -47,7 +47,7 @@ const TransformationCard = memo(function TransformationCard({ showcase }: { show
               </div>
             )}
             {showcase.after_photo_url && (
-              <div className="relative">
+              <div className="relative aspect-[4/5]">
                 <img 
                   src={showcase.after_photo_url} 
                   alt="After" 
@@ -113,7 +113,7 @@ const TransformationCard = memo(function TransformationCard({ showcase }: { show
               {(showcase.before_photo_url || showcase.after_photo_url) && (
                 <div className="grid grid-cols-2 gap-2 rounded-xl overflow-hidden">
                   {showcase.before_photo_url && (
-                    <div className="relative aspect-[3/4]">
+                    <div className="relative aspect-[4/5]">
                       <img 
                         src={showcase.before_photo_url} 
                         alt="Before" 
@@ -123,7 +123,7 @@ const TransformationCard = memo(function TransformationCard({ showcase }: { show
                     </div>
                   )}
                   {showcase.after_photo_url && (
-                    <div className="relative aspect-[3/4]">
+                    <div className="relative aspect-[4/5]">
                       <img 
                         src={showcase.after_photo_url} 
                         alt="After" 
