@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ import { useClientSuggestedPhotos } from "@/hooks/useClientSuggestedPhotos";
 import { useShowcasePhotoUpload } from "@/hooks/useShowcasePhotoUpload";
 import { format } from "date-fns";
 import { ConsentType } from "@/hooks/useOutcomeShowcase";
+import { TransformationPhotoCropperModal } from "@/components/shared/TransformationPhotoCropperModal";
 
 interface ShowcasePhotoEditorProps {
   clientId: string;
@@ -50,6 +51,7 @@ export function ShowcasePhotoEditor({
   const { t } = useTranslation();
   const beforeInputRef = useRef<HTMLInputElement>(null);
   const afterInputRef = useRef<HTMLInputElement>(null);
+  const [cropImage, setCropImage] = useState<{ src: string; type: 'before' | 'after' } | null>(null);
 
   const { data: suggestedPhotos, isLoading: suggestionsLoading } =
     useClientSuggestedPhotos(isExternal ? undefined : clientId);
@@ -60,24 +62,39 @@ export function ShowcasePhotoEditor({
     isExternal ||
     (consentType && PHOTO_ALLOWED_CONSENT_TYPES.includes(consentType));
 
-  const handleFileSelect = async (
+  const handleFileSelect = (
     event: React.ChangeEvent<HTMLInputElement>,
     type: "before" | "after"
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const url = await uploadPhoto(coachId, coachUserId, file, type);
+    // Read file and open cropper
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImage({ src: reader.result as string, type });
+    };
+    reader.readAsDataURL(file);
+
+    // Reset input
+    event.target.value = "";
+  };
+
+  const handleCropComplete = async (blob: Blob) => {
+    if (!cropImage) return;
+
+    const file = new File([blob], `${cropImage.type}-photo.jpg`, { type: 'image/jpeg' });
+    const url = await uploadPhoto(coachId, coachUserId, file, cropImage.type);
+
     if (url) {
-      if (type === "before") {
+      if (cropImage.type === "before") {
         onBeforePhotoChange(url);
       } else {
         onAfterPhotoChange(url);
       }
     }
 
-    // Reset input
-    event.target.value = "";
+    setCropImage(null);
   };
 
   const handleUseSuggested = (type: "before" | "after") => {
@@ -272,6 +289,16 @@ export function ShowcasePhotoEditor({
           <Loader2 className="w-3 h-3 animate-spin" />
           {t("showcase.loadingSuggestions", "Loading client photos...")}
         </div>
+      )}
+
+      {/* Photo Cropper Modal */}
+      {cropImage && (
+        <TransformationPhotoCropperModal
+          open={!!cropImage}
+          onClose={() => setCropImage(null)}
+          imageSrc={cropImage.src}
+          onCropComplete={handleCropComplete}
+        />
       )}
     </div>
   );
