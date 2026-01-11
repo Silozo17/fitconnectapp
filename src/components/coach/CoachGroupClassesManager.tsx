@@ -390,9 +390,10 @@ export function CoachGroupClassesManager() {
                 key={groupClass.id}
                 className="border border-border rounded-lg p-4 space-y-3"
               >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
+                  {/* Title and description */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h4 className="font-medium">{groupClass.title}</h4>
                       {!groupClass.is_active && (
                         <Badge variant="secondary">{t("groupClasses.inactive")}</Badge>
@@ -404,7 +405,9 @@ export function CoachGroupClassesManager() {
                       </p>
                     )}
                   </div>
-                  <div className="flex items-center gap-1">
+                  
+                  {/* Action buttons - row on mobile, inline on desktop */}
+                  <div className="flex items-center gap-1 shrink-0 flex-wrap">
                     <WaitlistViewer classId={groupClass.id} className={groupClass.title} t={t} />
                     <Button
                       variant="ghost"
