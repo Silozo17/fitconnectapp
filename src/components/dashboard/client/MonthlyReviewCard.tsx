@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format, subMonths } from "date-fns";
+import { parseSimpleMarkdown } from "@/lib/markdown-utils";
 
 interface MonthlyReviewData {
   period: { start: string; end: string };
@@ -84,7 +85,10 @@ export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
               <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
             </Button>
           </div>
-          <p className="text-sm text-foreground whitespace-pre-line leading-relaxed">{aiSummary}</p>
+          <div 
+            className="text-sm text-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none [&_p]:mb-2 [&_p:last-child]:mb-0"
+            dangerouslySetInnerHTML={{ __html: parseSimpleMarkdown(aiSummary) }}
+          />
         </div>
       )}
 

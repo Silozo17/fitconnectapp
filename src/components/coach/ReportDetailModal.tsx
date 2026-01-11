@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { CoachClientReport, useUpdateReport, useSendReportToClient } from "@/hooks/useCoachClientReports";
 import { useTranslation } from "@/hooks/useTranslation";
+import { parseSimpleMarkdown } from "@/lib/markdown-utils";
 
 interface ReportDetailModalProps {
   report: CoachClientReport | null;
@@ -116,7 +117,10 @@ export const ReportDetailModal = ({ report, onClose, clientName }: ReportDetailM
             <Card>
               <CardContent className="pt-4">
                 <h4 className="font-medium mb-2">{t("clientDetail.reports.sections.summary", "Summary")}</h4>
-                <p className="text-muted-foreground">{report.report_data.summary}</p>
+                <div 
+                  className="text-muted-foreground prose prose-sm dark:prose-invert max-w-none [&_p]:mb-2 [&_p:last-child]:mb-0"
+                  dangerouslySetInnerHTML={{ __html: parseSimpleMarkdown(report.report_data.summary) }}
+                />
               </CardContent>
             </Card>
           )}

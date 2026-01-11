@@ -23,6 +23,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { Rarity } from "@/lib/avatar-utils";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
+import { parseSimpleMarkdown } from "@/lib/markdown-utils";
 
 interface ParticipantInfo {
   name: string;
@@ -363,7 +364,10 @@ const ChatWindow = ({
                           : "glass-item bg-white/[0.06] text-foreground rounded-bl-md"
                       )}
                     >
-                      <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      <div 
+                        className="text-sm prose prose-sm dark:prose-invert max-w-none [&_p]:mb-1 [&_p:last-child]:mb-0"
+                        dangerouslySetInnerHTML={{ __html: parseSimpleMarkdown(message.content) }}
+                      />
                       <div
                         className={cn(
                           "flex items-center gap-1 mt-1",
