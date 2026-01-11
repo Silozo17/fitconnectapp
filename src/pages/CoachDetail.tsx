@@ -168,7 +168,7 @@ const CoachDetail = () => {
         <div className="container mx-auto px-4 pb-12">
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main Content Column */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-6 overflow-hidden">
               {/* 1. Hero Section */}
               <Card className="overflow-hidden border-0 shadow-lg">
                 <CoachHeroSection 
