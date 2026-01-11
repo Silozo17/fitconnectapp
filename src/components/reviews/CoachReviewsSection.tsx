@@ -69,10 +69,10 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
           </ThemedCard>
         ) : (
           <>
-            {/* Mobile: 3D Carousel */}
+            {/* Mobile: 3D Carousel - shows ALL reviews */}
             <div className="md:hidden -mx-5">
-              <Carousel3D gap={12} showPagination={displayedReviews.length > 2}>
-                {displayedReviews.map((review) => (
+              <Carousel3D gap={12} showPagination={reviews.length > 2}>
+                {reviews.map((review) => (
                   <Carousel3DItem key={review.id} className="w-[300px]">
                     <ReviewCard review={review} />
                   </Carousel3DItem>

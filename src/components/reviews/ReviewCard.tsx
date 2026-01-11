@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Star } from "lucide-react";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { format } from "date-fns";
@@ -10,7 +11,7 @@ interface ReviewCardProps {
   className?: string;
 }
 
-const ReviewCard = ({ review, className }: ReviewCardProps) => {
+const ReviewCard = memo(function ReviewCard({ review, className }: ReviewCardProps) {
   const clientName = review.client
     ? [review.client.first_name, review.client.last_name]
         .filter(Boolean)
@@ -58,6 +59,6 @@ const ReviewCard = ({ review, className }: ReviewCardProps) => {
       </div>
     </ThemedCard>
   );
-};
+});
 
 export default ReviewCard;

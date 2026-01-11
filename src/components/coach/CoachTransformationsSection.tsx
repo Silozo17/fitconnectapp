@@ -3,15 +3,16 @@ import { Badge } from "@/components/ui/badge";
 import { TrendingDown, Clock, Percent, TrendingUp } from "lucide-react";
 import { ContentSectionHeader } from "@/components/shared/ContentSection";
 import { ThemedCard } from "@/components/shared/ThemedCard";
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Carousel3D, Carousel3DItem } from "@/components/ui/carousel-3d";
+
 interface Props {
   coachId: string;
 }
 
-function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
+const TransformationCard = memo(function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
   const [showDetail, setShowDetail] = useState(false);
   const stats = showcase.stats;
 
@@ -167,7 +168,7 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
       </Dialog>
     </>
   );
-}
+});
 
 export function CoachTransformationsSection({ coachId }: Props) {
   const { data: showcases = [], isLoading } = usePublicCoachShowcases(coachId);
