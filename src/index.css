@@ -1601,3 +1601,141 @@ html.native-ios .carousel-3d-item:not(.carousel-3d-item--settling) {
     transition: none !important;
   }
 }
+
+/* ========================================
+   CARD DESIGN SYSTEM UTILITIES
+   Reusable patterns for gradient cards
+   ======================================== */
+
+/* Card accent lines - top gradient accent */
+.card-accent-primary {
+  @apply absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent;
+}
+
+.card-accent-blue {
+  @apply absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-400/60 via-blue-500/40 to-transparent;
+}
+
+.card-accent-green {
+  @apply absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-green-400/60 via-green-500/40 to-transparent;
+}
+
+.card-accent-orange {
+  @apply absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-400/60 via-orange-500/40 to-transparent;
+}
+
+.card-accent-purple {
+  @apply absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400/60 via-indigo-400/40 to-transparent;
+}
+
+.card-accent-cyan {
+  @apply absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400/60 via-cyan-500/40 to-transparent;
+}
+
+.card-accent-yellow {
+  @apply absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-yellow-400/60 via-amber-400/40 to-transparent;
+}
+
+.card-accent-red {
+  @apply absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-400/60 via-red-500/40 to-transparent;
+}
+
+/* Card gradient backgrounds */
+.card-gradient-primary {
+  @apply bg-gradient-to-br from-primary/5 via-background to-accent/5;
+}
+
+.card-gradient-blue {
+  @apply bg-gradient-to-br from-blue-500/10 via-background to-blue-600/5;
+}
+
+.card-gradient-green {
+  @apply bg-gradient-to-br from-green-500/10 via-background to-green-600/5;
+}
+
+.card-gradient-orange {
+  @apply bg-gradient-to-br from-orange-500/10 via-background to-orange-600/5;
+}
+
+.card-gradient-purple {
+  @apply bg-gradient-to-br from-purple-500/10 via-background to-indigo-600/5;
+}
+
+.card-gradient-cyan {
+  @apply bg-gradient-to-br from-cyan-500/10 via-background to-cyan-600/5;
+}
+
+.card-gradient-yellow {
+  @apply bg-gradient-to-br from-yellow-500/10 via-background to-amber-600/5;
+}
+
+.card-gradient-red {
+  @apply bg-gradient-to-br from-red-500/10 via-background to-red-600/5;
+}
+
+/* Combined card utility - gradient + border + rounded */
+.card-themed-primary {
+  @apply card-gradient-primary rounded-2xl border border-primary/20 overflow-hidden relative;
+}
+
+.card-themed-blue {
+  @apply card-gradient-blue rounded-2xl border border-blue-500/20 overflow-hidden relative;
+}
+
+.card-themed-green {
+  @apply card-gradient-green rounded-2xl border border-green-500/20 overflow-hidden relative;
+}
+
+.card-themed-orange {
+  @apply card-gradient-orange rounded-2xl border border-orange-500/20 overflow-hidden relative;
+}
+
+.card-themed-purple {
+  @apply card-gradient-purple rounded-2xl border border-purple-500/20 overflow-hidden relative;
+}
+
+/* Icon badge backgrounds - standard sizes */
+.icon-badge-sm {
+  @apply p-1.5 rounded-lg;
+}
+
+.icon-badge-default {
+  @apply p-2 rounded-xl;
+}
+
+.icon-badge-lg {
+  @apply p-3 rounded-2xl;
+}
+
+/* Icon badge color variants */
+.icon-badge-primary {
+  @apply bg-primary/20;
+}
+
+.icon-badge-blue {
+  @apply bg-blue-500/20;
+}
+
+.icon-badge-green {
+  @apply bg-green-500/20;
+}
+
+.icon-badge-orange {
+  @apply bg-orange-500/20;
+}
+
+.icon-badge-purple {
+  @apply bg-purple-500/20;
+}
+
+.icon-badge-cyan {
+  @apply bg-cyan-500/20;
+}
+
+.icon-badge-yellow {
+  @apply bg-yellow-500/20;
+}
+
+.icon-badge-red {
+  @apply bg-red-500/20;
+}

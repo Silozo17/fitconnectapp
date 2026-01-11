@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { useReadinessScore } from "@/hooks/useReadinessScore";
 import { InfoTooltip } from "@/components/ui/info-tooltip";
 import { Battery } from "lucide-react";
@@ -44,7 +44,7 @@ const getAccentGradient = (score: number) => {
   return "from-green-400/60 via-emerald-400/40 to-transparent";
 };
 
-export function ReadinessScoreCard({ className }: ReadinessScoreCardProps) {
+export const ReadinessScoreCard = memo(function ReadinessScoreCard({ className }: ReadinessScoreCardProps) {
   const { readiness, isLoading, hasData } = useReadinessScore();
   const [hasAnimated, setHasAnimated] = useState(false);
   const [displayValue, setDisplayValue] = useState(0);
@@ -162,6 +162,6 @@ export function ReadinessScoreCard({ className }: ReadinessScoreCardProps) {
       </div>
     </div>
   );
-}
+});
 
 export default ReadinessScoreCard;

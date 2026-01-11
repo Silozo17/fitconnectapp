@@ -1,9 +1,11 @@
+import { memo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
+import { ContentSection } from "@/components/shared/ContentSection";
 import { 
   Dumbbell,
   Target,
@@ -31,7 +33,7 @@ interface MonthlyReviewCardProps {
   className?: string;
 }
 
-export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
+export const MonthlyReviewCard = memo(function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
   const { user } = useAuth();
 
   const { data, isLoading, error, refetch, isFetching } = useQuery({
@@ -72,10 +74,7 @@ export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
     <div className={cn("space-y-3", className)}>
       {/* AI Summary Card */}
       {aiSummary && (
-        <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50">
-          {/* Top accent line */}
-          <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
-          
+        <ContentSection colorTheme="primary">
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-primary" />
@@ -89,7 +88,7 @@ export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
             className="text-sm text-foreground leading-relaxed prose prose-sm dark:prose-invert max-w-none [&_p]:mb-2 [&_p:last-child]:mb-0"
             dangerouslySetInnerHTML={{ __html: parseSimpleMarkdown(aiSummary) }}
           />
-        </div>
+        </ContentSection>
       )}
 
       {/* Stats Cards - 4 separate small cards matching HealthMetricCard style */}
@@ -144,7 +143,7 @@ export function MonthlyReviewCard({ className }: MonthlyReviewCardProps) {
       </div>
     </div>
   );
-}
+});
 
 // Export for sentinel description
 export function useMonthlyReviewTitle() {
