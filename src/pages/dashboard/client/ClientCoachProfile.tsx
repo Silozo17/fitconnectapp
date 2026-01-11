@@ -114,7 +114,7 @@ const ClientCoachProfile = () => {
       {/* Main Content */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Main Content Column */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6 overflow-hidden">
           {/* Hero Section */}
           <div className="rounded-3xl overflow-hidden shadow-lg">
             <CoachHeroSection 
