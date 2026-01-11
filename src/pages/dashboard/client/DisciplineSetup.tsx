@@ -2,7 +2,7 @@
  * DisciplineSetup - Choose your discipline onboarding flow
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -44,31 +44,10 @@ type Step = 'select' | 'preview';
 
 export default function DisciplineSetup() {
   const navigate = useNavigate();
-  const { addDiscipline, isUpdating, isReady, isLoading, clientProfileId } = useClientDisciplines();
+  const { addDiscipline, isUpdating, isReady } = useClientDisciplines();
   const [step, setStep] = useState<Step>('select');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
-  const [isTimedOut, setIsTimedOut] = useState(false);
-
-  // Timeout fallback - if isReady doesn't become true within 5 seconds, enable anyway
-  useEffect(() => {
-    if (isReady) {
-      setIsTimedOut(false);
-      return;
-    }
-    
-    const timer = setTimeout(() => {
-      if (!isReady && !isLoading) {
-        console.warn('[DisciplineSetup] isReady timed out after 5s, enabling button as fallback');
-        setIsTimedOut(true);
-      }
-    }, 5000);
-    
-    return () => clearTimeout(timer);
-  }, [isReady, isLoading]);
-
-  // Debug logging
-  console.log('[DisciplineSetup] isReady:', isReady, 'isLoading:', isLoading, 'clientProfileId:', clientProfileId, 'isTimedOut:', isTimedOut);
 
   const selectedConfig = selectedId ? getDisciplineConfig(selectedId) : null;
 
@@ -206,7 +185,7 @@ export default function DisciplineSetup() {
               <Button 
                 className="flex-1"
                 onClick={handleConfirm}
-                disabled={isUpdating || (!isReady && !isTimedOut)}
+                disabled={isUpdating || !isReady}
               >
                 {isUpdating ? 'Saving...' : 'Confirm'}
                 <Check className="w-4 h-4 ml-2" />

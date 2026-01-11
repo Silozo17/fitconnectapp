@@ -3,9 +3,9 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useClientProfileId } from "@/hooks/useClientProfileId";
 
 export interface ClientDiscipline {
   id: string;
@@ -17,45 +17,20 @@ export interface ClientDiscipline {
 }
 
 export function useClientDisciplines() {
-  const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  // Get client profile ID first - with stable caching to prevent flickers
-  const { data: clientProfile, isLoading: isLoadingProfile, error: profileError } = useQuery({
-    queryKey: ['client-profile-id', user?.id],
-    queryFn: async () => {
-      if (!user?.id) return null;
-      const { data, error } = await supabase
-        .from('client_profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .maybeSingle();
-      if (error) {
-        console.error('Error fetching client profile:', error);
-        throw error;
-      }
-      return data;
-    },
-    enabled: !!user?.id,
-    retry: 3, // Increased retries for resilience
-    staleTime: 5 * 60 * 1000, // 5 minutes - prevent unnecessary refetches
-    gcTime: 10 * 60 * 1000, // 10 minutes cache
-  });
-
-  // Debug logging
-  if (profileError) {
-    console.error('[useClientDisciplines] Profile query error:', profileError);
-  }
+  // Use the shared hook that has native cache support for instant availability
+  const { data: clientProfileId, isLoading: isLoadingProfile } = useClientProfileId();
 
   const { data: disciplines, isLoading: isLoadingDisciplines } = useQuery({
-    queryKey: ['client-disciplines', clientProfile?.id],
+    queryKey: ['client-disciplines', clientProfileId],
     queryFn: async (): Promise<ClientDiscipline[]> => {
-      if (!clientProfile?.id) return [];
+      if (!clientProfileId) return [];
 
       const { data, error } = await supabase
         .from('client_disciplines')
         .select('*')
-        .eq('client_id', clientProfile.id)
+        .eq('client_id', clientProfileId)
         .order('is_primary', { ascending: false })
         .order('created_at', { ascending: true });
 
@@ -66,14 +41,14 @@ export function useClientDisciplines() {
 
       return (data || []) as ClientDiscipline[];
     },
-    enabled: !!clientProfile?.id,
+    enabled: !!clientProfileId,
   });
 
   const primaryDiscipline = disciplines?.find(d => d.is_primary)?.discipline_id || disciplines?.[0]?.discipline_id || null;
 
   const addDisciplineMutation = useMutation({
     mutationFn: async ({ disciplineId, isPrimary = false }: { disciplineId: string; isPrimary?: boolean }) => {
-      if (!clientProfile?.id) throw new Error('Not authenticated');
+      if (!clientProfileId) throw new Error('Not authenticated');
 
       // If this is the first discipline or marked as primary, set is_primary true
       const shouldBePrimary = isPrimary || !disciplines?.length;
@@ -81,7 +56,7 @@ export function useClientDisciplines() {
       const { error, data } = await supabase
         .from('client_disciplines')
         .insert({
-          client_id: clientProfile.id,
+          client_id: clientProfileId,
           discipline_id: disciplineId,
           is_primary: shouldBePrimary,
         })
@@ -95,7 +70,7 @@ export function useClientDisciplines() {
         await supabase
           .from('client_profiles')
           .update({ selected_discipline: disciplineId })
-          .eq('id', clientProfile.id);
+          .eq('id', clientProfileId);
       }
 
       return data;
@@ -118,14 +93,14 @@ export function useClientDisciplines() {
 
   const removeDisciplineMutation = useMutation({
     mutationFn: async (disciplineId: string) => {
-      if (!clientProfile?.id) throw new Error('Not authenticated');
+      if (!clientProfileId) throw new Error('Not authenticated');
 
       const disciplineToRemove = disciplines?.find(d => d.discipline_id === disciplineId);
       
       const { error } = await supabase
         .from('client_disciplines')
         .delete()
-        .eq('client_id', clientProfile.id)
+        .eq('client_id', clientProfileId)
         .eq('discipline_id', disciplineId);
 
       if (error) throw error;
@@ -143,14 +118,14 @@ export function useClientDisciplines() {
           await supabase
             .from('client_profiles')
             .update({ selected_discipline: newPrimary.discipline_id })
-            .eq('id', clientProfile.id);
+            .eq('id', clientProfileId);
         }
       } else if (disciplineToRemove?.is_primary) {
         // No more disciplines, clear legacy field
         await supabase
           .from('client_profiles')
           .update({ selected_discipline: null })
-          .eq('id', clientProfile.id);
+          .eq('id', clientProfileId);
       }
 
       return disciplineId;
@@ -169,13 +144,13 @@ export function useClientDisciplines() {
 
   const setPrimaryMutation = useMutation({
     mutationFn: async (disciplineId: string) => {
-      if (!clientProfile?.id) throw new Error('Not authenticated');
+      if (!clientProfileId) throw new Error('Not authenticated');
 
       // The trigger will handle unsetting other primaries
       const { error } = await supabase
         .from('client_disciplines')
         .update({ is_primary: true })
-        .eq('client_id', clientProfile.id)
+        .eq('client_id', clientProfileId)
         .eq('discipline_id', disciplineId);
 
       if (error) throw error;
@@ -184,7 +159,7 @@ export function useClientDisciplines() {
       await supabase
         .from('client_profiles')
         .update({ selected_discipline: disciplineId })
-        .eq('id', clientProfile.id);
+        .eq('id', clientProfileId);
 
       return disciplineId;
     },
@@ -200,14 +175,14 @@ export function useClientDisciplines() {
     },
   });
 
-  const isReady = !isLoadingProfile && !!clientProfile?.id;
+  const isReady = !isLoadingProfile && !!clientProfileId;
 
   return {
     disciplines: disciplines || [],
     primaryDiscipline,
     isLoading: isLoadingProfile || isLoadingDisciplines,
     isReady,
-    clientProfileId: clientProfile?.id || null,
+    clientProfileId: clientProfileId || null,
     addDiscipline: addDisciplineMutation.mutate,
     removeDiscipline: removeDisciplineMutation.mutate,
     setPrimary: setPrimaryMutation.mutate,
