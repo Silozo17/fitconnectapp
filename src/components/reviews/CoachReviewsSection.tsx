@@ -7,6 +7,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ThemedCard } from "@/components/shared/ThemedCard";
+import { Carousel3D, Carousel3DItem } from "@/components/ui/carousel-3d";
 
 interface CoachReviewsSectionProps {
   coachId: string;
@@ -67,14 +68,30 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
             </div>
           </ThemedCard>
         ) : (
-          <div className="space-y-3">
-            {displayedReviews.map((review) => (
-              <ReviewCard key={review.id} review={review} />
-            ))}
+          <>
+            {/* Mobile: 3D Carousel */}
+            <div className="md:hidden -mx-5">
+              <Carousel3D gap={12} showPagination={displayedReviews.length > 2}>
+                {displayedReviews.map((review) => (
+                  <Carousel3DItem key={review.id} className="w-[300px]">
+                    <ReviewCard review={review} />
+                  </Carousel3DItem>
+                ))}
+              </Carousel3D>
+            </div>
+
+            {/* Desktop: List */}
+            <div className="hidden md:block space-y-3">
+              {displayedReviews.map((review) => (
+                <ReviewCard key={review.id} review={review} />
+              ))}
+            </div>
+
+            {/* Show more/less buttons */}
             {reviews.length > 3 && !showAll && (
               <Button 
                 variant="ghost" 
-                className="w-full"
+                className="w-full mt-3"
                 onClick={() => setShowAll(true)}
               >
                 View all {reviews.length} reviews
@@ -83,13 +100,13 @@ const CoachReviewsSection = ({ coachId }: CoachReviewsSectionProps) => {
             {showAll && reviews.length > 3 && (
               <Button 
                 variant="ghost" 
-                className="w-full"
+                className="w-full mt-3"
                 onClick={() => setShowAll(false)}
               >
                 Show less
               </Button>
             )}
-          </div>
+          </>
         )}
       </div>
     </div>
