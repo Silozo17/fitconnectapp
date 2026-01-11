@@ -3,6 +3,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Activity, UserPlus, Shield, Star, DollarSign, Settings } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
+import { ContentSection } from "@/components/shared/ContentSection";
 
 interface ActivityItem {
   id: string;
@@ -67,9 +68,7 @@ export const ActivityWidget = memo(function ActivityWidget({
   title = "Recent Activity" 
 }: ActivityWidgetProps) {
   return (
-    <div className="relative bg-gradient-to-br from-purple-500/10 via-background to-indigo-600/5 rounded-2xl border border-purple-500/20 overflow-hidden">
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-purple-400/60 via-indigo-400/40 to-transparent" />
+    <ContentSection colorTheme="purple" padding="none">
       
       {/* Header */}
       <div className="px-4 pt-4 pb-2 flex items-center gap-2">
@@ -116,6 +115,6 @@ export const ActivityWidget = memo(function ActivityWidget({
           </div>
         </ScrollArea>
       </div>
-    </div>
+    </ContentSection>
   );
 });

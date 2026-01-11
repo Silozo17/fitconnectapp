@@ -2,6 +2,7 @@ import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Activity, CheckCircle, AlertTriangle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ContentSection } from "@/components/shared/ContentSection";
 
 interface IntegrationHealth {
   name: string;
@@ -42,10 +43,7 @@ export const IntegrationHealthWidget = memo(function IntegrationHealthWidget({ h
   const totalCount = health.length;
 
   return (
-    <div className="relative bg-gradient-to-br from-cyan-500/10 via-background to-cyan-600/5 rounded-2xl border border-cyan-500/20 overflow-hidden">
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400/60 via-cyan-500/40 to-transparent" />
-      
+    <ContentSection colorTheme="cyan" padding="none">
       {/* Header */}
       <div className="px-4 pt-4 pb-2 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -88,6 +86,6 @@ export const IntegrationHealthWidget = memo(function IntegrationHealthWidget({ h
           })}
         </div>
       </div>
-    </div>
+    </ContentSection>
   );
 });
