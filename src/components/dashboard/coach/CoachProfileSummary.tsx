@@ -8,6 +8,7 @@ import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { useCoachProfile } from "@/hooks/useCoachClients";
 import { useCoachBoostStatus, isBoostActive, getBoostRemainingDays } from "@/hooks/useCoachBoost";
+import { useCoachProfileCompletion } from "@/hooks/useCoachProfileCompletion";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import { UserAvatar } from "@/components/shared/UserAvatar";
@@ -25,6 +26,7 @@ const CoachProfileSummary = () => {
   const { data: coachProfile } = useCoachProfile();
 
   const { data: boostStatus } = useCoachBoostStatus();
+  const { data: profileCompletionData } = useCoachProfileCompletion();
   
   const displayName = profile?.display_name || profile?.first_name || t("common:profile.coach");
   const subscriptionTier = coachProfile?.subscription_tier || "free";
@@ -36,8 +38,9 @@ const CoachProfileSummary = () => {
   const showExpiryWarning = boostActive && remainingDays <= 7;
   const isUrgent = remainingDays <= 3;
 
-  // Profile completion
-  const profileCompletion = coachProfile ? calculateProfileCompletion(coachProfile) : 0;
+  // Profile completion - use the shared hook for consistency
+  const profileCompletion = profileCompletionData?.percentage ?? 0;
+  const isProfileComplete = profileCompletionData?.isFullyComplete ?? false;
 
   const handleNavigate = (path: string) => {
     close();
@@ -94,19 +97,21 @@ const CoachProfileSummary = () => {
             </Badge>
           </div>
           
-          {/* Profile Completion (compact) */}
-          <div className="mt-1.5">
-            <div className="flex items-center justify-between mb-0.5">
-              <span className="text-[10px] text-muted-foreground">
-                {t("coach:profile.completion", "Profile")}
-              </span>
-              <span className="text-[10px] font-medium text-primary">{profileCompletion}%</span>
+          {/* Profile Completion (compact) - only show if not complete */}
+          {!isProfileComplete && (
+            <div className="mt-1.5">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[10px] text-muted-foreground">
+                  {t("coach:profile.completion", "Profile")}
+                </span>
+                <span className="text-[10px] font-medium text-primary">{profileCompletion}%</span>
+              </div>
+              <Progress 
+                value={profileCompletion} 
+                className="h-1 bg-muted"
+              />
             </div>
-            <Progress 
-              value={profileCompletion} 
-              className="h-1 bg-muted"
-            />
-          </div>
+          )}
         </div>
         
         {/* Boost Status Badge */}
@@ -176,26 +181,5 @@ const CoachProfileSummary = () => {
     </div>
   );
 };
-
-// Helper function to calculate profile completion
-function calculateProfileCompletion(profile: any): number {
-  const fields = [
-    'display_name',
-    'bio',
-    'profile_image_url',
-    'coach_types',
-    'location',
-    'hourly_rate',
-    'certifications'
-  ];
-  
-  const completed = fields.filter(field => {
-    const value = profile[field];
-    if (Array.isArray(value)) return value.length > 0;
-    return !!value;
-  }).length;
-  
-  return Math.round((completed / fields.length) * 100);
-}
 
 export default CoachProfileSummary;

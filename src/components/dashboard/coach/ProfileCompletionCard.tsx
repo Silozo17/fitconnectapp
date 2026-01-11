@@ -28,6 +28,9 @@ export const ProfileCompletionCard = () => {
 
   if (!data) return null;
 
+  // Hide the card entirely when profile is 100% complete
+  if (data.isFullyComplete) return null;
+
   const { percentage, completedSteps, incompleteSteps, isFullyComplete } = data;
 
   return (
