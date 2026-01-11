@@ -1,18 +1,19 @@
+import { memo, useState } from "react";
 import { Check, X, Loader2, UserPlus, MessageSquare, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { ContentSection } from "@/components/shared/ContentSection";
 import { useConnections } from "@/hooks/useConnections";
 import { useCelebration } from "@/contexts/CelebrationContext";
 import { formatDistanceToNow } from "date-fns";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 interface UserConnectionRequestsProps {
   className?: string;
 }
 
-const UserConnectionRequests = ({ className }: UserConnectionRequestsProps) => {
+const UserConnectionRequests = memo(function UserConnectionRequests({ className }: UserConnectionRequestsProps) {
   const { pendingRequests, acceptRequest, rejectRequest, loading } = useConnections();
   const { showFirstTimeAchievement } = useCelebration();
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -58,36 +59,30 @@ const UserConnectionRequests = ({ className }: UserConnectionRequestsProps) => {
 
   if (loading) {
     return (
-      <div className={cn("relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+      <ContentSection className={className} padding="lg">
         <div className="flex items-center justify-center py-8">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
         </div>
-      </div>
+      </ContentSection>
     );
   }
 
   // Show empty state if there are no pending requests
   if (pendingRequests.length === 0) {
     return (
-      <div className={cn("relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
-        {/* Top accent line */}
-        <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
-        
+      <ContentSection className={className} padding="lg">
         <div className="text-center py-8 text-muted-foreground">
           <div className="w-14 h-14 mx-auto mb-3 rounded-2xl bg-muted/50 flex items-center justify-center">
             <UserPlus className="h-7 w-7 opacity-50" />
           </div>
           <p className="text-sm">No pending friend requests</p>
         </div>
-      </div>
+      </ContentSection>
     );
   }
 
   return (
-    <div className={cn("relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
-      
+    <ContentSection className={className} padding="lg">
       <div className="flex items-center justify-end mb-4">
         <Badge className="bg-primary/15 text-primary border-primary/20 rounded-full px-3">
           {pendingRequests.length} pending
@@ -172,8 +167,8 @@ const UserConnectionRequests = ({ className }: UserConnectionRequestsProps) => {
           </div>
         ))}
       </div>
-    </div>
+    </ContentSection>
   );
-};
+});
 
 export default UserConnectionRequests;

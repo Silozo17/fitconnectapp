@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { useAdaptiveGoalSuggestions, GoalSuggestion } from "@/hooks/useAdaptiveGoalSuggestions";
 import { AccentCard, AccentCardContent } from "@/components/ui/accent-card";
@@ -191,7 +192,7 @@ function SuggestionCard({
   );
 }
 
-export function GoalSuggestionBanner({ className }: GoalSuggestionBannerProps) {
+export const GoalSuggestionBanner = memo(function GoalSuggestionBanner({ className }: GoalSuggestionBannerProps) {
   const { t } = useTranslation("dashboard");
   const { suggestions, hasSuggestions, dismissSuggestion } = useAdaptiveGoalSuggestions();
 
@@ -213,6 +214,6 @@ export function GoalSuggestionBanner({ className }: GoalSuggestionBannerProps) {
       ))}
     </div>
   );
-}
+});
 
 export default GoalSuggestionBanner;

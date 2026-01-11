@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -10,7 +11,7 @@ interface PersonalRecordsWidgetProps {
   className?: string;
 }
 
-export function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps) {
+export const PersonalRecordsWidget = memo(function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps) {
   const { records, recentPRs, isLoading, hasRecords } = usePersonalRecords();
 
   if (isLoading) {
@@ -110,4 +111,4 @@ export function PersonalRecordsWidget({ className }: PersonalRecordsWidgetProps)
       </AccentCardContent>
     </AccentCard>
   );
-}
+});

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { AccentCard, AccentCardHeader, AccentCardContent } from "@/components/ui/accent-card";
 import { Badge } from "@/components/ui/badge";
 import { ShimmerSkeleton } from "@/components/ui/premium-skeleton";
@@ -11,7 +11,7 @@ interface TrainingStreakWidgetProps {
   className?: string;
 }
 
-export function TrainingStreakWidget({ className }: TrainingStreakWidgetProps) {
+export const TrainingStreakWidget = memo(function TrainingStreakWidget({ className }: TrainingStreakWidgetProps) {
   const { data: logs, isLoading } = useTrainingLogs();
 
   const streakData = useMemo(() => {
@@ -183,4 +183,4 @@ export function TrainingStreakWidget({ className }: TrainingStreakWidgetProps) {
       </AccentCardContent>
     </AccentCard>
   );
-}
+});

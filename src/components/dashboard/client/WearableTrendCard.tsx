@@ -1,5 +1,7 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import { useWearableTrends, TrendData } from "@/hooks/useWearableTrends";
+import { ContentSection } from "@/components/shared/ContentSection";
 import {
   TrendingUp,
   TrendingDown,
@@ -79,13 +81,13 @@ function TrendItem({ trend }: { trend: TrendData }) {
   );
 }
 
-export function WearableTrendCard({ className }: WearableTrendCardProps) {
+export const WearableTrendCard = memo(function WearableTrendCard({ className }: WearableTrendCardProps) {
   const { t } = useTranslation("dashboard");
   const { trends, isLoading, hasData } = useWearableTrends();
 
   if (isLoading) {
     return (
-      <div className={cn("relative bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
+      <ContentSection className={className} padding="lg">
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex items-center justify-between py-3">
@@ -100,7 +102,7 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
             </div>
           ))}
         </div>
-      </div>
+      </ContentSection>
     );
   }
 
@@ -109,10 +111,7 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
   }
 
   return (
-    <div className={cn("relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 rounded-2xl p-5 border border-border/50", className)}>
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary/60 via-accent/40 to-transparent" />
-
+    <ContentSection className={className} padding="lg">
       <p className="text-xs text-muted-foreground mb-3">
         {t("client.trends.subtitle", "Compared to last week")}
       </p>
@@ -121,8 +120,8 @@ export function WearableTrendCard({ className }: WearableTrendCardProps) {
           <TrendItem key={trend.type} trend={trend} />
         ))}
       </div>
-    </div>
+    </ContentSection>
   );
-}
+});
 
 export default WearableTrendCard;
