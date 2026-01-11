@@ -1,8 +1,8 @@
 import { usePublicCoachShowcases, PublicShowcase } from "@/hooks/usePublicCoachShowcases";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { TrendingDown, Clock, Percent, TrendingUp } from "lucide-react";
-import { ContentSection, ContentSectionHeader } from "@/components/shared/ContentSection";
+import { ContentSectionHeader } from "@/components/shared/ContentSection";
+import { ThemedCard } from "@/components/shared/ThemedCard";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -27,13 +27,14 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
 
   return (
     <>
-      <Card 
-        className="overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.02] border-border/50"
+      <ThemedCard 
+        colorTheme="green"
+        className="overflow-hidden"
         onClick={() => setShowDetail(true)}
       >
         {/* Before/After Images */}
         {(showcase.before_photo_url || showcase.after_photo_url) && (
-          <div className="relative h-48 grid grid-cols-2">
+          <div className="relative h-48 grid grid-cols-2 -mx-4 -mt-4 mb-4">
             {showcase.before_photo_url && (
               <div className="relative">
                 <img 
@@ -57,45 +58,43 @@ function TransformationCard({ showcase }: { showcase: PublicShowcase }) {
           </div>
         )}
 
-        <CardContent className="p-4">
-          <div className="flex items-start justify-between gap-2 mb-3">
-            <h3 className="font-semibold text-foreground line-clamp-1">{showcase.title || showcase.display_name || "Transformation"}</h3>
-            <Badge variant="secondary" className="shrink-0">
-              {goalTypeLabels[goalType] || "Fitness"}
-            </Badge>
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <h3 className="font-semibold text-foreground line-clamp-1">{showcase.title || showcase.display_name || "Transformation"}</h3>
+          <Badge variant="secondary" className="shrink-0">
+            {goalTypeLabels[goalType] || "Fitness"}
+          </Badge>
+        </div>
+
+        {showcase.description && (
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+            {showcase.description}
+          </p>
+        )}
+
+        {/* Stats */}
+        {stats && (
+          <div className="flex flex-wrap gap-3 text-sm">
+            {stats.weightLost && (
+              <div className="flex items-center gap-1 text-primary">
+                <TrendingDown className="h-4 w-4" />
+                <span className="font-medium">{stats.weightLost}kg</span>
+              </div>
+            )}
+            {stats.durationWeeks && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Clock className="h-4 w-4" />
+                <span>{stats.durationWeeks} weeks</span>
+              </div>
+            )}
+            {stats.bodyFatChange && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Percent className="h-4 w-4" />
+                <span>{Math.abs(stats.bodyFatChange)}% BF</span>
+              </div>
+            )}
           </div>
-
-          {showcase.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-              {showcase.description}
-            </p>
-          )}
-
-          {/* Stats */}
-          {stats && (
-            <div className="flex flex-wrap gap-3 text-sm">
-              {stats.weightLost && (
-                <div className="flex items-center gap-1 text-primary">
-                  <TrendingDown className="h-4 w-4" />
-                  <span className="font-medium">{stats.weightLost}kg</span>
-                </div>
-              )}
-              {stats.durationWeeks && (
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Clock className="h-4 w-4" />
-                  <span>{stats.durationWeeks} weeks</span>
-                </div>
-              )}
-              {stats.bodyFatChange && (
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Percent className="h-4 w-4" />
-                  <span>{Math.abs(stats.bodyFatChange)}% BF</span>
-                </div>
-              )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+        )}
+      </ThemedCard>
 
       {/* Detail Modal */}
       <Dialog open={showDetail} onOpenChange={setShowDetail}>
@@ -176,17 +175,17 @@ export function CoachTransformationsSection({ coachId }: Props) {
   if (isLoading || showcases.length === 0) return null;
 
   return (
-    <ContentSection colorTheme="green" padding="lg">
+    <div className="space-y-4">
       <ContentSectionHeader
         icon={TrendingUp}
         title="Client Transformations"
         badge={<Badge variant="secondary">{showcases.length}</Badge>}
       />
-      <div className="pt-4 grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 gap-4">
         {showcases.map((showcase) => (
           <TransformationCard key={showcase.id} showcase={showcase} />
         ))}
       </div>
-    </ContentSection>
+    </div>
   );
 }
