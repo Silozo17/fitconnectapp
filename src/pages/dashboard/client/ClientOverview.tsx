@@ -186,7 +186,23 @@ const ClientOverview = () => {
         </Alert>
       )}
 
-      {/* Section: Today's Health - 44px after */}
+      {/* Section: Daily Readiness */}
+      <DashboardSectionHeader 
+        title="Daily Readiness" 
+        description={readiness?.recommendation || "How prepared you are for today"} 
+      />
+      <WidgetErrorBoundary widgetName="ReadinessScoreCard" silent>
+        <ReadinessScoreCard className="mb-3" />
+      </WidgetErrorBoundary>
+      <WidgetErrorBoundary widgetName="ReadinessComponents" silent>
+        <div className="grid grid-cols-3 gap-3 mb-11">
+          <ReadinessComponentCard type="sleep" />
+          <ReadinessComponentCard type="recovery" />
+          <ReadinessComponentCard type="activity" />
+        </div>
+      </WidgetErrorBoundary>
+
+      {/* Section: Today's Health */}
       <WidgetErrorBoundary widgetName="HealthDataWidget">
         <Suspense fallback={<HealthWidgetSkeleton />}>
           <HealthDataWidget compact className="mb-11" />
@@ -236,22 +252,6 @@ const ClientOverview = () => {
           <DisciplineSetupCTA className="mb-11" />
         </>
       )}
-
-      {/* Section: Daily Readiness */}
-      <DashboardSectionHeader 
-        title="Daily Readiness" 
-        description={readiness?.recommendation || "How prepared you are for today"} 
-      />
-      <WidgetErrorBoundary widgetName="ReadinessScoreCard" silent>
-        <ReadinessScoreCard className="mb-3" />
-      </WidgetErrorBoundary>
-      <WidgetErrorBoundary widgetName="ReadinessComponents" silent>
-        <div className="grid grid-cols-3 gap-3 mb-11">
-          <ReadinessComponentCard type="sleep" />
-          <ReadinessComponentCard type="recovery" />
-          <ReadinessComponentCard type="activity" />
-        </div>
-      </WidgetErrorBoundary>
 
       {/* Section: Insights (Collapsible) */}
       <CollapsibleDashboardSection 

@@ -113,24 +113,6 @@ export const HealthRadarCard = ({
         sleep={sleep}
         distance={distance}
       />
-
-      {/* Quick stats row */}
-      <div className="flex items-center justify-center gap-6 mt-2 text-sm">
-        <div className="text-center">
-          <span className="text-foreground font-semibold">{steps.toLocaleString()}</span>
-          <span className="text-muted-foreground ml-1">steps</span>
-        </div>
-        <div className="w-px h-4 bg-border" />
-        <div className="text-center">
-          <span className="text-foreground font-semibold">{calories}</span>
-          <span className="text-muted-foreground ml-1">kcal</span>
-        </div>
-        <div className="w-px h-4 bg-border" />
-        <div className="text-center">
-          <span className="text-foreground font-semibold">{activeMinutes}</span>
-          <span className="text-muted-foreground ml-1">min</span>
-        </div>
-      </div>
     </div>
   );
 };
