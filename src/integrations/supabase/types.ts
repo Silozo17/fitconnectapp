@@ -8736,57 +8736,62 @@ export type Database = {
         Args: {
           p_coach_types?: string[]
           p_filter_country_code?: string
+          p_in_person_only?: boolean
           p_limit?: number
-          p_max_distance_km?: number
           p_max_price?: number
           p_min_price?: number
-          p_min_rating?: number
-          p_offset?: number
           p_online_only?: boolean
-          p_search_query?: string
-          p_sort_by?: string
+          p_search_term?: string
+          p_user_city?: string
+          p_user_country_code?: string
           p_user_lat?: number
           p_user_lng?: number
+          p_user_region?: string
         }
         Returns: {
-          achievements: string[]
-          avatar_url: string
-          average_rating: number
+          avatar_rarity: string
+          avatar_slug: string
+          avg_rating: number
           bio: string
           booking_mode: string
-          certifications: string[]
+          card_image_url: string
+          certifications: Json
           coach_types: string[]
           created_at: string
           currency: string
           display_name: string
-          distance_km: number
-          first_name: string
-          gym_affiliations: Json
+          experience_years: number
+          facebook_url: string
+          gym_affiliation: string
           hourly_rate: number
           id: string
+          in_person_available: boolean
+          instagram_url: string
+          is_sponsored: boolean
           is_verified: boolean
-          languages: string[]
-          last_name: string
+          linkedin_url: string
           location: string
+          location_city: string
+          location_country: string
           location_country_code: string
-          location_lat: number
-          location_lng: number
+          location_region: string
           location_tier: number
           marketplace_visible: boolean
-          offers_in_person: boolean
-          offers_online: boolean
           onboarding_completed: boolean
-          relevance_score: number
+          online_available: boolean
+          profile_image_url: string
+          review_count: number
           selected_avatar_id: string
-          specializations: string[]
           threads_url: string
-          total_reviews: number
-          training_approach: string
+          tiktok_url: string
           user_id: string
           username: string
+          verified_at: string
+          verified_qualification_count: number
+          visibility_score: number
           who_i_work_with: string
           x_url: string
-          years_experience: number
+          youtube_url: string
         }[]
       }
       has_role:
