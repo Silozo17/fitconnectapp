@@ -8752,8 +8752,10 @@ export type Database = {
           avatar_rarity: string
           avatar_slug: string
           bio: string
+          booking_mode: string
           card_image_url: string
           coach_types: string[]
+          created_at: string
           currency: string
           display_name: string
           distance_miles: number
@@ -8775,16 +8777,19 @@ export type Database = {
           location_region: string
           location_score: number
           location_tier: number
+          marketplace_visible: boolean
           online_available: boolean
           profile_image_url: string
           profile_score: number
+          threads_url: string
           tiktok_url: string
           total_score: number
-          twitter_url: string
           user_id: string
           username: string
           verified_at: string
           verified_qualification_count: number
+          who_i_work_with: string
+          x_url: string
           youtube_url: string
         }[]
       }
