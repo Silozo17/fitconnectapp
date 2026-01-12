@@ -19,6 +19,7 @@ import { WearableTrendCard } from "@/components/dashboard/client/WearableTrendCa
 import { WeeklySummaryCard } from "@/components/dashboard/client/WeeklySummaryCard";
 import MonthlyReviewCard from "@/components/dashboard/client/MonthlyReviewCard";
 import { DashboardSectionHeader } from "@/components/shared/DashboardSectionHeader";
+import { CollapsibleDashboardSection } from "@/components/shared/CollapsibleDashboardSection";
 import { WidgetErrorBoundary } from "@/components/shared/WidgetErrorBoundary";
 import { DisciplineWidget } from "@/components/discipline/DisciplineWidget";
 import { DisciplineSetupCTA } from "@/components/discipline/DisciplineSetupCTA";
@@ -252,14 +253,16 @@ const ClientOverview = () => {
         </div>
       </WidgetErrorBoundary>
 
-      {/* Section: Insights */}
-      <DashboardSectionHeader 
+      {/* Section: Insights (Collapsible) */}
+      <CollapsibleDashboardSection 
         title="Your Insights" 
-        description="Trends compared to last week" 
-      />
-      <WidgetErrorBoundary widgetName="WearableTrendCard" silent>
-        <WearableTrendCard className="mb-11" />
-      </WidgetErrorBoundary>
+        description="Trends compared to last week"
+        className="mb-11"
+      >
+        <WidgetErrorBoundary widgetName="WearableTrendCard" silent>
+          <WearableTrendCard />
+        </WidgetErrorBoundary>
+      </CollapsibleDashboardSection>
 
       {/* Section: Tip of the Day */}
       <DashboardSectionHeader 
@@ -270,23 +273,27 @@ const ClientOverview = () => {
         <DailyTipWidget className="mb-11" />
       </WidgetErrorBoundary>
 
-      {/* Section: Weekly Summary */}
-      <DashboardSectionHeader 
+      {/* Section: Weekly Summary (Collapsible) */}
+      <CollapsibleDashboardSection 
         title="Weekly Summary" 
-        description="Your week at a glance" 
-      />
-      <WidgetErrorBoundary widgetName="WeeklySummaryCard">
-        <WeeklySummaryCard className="mb-11" />
-      </WidgetErrorBoundary>
+        description="Your week at a glance"
+        className="mb-11"
+      >
+        <WidgetErrorBoundary widgetName="WeeklySummaryCard">
+          <WeeklySummaryCard />
+        </WidgetErrorBoundary>
+      </CollapsibleDashboardSection>
 
-      {/* Section: Monthly Review */}
-      <DashboardSectionHeader 
+      {/* Section: Monthly Review (Collapsible) */}
+      <CollapsibleDashboardSection 
         title="Monthly Review" 
-        description="Your progress this month" 
-      />
-      <WidgetErrorBoundary widgetName="MonthlyReviewCard">
-        <MonthlyReviewCard className="mb-11" />
-      </WidgetErrorBoundary>
+        description="Your progress this month"
+        className="mb-11"
+      >
+        <WidgetErrorBoundary widgetName="MonthlyReviewCard">
+          <MonthlyReviewCard />
+        </WidgetErrorBoundary>
+      </CollapsibleDashboardSection>
 
       {/* Section: Friend Requests */}
       <DashboardSectionHeader 
