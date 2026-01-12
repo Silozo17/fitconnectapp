@@ -303,25 +303,283 @@ export const SPARTAN_RACE: DisciplineConfig = {
 };
 
 // ============================================
+// RACKET SPORTS
+// ============================================
+
+export const TENNIS: DisciplineConfig = {
+  id: 'tennis',
+  name: 'Tennis',
+  icon: 'Target',
+  theme: {
+    gradient: 'from-lime-500/20 to-green-500/10',
+    accent: 'text-lime-400',
+    bgAccent: 'bg-lime-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Sessions', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'matches_30d', label: 'Matches Played', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'match' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'court_time_7d', label: 'Court Time', type: 'duration', timeframe: '7d', sources: { wearableTypes: ['active_minutes'], manualEventType: 'court_time' }, formatter: 'min', computeRule: 'sum' },
+    { id: 'avg_hr_7d', label: 'Avg HR', type: 'heartRateAvg', timeframe: '7d', sources: { wearableTypes: ['heart_rate'] }, formatter: 'bpm', computeRule: 'avg' }
+  ],
+  milestone: { id: 'match_record', label: 'Match Record', type: 'fightRecord', eventType: 'match_record', displayRule: 'latest' },
+  highlight: { template: '{sessions_7d} sessions — {matches_30d} matches this month', fallback: 'Log your first tennis session', primaryMetricId: 'sessions_7d' }
+};
+
+export const BADMINTON: DisciplineConfig = {
+  id: 'badminton',
+  name: 'Badminton',
+  icon: 'Target',
+  theme: {
+    gradient: 'from-cyan-500/20 to-teal-500/10',
+    accent: 'text-cyan-400',
+    bgAccent: 'bg-cyan-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Sessions', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'matches_30d', label: 'Matches', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'match' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'court_time_7d', label: 'Court Time', type: 'duration', timeframe: '7d', sources: { wearableTypes: ['active_minutes'], manualEventType: 'court_time' }, formatter: 'min', computeRule: 'sum' },
+    { id: 'calories_7d', label: 'Calories', type: 'calories', timeframe: '7d', sources: { wearableTypes: ['calories'], manualEventType: 'calories' }, formatter: 'kcal', computeRule: 'sum' }
+  ],
+  milestone: { id: 'match_record', label: 'Match Record', type: 'fightRecord', eventType: 'match_record', displayRule: 'latest' },
+  highlight: { template: '{matches_30d} matches this month — speed is power', fallback: 'Log your first badminton session', primaryMetricId: 'matches_30d' }
+};
+
+export const SQUASH: DisciplineConfig = {
+  id: 'squash',
+  name: 'Squash',
+  icon: 'Target',
+  theme: {
+    gradient: 'from-orange-500/20 to-amber-500/10',
+    accent: 'text-orange-400',
+    bgAccent: 'bg-orange-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Sessions', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'matches_30d', label: 'Matches', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'match' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'games_won_30d', label: 'Games Won', type: 'count', timeframe: '30d', sources: { manualEventType: 'games_won' }, formatter: 'sessions', computeRule: 'sum' },
+    { id: 'avg_hr_7d', label: 'Avg HR', type: 'heartRateAvg', timeframe: '7d', sources: { wearableTypes: ['heart_rate'] }, formatter: 'bpm', computeRule: 'avg' }
+  ],
+  milestone: { id: 'match_record', label: 'Match Record', type: 'fightRecord', eventType: 'match_record', displayRule: 'latest' },
+  highlight: { template: '{matches_30d} matches — intensity builds fitness', fallback: 'Log your first squash session', primaryMetricId: 'matches_30d' }
+};
+
+export const TABLE_TENNIS: DisciplineConfig = {
+  id: 'table_tennis',
+  name: 'Table Tennis',
+  icon: 'Target',
+  theme: {
+    gradient: 'from-blue-500/20 to-indigo-500/10',
+    accent: 'text-blue-400',
+    bgAccent: 'bg-blue-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Sessions', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'matches_30d', label: 'Matches', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'match' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'games_30d', label: 'Games Played', type: 'count', timeframe: '30d', sources: { manualEventType: 'games' }, formatter: 'sessions', computeRule: 'sum' },
+    { id: 'practice_time_7d', label: 'Practice Time', type: 'duration', timeframe: '7d', sources: { manualEventType: 'practice_time' }, formatter: 'min', computeRule: 'sum' }
+  ],
+  milestone: { id: 'rating', label: 'Current Rating', type: 'rank', eventType: 'rating_update', displayRule: 'latest' },
+  highlight: { template: '{sessions_7d} sessions — reflexes sharpening', fallback: 'Log your first table tennis session', primaryMetricId: 'sessions_7d' }
+};
+
+export const PADEL: DisciplineConfig = {
+  id: 'padel',
+  name: 'Padel',
+  icon: 'Target',
+  theme: {
+    gradient: 'from-pink-500/20 to-rose-500/10',
+    accent: 'text-pink-400',
+    bgAccent: 'bg-pink-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Sessions', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'matches_30d', label: 'Matches', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'match' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'court_time_7d', label: 'Court Time', type: 'duration', timeframe: '7d', sources: { wearableTypes: ['active_minutes'], manualEventType: 'court_time' }, formatter: 'min', computeRule: 'sum' },
+    { id: 'avg_hr_7d', label: 'Avg HR', type: 'heartRateAvg', timeframe: '7d', sources: { wearableTypes: ['heart_rate'] }, formatter: 'bpm', computeRule: 'avg' }
+  ],
+  milestone: { id: 'match_record', label: 'Match Record', type: 'fightRecord', eventType: 'match_record', displayRule: 'latest' },
+  highlight: { template: '{matches_30d} matches this month — wall game improving', fallback: 'Log your first padel session', primaryMetricId: 'matches_30d' }
+};
+
+// ============================================
+// TEAM SPORTS
+// ============================================
+
+export const FOOTBALL: DisciplineConfig = {
+  id: 'football',
+  name: 'Football',
+  icon: 'Goal',
+  theme: {
+    gradient: 'from-emerald-500/20 to-green-500/10',
+    accent: 'text-emerald-400',
+    bgAccent: 'bg-emerald-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Training', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'matches_30d', label: 'Matches', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'match' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'distance_7d', label: 'Distance', type: 'distance', timeframe: '7d', sources: { wearableTypes: ['distance'], manualEventType: 'distance' }, formatter: 'km', computeRule: 'sum' },
+    { id: 'sprints_7d', label: 'Sprints', type: 'count', timeframe: '7d', sources: { wearableTypes: ['sprints'], manualEventType: 'sprints' }, formatter: 'sessions', computeRule: 'sum' }
+  ],
+  milestone: { id: 'season_stats', label: 'Season Goals/Assists', type: 'achievement', eventType: 'season_record', displayRule: 'latest' },
+  highlight: { template: '{distance_7d} km covered — {matches_30d} matches this month', fallback: 'Log your first football session', primaryMetricId: 'distance_7d' }
+};
+
+export const BASKETBALL: DisciplineConfig = {
+  id: 'basketball',
+  name: 'Basketball',
+  icon: 'Circle',
+  theme: {
+    gradient: 'from-orange-500/20 to-amber-500/10',
+    accent: 'text-orange-400',
+    bgAccent: 'bg-orange-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Training', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'games_30d', label: 'Games', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'game' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'court_time_7d', label: 'Court Time', type: 'duration', timeframe: '7d', sources: { wearableTypes: ['active_minutes'], manualEventType: 'court_time' }, formatter: 'min', computeRule: 'sum' },
+    { id: 'calories_7d', label: 'Calories', type: 'calories', timeframe: '7d', sources: { wearableTypes: ['calories'], manualEventType: 'calories' }, formatter: 'kcal', computeRule: 'sum' }
+  ],
+  milestone: { id: 'season_stats', label: 'Season PPG/APG/RPG', type: 'achievement', eventType: 'season_record', displayRule: 'latest' },
+  highlight: { template: '{games_30d} games this month — hoops don\'t stop', fallback: 'Log your first basketball session', primaryMetricId: 'games_30d' }
+};
+
+export const AMERICAN_FOOTBALL: DisciplineConfig = {
+  id: 'american_football',
+  name: 'American Football',
+  icon: 'Hexagon',
+  theme: {
+    gradient: 'from-amber-600/20 to-brown-500/10',
+    accent: 'text-amber-500',
+    bgAccent: 'bg-amber-600/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Practices', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'games_30d', label: 'Games', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'game' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'strength_30d', label: 'Strength Sessions', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'strength_session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'calories_7d', label: 'Calories', type: 'calories', timeframe: '7d', sources: { wearableTypes: ['calories'], manualEventType: 'calories' }, formatter: 'kcal', computeRule: 'sum' }
+  ],
+  milestone: { id: 'season_stats', label: 'Season Stats', type: 'achievement', eventType: 'season_record', displayRule: 'latest' },
+  highlight: { template: '{sessions_7d} practices — game day prep on track', fallback: 'Log your first football practice', primaryMetricId: 'sessions_7d' }
+};
+
+export const RUGBY: DisciplineConfig = {
+  id: 'rugby',
+  name: 'Rugby',
+  icon: 'Hexagon',
+  theme: {
+    gradient: 'from-green-600/20 to-teal-500/10',
+    accent: 'text-green-500',
+    bgAccent: 'bg-green-600/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Training', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'matches_30d', label: 'Matches', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'match' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'distance_7d', label: 'Distance', type: 'distance', timeframe: '7d', sources: { wearableTypes: ['distance'], manualEventType: 'distance' }, formatter: 'km', computeRule: 'sum' },
+    { id: 'contact_sessions_30d', label: 'Contact Sessions', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'contact_session' }, formatter: 'sessions', computeRule: 'count' }
+  ],
+  milestone: { id: 'season_stats', label: 'Tries/Tackles', type: 'achievement', eventType: 'season_record', displayRule: 'latest' },
+  highlight: { template: '{distance_7d} km — {contact_sessions_30d} contact sessions', fallback: 'Log your first rugby session', primaryMetricId: 'distance_7d' }
+};
+
+export const ICE_HOCKEY: DisciplineConfig = {
+  id: 'ice_hockey',
+  name: 'Ice Hockey',
+  icon: 'Snowflake',
+  theme: {
+    gradient: 'from-sky-500/20 to-blue-500/10',
+    accent: 'text-sky-400',
+    bgAccent: 'bg-sky-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Practice', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'games_30d', label: 'Games', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'game' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'ice_time_7d', label: 'Ice Time', type: 'duration', timeframe: '7d', sources: { manualEventType: 'ice_time' }, formatter: 'min', computeRule: 'sum' },
+    { id: 'shifts_30d', label: 'Shifts Played', type: 'count', timeframe: '30d', sources: { manualEventType: 'shifts' }, formatter: 'sessions', computeRule: 'sum' }
+  ],
+  milestone: { id: 'season_stats', label: 'Goals/Assists', type: 'achievement', eventType: 'season_record', displayRule: 'latest' },
+  highlight: { template: '{ice_time_7d} min ice time — {games_30d} games this month', fallback: 'Log your first hockey session', primaryMetricId: 'ice_time_7d' }
+};
+
+export const VOLLEYBALL: DisciplineConfig = {
+  id: 'volleyball',
+  name: 'Volleyball',
+  icon: 'Circle',
+  theme: {
+    gradient: 'from-yellow-500/20 to-gold-500/10',
+    accent: 'text-yellow-400',
+    bgAccent: 'bg-yellow-500/10'
+  },
+  metrics: [
+    { id: 'sessions_7d', label: 'Training', type: 'sessions', timeframe: '7d', sources: { manualEventType: 'session' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'matches_30d', label: 'Matches', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'match' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'sets_played_30d', label: 'Sets Played', type: 'count', timeframe: '30d', sources: { manualEventType: 'sets_played' }, formatter: 'sessions', computeRule: 'sum' },
+    { id: 'jumps_7d', label: 'Jump Count', type: 'count', timeframe: '7d', sources: { manualEventType: 'jumps' }, formatter: 'sessions', computeRule: 'sum' }
+  ],
+  milestone: { id: 'season_stats', label: 'Kills/Blocks/Digs', type: 'achievement', eventType: 'season_record', displayRule: 'latest' },
+  highlight: { template: '{sets_played_30d} sets — vertical power building', fallback: 'Log your first volleyball session', primaryMetricId: 'sets_played_30d' }
+};
+
+// ============================================
+// OTHER SPORTS
+// ============================================
+
+export const GOLF: DisciplineConfig = {
+  id: 'golf',
+  name: 'Golf',
+  icon: 'Flag',
+  theme: {
+    gradient: 'from-green-500/20 to-emerald-500/10',
+    accent: 'text-green-400',
+    bgAccent: 'bg-green-500/10'
+  },
+  metrics: [
+    { id: 'rounds_30d', label: 'Rounds', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'round' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'practice_30d', label: 'Practice', type: 'sessions', timeframe: '30d', sources: { manualEventType: 'practice' }, formatter: 'sessions', computeRule: 'count' },
+    { id: 'best_score_90d', label: 'Best Score', type: 'count', timeframe: '90d', sources: { manualEventType: 'round_score' }, formatter: 'sessions', computeRule: 'max' },
+    { id: 'distance_walked_30d', label: 'Distance Walked', type: 'distance', timeframe: '30d', sources: { wearableTypes: ['distance'], manualEventType: 'distance' }, formatter: 'km', computeRule: 'sum' }
+  ],
+  milestone: { id: 'handicap', label: 'Handicap', type: 'rank', eventType: 'handicap_update', displayRule: 'latest' },
+  highlight: { template: '{rounds_30d} rounds this month — short game sharpening', fallback: 'Log your first round', primaryMetricId: 'rounds_30d' }
+};
+
+// ============================================
 // CATALOG REGISTRY
 // ============================================
 
 export const DISCIPLINE_CATALOG: Record<string, DisciplineConfig> = {
+  // Combat Sports
   boxing: BOXING,
   mma: MMA,
   muay_thai: MUAY_THAI,
   kickboxing: KICKBOXING,
   karate: KARATE,
   bjj: BJJ,
+  // Endurance Sports
   running: RUNNING,
   swimming: SWIMMING,
   cycling: CYCLING,
   triathlon: TRIATHLON,
+  spartan_race: SPARTAN_RACE,
+  // Strength Sports
   powerlifting: POWERLIFTING,
   bodybuilding: BODYBUILDING,
   crossfit: CROSSFIT,
   calisthenics: CALISTHENICS,
-  spartan_race: SPARTAN_RACE,
+  // Racket Sports
+  tennis: TENNIS,
+  badminton: BADMINTON,
+  squash: SQUASH,
+  table_tennis: TABLE_TENNIS,
+  padel: PADEL,
+  // Team Sports
+  football: FOOTBALL,
+  basketball: BASKETBALL,
+  american_football: AMERICAN_FOOTBALL,
+  rugby: RUGBY,
+  ice_hockey: ICE_HOCKEY,
+  volleyball: VOLLEYBALL,
+  // Other Sports
+  golf: GOLF,
 };
 
 export const DISCIPLINE_LIST = Object.values(DISCIPLINE_CATALOG);
@@ -335,4 +593,7 @@ export const DISCIPLINE_CATEGORIES = {
   combat: ['boxing', 'mma', 'muay_thai', 'kickboxing', 'karate', 'bjj'],
   endurance: ['running', 'swimming', 'cycling', 'triathlon', 'spartan_race'],
   strength: ['powerlifting', 'bodybuilding', 'crossfit', 'calisthenics'],
+  racket: ['tennis', 'badminton', 'squash', 'table_tennis', 'padel'],
+  team: ['football', 'basketball', 'american_football', 'rugby', 'ice_hockey', 'volleyball'],
+  other: ['golf'],
 };
