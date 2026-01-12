@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { MapPin, Search, X, Navigation, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAvailableCities } from "@/hooks/useAvailableCities";
 import { LocationData } from "@/types/ranking";
 import { LocationAccuracyLevel } from "@/types/location";
+import { supabase } from "@/integrations/supabase/client";
+
+interface PlacePrediction {
+  place_id: string;
+  description: string;
+  main_text: string;
+  secondary_text: string;
+}
 
 interface LocationFilterProps {
   /** Auto-detected location from browser/IP */
@@ -39,6 +47,10 @@ export function LocationFilter({
 }: LocationFilterProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [predictions, setPredictions] = useState<PlacePrediction[]>([]);
+  const [isSearchingPlaces, setIsSearchingPlaces] = useState(false);
+  const [isSelectingPlace, setIsSelectingPlace] = useState(false);
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const { data: cities, isLoading: citiesLoading } = useAvailableCities();
 
@@ -46,20 +58,91 @@ export function LocationFilter({
   const activeLocation = manualLocation ?? autoLocation;
   const isManual = manualLocation !== null;
 
-  // Filter cities based on search
-  const filteredCities = useMemo(() => {
-    if (!cities || !searchQuery.trim()) return cities ?? [];
-    
-    const query = searchQuery.toLowerCase();
-    return cities.filter(
-      (c) =>
-        c.city.toLowerCase().includes(query) ||
-        c.region?.toLowerCase().includes(query) ||
-        c.country?.toLowerCase().includes(query)
-    );
-  }, [cities, searchQuery]);
+  // Search places using Google Places API
+  const searchPlaces = useCallback(async (query: string) => {
+    if (query.length < 2) {
+      setPredictions([]);
+      return;
+    }
 
-  const handleCitySelect = (city: typeof filteredCities[0]) => {
+    setIsSearchingPlaces(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("places-autocomplete", {
+        body: { query },
+      });
+
+      if (error) {
+        console.error("Places autocomplete error:", error);
+        setPredictions([]);
+        return;
+      }
+
+      setPredictions(data?.predictions || []);
+    } catch (err) {
+      console.error("Failed to search places:", err);
+      setPredictions([]);
+    } finally {
+      setIsSearchingPlaces(false);
+    }
+  }, []);
+
+  // Handle search input change with debounce
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      searchPlaces(value);
+    }, 300);
+  }, [searchPlaces]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  // Handle place selection from Google Places
+  const handlePlaceSelect = async (prediction: PlacePrediction) => {
+    setIsSelectingPlace(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("places-details", {
+        body: { placeId: prediction.place_id },
+      });
+
+      if (error) {
+        console.error("Places details error:", error);
+        return;
+      }
+
+      if (data) {
+        onLocationSelect({
+          city: data.city || prediction.main_text,
+          region: data.region,
+          country: data.country,
+          displayLocation: prediction.main_text,
+          lat: data.lat,
+          lng: data.lng,
+        });
+      }
+    } catch (err) {
+      console.error("Failed to get place details:", err);
+    } finally {
+      setIsSelectingPlace(false);
+      setSearchQuery("");
+      setIsSearchFocused(false);
+      setPredictions([]);
+    }
+  };
+
+  // Handle quick access city selection (from database)
+  const handleCitySelect = (city: NonNullable<typeof cities>[0]) => {
     onLocationSelect({
       city: city.city,
       region: city.region,
@@ -67,6 +150,7 @@ export function LocationFilter({
     });
     setSearchQuery("");
     setIsSearchFocused(false);
+    setPredictions([]);
   };
 
   // Use displayLocation if available, otherwise fall back to city/region/country
@@ -194,9 +278,9 @@ export function LocationFilter({
       <div className="relative">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Search different location..."
+          placeholder="Search any location..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={(e) => handleSearchChange(e.target.value)}
           onFocus={() => setIsSearchFocused(true)}
           onBlur={() => {
             // Delay to allow click on results
@@ -205,31 +289,39 @@ export function LocationFilter({
           autoFocus={false}
           className="pl-8 h-9 text-sm"
         />
+        {(isSearchingPlaces || isSelectingPlace) && (
+          <Loader2 className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-muted-foreground" />
+        )}
       </div>
 
-      {/* Search Results Dropdown */}
+      {/* Google Places Search Results Dropdown */}
       {isSearchFocused && searchQuery.trim() && (
         <div className="border border-border rounded-md bg-popover shadow-md">
-          {citiesLoading ? (
-            <p className="text-xs text-muted-foreground p-3">Loading cities...</p>
-          ) : filteredCities.length === 0 ? (
-            <p className="text-xs text-muted-foreground p-3">No cities found</p>
+          {isSearchingPlaces ? (
+            <div className="flex items-center gap-2 p-3 text-xs text-muted-foreground">
+              <Loader2 className="h-3 w-3 animate-spin" />
+              Searching locations...
+            </div>
+          ) : predictions.length === 0 ? (
+            <p className="text-xs text-muted-foreground p-3">
+              {searchQuery.length < 2 ? "Type at least 2 characters" : "No locations found"}
+            </p>
           ) : (
             <ScrollArea className="max-h-48">
               <div className="p-1">
-                {filteredCities.slice(0, 10).map((city) => (
+                {predictions.map((prediction) => (
                   <Button
-                    key={`${city.city}-${city.region}`}
+                    key={prediction.place_id}
                     variant="ghost"
                     size="sm"
                     className="w-full justify-start text-left h-auto py-2 px-3"
-                    onClick={() => handleCitySelect(city)}
+                    onClick={() => handlePlaceSelect(prediction)}
+                    disabled={isSelectingPlace}
                   >
                     <div className="flex flex-col items-start">
-                      <span className="font-medium text-sm">{city.city}</span>
+                      <span className="font-medium text-sm">{prediction.main_text}</span>
                       <span className="text-xs text-muted-foreground">
-                        {[city.region, city.country].filter(Boolean).join(", ")}
-                        {city.coachCount > 0 && ` · ${city.coachCount} coach${city.coachCount !== 1 ? "es" : ""}`}
+                        {prediction.secondary_text}
                       </span>
                     </div>
                   </Button>
