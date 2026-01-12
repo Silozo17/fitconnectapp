@@ -1,7 +1,7 @@
 import { format, formatDistance, formatRelative, parseISO, Locale } from 'date-fns';
 import { enGB, enUS } from 'date-fns/locale';
 
-export type LocaleCode = 'en-GB' | 'en-US' | 'de-DE' | 'fr-FR' | 'es-ES';
+export type LocaleCode = 'en-GB' | 'en-US' | 'en-NZ' | 'en-AE' | 'de-DE' | 'fr-FR' | 'es-ES';
 
 // Default locale for UK launch
 export const DEFAULT_DATE_LOCALE: LocaleCode = 'en-GB';

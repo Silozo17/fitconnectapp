@@ -26,6 +26,8 @@ const LOCATION_NAMES: Record<RouteLocationCode, { name: string; flag: string }> 
   pl: { name: "Poland", flag: "🇵🇱" },
   au: { name: "Australia", flag: "🇦🇺" },
   ca: { name: "Canada", flag: "🇨🇦" },
+  nz: { name: "New Zealand", flag: "🇳🇿" },
+  ae: { name: "United Arab Emirates", flag: "🇦🇪" },
 };
 
 export const LocationSelector = () => {
