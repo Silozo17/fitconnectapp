@@ -20,6 +20,12 @@ import {
   Flame,
   Mountain,
   MessageSquarePlus,
+  Target,
+  Goal,
+  Circle,
+  Hexagon,
+  Snowflake,
+  Flag,
 } from "lucide-react";
 import { DISCIPLINE_LIST, DISCIPLINE_CATEGORIES, getDisciplineConfig } from "@/config/disciplines/catalog";
 import { DisciplineConfig } from "@/config/disciplines/types";
@@ -38,6 +44,12 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Dumbbell,
   Flame,
   Mountain,
+  Target,
+  Goal,
+  Circle,
+  Hexagon,
+  Snowflake,
+  Flag,
 };
 
 type Step = 'select' | 'preview';
@@ -127,6 +139,30 @@ export default function DisciplineSetup() {
             <CategorySection 
               title="Strength Sports"
               disciplines={DISCIPLINE_CATEGORIES.strength.map(id => getDisciplineConfig(id)!).filter(Boolean)}
+              selectedId={selectedId}
+              onSelect={handleSelect}
+            />
+
+            {/* Racket Sports */}
+            <CategorySection 
+              title="Racket Sports"
+              disciplines={DISCIPLINE_CATEGORIES.racket.map(id => getDisciplineConfig(id)!).filter(Boolean)}
+              selectedId={selectedId}
+              onSelect={handleSelect}
+            />
+
+            {/* Team Sports */}
+            <CategorySection 
+              title="Team Sports"
+              disciplines={DISCIPLINE_CATEGORIES.team.map(id => getDisciplineConfig(id)!).filter(Boolean)}
+              selectedId={selectedId}
+              onSelect={handleSelect}
+            />
+
+            {/* Other Sports */}
+            <CategorySection 
+              title="Other Sports"
+              disciplines={DISCIPLINE_CATEGORIES.other.map(id => getDisciplineConfig(id)!).filter(Boolean)}
               selectedId={selectedId}
               onSelect={handleSelect}
             />
