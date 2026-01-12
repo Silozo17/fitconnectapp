@@ -1,5 +1,5 @@
 // Supported currencies
-export type CurrencyCode = 'GBP' | 'USD' | 'EUR' | 'AUD' | 'CAD' | 'PLN';
+export type CurrencyCode = 'GBP' | 'USD' | 'EUR' | 'AUD' | 'CAD' | 'PLN' | 'NZD' | 'AED';
 
 export interface CurrencyConfig {
   code: CurrencyCode;
@@ -15,10 +15,12 @@ export const CURRENCIES: Record<CurrencyCode, CurrencyConfig> = {
   AUD: { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', locale: 'en-AU' },
   CAD: { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar', locale: 'en-CA' },
   PLN: { code: 'PLN', symbol: 'zł', name: 'Polish Zloty', locale: 'pl-PL' },
+  NZD: { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar', locale: 'en-NZ' },
+  AED: { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham', locale: 'en-AE' },
 };
 
 // Route location code type for country mapping
-export type RouteLocationCode = 'gb' | 'pl' | 'us' | 'ie' | 'de' | 'fr' | 'es' | 'it' | 'au' | 'ca';
+export type RouteLocationCode = 'gb' | 'pl' | 'us' | 'ie' | 'de' | 'fr' | 'es' | 'it' | 'au' | 'ca' | 'nz' | 'ae';
 
 /**
  * Infer a coach's country from their currency setting
@@ -31,6 +33,8 @@ export function inferCoachCountry(currency: CurrencyCode | null | undefined): Ro
     'EUR': 'ie', // default to Ireland for EUR
     'AUD': 'au',
     'CAD': 'ca',
+    'NZD': 'nz',
+    'AED': 'ae',
   };
   return currencyToCountry[currency || 'GBP'] || 'gb';
 }

@@ -11,14 +11,14 @@ export const SUPPORTED_LANGUAGES: RouteLanguageCode[] = ['en', 'pl'];
 // ============================================
 // Supported Location Codes (region/market)
 // ============================================
-export type RouteLocationCode = 'gb' | 'pl' | 'us' | 'ie' | 'au' | 'ca';
+export type RouteLocationCode = 'gb' | 'pl' | 'us' | 'ie' | 'au' | 'ca' | 'nz' | 'ae';
 
-export const SUPPORTED_LOCATIONS: RouteLocationCode[] = ['gb', 'pl', 'us', 'ie', 'au', 'ca'];
+export const SUPPORTED_LOCATIONS: RouteLocationCode[] = ['gb', 'pl', 'us', 'ie', 'au', 'ca', 'nz', 'ae'];
 
 // ============================================
 // English-speaking countries (language defaults to English)
 // ============================================
-export const ENGLISH_SPEAKING_COUNTRIES: RouteLocationCode[] = ['gb', 'us', 'ie', 'au', 'ca'];
+export const ENGLISH_SPEAKING_COUNTRIES: RouteLocationCode[] = ['gb', 'us', 'ie', 'au', 'ca', 'nz', 'ae'];
 
 // ============================================
 // Default fallback locale
@@ -40,6 +40,8 @@ export const COUNTRY_TO_LOCATION: Record<string, RouteLocationCode> = {
   'IE': 'ie',
   'AU': 'au',
   'CA': 'ca',
+  'NZ': 'nz',
+  'AE': 'ae',
   // Country names (from geo-detection)
   'United Kingdom': 'gb',
   'Poland': 'pl',
@@ -47,6 +49,9 @@ export const COUNTRY_TO_LOCATION: Record<string, RouteLocationCode> = {
   'Ireland': 'ie',
   'Australia': 'au',
   'Canada': 'ca',
+  'New Zealand': 'nz',
+  'UAE': 'ae',
+  'United Arab Emirates': 'ae',
 };
 
 // ============================================
@@ -59,6 +64,8 @@ export const LOCATION_TO_CURRENCY: Record<RouteLocationCode, CurrencyCode> = {
   'pl': 'PLN',
   'au': 'AUD',
   'ca': 'CAD',
+  'nz': 'NZD',
+  'ae': 'AED',
 };
 
 // ============================================
@@ -71,6 +78,8 @@ export const LOCATION_TO_DATE_LOCALE: Record<RouteLocationCode, LocaleCode> = {
   'pl': 'en-GB', // Use en-GB until we add pl-PL locale
   'au': 'en-GB', // Australia uses UK date format
   'ca': 'en-US', // Canada uses US date format
+  'nz': 'en-GB', // NZ uses UK date format
+  'ae': 'en-GB', // UAE uses UK date format for English
 };
 
 // ============================================
