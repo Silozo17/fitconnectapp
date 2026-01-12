@@ -3,11 +3,22 @@
  */
 
 import { useState } from "react";
-import { Plus, History, X, Star } from "lucide-react";
+import { Plus, History, X, Star, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useDisciplineWidgetData } from "@/hooks/useDisciplineWidgetData";
+import { useClientDisciplines } from "@/hooks/useClientDisciplines";
 import { DisciplineMetricCard } from "./DisciplineMetricCard";
 import { DisciplineLogModal } from "./DisciplineLogModal";
 import { DisciplineNewsFeed } from "./DisciplineNewsFeed";
@@ -28,8 +39,10 @@ export function DisciplineDetailsDrawer({
   disciplineId,
 }: DisciplineDetailsDrawerProps) {
   const { data, isLoading } = useDisciplineWidgetData(disciplineId);
+  const { removeDiscipline, isUpdating } = useClientDisciplines();
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [favoritesOpen, setFavoritesOpen] = useState(false);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
   
   const detailConfig = getDisciplineDetailConfig(disciplineId);
 
@@ -45,6 +58,15 @@ export function DisciplineDetailsDrawer({
       day,
       value: Math.floor(Math.random() * 100),
     }));
+
+  const handleRemoveDiscipline = () => {
+    removeDiscipline(disciplineId, {
+      onSuccess: () => {
+        setShowRemoveConfirm(false);
+        onOpenChange(false);
+      },
+    });
+  };
 
   return (
     <>
@@ -70,6 +92,15 @@ export function DisciplineDetailsDrawer({
                 <Button size="sm" onClick={() => setLogModalOpen(true)}>
                   <Plus className="w-4 h-4 mr-1" />
                   Log
+                </Button>
+                <Button 
+                  size="icon" 
+                  variant="ghost"
+                  onClick={() => setShowRemoveConfirm(true)}
+                  title="Remove discipline"
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 className="w-4 h-4" />
                 </Button>
                 <DrawerClose asChild>
                   <Button size="icon" variant="ghost">
@@ -166,6 +197,27 @@ export function DisciplineDetailsDrawer({
         disciplineName={config.name}
         theme={config.theme}
       />
+
+      <AlertDialog open={showRemoveConfirm} onOpenChange={setShowRemoveConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Discipline?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove {config.name} from your tracked disciplines. You can always add it back later.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveDiscipline}
+              disabled={isUpdating}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isUpdating ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
