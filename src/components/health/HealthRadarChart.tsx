@@ -112,8 +112,8 @@ export const HealthRadarChart = ({
         </div>
       </div>
 
-      <ResponsiveContainer width="100%" height={280}>
-        <RadarChart cx="50%" cy="50%" outerRadius="70%" data={chartData}>
+      <ResponsiveContainer width="100%" height={220}>
+        <RadarChart cx="50%" cy="50%" outerRadius="65%" data={chartData}>
           <PolarGrid 
             stroke="hsl(var(--muted-foreground))" 
             strokeOpacity={0.2}
