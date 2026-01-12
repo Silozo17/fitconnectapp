@@ -6,8 +6,9 @@ import { memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronRight, MessageSquarePlus } from "lucide-react";
+import { Plus, ChevronRight, MessageSquarePlus, Trash2 } from "lucide-react";
 import { useDisciplineWidgetData } from "@/hooks/useDisciplineWidgetData";
+import { useClientDisciplines } from "@/hooks/useClientDisciplines";
 import { DisciplineMetricChip } from "./DisciplineMetricChip";
 import { DisciplineLogModal } from "./DisciplineLogModal";
 import { DisciplineDetailsDrawer } from "./DisciplineDetailsDrawer";
@@ -16,6 +17,16 @@ import { DisciplineNewsTicker } from "./DisciplineNewsTicker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDisciplineIcon, getMilestoneIcon } from "@/config/disciplines/icons";
 import { formatMilestoneDisplay } from "@/utils/formatMilestoneDisplay";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface DisciplineWidgetProps {
   disciplineId: string;
@@ -26,9 +37,16 @@ interface DisciplineWidgetProps {
 export const DisciplineWidget = memo(function DisciplineWidget({ disciplineId, className }: DisciplineWidgetProps) {
   const navigate = useNavigate();
   const { data, isLoading, error } = useDisciplineWidgetData(disciplineId);
+  const { removeDiscipline, isUpdating } = useClientDisciplines();
   const [logModalOpen, setLogModalOpen] = useState(false);
   const [detailsDrawerOpen, setDetailsDrawerOpen] = useState(false);
   const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [showRemoveConfirm, setShowRemoveConfirm] = useState(false);
+
+  const handleRemoveDiscipline = () => {
+    removeDiscipline(disciplineId);
+    setShowRemoveConfirm(false);
+  };
 
   if (isLoading) {
     return <DisciplineWidgetSkeleton className={className} />;
@@ -64,16 +82,30 @@ export const DisciplineWidget = memo(function DisciplineWidget({ disciplineId, c
             <div className="flex-1 min-w-0">
               <h3 className="font-semibold text-lg">{config.name}</h3>
             </div>
-            <button
-              onClick={() => navigate('/dashboard/client/discipline-setup')}
-              className={cn(
-                "p-1.5 rounded-lg transition-colors",
-                "hover:bg-primary/10 text-muted-foreground hover:text-primary"
-              )}
-              title="Add another discipline"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowRemoveConfirm(true)}
+                disabled={isUpdating}
+                className={cn(
+                  "p-1.5 rounded-lg transition-colors",
+                  "hover:bg-destructive/10 text-muted-foreground hover:text-destructive",
+                  isUpdating && "opacity-50 cursor-not-allowed"
+                )}
+                title={`Remove ${data?.config?.name || 'discipline'}`}
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => navigate('/dashboard/client/discipline-setup')}
+                className={cn(
+                  "p-1.5 rounded-lg transition-colors",
+                  "hover:bg-primary/10 text-muted-foreground hover:text-primary"
+                )}
+                title="Add another discipline"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
 
           {/* Highlight */}
@@ -164,6 +196,27 @@ export const DisciplineWidget = memo(function DisciplineWidget({ disciplineId, c
         open={requestModalOpen}
         onOpenChange={setRequestModalOpen}
       />
+
+      {/* Remove Confirmation Dialog */}
+      <AlertDialog open={showRemoveConfirm} onOpenChange={setShowRemoveConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove {config.name}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove {config.name} from your tracked disciplines. Your logged data will be preserved and you can add it back anytime.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRemoveDiscipline}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 });
