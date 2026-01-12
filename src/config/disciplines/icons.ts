@@ -29,6 +29,8 @@ import {
   Hexagon,
   Snowflake,
   Flag,
+  Users,
+  PersonStanding,
   LucideIcon,
 } from "lucide-react";
 
