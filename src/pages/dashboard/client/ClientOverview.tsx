@@ -192,14 +192,7 @@ const ClientOverview = () => {
         description={readiness?.recommendation || "How prepared you are for today"} 
       />
       <WidgetErrorBoundary widgetName="ReadinessScoreCard" silent>
-        <ReadinessScoreCard className="mb-3" />
-      </WidgetErrorBoundary>
-      <WidgetErrorBoundary widgetName="ReadinessComponents" silent>
-        <div className="grid grid-cols-3 gap-3 mb-11">
-          <ReadinessComponentCard type="sleep" />
-          <ReadinessComponentCard type="recovery" />
-          <ReadinessComponentCard type="activity" />
-        </div>
+        <ReadinessScoreCard className="mb-11" />
       </WidgetErrorBoundary>
 
       {/* Section: Today's Health */}
