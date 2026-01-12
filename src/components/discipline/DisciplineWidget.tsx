@@ -6,12 +6,13 @@ import { memo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronRight, MessageSquarePlus, Trophy } from "lucide-react";
+import { Plus, ChevronRight, MessageSquarePlus } from "lucide-react";
 import { useDisciplineWidgetData } from "@/hooks/useDisciplineWidgetData";
 import { DisciplineMetricChip } from "./DisciplineMetricChip";
 import { DisciplineLogModal } from "./DisciplineLogModal";
 import { DisciplineDetailsDrawer } from "./DisciplineDetailsDrawer";
 import { RequestDisciplineModal } from "./RequestDisciplineModal";
+import { DisciplineNewsTicker } from "./DisciplineNewsTicker";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getDisciplineIcon, getMilestoneIcon } from "@/config/disciplines/icons";
 import { formatMilestoneDisplay } from "@/utils/formatMilestoneDisplay";
@@ -108,6 +109,13 @@ export const DisciplineWidget = memo(function DisciplineWidget({ disciplineId, c
               </p>
             </div>
           </div>
+
+          {/* News Ticker */}
+          <DisciplineNewsTicker 
+            disciplineId={disciplineId} 
+            accentClass={config.theme.accent}
+            className="mb-4"
+          />
 
           {/* Actions Row */}
           <div className="flex items-center gap-2">
