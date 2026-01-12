@@ -113,7 +113,7 @@ export function LocationFilter({
     setIsSelectingPlace(true);
     try {
       const { data, error } = await supabase.functions.invoke("places-details", {
-        body: { placeId: prediction.place_id },
+        body: { place_id: prediction.place_id },
       });
 
       if (error) {
