@@ -126,6 +126,7 @@ export function LocationFilter({
           city: data.city || prediction.main_text,
           region: data.region,
           country: data.country,
+          countryCode: data.country_code,
           displayLocation: prediction.main_text,
           lat: data.lat,
           lng: data.lng,
