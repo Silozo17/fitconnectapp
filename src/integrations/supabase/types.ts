@@ -1462,6 +1462,59 @@ export type Database = {
           },
         ]
       }
+      client_discipline_favorites: {
+        Row: {
+          client_id: string
+          created_at: string
+          discipline_id: string
+          entity_id: string
+          id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          discipline_id: string
+          entity_id: string
+          id?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          discipline_id?: string
+          entity_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_discipline_favorites_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "client_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_discipline_favorites_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_discipline_favorites_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "public_leaderboard_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_discipline_favorites_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "discipline_followable_entities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_disciplines: {
         Row: {
           client_id: string
@@ -4578,6 +4631,125 @@ export type Database = {
           source?: string
           user_id?: string
           value_json?: Json
+        }
+        Relationships: []
+      }
+      discipline_followable_entities: {
+        Row: {
+          created_at: string
+          discipline_id: string
+          entity_type: string
+          external_id: string | null
+          id: string
+          is_active: boolean
+          metadata: Json | null
+          name: string
+          search_keywords: string[] | null
+        }
+        Insert: {
+          created_at?: string
+          discipline_id: string
+          entity_type: string
+          external_id?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name: string
+          search_keywords?: string[] | null
+        }
+        Update: {
+          created_at?: string
+          discipline_id?: string
+          entity_type?: string
+          external_id?: string | null
+          id?: string
+          is_active?: boolean
+          metadata?: Json | null
+          name?: string
+          search_keywords?: string[] | null
+        }
+        Relationships: []
+      }
+      discipline_news_cache: {
+        Row: {
+          discipline_id: string
+          entity_ids: string[] | null
+          expires_at: string
+          fetched_at: string
+          id: string
+          image_url: string | null
+          published_at: string | null
+          source_id: string | null
+          summary: string | null
+          title: string
+          url: string
+        }
+        Insert: {
+          discipline_id: string
+          entity_ids?: string[] | null
+          expires_at?: string
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          source_id?: string | null
+          summary?: string | null
+          title: string
+          url: string
+        }
+        Update: {
+          discipline_id?: string
+          entity_ids?: string[] | null
+          expires_at?: string
+          fetched_at?: string
+          id?: string
+          image_url?: string | null
+          published_at?: string | null
+          source_id?: string | null
+          summary?: string | null
+          title?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discipline_news_cache_source_id_fkey"
+            columns: ["source_id"]
+            isOneToOne: false
+            referencedRelation: "discipline_news_sources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discipline_news_sources: {
+        Row: {
+          created_at: string
+          discipline_id: string
+          feed_url: string
+          id: string
+          is_active: boolean
+          priority: number
+          source_name: string
+          source_type: string
+        }
+        Insert: {
+          created_at?: string
+          discipline_id: string
+          feed_url: string
+          id?: string
+          is_active?: boolean
+          priority?: number
+          source_name: string
+          source_type?: string
+        }
+        Update: {
+          created_at?: string
+          discipline_id?: string
+          feed_url?: string
+          id?: string
+          is_active?: boolean
+          priority?: number
+          source_name?: string
+          source_type?: string
         }
         Relationships: []
       }

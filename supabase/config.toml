@@ -320,3 +320,6 @@ verify_jwt = false
 
 [functions.detect-milestones]
 verify_jwt = false
+
+[functions.fetch-discipline-news]
+verify_jwt = false
