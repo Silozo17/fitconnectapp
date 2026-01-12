@@ -26,6 +26,16 @@ export interface ClientFavorite {
   entity?: FollowableEntity;
 }
 
+// Fetch client profile id from user id
+async function fetchClientProfileId(userId: string): Promise<string | null> {
+  const { data } = await supabase
+    .from('client_profiles')
+    .select('id')
+    .eq('user_id', userId)
+    .single();
+  return data?.id || null;
+}
+
 // Fetch available entities for a discipline
 async function fetchEntities(disciplineId: string): Promise<FollowableEntity[]> {
   const { data, error } = await supabase
@@ -61,8 +71,6 @@ async function fetchFavorites(clientId: string, disciplineId?: string): Promise<
 
 // Search entities across disciplines
 async function searchEntities(query: string, disciplineId?: string): Promise<FollowableEntity[]> {
-  const searchTerms = query.toLowerCase().split(' ');
-  
   let dbQuery = supabase
     .from('discipline_followable_entities')
     .select('*')
@@ -79,6 +87,18 @@ async function searchEntities(query: string, disciplineId?: string): Promise<Fol
   return (data || []) as FollowableEntity[];
 }
 
+// Hook to get client profile id
+function useClientProfileId() {
+  const { user } = useAuth();
+  
+  return useQuery({
+    queryKey: ['client-profile-id', user?.id],
+    queryFn: () => fetchClientProfileId(user!.id),
+    enabled: !!user?.id,
+    staleTime: 60 * 60 * 1000, // 1 hour
+  });
+}
+
 export function useDisciplineEntities(disciplineId: string | null) {
   return useQuery({
     queryKey: ['discipline-entities', disciplineId],
@@ -89,12 +109,12 @@ export function useDisciplineEntities(disciplineId: string | null) {
 }
 
 export function useDisciplineFavorites(disciplineId?: string) {
-  const { profile } = useAuth();
+  const { data: clientId } = useClientProfileId();
   
   return useQuery({
-    queryKey: ['discipline-favorites', profile?.id, disciplineId],
-    queryFn: () => fetchFavorites(profile!.id, disciplineId),
-    enabled: !!profile?.id,
+    queryKey: ['discipline-favorites', clientId, disciplineId],
+    queryFn: () => fetchFavorites(clientId!, disciplineId),
+    enabled: !!clientId,
     staleTime: 5 * 60 * 1000,
   });
 }
@@ -110,16 +130,16 @@ export function useSearchEntities(query: string, disciplineId?: string) {
 
 export function useAddFavorite() {
   const queryClient = useQueryClient();
-  const { profile } = useAuth();
+  const { data: clientId } = useClientProfileId();
 
   return useMutation({
     mutationFn: async ({ entityId, disciplineId }: { entityId: string; disciplineId: string }) => {
-      if (!profile?.id) throw new Error('Not authenticated');
+      if (!clientId) throw new Error('Not authenticated');
 
       const { data, error } = await supabase
         .from('client_discipline_favorites')
         .insert({
-          client_id: profile.id,
+          client_id: clientId,
           entity_id: entityId,
           discipline_id: disciplineId,
         })

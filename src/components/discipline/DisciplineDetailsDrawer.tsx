@@ -3,13 +3,15 @@
  */
 
 import { useState } from "react";
-import { Plus, History, X } from "lucide-react";
+import { Plus, History, X, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer";
 import { useDisciplineWidgetData } from "@/hooks/useDisciplineWidgetData";
 import { DisciplineMetricCard } from "./DisciplineMetricCard";
 import { DisciplineLogModal } from "./DisciplineLogModal";
+import { DisciplineNewsFeed } from "./DisciplineNewsFeed";
+import { FavoritesSelector } from "./FavoritesSelector";
 import { getDisciplineDetailConfig } from "@/config/disciplines/detailConfigs";
 import { getDisciplineIcon, getMilestoneIcon } from "@/config/disciplines/icons";
 import { formatMilestoneDisplay } from "@/utils/formatMilestoneDisplay";
@@ -27,6 +29,7 @@ export function DisciplineDetailsDrawer({
 }: DisciplineDetailsDrawerProps) {
   const { data, isLoading } = useDisciplineWidgetData(disciplineId);
   const [logModalOpen, setLogModalOpen] = useState(false);
+  const [favoritesOpen, setFavoritesOpen] = useState(false);
   
   const detailConfig = getDisciplineDetailConfig(disciplineId);
 
@@ -56,6 +59,14 @@ export function DisciplineDetailsDrawer({
                 <DrawerTitle>{config.name}</DrawerTitle>
               </div>
               <div className="flex items-center gap-2">
+                <Button 
+                  size="icon" 
+                  variant="ghost"
+                  onClick={() => setFavoritesOpen(true)}
+                  title="Manage favorites"
+                >
+                  <Star className="w-4 h-4" />
+                </Button>
                 <Button size="sm" onClick={() => setLogModalOpen(true)}>
                   <Plus className="w-4 h-4 mr-1" />
                   Log
@@ -129,6 +140,15 @@ export function DisciplineDetailsDrawer({
                 </div>
               </div>
             )}
+
+            {/* Live News Feed */}
+            <div className="mb-6">
+              <DisciplineNewsFeed
+                disciplineId={disciplineId}
+                theme={config.theme}
+                onManageFavorites={() => setFavoritesOpen(true)}
+              />
+            </div>
           </div>
         </DrawerContent>
       </Drawer>
@@ -137,6 +157,14 @@ export function DisciplineDetailsDrawer({
         open={logModalOpen}
         onOpenChange={setLogModalOpen}
         config={config}
+      />
+
+      <FavoritesSelector
+        open={favoritesOpen}
+        onOpenChange={setFavoritesOpen}
+        disciplineId={disciplineId}
+        disciplineName={config.name}
+        theme={config.theme}
       />
     </>
   );
