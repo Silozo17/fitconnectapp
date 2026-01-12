@@ -8749,30 +8749,47 @@ export type Database = {
           p_user_region?: string
         }
         Returns: {
+          avatar_rarity: string
+          avatar_slug: string
+          avg_rating: number
           bio: string
-          boost_expires_at: string
+          booking_mode: string
           card_image_url: string
           certifications: Json
-          city: string
           coach_types: string[]
-          country: string
-          country_code: string
+          created_at: string
           currency: string
           display_name: string
-          distance_km: number
-          gallery_images: string[]
+          experience_years: number
+          facebook_url: string
+          gym_affiliation: string
           hourly_rate: number
           id: string
-          is_boosted: boolean
-          is_in_person: boolean
-          is_online: boolean
-          location_lat: number
-          location_lng: number
+          in_person_available: boolean
+          instagram_url: string
+          is_sponsored: boolean
+          is_verified: boolean
+          linkedin_url: string
+          location: string
+          location_city: string
+          location_country: string
+          location_country_code: string
+          location_region: string
+          location_tier: number
+          marketplace_visible: boolean
+          onboarding_completed: boolean
+          online_available: boolean
           profile_image_url: string
-          rank_score: number
-          rating_average: number
           review_count: number
-          years_experience: number
+          selected_avatar_id: string
+          threads_url: string
+          tiktok_url: string
+          username: string
+          verified_at: string
+          visibility_score: number
+          who_i_work_with: string
+          x_url: string
+          youtube_url: string
         }[]
       }
       has_role:
