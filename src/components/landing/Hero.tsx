@@ -68,10 +68,8 @@ const Hero = () => {
 
             {/* App Store Badges */}
             <div className="flex justify-center lg:justify-start mb-6">
-              <a 
-                href="https://apps.apple.com/app/fitconnect" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <Link 
+                to="/install"
                 className="hover:opacity-80 transition-opacity"
               >
                 <img 
@@ -80,7 +78,7 @@ const Hero = () => {
                   className="h-10 md:h-12 w-auto"
                   loading="eager"
                 />
-              </a>
+              </Link>
             </div>
 
             {/* Title */}
