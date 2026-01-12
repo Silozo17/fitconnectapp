@@ -252,6 +252,137 @@ export const DISCIPLINE_DETAIL_CONFIGS: Record<string, DisciplineDetailConfig> =
       { id: 'age_group', label: 'Age Group', type: 'dropdown', options: { choices: ['Elite', 'Age Group', 'Open'] } },
     ],
   },
+
+  // ===========================================
+  // RACKET SPORTS
+  // ===========================================
+  tennis: {
+    milestoneFields: [
+      { id: 'match_record', label: 'Match Record', type: 'fight_record', options: { fields: ['wins', 'losses'] } },
+      { id: 'ranking', label: 'Tournament Ranking', type: 'number', options: { unit: 'rank' } },
+    ],
+    additionalLogFields: [
+      { id: 'surface', label: 'Surface', type: 'dropdown', options: { choices: ['Hard Court', 'Clay', 'Grass', 'Indoor', 'Carpet'] } },
+      { id: 'match_type', label: 'Match Type', type: 'dropdown', options: { choices: ['Singles', 'Doubles', 'Practice'] } },
+    ],
+  },
+
+  badminton: {
+    milestoneFields: [
+      { id: 'match_record', label: 'Match Record', type: 'fight_record', options: { fields: ['wins', 'losses'] } },
+      { id: 'ranking', label: 'Ranking', type: 'number', options: { unit: 'rank' } },
+    ],
+    additionalLogFields: [
+      { id: 'match_type', label: 'Match Type', type: 'dropdown', options: { choices: ['Singles', 'Doubles', 'Mixed Doubles', 'Practice'] } },
+    ],
+  },
+
+  squash: {
+    milestoneFields: [
+      { id: 'match_record', label: 'Match Record', type: 'fight_record', options: { fields: ['wins', 'losses'] } },
+      { id: 'ranking', label: 'Ranking', type: 'number', options: { unit: 'rank' } },
+    ],
+  },
+
+  table_tennis: {
+    milestoneFields: [
+      { id: 'match_record', label: 'Match Record', type: 'fight_record', options: { fields: ['wins', 'losses'] } },
+      { id: 'rating', label: 'Rating', type: 'number', options: { unit: 'points' } },
+    ],
+    additionalLogFields: [
+      { id: 'match_type', label: 'Match Type', type: 'dropdown', options: { choices: ['Singles', 'Doubles', 'Practice'] } },
+    ],
+  },
+
+  padel: {
+    milestoneFields: [
+      { id: 'match_record', label: 'Match Record', type: 'fight_record', options: { fields: ['wins', 'losses'] } },
+    ],
+    additionalLogFields: [
+      { id: 'partner', label: 'Partner', type: 'dropdown', options: { choices: ['Regular Partner', 'Guest Partner', 'Practice'] } },
+    ],
+  },
+
+  // ===========================================
+  // TEAM SPORTS
+  // ===========================================
+  football: {
+    milestoneFields: [
+      { id: 'season_goals', label: 'Season Goals', type: 'number', options: { unit: 'goals' } },
+      { id: 'season_assists', label: 'Season Assists', type: 'number', options: { unit: 'assists' } },
+    ],
+    additionalLogFields: [
+      { id: 'position', label: 'Position', type: 'dropdown', options: { choices: ['Goalkeeper', 'Defender', 'Midfielder', 'Forward'] } },
+    ],
+  },
+
+  basketball: {
+    milestoneFields: [
+      { id: 'ppg', label: 'Points Per Game', type: 'number', options: { unit: 'PPG' } },
+      { id: 'apg', label: 'Assists Per Game', type: 'number', options: { unit: 'APG' } },
+      { id: 'rpg', label: 'Rebounds Per Game', type: 'number', options: { unit: 'RPG' } },
+    ],
+    additionalLogFields: [
+      { id: 'position', label: 'Position', type: 'dropdown', options: { choices: ['Point Guard', 'Shooting Guard', 'Small Forward', 'Power Forward', 'Center'] } },
+    ],
+  },
+
+  american_football: {
+    milestoneFields: [
+      { id: 'season_stats', label: 'Season Stats', type: 'number', options: { unit: 'yards' } },
+    ],
+    additionalLogFields: [
+      { id: 'position', label: 'Position', type: 'dropdown', options: { choices: ['Quarterback', 'Running Back', 'Wide Receiver', 'Tight End', 'Offensive Line', 'Defensive Line', 'Linebacker', 'Defensive Back', 'Special Teams'] } },
+    ],
+  },
+
+  rugby: {
+    milestoneFields: [
+      { id: 'tries', label: 'Season Tries', type: 'number', options: { unit: 'tries' } },
+      { id: 'tackles', label: 'Season Tackles', type: 'number', options: { unit: 'tackles' } },
+    ],
+    additionalLogFields: [
+      { id: 'position', label: 'Position', type: 'dropdown', options: { choices: ['Prop', 'Hooker', 'Lock', 'Flanker', 'Number 8', 'Scrum-half', 'Fly-half', 'Centre', 'Wing', 'Fullback'] } },
+      { id: 'code', label: 'Code', type: 'dropdown', options: { choices: ['Union', 'League', 'Sevens'] } },
+    ],
+  },
+
+  ice_hockey: {
+    milestoneFields: [
+      { id: 'goals', label: 'Season Goals', type: 'number', options: { unit: 'goals' } },
+      { id: 'assists', label: 'Season Assists', type: 'number', options: { unit: 'assists' } },
+    ],
+    additionalLogFields: [
+      { id: 'position', label: 'Position', type: 'dropdown', options: { choices: ['Goaltender', 'Defenseman', 'Center', 'Left Wing', 'Right Wing'] } },
+    ],
+  },
+
+  volleyball: {
+    milestoneFields: [
+      { id: 'kills', label: 'Season Kills', type: 'number', options: { unit: 'kills' } },
+      { id: 'blocks', label: 'Season Blocks', type: 'number', options: { unit: 'blocks' } },
+      { id: 'digs', label: 'Season Digs', type: 'number', options: { unit: 'digs' } },
+    ],
+    additionalLogFields: [
+      { id: 'position', label: 'Position', type: 'dropdown', options: { choices: ['Setter', 'Outside Hitter', 'Opposite Hitter', 'Middle Blocker', 'Libero'] } },
+      { id: 'type', label: 'Type', type: 'dropdown', options: { choices: ['Indoor', 'Beach', 'Grass'] } },
+    ],
+  },
+
+  // ===========================================
+  // OTHER SPORTS
+  // ===========================================
+  golf: {
+    milestoneFields: [
+      { id: 'handicap', label: 'Handicap', type: 'number', options: { unit: 'HCP' } },
+      { id: 'best_18', label: 'Best 18-Hole Score', type: 'number', options: { unit: 'strokes' } },
+      { id: 'best_9', label: 'Best 9-Hole Score', type: 'number', options: { unit: 'strokes' } },
+    ],
+    additionalLogFields: [
+      { id: 'course_rating', label: 'Course Rating', type: 'number', options: { unit: 'rating' } },
+      { id: 'tees', label: 'Tees Played', type: 'dropdown', options: { choices: ['Championship', 'Back', 'Middle', 'Forward', 'Junior'] } },
+    ],
+  },
 };
 
 // Get detail config for a discipline, with fallback

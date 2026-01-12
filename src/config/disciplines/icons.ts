@@ -24,6 +24,11 @@ import {
   TrendingUp,
   Calendar,
   Trophy,
+  Goal,
+  Circle,
+  Hexagon,
+  Snowflake,
+  Flag,
   LucideIcon,
 } from "lucide-react";
 
@@ -42,13 +47,31 @@ export const DISCIPLINE_ICONS: Record<string, LucideIcon> = {
   swimming: Waves,
   cycling: Bike,
   triathlon: Medal,
+  spartan_race: Mountain,
   
   // Strength sports
   powerlifting: Dumbbell,
   bodybuilding: UserCircle,
   crossfit: Flame,
   calisthenics: CircleDot,
-  spartan_race: Mountain,
+  
+  // Racket sports
+  tennis: Target,
+  badminton: Target,
+  squash: Target,
+  table_tennis: Target,
+  padel: Target,
+  
+  // Team sports
+  football: Goal,
+  basketball: Circle,
+  american_football: Hexagon,
+  rugby: Hexagon,
+  ice_hockey: Snowflake,
+  volleyball: Circle,
+  
+  // Other sports
+  golf: Flag,
 };
 
 // Milestone type icons
