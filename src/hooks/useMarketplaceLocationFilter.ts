@@ -97,10 +97,15 @@ export function useMarketplaceLocationFilter(): MarketplaceLocationFilter {
 
   const setManualLocation = useCallback((location: LocationData) => {
     setManualLocationState(location);
-    // Also set country code from the location if available
-    const derivedCode = deriveCountryCode(location.country);
-    if (derivedCode) {
-      setManualCountryCodeState(derivedCode);
+    // Use explicit countryCode if available, otherwise derive from country name
+    const explicitCode = location.countryCode?.toUpperCase() as RouteLocationCode | undefined;
+    if (explicitCode && SUPPORTED_LOCATIONS.includes(explicitCode)) {
+      setManualCountryCodeState(explicitCode);
+    } else {
+      const derivedCode = deriveCountryCode(location.country);
+      if (derivedCode) {
+        setManualCountryCodeState(derivedCode);
+      }
     }
   }, []);
 
