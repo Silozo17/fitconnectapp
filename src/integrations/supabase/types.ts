@@ -8732,52 +8732,123 @@ export type Database = {
         Args: { p_location_type?: string; p_location_value?: string }
         Returns: number
       }
-      get_ranked_coaches: {
-        Args: {
-          p_coach_types?: string[]
-          p_filter_country_code?: string
-          p_in_person_only?: boolean
-          p_limit?: number
-          p_max_price?: number
-          p_min_price?: number
-          p_online_only?: boolean
-          p_search_term?: string
-          p_user_city?: string
-          p_user_country_code?: string
-          p_user_lat?: number
-          p_user_lng?: number
-          p_user_region?: string
-        }
-        Returns: {
-          avatar_rarity: string
-          avatar_slug: string
-          avg_rating: number
-          bio: string
-          card_image_url: string
-          certifications: string[]
-          coach_types: string[]
-          currency: string
-          display_name: string
-          experience_years: number
-          gym_affiliation: string
-          hourly_rate: number
-          id: string
-          in_person_available: boolean
-          is_sponsored: boolean
-          is_verified: boolean
-          location_city: string
-          location_country: string
-          location_country_code: string
-          location_region: string
-          location_tier: number
-          online_available: boolean
-          profile_image_url: string
-          review_count: number
-          selected_avatar_id: string
-          username: string
-          visibility_score: number
-        }[]
-      }
+      get_ranked_coaches:
+        | {
+            Args: {
+              p_coach_types?: string[]
+              p_filter_country_code?: string
+              p_in_person_only?: boolean
+              p_limit?: number
+              p_max_price?: number
+              p_min_price?: number
+              p_online_only?: boolean
+              p_search_term?: string
+              p_user_city?: string
+              p_user_country_code?: string
+              p_user_lat?: number
+              p_user_lng?: number
+              p_user_region?: string
+            }
+            Returns: {
+              avatar_rarity: string
+              avatar_slug: string
+              bio: string
+              booking_mode: string
+              card_image_url: string
+              coach_types: string[]
+              created_at: string
+              currency: string
+              display_name: string
+              distance_miles: number
+              engagement_score: number
+              experience_years: number
+              facebook_url: string
+              gym_affiliation: string
+              hourly_rate: number
+              id: string
+              in_person_available: boolean
+              instagram_url: string
+              is_sponsored: boolean
+              is_verified: boolean
+              linkedin_url: string
+              location: string
+              location_city: string
+              location_country: string
+              location_country_code: string
+              location_region: string
+              location_score: number
+              location_tier: number
+              marketplace_visible: boolean
+              onboarding_completed: boolean
+              online_available: boolean
+              profile_image_url: string
+              profile_score: number
+              selected_avatar_id: string
+              threads_url: string
+              tiktok_url: string
+              total_score: number
+              user_id: string
+              username: string
+              verified_at: string
+              verified_qualification_count: number
+              who_i_work_with: string
+              x_url: string
+              youtube_url: string
+            }[]
+          }
+        | {
+            Args: {
+              p_country_code?: string
+              p_limit?: number
+              p_user_city?: string
+              p_user_country?: string
+              p_user_county?: string
+              p_user_lat?: number
+              p_user_lng?: number
+            }
+            Returns: {
+              achievements: Json
+              availability_status: string
+              base_score: number
+              bio: string
+              boost_expires_at: string
+              certifications: Json
+              city: string
+              coach_types: string[]
+              country: string
+              county: string
+              cover_image_url: string
+              created_at: string
+              currency: string
+              display_name: string
+              distance_miles: number
+              experience_years: number
+              final_score: number
+              hourly_rate: number
+              id: string
+              is_accepting_clients: boolean
+              is_boosted: boolean
+              is_verified: boolean
+              languages_spoken: string[]
+              location_lat: number
+              location_lng: number
+              location_tier: number
+              offers_in_person: boolean
+              offers_online: boolean
+              profile_completeness: number
+              profile_image_url: string
+              rating_average: number
+              rating_count: number
+              slug: string
+              social_links: Json
+              specializations: string[]
+              total_clients: number
+              travel_radius_miles: number
+              updated_at: string
+              user_id: string
+              verification_status: string
+            }[]
+          }
       has_role:
         | {
             Args: { _role: Database["public"]["Enums"]["app_role"] }
