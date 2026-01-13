@@ -27,6 +27,7 @@ const Coaches = () => {
   const [inPersonOnly, setInPersonOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [qualifiedOnly, setQualifiedOnly] = useState(false);
+  const [minRating, setMinRating] = useState<number | undefined>(undefined);
 
   // "Best match" ranking toggle - OFF by default
   const [useRanking, setUseRanking] = useState(false);
@@ -87,6 +88,8 @@ const Coaches = () => {
     // Badge filters
     verifiedOnly: verifiedOnly,
     qualifiedOnly: qualifiedOnly,
+    // Rating filter
+    minRating: minRating,
     // ⚠️ RANKING: Only enabled when user explicitly opts in AND has location
     useRanking: useRanking && hasLocationForRanking,
   });
@@ -246,6 +249,9 @@ const Coaches = () => {
                         onVerifiedOnlyChange={setVerifiedOnly}
                         qualifiedOnly={qualifiedOnly}
                         onQualifiedOnlyChange={setQualifiedOnly}
+                        // Rating filter
+                        minRating={minRating}
+                        onMinRatingChange={setMinRating}
                         // Location filter props
                         autoLocation={null}
                         manualLocation={manualLocation}
@@ -276,6 +282,9 @@ const Coaches = () => {
                     onVerifiedOnlyChange={setVerifiedOnly}
                     qualifiedOnly={qualifiedOnly}
                     onQualifiedOnlyChange={setQualifiedOnly}
+                    // Rating filter
+                    minRating={minRating}
+                    onMinRatingChange={setMinRating}
                     // Location filter props
                     autoLocation={null}
                     manualLocation={manualLocation}

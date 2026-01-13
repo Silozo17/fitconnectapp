@@ -13,7 +13,8 @@ import { COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coac
 import { LocationFilter } from "./LocationFilter";
 import { LocationData } from "@/types/ranking";
 import { useTranslation } from "@/hooks/useTranslation";
-import { BadgeCheck, Award } from "lucide-react";
+import { BadgeCheck, Award, Star } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface CoachFiltersProps {
   selectedTypes: string[];
@@ -280,6 +281,38 @@ const CoachFilters = ({
             </Label>
           </div>
         </div>
+      </div>
+
+      {/* Rating Filter */}
+      <div>
+        <h4 className="font-medium mb-3 text-sm">{t('filters.rating') || 'Minimum Rating'}</h4>
+        <RadioGroup
+          value={minRating?.toString() ?? 'any'}
+          onValueChange={(val) => {
+            if (val === 'any') {
+              onMinRatingChange?.(undefined);
+            } else {
+              onMinRatingChange?.(parseFloat(val));
+            }
+          }}
+          className="space-y-2"
+        >
+          {ratingOptions.map((option) => (
+            <div key={option.value?.toString() ?? 'any'} className="flex items-center gap-2">
+              <RadioGroupItem
+                value={option.value?.toString() ?? 'any'}
+                id={`${variant}-rating-${option.value ?? 'any'}`}
+              />
+              <Label
+                htmlFor={`${variant}-rating-${option.value ?? 'any'}`}
+                className="text-sm cursor-pointer flex items-center gap-1.5"
+              >
+                {option.value !== undefined && <Star className="w-4 h-4 text-amber-400 fill-amber-400" />}
+                {option.label}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
       </div>
     </div>
   );
