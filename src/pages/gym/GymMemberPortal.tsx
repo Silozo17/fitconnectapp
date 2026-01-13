@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useGym } from "@/contexts/GymContext";
 import { useGymClasses } from "@/hooks/gym/useGymClasses";
 import { useClassBooking } from "@/hooks/gym/useClassBooking";
+import { useMyGymMembership, useGymCustomerPortal, useGymCredits } from "@/hooks/gym/useGymMembership";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,8 @@ import {
   Clock, 
   ChevronLeft,
   ChevronRight,
-  Dumbbell
+  Dumbbell,
+  Loader2
 } from "lucide-react";
 
 export default function GymMemberPortal() {
@@ -28,6 +30,10 @@ export default function GymMemberPortal() {
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
+
+  const { data: membership, isLoading: membershipLoading } = useMyGymMembership();
+  const { data: credits } = useGymCredits();
+  const customerPortal = useGymCustomerPortal();
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -147,7 +153,9 @@ export default function GymMemberPortal() {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Credits Remaining</p>
-                <p className="text-2xl font-bold">∞</p>
+                <p className="text-2xl font-bold">
+                  {credits?.unlimited ? "∞" : credits?.remaining ?? "—"}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -290,31 +298,64 @@ export default function GymMemberPortal() {
               <CardDescription>Your current membership status and benefits</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-medium">Current Plan</span>
-                    <Badge>Active</Badge>
-                  </div>
-                  <p className="text-2xl font-bold">Unlimited Access</p>
-                  <p className="text-sm text-muted-foreground">Renews monthly</p>
+              {membershipLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-24" />
+                  <Skeleton className="h-16" />
                 </div>
-                
-                <div className="grid grid-cols-2 gap-4">
+              ) : membership ? (
+                <div className="space-y-4">
                   <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground">Member Since</p>
-                    <p className="font-semibold">{format(new Date(), "MMMM yyyy")}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Current Plan</span>
+                      <Badge className="bg-green-100 text-green-800">Active</Badge>
+                    </div>
+                    <p className="text-2xl font-bold">{membership.plan?.name || "Membership"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {membership.plan?.billing_interval === "month" ? "Renews monthly" : 
+                       membership.plan?.billing_interval === "year" ? "Renews yearly" : ""}
+                    </p>
                   </div>
-                  <div className="p-4 border rounded-lg">
-                    <p className="text-sm text-muted-foreground">Next Billing</p>
-                    <p className="font-semibold">{format(addDays(new Date(), 30), "MMM d, yyyy")}</p>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 border rounded-lg">
+                      <p className="text-sm text-muted-foreground">Started</p>
+                      <p className="font-semibold">
+                        {format(new Date(membership.current_period_start), "MMMM d, yyyy")}
+                      </p>
+                    </div>
+                    <div className="p-4 border rounded-lg">
+                      <p className="text-sm text-muted-foreground">Next Billing</p>
+                      <p className="font-semibold">
+                        {membership.current_period_end 
+                          ? format(new Date(membership.current_period_end), "MMM d, yyyy")
+                          : "—"}
+                      </p>
+                    </div>
                   </div>
-                </div>
 
-                <Button variant="outline" className="w-full">
-                  Manage Subscription
-                </Button>
-              </div>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => customerPortal.mutate({ returnUrl: window.location.href })}
+                    disabled={customerPortal.isPending}
+                  >
+                    {customerPortal.isPending ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Loading...</>
+                    ) : (
+                      "Manage Subscription"
+                    )}
+                  </Button>
+                </div>
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  <CreditCard className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                  <p>No active membership</p>
+                  <Button asChild className="mt-4">
+                    <Link to={`/club/${gym?.slug}/signup`}>View Plans</Link>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

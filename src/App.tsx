@@ -145,6 +145,8 @@ const GymAdminSettings = lazy(() => import('@/pages/gym/GymAdminSettings'));
 const GymAdminLocations = lazy(() => import('@/pages/gym/GymAdminLocations'));
 const GymMemberPortal = lazy(() => import('@/pages/gym/GymMemberPortal'));
 const GymCheckIn = lazy(() => import('@/pages/gym/GymCheckIn'));
+const GymMemberSignup = lazy(() => import('@/pages/gym/GymMemberSignup'));
+const GymMemberProfile = lazy(() => import('@/pages/gym/GymMemberProfile'));
 
 // Shared Dashboard Pages
 const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
@@ -1856,6 +1858,20 @@ const App = () => (
                                     </Suspense>
                                   </ProtectedRoute>
                                 </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym-admin/:gymId/members/:memberId" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymMemberProfile />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/club/:gymSlug/signup" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <GymMemberSignup />
+                                </Suspense>
                               } />
                               <Route path="/gym-admin/:gymId/schedule" element={
                                 <AppLocaleWrapper>
