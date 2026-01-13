@@ -96,6 +96,12 @@ export interface UseCoachMarketplaceOptions {
   search?: string;
   userLat?: number;
   userLng?: number;
+  /** 
+   * ⚠️ OPT-IN RANKING: When true AND location is available, uses get_ranked_coaches_v1.
+   * This must be explicitly set by user action (e.g., "Best match" toggle).
+   * Default: false - uses stable ordering.
+   */
+  useRanking?: boolean;
 }
 
 export interface UseCoachMarketplaceResult {
@@ -126,21 +132,30 @@ function hasActiveFilters(options: UseCoachMarketplaceOptions): boolean {
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): UseCoachMarketplaceResult => {
   const filtersActive = hasActiveFilters(options);
   
-  // Determine if ranking should be used (ONLY when flag enabled AND location known)
-  // ⚠️ RANKING IS DISABLED BY DEFAULT - flag must be explicitly set to true
+  // ⚠️ RANKING ACTIVATION RULES (CRITICAL):
+  // Ranking is used ONLY when ALL conditions are met:
+  // 1. MARKETPLACE_RANKING_ENABLED === true (system flag)
+  // 2. options.useRanking === true (user explicitly opted in via "Best match" toggle)
+  // 3. Location is available (userCity OR userLat+userLng)
+  //
+  // If ANY condition is false, ranking is NOT used.
   const shouldUseRanking =
     (MARKETPLACE_RANKING_ENABLED as boolean) === true &&
+    options.useRanking === true &&
     !!(
       options.userCity ||
       (options.userLat && options.userLng)
     );
   
-  // Query key includes filter state to ensure proper cache invalidation
+  // Query key includes filter state and ranking state to ensure proper cache invalidation
   // But uses a stable structure to minimize unnecessary refetches
+  // ⚠️ CRITICAL: Query key must include shouldUseRanking to ensure cache separation
   const queryKey = useMemo(() => [
     "marketplace-coaches-stable",
     options.countryCode || null,
     options.limit ?? 50,
+    // Ranking state (separate cache for ranked vs unranked)
+    shouldUseRanking ? 'ranked' : 'stable',
     // Filter params included for cache invalidation
     filtersActive ? {
       city: options.userCity || null,
@@ -153,9 +168,15 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
       verified: options.verifiedOnly || false,
       qualified: options.qualifiedOnly || false,
     } : null,
+    // Location for ranking (only included when ranking is active)
+    shouldUseRanking ? {
+      lat: options.userLat ?? null,
+      lng: options.userLng ?? null,
+    } : null,
   ], [
     options.countryCode,
     options.limit,
+    shouldUseRanking,
     filtersActive,
     options.userCity,
     options.userRegion,
@@ -166,6 +187,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.inPersonOnly,
     options.verifiedOnly,
     options.qualifiedOnly,
+    options.userLat,
+    options.userLng,
   ]);
   
   const query = useQuery({
