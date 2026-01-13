@@ -8704,6 +8704,47 @@ export type Database = {
         Args: { client_id_param: string }
         Returns: number
       }
+      get_filtered_coaches_v1: {
+        Args: {
+          p_city?: string
+          p_coach_types?: string[]
+          p_country_code?: string
+          p_in_person_only?: boolean
+          p_limit?: number
+          p_max_price?: number
+          p_min_price?: number
+          p_online_only?: boolean
+          p_qualified_only?: boolean
+          p_region?: string
+          p_verified_only?: boolean
+        }
+        Returns: {
+          avg_rating: number
+          bio: string
+          card_image_url: string
+          coach_types: string[]
+          created_at: string
+          currency: string
+          display_name: string
+          gym_affiliation: string
+          hourly_rate: number
+          id: string
+          in_person_available: boolean
+          is_sponsored: boolean
+          is_verified: boolean
+          location: string
+          location_city: string
+          location_country: string
+          location_country_code: string
+          location_region: string
+          online_available: boolean
+          profile_image_url: string
+          review_count: number
+          username: string
+          verified_at: string
+          verified_qualification_count: number
+        }[]
+      }
       get_leaderboard_locations: {
         Args: { p_location_type: string }
         Returns: {

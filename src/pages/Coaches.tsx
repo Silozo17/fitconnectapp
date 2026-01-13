@@ -34,16 +34,27 @@ const Coaches = () => {
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
 
   // Get country from URL locale route - this is the source of truth
-  // URL: /en-gb/coaches → locationCode: 'gb' → shows UK coaches
-  // URL: /pl-pl/coaches → locationCode: 'pl' → shows Polish coaches
   const { locationCode } = useLocationFromRoute();
 
   // Determine effective country code: manual location overrides route
   const effectiveCountryCode = manualLocation?.countryCode || locationCode;
 
-  // Fetch coaches with STRICT country filtering
+  // Fetch coaches with ALL filters wired to SQL
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     countryCode: effectiveCountryCode,
+    // Location filters (from Google Places API)
+    userCity: manualLocation?.city || undefined,
+    userRegion: manualLocation?.region || undefined,
+    // Speciality filters
+    coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
+    // Price filters
+    priceRange: priceRange,
+    // Availability filters
+    onlineOnly: onlineOnly,
+    inPersonOnly: inPersonOnly,
+    // Badge filters
+    verifiedOnly: verifiedOnly,
+    qualifiedOnly: qualifiedOnly,
   });
 
   const handleLocationSelect = useCallback((location: LocationData) => {

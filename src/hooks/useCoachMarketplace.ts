@@ -1,19 +1,18 @@
 /**
  * Hook for fetching coaches for the marketplace (/coaches and /dashboard/client/find-coaches)
  * 
- * STABILISATION: Uses get_simple_coaches with 2 parameters only.
- * Maps ALL fields returned by the RPC for coach card display.
+ * STABILISATION: Uses get_simple_coaches when NO filters are active.
+ * FILTERS: Uses get_filtered_coaches_v1 when ANY filter is active.
  * 
- * DO NOT add joins, ranking, boost logic, or any complexity.
- * This is Layer 0: Visibility only.
+ * Query key remains STABLE to prevent reshuffling.
+ * Order is always created_at DESC - NO client-side sorting.
  */
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isDespia } from "@/lib/despia";
 
-// Coach type matching what get_simple_coaches returns
-// Core fields required, aggregated fields optional for compatibility with direct table queries
+// Coach type matching what RPC functions return
 export type MarketplaceCoach = {
   id: string;
   username: string | null;
@@ -22,7 +21,6 @@ export type MarketplaceCoach = {
   location_country: string | null;
   location_country_code: string | null;
   created_at: string;
-  // Display fields from RPC
   bio?: string | null;
   coach_types?: string[] | null;
   hourly_rate?: number | null;
@@ -31,11 +29,11 @@ export type MarketplaceCoach = {
   in_person_available?: boolean | null;
   location?: string | null;
   location_city?: string | null;
+  location_region?: string | null;
   card_image_url?: string | null;
   is_verified?: boolean | null;
   verified_at?: string | null;
   gym_affiliation?: string | null;
-  // Aggregated fields from RPC (optional for direct table queries)
   avg_rating?: number | null;
   review_count?: number | null;
   is_sponsored?: boolean | null;
@@ -45,7 +43,6 @@ export type MarketplaceCoach = {
   reviews_count?: number | null;
   is_boosted?: boolean | null;
   // Type compatibility fields (not from RPC)
-  location_region?: string | null;
   certifications?: unknown | null;
   experience_years?: number | null;
   booking_mode?: string | null;
@@ -77,19 +74,22 @@ export interface UseCoachMarketplaceOptions {
   limit?: number;
   /** Whether the query should execute (default: true) */
   enabled?: boolean;
-  // Remaining options kept for interface compatibility but NOT USED by get_simple_coaches
-  offset?: number;
-  search?: string;
+  // Filter options
   coachTypes?: string[];
   priceRange?: { min?: number; max?: number };
   onlineOnly?: boolean;
   inPersonOnly?: boolean;
   verifiedOnly?: boolean;
   qualifiedOnly?: boolean;
+  /** City from Google Places API */
+  userCity?: string;
+  /** Region from Google Places API */
+  userRegion?: string;
+  // Unused but kept for interface compatibility
+  offset?: number;
+  search?: string;
   userLat?: number;
   userLng?: number;
-  userCity?: string;
-  userRegion?: string;
 }
 
 export interface UseCoachMarketplaceResult {
@@ -100,29 +100,100 @@ export interface UseCoachMarketplaceResult {
 
 const EMPTY_RESULT: MarketplaceCoach[] = [];
 
+/**
+ * Determines if any filter is active (beyond country code)
+ */
+function hasActiveFilters(options: UseCoachMarketplaceOptions): boolean {
+  return !!(
+    options.userCity ||
+    options.userRegion ||
+    (options.coachTypes && options.coachTypes.length > 0) ||
+    options.priceRange?.min !== undefined ||
+    options.priceRange?.max !== undefined ||
+    options.onlineOnly ||
+    options.inPersonOnly ||
+    options.verifiedOnly ||
+    options.qualifiedOnly
+  );
+}
+
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): UseCoachMarketplaceResult => {
-  // Stable query key - ONLY uses the 2 params passed to get_simple_coaches
+  const filtersActive = hasActiveFilters(options);
+  
+  // Query key includes filter state to ensure proper cache invalidation
+  // But uses a stable structure to minimize unnecessary refetches
   const queryKey = useMemo(() => [
     "marketplace-coaches-stable",
     options.countryCode || null,
     options.limit ?? 50,
-  ], [options.countryCode, options.limit]);
+    // Filter params included for cache invalidation
+    filtersActive ? {
+      city: options.userCity || null,
+      region: options.userRegion || null,
+      types: options.coachTypes || null,
+      minPrice: options.priceRange?.min ?? null,
+      maxPrice: options.priceRange?.max ?? null,
+      online: options.onlineOnly || false,
+      inPerson: options.inPersonOnly || false,
+      verified: options.verifiedOnly || false,
+      qualified: options.qualifiedOnly || false,
+    } : null,
+  ], [
+    options.countryCode,
+    options.limit,
+    filtersActive,
+    options.userCity,
+    options.userRegion,
+    options.coachTypes,
+    options.priceRange?.min,
+    options.priceRange?.max,
+    options.onlineOnly,
+    options.inPersonOnly,
+    options.verifiedOnly,
+    options.qualifiedOnly,
+  ]);
   
   const query = useQuery({
     queryKey,
     queryFn: async () => {
-      // STABILISATION: Call get_simple_coaches with 2 parameters ONLY
-      const { data, error } = await supabase.rpc('get_simple_coaches', {
-        p_filter_country_code: options.countryCode || null,
-        p_limit: options.limit ?? 50,
-      });
+      let data: any[] | null = null;
+      let error: any = null;
+
+      if (filtersActive) {
+        // Use get_filtered_coaches_v1 when filters are active
+        const result = await supabase.rpc('get_filtered_coaches_v1', {
+          p_country_code: options.countryCode || null,
+          p_city: options.userCity || null,
+          p_region: options.userRegion || null,
+          p_coach_types: options.coachTypes && options.coachTypes.length > 0 
+            ? options.coachTypes 
+            : null,
+          p_min_price: options.priceRange?.min ?? null,
+          p_max_price: options.priceRange?.max ?? null,
+          p_online_only: options.onlineOnly ?? false,
+          p_in_person_only: options.inPersonOnly ?? false,
+          p_verified_only: options.verifiedOnly ?? false,
+          p_qualified_only: options.qualifiedOnly ?? false,
+          p_limit: options.limit ?? 50,
+        });
+        data = result.data;
+        error = result.error;
+      } else {
+        // Use get_simple_coaches when no filters are active
+        const result = await supabase.rpc('get_simple_coaches', {
+          p_filter_country_code: options.countryCode || null,
+          p_limit: options.limit ?? 50,
+        });
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) {
         console.error('[useCoachMarketplace] RPC error:', error);
         throw error;
       }
 
-      // Map ALL fields returned by get_simple_coaches for coach card display
+      // Map ALL fields returned by RPC for coach card display
       const coaches: MarketplaceCoach[] = (data || []).map((row: any) => ({
         // Core identity
         id: row.id,
@@ -133,6 +204,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         // Location
         location: row.location,
         location_city: row.location_city,
+        location_region: row.location_region,
         location_country: row.location_country,
         location_country_code: row.location_country_code,
         // Display fields
