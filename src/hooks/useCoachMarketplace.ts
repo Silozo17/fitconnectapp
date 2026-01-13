@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isDespia } from "@/lib/despia";
+import { MARKETPLACE_RANKING_ENABLED } from "@/config/marketplace";
 
 // Coach type matching what RPC functions return
 export type MarketplaceCoach = {
@@ -125,6 +126,15 @@ function hasActiveFilters(options: UseCoachMarketplaceOptions): boolean {
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): UseCoachMarketplaceResult => {
   const filtersActive = hasActiveFilters(options);
   
+  // Determine if ranking should be used (ONLY when flag enabled AND location known)
+  // ⚠️ RANKING IS DISABLED BY DEFAULT - flag must be explicitly set to true
+  const shouldUseRanking =
+    (MARKETPLACE_RANKING_ENABLED as boolean) === true &&
+    !!(
+      options.userCity ||
+      (options.userLat && options.userLng)
+    );
+  
   // Query key includes filter state to ensure proper cache invalidation
   // But uses a stable structure to minimize unnecessary refetches
   const queryKey = useMemo(() => [
@@ -164,8 +174,22 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
       let data: any[] | null = null;
       let error: any = null;
 
-      if (filtersActive) {
-        // Use get_filtered_coaches_v1 when filters are active
+      // PATH 1: Ranking (NOT ACTIVE - requires MARKETPLACE_RANKING_ENABLED = true)
+      if (shouldUseRanking) {
+        const result = await supabase.rpc('get_ranked_coaches_v1', {
+          p_country_code: options.countryCode || null,
+          p_city: options.userCity || null,
+          p_region: options.userRegion || null,
+          p_user_lat: options.userLat ?? null,
+          p_user_lng: options.userLng ?? null,
+          p_limit: options.limit ?? 50,
+          p_offset: options.offset ?? 0,
+        });
+        data = result.data;
+        error = result.error;
+      }
+      // PATH 2: Filters active (uses get_filtered_coaches_v1)
+      else if (filtersActive) {
         const result = await supabase.rpc('get_filtered_coaches_v1', {
           p_country_code: options.countryCode || null,
           p_city: options.userCity || null,
@@ -183,8 +207,9 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         });
         data = result.data;
         error = result.error;
-      } else {
-        // Use get_simple_coaches when no filters are active
+      }
+      // PATH 3: Default - no filters, no ranking (uses get_simple_coaches)
+      else {
         const result = await supabase.rpc('get_simple_coaches', {
           p_filter_country_code: options.countryCode || null,
           p_limit: options.limit ?? 50,
