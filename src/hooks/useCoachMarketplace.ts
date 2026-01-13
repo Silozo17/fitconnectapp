@@ -103,7 +103,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         throw error;
       }
 
-      // Map RPC results - only 7 fields returned, rest are null/defaults
+      // Map all 23 fields from enhanced RPC
       const coaches: MarketplaceCoach[] = (data || []).map((row: any) => ({
         id: row.id,
         username: row.username,
@@ -112,23 +112,31 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         location_country: row.location_country,
         location_country_code: row.location_country_code,
         created_at: row.created_at,
-        // All other fields are null/defaults for now
-        bio: null,
-        coach_types: null,
+        // Display fields from RPC
+        bio: row.bio,
+        coach_types: row.coach_types,
+        hourly_rate: row.hourly_rate,
+        currency: row.currency,
+        online_available: row.online_available,
+        in_person_available: row.in_person_available,
+        location: row.location,
+        location_city: row.location_city,
+        card_image_url: row.card_image_url,
+        is_verified: row.is_verified,
+        verified_at: row.verified_at,
+        gym_affiliation: row.gym_affiliation,
+        // Aggregated fields from RPC
+        avg_rating: row.avg_rating,
+        review_count: row.review_count,
+        rating: row.avg_rating, // Alias for backwards compatibility
+        reviews_count: row.review_count, // Alias for backwards compatibility
+        is_sponsored: row.is_sponsored,
+        verified_qualification_count: row.verified_qualification_count,
+        // Remaining fields not in RPC - null/defaults
         certifications: null,
         experience_years: null,
-        hourly_rate: null,
-        currency: null,
-        location: null,
-        location_city: null,
         location_region: null,
-        online_available: null,
-        in_person_available: null,
-        card_image_url: null,
         booking_mode: null,
-        is_verified: null,
-        verified_at: null,
-        gym_affiliation: null,
         marketplace_visible: true,
         selected_avatar_id: null,
         onboarding_completed: true,
@@ -141,12 +149,6 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         linkedin_url: null,
         youtube_url: null,
         avatars: null,
-        is_sponsored: false,
-        rating: null,
-        avg_rating: null,
-        reviews_count: null,
-        review_count: null,
-        verified_qualification_count: 0,
         tags: null,
       }));
 
