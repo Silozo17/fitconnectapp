@@ -13,6 +13,7 @@ import RequestConnectionModal from "@/components/coaches/RequestConnectionModal"
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useLocationFromRoute } from "@/hooks/useLocationFromRoute";
 import { useTranslation } from "@/hooks/useTranslation";
+import { LocationData } from "@/types/ranking";
 
 const Coaches = () => {
   const { t } = useTranslation('coaches');
@@ -25,6 +26,9 @@ const Coaches = () => {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [qualifiedOnly, setQualifiedOnly] = useState(false);
 
+  // Location filter state
+  const [manualLocation, setManualLocation] = useState<LocationData | null>(null);
+
   // Modal state
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
@@ -34,17 +38,21 @@ const Coaches = () => {
   // URL: /pl-pl/coaches → locationCode: 'pl' → shows Polish coaches
   const { locationCode } = useLocationFromRoute();
 
+  // Determine effective country code: manual location overrides route
+  const effectiveCountryCode = manualLocation?.countryCode || locationCode;
+
   // Fetch coaches with STRICT country filtering
   const { data: coaches, isLoading, error } = useCoachMarketplace({
-    search: searchQuery || undefined,
-    coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
-    priceRange,
-    onlineOnly,
-    inPersonOnly,
-    verifiedOnly,
-    qualifiedOnly,
-    countryCode: locationCode,
+    countryCode: effectiveCountryCode,
   });
+
+  const handleLocationSelect = useCallback((location: LocationData) => {
+    setManualLocation(location);
+  }, []);
+
+  const handleClearLocation = useCallback(() => {
+    setManualLocation(null);
+  }, []);
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);
@@ -79,12 +87,12 @@ const Coaches = () => {
   };
 
   // Get country display name
-  const countryDisplay = locationCode
-    ? locationCode.toUpperCase() === 'GB'
+  const countryDisplay = effectiveCountryCode
+    ? effectiveCountryCode.toUpperCase() === 'GB'
       ? 'United Kingdom'
-      : locationCode.toUpperCase() === 'PL'
+      : effectiveCountryCode.toUpperCase() === 'PL'
         ? 'Poland'
-        : locationCode.toUpperCase()
+        : effectiveCountryCode.toUpperCase()
     : null;
 
   return (
@@ -109,7 +117,12 @@ const Coaches = () => {
                 {t('header.title')} <span className="gradient-text">{t('header.titleHighlight')}</span>
               </h1>
               <p className="text-muted-foreground mb-6">
-                {countryDisplay ? `Showing coaches in ${countryDisplay}` : t('header.subtitle')}
+                {manualLocation?.city 
+                  ? `Showing coaches in ${manualLocation.city}${manualLocation.country ? `, ${manualLocation.country}` : ''}`
+                  : countryDisplay 
+                    ? `Showing coaches in ${countryDisplay}` 
+                    : t('header.subtitle')
+                }
               </p>
 
               {/* Search Bar */}
@@ -160,6 +173,11 @@ const Coaches = () => {
                         onVerifiedOnlyChange={setVerifiedOnly}
                         qualifiedOnly={qualifiedOnly}
                         onQualifiedOnlyChange={setQualifiedOnly}
+                        // Location filter props
+                        autoLocation={null}
+                        manualLocation={manualLocation}
+                        onLocationSelect={handleLocationSelect}
+                        onClearLocation={handleClearLocation}
                       />
                     </div>
                   </SheetContent>
@@ -185,6 +203,11 @@ const Coaches = () => {
                     onVerifiedOnlyChange={setVerifiedOnly}
                     qualifiedOnly={qualifiedOnly}
                     onQualifiedOnlyChange={setQualifiedOnly}
+                    // Location filter props
+                    autoLocation={null}
+                    manualLocation={manualLocation}
+                    onLocationSelect={handleLocationSelect}
+                    onClearLocation={handleClearLocation}
                   />
                 </aside>
               )}
