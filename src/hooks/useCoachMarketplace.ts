@@ -1,3 +1,8 @@
+// ⚠️ STABILITY LOCK
+// This function/hook must NOT include ranking, boost ordering, or distance logic.
+// Sorting here is intentionally deterministic to prevent UI reshuffle.
+// Any ranking must be implemented in a NEW function.
+
 /**
  * Hook for fetching coaches for the marketplace (/coaches and /dashboard/client/find-coaches)
  * 
