@@ -282,7 +282,7 @@ const Auth = () => {
     try {
       const { error } = await signIn(data.email, data.password);
       if (error) {
-        if (error.message.includes("Invalid login credentials")) {
+        if (error.message.includes("Invalid email or password")) {
           toast.error(t("auth.invalidCredentials"));
         } else {
           toast.error(t("auth.unexpectedError"));
