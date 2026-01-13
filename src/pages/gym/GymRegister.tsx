@@ -15,18 +15,50 @@ import { Building2, Loader2 } from "lucide-react";
 
 const gymSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  slug: z.string().min(3, "Slug must be at least 3 characters").regex(/^[a-z0-9-]+$/, "Slug can only contain lowercase letters, numbers, and hyphens"),
   description: z.string().optional(),
   email: z.string().email("Invalid email address"),
   phone: z.string().optional(),
   website: z.string().url("Invalid URL").optional().or(z.literal("")),
-  address_line1: z.string().min(1, "Address is required"),
+  // Location fields (will create first gym_location)
+  address_line_1: z.string().min(1, "Address is required"),
+  address_line_2: z.string().optional(),
   city: z.string().min(1, "City is required"),
-  postal_code: z.string().min(1, "Postal code is required"),
+  county: z.string().optional(),
+  postcode: z.string().min(1, "Postal code is required"),
   country: z.string().min(1, "Country is required"),
 });
 
 type GymFormData = z.infer<typeof gymSchema>;
+
+// Generate a URL-safe slug from name
+const generateSlug = (name: string): string => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .trim();
+};
+
+// Generate a unique slug by appending random chars if needed
+const generateUniqueSlug = async (baseName: string): Promise<string> => {
+  let slug = generateSlug(baseName);
+  
+  // Check if slug exists
+  const { data: existing } = await supabase
+    .from("gym_profiles")
+    .select("id")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (existing) {
+    // Append random suffix
+    const suffix = Math.random().toString(36).substring(2, 6);
+    slug = `${slug}-${suffix}`;
+  }
+
+  return slug;
+};
 
 export default function GymRegister() {
   const navigate = useNavigate();
@@ -37,34 +69,18 @@ export default function GymRegister() {
     resolver: zodResolver(gymSchema),
     defaultValues: {
       name: "",
-      slug: "",
       description: "",
       email: "",
       phone: "",
       website: "",
-      address_line1: "",
+      address_line_1: "",
+      address_line_2: "",
       city: "",
-      postal_code: "",
+      county: "",
+      postcode: "",
       country: "United Kingdom",
     },
   });
-
-  const generateSlug = (name: string) => {
-    return name
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
-  };
-
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const name = e.target.value;
-    form.setValue("name", name);
-    if (!form.getValues("slug") || form.getValues("slug") === generateSlug(form.getValues("name").slice(0, -1))) {
-      form.setValue("slug", generateSlug(name));
-    }
-  };
 
   const onSubmit = async (data: GymFormData) => {
     if (!user) {
@@ -75,35 +91,28 @@ export default function GymRegister() {
     setIsSubmitting(true);
 
     try {
-      // Check if slug is already taken
-      const { data: existing } = await supabase
-        .from("gym_profiles")
-        .select("id")
-        .eq("slug", data.slug)
-        .single();
+      // Generate unique slug internally
+      const slug = await generateUniqueSlug(data.name);
 
-      if (existing) {
-        form.setError("slug", { message: "This slug is already taken" });
-        setIsSubmitting(false);
-        return;
-      }
-
-      // Create gym profile
+      // Create gym profile (without address fields - those go to gym_locations)
       const { data: gym, error: gymError } = await supabase
         .from("gym_profiles")
         .insert({
           name: data.name,
-          slug: data.slug,
+          slug: slug,
           description: data.description || null,
           email: data.email,
           phone: data.phone || null,
           website: data.website || null,
-          address_line1: data.address_line1,
+          user_id: user.id,
+          // Store primary location address on profile for backwards compatibility
+          address_line_1: data.address_line_1,
+          address_line_2: data.address_line_2 || null,
           city: data.city,
-          postal_code: data.postal_code,
+          county: data.county || null,
+          postcode: data.postcode,
           country: data.country,
-          owner_id: user.id,
-        } as never)
+        } as any)
         .select()
         .single();
 
@@ -116,13 +125,39 @@ export default function GymRegister() {
           gym_id: gym.id,
           user_id: user.id,
           role: "owner",
-          is_active: true,
-        } as never);
+          status: "active",
+        } as any);
 
       if (staffError) throw staffError;
 
+      // Create first location as primary
+      const { error: locationError } = await supabase
+        .from("gym_locations")
+        .insert({
+          gym_id: gym.id,
+          name: "Main Location",
+          address_line_1: data.address_line_1,
+          address_line_2: data.address_line_2 || null,
+          city: data.city,
+          county: data.county || null,
+          postcode: data.postcode,
+          country: data.country,
+          phone: data.phone || null,
+          email: data.email,
+          is_primary: true,
+          is_active: true,
+        } as any);
+
+      if (locationError) {
+        console.error("Error creating location:", locationError);
+        // Don't fail registration if location creation fails
+      }
+
       toast.success("Gym registered successfully!");
-      navigate(`/gym/${data.slug}/admin`);
+      
+      // Store selected gym and navigate to admin
+      localStorage.setItem("selectedGymId", gym.id);
+      navigate(`/gym-admin/${gym.id}`);
     } catch (error: any) {
       console.error("Error registering gym:", error);
       toast.error(error.message || "Failed to register gym");
@@ -180,32 +215,8 @@ export default function GymRegister() {
                       <FormItem className="sm:col-span-2">
                         <FormLabel>Gym Name *</FormLabel>
                         <FormControl>
-                          <Input 
-                            placeholder="Iron Fitness" 
-                            {...field} 
-                            onChange={handleNameChange}
-                          />
+                          <Input placeholder="Iron Fitness" {...field} />
                         </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name="slug"
-                    render={({ field }) => (
-                      <FormItem className="sm:col-span-2">
-                        <FormLabel>URL Slug *</FormLabel>
-                        <FormControl>
-                          <div className="flex items-center">
-                            <span className="text-sm text-muted-foreground mr-1">fitconnect.app/gym/</span>
-                            <Input placeholder="iron-fitness" {...field} />
-                          </div>
-                        </FormControl>
-                        <FormDescription>
-                          This will be your gym's unique URL
-                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -273,16 +284,33 @@ export default function GymRegister() {
                 </div>
 
                 <div className="border-t pt-6">
-                  <h3 className="font-medium mb-4">Address</h3>
+                  <h3 className="font-medium mb-4">Primary Location Address</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    This will be your gym's main location. You can add more locations later.
+                  </p>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <FormField
                       control={form.control}
-                      name="address_line1"
+                      name="address_line_1"
                       render={({ field }) => (
                         <FormItem className="sm:col-span-2">
                           <FormLabel>Street Address *</FormLabel>
                           <FormControl>
                             <Input placeholder="123 Fitness Street" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="address_line_2"
+                      render={({ field }) => (
+                        <FormItem className="sm:col-span-2">
+                          <FormLabel>Address Line 2</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Suite 100 (optional)" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -305,7 +333,21 @@ export default function GymRegister() {
 
                     <FormField
                       control={form.control}
-                      name="postal_code"
+                      name="county"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>County</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Greater London" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="postcode"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Postal Code *</FormLabel>
@@ -321,7 +363,7 @@ export default function GymRegister() {
                       control={form.control}
                       name="country"
                       render={({ field }) => (
-                        <FormItem className="sm:col-span-2">
+                        <FormItem>
                           <FormLabel>Country *</FormLabel>
                           <FormControl>
                             <Input placeholder="United Kingdom" {...field} />

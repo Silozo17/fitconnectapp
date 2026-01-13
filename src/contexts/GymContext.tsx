@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -53,6 +54,7 @@ export interface GymStaff {
 
 interface GymContextType {
   gym: GymProfile | null;
+  gymId: string | null;
   isLoading: boolean;
   error: Error | null;
   isOwner: boolean;
@@ -61,68 +63,74 @@ interface GymContextType {
   userRole: GymRole | null;
   staffRecord: GymStaff | null;
   refetch: () => void;
-  setGymSlug: (slug: string | null) => void;
+  setGymId: (id: string | null) => void;
 }
 
 const GymContext = createContext<GymContextType | undefined>(undefined);
 
 /**
- * Extract gym slug from URL
- * Supports both subdomain (gym-slug.fitconnect.com) and path (/gym/gym-slug/...)
+ * Get gym ID from URL params or localStorage
  */
-export const getGymSlugFromUrl = (): string | null => {
-  const hostname = window.location.hostname;
-  const pathname = window.location.pathname;
-  
-  // Check for subdomain pattern: {gym-slug}.fitconnect.com
-  const subdomainMatch = hostname.match(/^([a-z0-9-]+)\.fitconnect\.(com|app|dev)$/i);
-  if (subdomainMatch && !["www", "app", "admin", "api"].includes(subdomainMatch[1])) {
-    return subdomainMatch[1];
-  }
-  
-  // Check for path pattern: /gym/{gym-slug}/...
-  const pathMatch = pathname.match(/^\/gym\/([a-z0-9-]+)/i);
-  if (pathMatch) {
-    return pathMatch[1];
-  }
-  
-  return null;
+export const getStoredGymId = (): string | null => {
+  return localStorage.getItem("selectedGymId");
 };
 
-export const isGymSubdomain = (): boolean => {
-  return getGymSlugFromUrl() !== null;
+export const setStoredGymId = (gymId: string | null) => {
+  if (gymId) {
+    localStorage.setItem("selectedGymId", gymId);
+  } else {
+    localStorage.removeItem("selectedGymId");
+  }
 };
 
 interface GymProviderProps {
   children: React.ReactNode;
-  initialSlug?: string | null;
+  initialGymId?: string | null;
 }
 
-export function GymProvider({ children, initialSlug }: GymProviderProps) {
+export function GymProvider({ children, initialGymId }: GymProviderProps) {
   const { user } = useAuth();
-  const [gymSlug, setGymSlug] = useState<string | null>(initialSlug ?? getGymSlugFromUrl());
+  const params = useParams<{ gymId?: string }>();
+  
+  // Priority: URL param > initial prop > localStorage
+  const [gymId, setGymIdState] = useState<string | null>(
+    params.gymId ?? initialGymId ?? getStoredGymId()
+  );
 
-  // Fetch gym profile by slug
+  // Sync gymId when URL params change
+  useEffect(() => {
+    if (params.gymId && params.gymId !== gymId) {
+      setGymIdState(params.gymId);
+      setStoredGymId(params.gymId);
+    }
+  }, [params.gymId]);
+
+  const setGymId = useCallback((id: string | null) => {
+    setGymIdState(id);
+    setStoredGymId(id);
+  }, []);
+
+  // Fetch gym profile by ID
   const {
     data: gym,
     isLoading: isLoadingGym,
     error: gymError,
     refetch: refetchGym,
   } = useQuery({
-    queryKey: ["gym-profile", gymSlug],
+    queryKey: ["gym-profile", gymId],
     queryFn: async () => {
-      if (!gymSlug) return null;
+      if (!gymId) return null;
       
       const { data, error } = await supabase
         .from("gym_profiles")
         .select("*")
-        .eq("slug", gymSlug)
+        .eq("id", gymId)
         .single();
       
       if (error) throw error;
       return data as GymProfile;
     },
-    enabled: !!gymSlug,
+    enabled: !!gymId,
   });
 
   // Fetch user's staff record at this gym
@@ -191,6 +199,7 @@ export function GymProvider({ children, initialSlug }: GymProviderProps) {
 
   const value = useMemo<GymContextType>(() => ({
     gym,
+    gymId,
     isLoading: isLoadingGym || isLoadingStaff,
     error: gymError as Error | null,
     isOwner,
@@ -199,8 +208,8 @@ export function GymProvider({ children, initialSlug }: GymProviderProps) {
     userRole,
     staffRecord,
     refetch,
-    setGymSlug,
-  }), [gym, isLoadingGym, isLoadingStaff, gymError, isOwner, isStaff, isMember, userRole, staffRecord, refetch]);
+    setGymId,
+  }), [gym, gymId, isLoadingGym, isLoadingStaff, gymError, isOwner, isStaff, isMember, userRole, staffRecord, refetch, setGymId]);
 
   return (
     <GymContext.Provider value={value}>
