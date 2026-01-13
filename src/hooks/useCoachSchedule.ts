@@ -255,20 +255,21 @@ export const useRespondToBooking = () => {
         // For online sessions: detect video provider, create meeting, then sync & email
         if (request.is_online && newSession) {
           try {
-            // Get coach's active video provider (Zoom or Google Meet)
+            // Get coach's active video provider and auto_create setting
             const { data: videoSettings } = await supabase
               .from("video_conference_settings")
-              .select("provider")
+              .select("provider, auto_create_meetings")
               .eq("coach_id", request.coach_id)
               .eq("is_active", true)
               .single();
 
-            const provider = videoSettings?.provider || "google_meet";
-
-            // Create video meeting - wait for it to complete so calendar/email has the link
-            await supabase.functions.invoke("video-create-meeting", {
-              body: { sessionId: newSession.id, provider },
-            });
+            // Only create meeting if auto_create is enabled (default true if null/undefined)
+            if (videoSettings?.provider && videoSettings?.auto_create_meetings !== false) {
+              // Create video meeting - wait for it to complete so calendar/email has the link
+              await supabase.functions.invoke("video-create-meeting", {
+                body: { sessionId: newSession.id, provider: videoSettings.provider },
+              });
+            }
           } catch (err) {
             console.error("Video meeting creation failed (non-blocking):", err);
             // Video meeting creation is optional - don't fail the booking
@@ -294,6 +295,70 @@ export const useRespondToBooking = () => {
             });
           } catch (err) {
             console.error("Confirmation email failed (non-blocking):", err);
+          }
+        }
+
+        // Send automatic booking confirmation message in chat
+        if (newSession) {
+          try {
+            // Get coach profile ID
+            const { data: coachProfileData } = await supabase
+              .from("coach_profiles")
+              .select("id")
+              .eq("id", request.coach_id)
+              .single();
+
+            // Get updated session with video meeting URL
+            const { data: updatedSessionData } = await supabase
+              .from("coaching_sessions")
+              .select("video_meeting_url")
+              .eq("id", newSession.id)
+              .single();
+
+            if (coachProfileData) {
+              const sessionDate = new Date(request.requested_at);
+              const formattedDate = sessionDate.toLocaleDateString("en-GB", {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              });
+              const formattedTime = sessionDate.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+
+              const videoLink = updatedSessionData?.video_meeting_url;
+              const sessionTypeName = request.session_type?.name || "Session";
+              const duration = request.duration_minutes || 60;
+              const isOnline = request.is_online;
+
+              let messageContent = `📅 **Your ${sessionTypeName} is confirmed!**\n\n`;
+              messageContent += `**Date:** ${formattedDate}\n`;
+              messageContent += `**Time:** ${formattedTime}\n`;
+              messageContent += `**Duration:** ${duration} minutes\n`;
+              messageContent += isOnline ? `**Location:** Online Session\n` : `**Location:** In-Person\n`;
+
+              if (isOnline && videoLink) {
+                messageContent += `\n🔗 **Join Meeting:** ${videoLink}\n`;
+              }
+
+              messageContent += `\nNeed to make changes? Visit your sessions page to reschedule or cancel.`;
+
+              // Insert message from coach to client
+              await supabase.from("messages").insert({
+                sender_id: coachProfileData.id,
+                receiver_id: request.client_id,
+                content: messageContent,
+                metadata: {
+                  type: "booking_confirmation",
+                  sessionId: newSession.id,
+                  videoMeetingUrl: videoLink || null,
+                },
+              });
+            }
+          } catch (err) {
+            console.error("Booking confirmation message failed (non-blocking):", err);
           }
         }
       }
@@ -345,11 +410,16 @@ export const useCreateBookingRequest = () => {
 
       if (error) throw error;
       
-      // Send booking confirmation email
+      // Send booking confirmation email to client
       if (data?.id) {
         supabase.functions.invoke("send-booking-confirmation", {
           body: { bookingRequestId: data.id },
         }).catch((err) => console.error("Failed to send booking confirmation email:", err));
+        
+        // Send notification to coach about new booking request
+        supabase.functions.invoke("send-booking-request-to-coach", {
+          body: { bookingRequestId: data.id },
+        }).catch((err) => console.error("Failed to send coach notification:", err));
       }
       
       return data;

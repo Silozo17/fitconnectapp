@@ -23,10 +23,10 @@ export const useSessionManagement = () => {
       forceCancel?: boolean;
       returnToken?: boolean; // Coach can override to return token even on late cancellation
     }) => {
-      // Get session details including package info
+      // Get session details including package info and video meeting
       const { data: session, error: fetchError } = await supabase
         .from("coaching_sessions")
-        .select("scheduled_at, status, coach_id, client_id, package_purchase_id, token_returned")
+        .select("scheduled_at, status, coach_id, client_id, package_purchase_id, token_returned, video_meeting_id, is_online")
         .eq("id", sessionId)
         .single();
 
@@ -56,6 +56,32 @@ export const useSessionManagement = () => {
         );
       }
 
+      // Delete video meeting if exists (fire-and-forget)
+      if (session.video_meeting_id && session.is_online) {
+        try {
+          // Get coach's video provider
+          const { data: videoSettings } = await supabase
+            .from("video_conference_settings")
+            .select("provider")
+            .eq("coach_id", session.coach_id)
+            .eq("is_active", true)
+            .single();
+
+          if (videoSettings?.provider) {
+            supabase.functions.invoke("video-delete-meeting", {
+              body: {
+                meetingId: session.video_meeting_id,
+                provider: videoSettings.provider,
+                coachId: session.coach_id,
+                sessionId,
+              },
+            }).catch((err) => console.error("Video meeting deletion failed (non-blocking):", err));
+          }
+        } catch (err) {
+          console.error("Failed to get video settings for deletion:", err);
+        }
+      }
+
       // Cancel the session
       const { error } = await supabase
         .from("coaching_sessions")
@@ -64,6 +90,8 @@ export const useSessionManagement = () => {
           cancellation_reason: reason,
           cancelled_at: new Date().toISOString(),
           cancelled_by: user?.id,
+          video_meeting_url: null,
+          video_meeting_id: null,
         })
         .eq("id", sessionId);
 
@@ -162,7 +190,7 @@ export const useSessionManagement = () => {
       // Get original session
       const { data: session, error: fetchError } = await supabase
         .from("coaching_sessions")
-        .select("scheduled_at, status, is_online, coach_id")
+        .select("scheduled_at, status, is_online, coach_id, video_meeting_id")
         .eq("id", sessionId)
         .single();
 
@@ -171,6 +199,32 @@ export const useSessionManagement = () => {
       if (session.status !== "scheduled") throw new Error("Can only reschedule scheduled sessions");
 
       const originalTime = session.scheduled_at;
+      const oldMeetingId = session.video_meeting_id;
+
+      // Delete old video meeting if exists (fire-and-forget)
+      if (oldMeetingId && session.is_online) {
+        try {
+          const { data: videoSettingsForDelete } = await supabase
+            .from("video_conference_settings")
+            .select("provider")
+            .eq("coach_id", session.coach_id)
+            .eq("is_active", true)
+            .single();
+
+          if (videoSettingsForDelete?.provider) {
+            supabase.functions.invoke("video-delete-meeting", {
+              body: {
+                meetingId: oldMeetingId,
+                provider: videoSettingsForDelete.provider,
+                coachId: session.coach_id,
+                sessionId,
+              },
+            }).catch((err) => console.error("Old video meeting deletion failed (non-blocking):", err));
+          }
+        } catch (err) {
+          console.error("Failed to delete old video meeting:", err);
+        }
+      }
 
       // Update session with new time
       const { data: updatedSession, error } = await supabase
@@ -191,21 +245,22 @@ export const useSessionManagement = () => {
       // Auto-create new video meeting if online session
       if (session.is_online && updatedSession) {
         try {
-          // Get coach's actual video provider (not hardcoded)
+          // Get coach's actual video provider and auto_create setting
           const { data: videoSettings } = await supabase
             .from("video_conference_settings")
-            .select("provider")
+            .select("provider, auto_create_meetings")
             .eq("coach_id", session.coach_id)
             .eq("is_active", true)
             .single();
 
-          if (videoSettings?.provider) {
+          // Only create meeting if auto_create is enabled (default true if null/undefined)
+          if (videoSettings?.provider && videoSettings?.auto_create_meetings !== false) {
             await supabase.functions.invoke("video-create-meeting", {
               body: { sessionId, provider: videoSettings.provider },
             });
           }
         } catch {
-          // Video meeting creation skipped - provider not connected
+          // Video meeting creation skipped - provider not connected or auto_create disabled
         }
       }
 

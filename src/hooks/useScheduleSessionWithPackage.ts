@@ -102,15 +102,16 @@ export function useScheduleSessionWithPackage() {
       // Create video meeting for online sessions
       if (data.isOnline && session) {
         try {
-          // Get coach's active video provider
+          // Get coach's active video provider and auto_create setting
           const { data: videoSettings } = await supabase
             .from("video_conference_settings")
-            .select("provider")
+            .select("provider, auto_create_meetings")
             .eq("coach_id", coachProfile.id)
             .eq("is_active", true)
             .single();
 
-          if (videoSettings?.provider) {
+          // Only create meeting if auto_create is enabled (default true if null/undefined)
+          if (videoSettings?.provider && videoSettings?.auto_create_meetings !== false) {
             await supabase.functions.invoke("video-create-meeting", {
               body: { sessionId: session.id, provider: videoSettings.provider },
             });
