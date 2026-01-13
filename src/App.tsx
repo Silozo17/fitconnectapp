@@ -134,6 +134,7 @@ const CoachClientComparison = lazy(() => import('@/pages/dashboard/coach/CoachCl
 const CoachCaseStudies = lazy(() => import('@/pages/dashboard/coach/CoachCaseStudies'));
 
 // Gym Admin Pages
+const GymRegister = lazy(() => import('@/pages/gym/GymRegister'));
 const GymAdminDashboard = lazy(() => import('@/pages/gym/GymAdminDashboard'));
 const GymAdminMembers = lazy(() => import('@/pages/gym/GymAdminMembers'));
 const GymAdminSchedule = lazy(() => import('@/pages/gym/GymAdminSchedule'));
@@ -1812,6 +1813,15 @@ const App = () => (
                                   </ProtectedRoute>
                                 } />
                               </Route>
+
+                              {/* Gym Registration */}
+                              <Route path="/gym/register" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <GymRegister />
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
 
                               {/* Gym Admin Routes - outside dashboard, uses own context */}
                               <Route path="/gym/:slug/admin" element={
