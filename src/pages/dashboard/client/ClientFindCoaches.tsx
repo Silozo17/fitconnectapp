@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, SlidersHorizontal, Users, MapPin } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,26 +11,10 @@ import CoachFilters from "@/components/coaches/CoachFilters";
 import BookSessionModal from "@/components/booking/BookSessionModal";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
-import { useUserLocation } from "@/hooks/useUserLocation";
-import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
 import { useCountry } from "@/hooks/useCountry";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { CoachCardSkeleton } from "@/components/dashboard/CoachCardSkeleton";
-import { STORAGE_KEYS, getStorage } from "@/lib/storage-keys";
-
-// Type for saved location from pre-fetch
-interface SavedLocation {
-  city: string | null;
-  region: string | null;
-  country: string | null;
-  countryCode: string | null;
-  county: string | null;
-  lat?: number | null;
-  lng?: number | null;
-  accuracyLevel: 'approximate' | 'precise' | 'manual';
-  savedAt: number;
-}
 
 const ClientFindCoaches = () => {
   const { t } = useTranslation("client");
@@ -45,38 +29,7 @@ const ClientFindCoaches = () => {
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
 
-  // Get pre-cached location immediately (from background pre-fetch)
-  const cachedLocation = useMemo(() => {
-    const saved = getStorage<SavedLocation>(STORAGE_KEYS.LAST_KNOWN_LOCATION);
-    if (saved) {
-      return {
-        city: saved.city,
-        region: saved.region,
-        country: saved.country,
-        countryCode: saved.countryCode,
-        county: saved.county,
-        displayLocation: saved.city || saved.region || saved.county,
-        accuracyLevel: saved.accuracyLevel,
-        lat: saved.lat,
-        lng: saved.lng,
-      };
-    }
-    return null;
-  }, []);
-
-  // Get auto-detected user location (may still be loading)
-  const { location: autoLocation, isLoading: autoLocationLoading } = useUserLocation();
-
-  // Manual location filter (persisted for session)
-  const {
-    manualLocation,
-    manualCountryCode,
-    isManualSelection,
-    setManualLocation,
-    clearManualLocation,
-  } = useMarketplaceLocationFilter();
-
-  // Get country from context (geo-detected fallback)
+  // Get country from context (geo-detection fallback)
   const { countryCode: contextCountryCode } = useCountry();
 
   // Get user's saved location preference from DB (for authenticated users)
@@ -84,52 +37,20 @@ const ClientFindCoaches = () => {
 
   /**
    * Effective country code priority:
-   * 1. Manual selection from marketplace filter (user explicitly chose in this session)
-   * 2. User's saved preference in DB (from dashboard settings)
-   * 3. Context country (geo-detection fallback)
+   * 1. User's saved preference in DB (from dashboard settings)
+   * 2. Context country (geo-detection fallback)
    */
-  const effectiveCountryCode = manualCountryCode ?? userCountryPreference ?? contextCountryCode;
+  const effectiveCountryCode = userCountryPreference ?? contextCountryCode;
 
-  /**
-   * Effective location priority:
-   * 1. Manual selection (user explicitly chose)
-   * 2. Cached location (from pre-fetch - available immediately)
-   * 3. Auto location (if loaded and no cache)
-   */
-  const effectiveLocation = useMemo(() => {
-    if (isManualSelection && manualLocation) {
-      return manualLocation;
-    }
-    // Use cached location if available and auto is still loading
-    if (cachedLocation && autoLocationLoading) {
-      return cachedLocation;
-    }
-    // Once auto loads, prefer it (may be fresher)
-    if (!autoLocationLoading && autoLocation) {
-      return autoLocation;
-    }
-    // Fall back to cache
-    return cachedLocation;
-  }, [isManualSelection, manualLocation, cachedLocation, autoLocation, autoLocationLoading]);
-
-  // Only defer if we have NO location data at all
-  const shouldDeferFetch = !effectiveLocation;
-
-  // Fetch coaches - enabled immediately if we have any location data
+  // Fetch coaches with STRICT country filtering
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
     priceRange,
     onlineOnly,
     inPersonOnly,
-    userLocation: effectiveLocation,
-    enableLocationRanking: true,
     countryCode: effectiveCountryCode,
-    enabled: !shouldDeferFetch, // Fetch as soon as we have any location
   });
-
-  // Unified loading: show loader only if we're still loading AND have no coaches data
-  const isFullyLoading = shouldDeferFetch || (isLoading && !coaches?.length);
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);
@@ -139,8 +60,14 @@ const ClientFindCoaches = () => {
     setConnectionCoach(coach);
   }, []);
 
-  // Get display location name
-  const locationDisplay = effectiveLocation?.city || effectiveLocation?.region || effectiveLocation?.country;
+  // Get country display name
+  const countryDisplay = effectiveCountryCode
+    ? effectiveCountryCode.toUpperCase() === 'GB'
+      ? 'United Kingdom'
+      : effectiveCountryCode.toUpperCase() === 'PL'
+        ? 'Poland'
+        : effectiveCountryCode.toUpperCase()
+    : null;
 
   return (
     <ClientDashboardLayout
@@ -163,10 +90,10 @@ const ClientFindCoaches = () => {
               {t('findCoaches.description')}
             </p>
           </div>
-          {locationDisplay && (
+          {countryDisplay && (
             <Badge variant="secondary" className="gap-1.5 shrink-0">
               <MapPin className="w-3.5 h-3.5" />
-              {isManualSelection ? t('findCoaches.filtered') : t('findCoaches.near')} {locationDisplay}
+              {countryDisplay}
             </Badge>
           )}
         </div>
@@ -214,11 +141,6 @@ const ClientFindCoaches = () => {
                   onOnlineOnlyChange={setOnlineOnly}
                   inPersonOnly={inPersonOnly}
                   onInPersonOnlyChange={setInPersonOnly}
-                  autoLocation={autoLocation}
-                  manualLocation={manualLocation}
-                  isAutoLocationLoading={autoLocationLoading}
-                  onLocationSelect={setManualLocation}
-                  onClearLocation={clearManualLocation}
                 />
               </div>
             </SheetContent>
@@ -240,18 +162,13 @@ const ClientFindCoaches = () => {
               onOnlineOnlyChange={setOnlineOnly}
               inPersonOnly={inPersonOnly}
               onInPersonOnlyChange={setInPersonOnly}
-              autoLocation={autoLocation}
-              manualLocation={manualLocation}
-              isAutoLocationLoading={autoLocationLoading}
-              onLocationSelect={setManualLocation}
-              onClearLocation={clearManualLocation}
             />
           </aside>
         )}
 
         {/* Coaches Grid */}
         <div className="flex-1">
-          {isFullyLoading ? (
+          {isLoading ? (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
                 <CoachCardSkeleton key={i} />
