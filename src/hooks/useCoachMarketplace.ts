@@ -93,10 +93,9 @@ export interface UseCoachMarketplaceOptions {
   userCity?: string;
   /** Region from Google Places API */
   userRegion?: string;
-  // Unused but kept for interface compatibility
-  offset?: number;
-  search?: string;
+  /** User latitude for distance calculations */
   userLat?: number;
+  /** User longitude for distance calculations */
   userLng?: number;
   /** 
    * ⚠️ OPT-IN RANKING: When true AND location is available, uses get_ranked_coaches_v1.
@@ -157,32 +156,26 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
       (options.userLat && options.userLng)
     );
   
-  // Query key includes all state that affects the result
-  // Stable structure prevents unnecessary refetches
+  // Query key: primitives only to prevent cache misses from object reference changes
   const queryKey = useMemo(() => [
     "marketplace-coaches-v2",
-    options.countryCode || null,
+    options.countryCode ?? null,
     options.limit ?? 50,
-    // Ranking state (affects location context usage)
     shouldUseRanking ? 'ranked' : 'base',
-    // All filters (affects visibility)
-    {
-      onlineOnly: options.onlineOnly || false,
-      inPersonOnly: options.inPersonOnly || false,
-      types: options.coachTypes || null,
-      minPrice: options.priceRange?.min ?? null,
-      maxPrice: options.priceRange?.max ?? null,
-      verified: options.verifiedOnly || false,
-      qualified: options.qualifiedOnly || false,
-      minRating: options.minRating ?? null,
-    },
-    // Location context (only matters when ranking is active)
-    shouldUseRanking ? {
-      city: options.userCity || null,
-      region: options.userRegion || null,
-      lat: options.userLat ?? null,
-      lng: options.userLng ?? null,
-    } : null,
+    // Flattened filters (primitives only)
+    options.onlineOnly ?? false,
+    options.inPersonOnly ?? false,
+    JSON.stringify(options.coachTypes ?? []),
+    options.priceRange?.min ?? null,
+    options.priceRange?.max ?? null,
+    options.verifiedOnly ?? false,
+    options.qualifiedOnly ?? false,
+    options.minRating ?? null,
+    // Location context (only when ranking)
+    shouldUseRanking ? options.userCity ?? null : null,
+    shouldUseRanking ? options.userRegion ?? null : null,
+    shouldUseRanking ? options.userLat ?? null : null,
+    shouldUseRanking ? options.userLng ?? null : null,
   ], [
     options.countryCode,
     options.limit,
@@ -247,7 +240,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         
         // Pagination
         p_limit: options.limit ?? 50,
-        p_offset: options.offset ?? 0,
+        p_offset: 0, // Reserved for future pagination
       });
       
       // Safety fallback: If result is empty and we have no filters,

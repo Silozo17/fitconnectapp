@@ -2,8 +2,8 @@
  * "Best match" toggle for opt-in location-based ranking
  * 
  * ⚠️ STABILITY: This toggle controls ranking activation.
- * When OFF: Standard order (get_simple_coaches or get_filtered_coaches_v1)
- * When ON: Ranked order (get_ranked_coaches_v1) - requires location
+ * When OFF: Standard ordering (get_marketplace_coaches_v2 without location context)
+ * When ON: Ranked ordering (get_marketplace_coaches_v2 with location context)
  */
 
 import { useState, useCallback } from "react";
