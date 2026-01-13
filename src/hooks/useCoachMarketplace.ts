@@ -87,6 +87,8 @@ export interface UseCoachMarketplaceOptions {
   inPersonOnly?: boolean;
   verifiedOnly?: boolean;
   qualifiedOnly?: boolean;
+  /** Minimum rating filter (e.g., 4.0, 4.5) */
+  minRating?: number;
   /** City from Google Places API */
   userCity?: string;
   /** Region from Google Places API */
@@ -113,7 +115,8 @@ export interface UseCoachMarketplaceResult {
 const EMPTY_RESULT: MarketplaceCoach[] = [];
 
 /**
- * Determines if any filter is active (beyond country code)
+ * Determines if any filter is active (beyond country code and min rating)
+ * Note: minRating is handled by BASE view function, not considered a "filter"
  */
 function hasActiveFilters(options: UseCoachMarketplaceOptions): boolean {
   return !!(
@@ -155,7 +158,9 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.countryCode || null,
     options.limit ?? 50,
     // Ranking state (separate cache for ranked vs unranked)
-    shouldUseRanking ? 'ranked' : 'stable',
+    shouldUseRanking ? 'ranked' : filtersActive ? 'filtered' : 'base',
+    // Rating filter (always included as it's supported in both base and filtered views)
+    options.minRating ?? null,
     // Filter params included for cache invalidation
     filtersActive ? {
       city: options.userCity || null,
@@ -178,6 +183,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.limit,
     shouldUseRanking,
     filtersActive,
+    options.minRating,
     options.userCity,
     options.userRegion,
     options.coachTypes,
@@ -209,12 +215,13 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
           p_offset: options.offset ?? 0,
         });
         
-        // Safety fallback: If ranking returns empty, fall back to stable order
+        // Safety fallback: If ranking returns empty, fall back to base view
         // This ensures "Best match" never shows 0 results when coaches exist
         if (result.data && result.data.length === 0 && !result.error) {
-          console.warn('[useCoachMarketplace] Ranking returned 0 results, falling back to stable order');
-          const fallback = await supabase.rpc('get_simple_coaches', {
-            p_filter_country_code: options.countryCode || null,
+          console.warn('[useCoachMarketplace] Ranking returned 0 results, falling back to base view');
+          const fallback = await supabase.rpc('get_base_marketplace_coaches_v1', {
+            p_country_code: options.countryCode || null,
+            p_min_rating: options.minRating ?? null,
             p_limit: options.limit ?? 50,
           });
           data = fallback.data;
@@ -244,10 +251,15 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         data = result.data;
         error = result.error;
       }
-      // PATH 3: Default - no filters, no ranking (uses get_simple_coaches)
+      // PATH 3: Base view - no filters, no ranking 
+      // Uses get_base_marketplace_coaches_v1 with:
+      //   - Top 5 boosted coaches (hourly rotation)
+      //   - Quality-based sorting for non-boosted
+      //   - Optional minRating filter
       else {
-        const result = await supabase.rpc('get_simple_coaches', {
-          p_filter_country_code: options.countryCode || null,
+        const result = await supabase.rpc('get_base_marketplace_coaches_v1', {
+          p_country_code: options.countryCode || null,
+          p_min_rating: options.minRating ?? null,
           p_limit: options.limit ?? 50,
         });
         data = result.data;

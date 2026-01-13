@@ -29,6 +29,9 @@ interface CoachFiltersProps {
   onVerifiedOnlyChange: (value: boolean) => void;
   qualifiedOnly: boolean;
   onQualifiedOnlyChange: (value: boolean) => void;
+  // Rating filter
+  minRating?: number;
+  onMinRatingChange?: (value: number | undefined) => void;
   // Location filter props
   autoLocation?: LocationData | null;
   manualLocation?: LocationData | null;
@@ -52,6 +55,8 @@ const CoachFilters = ({
   onVerifiedOnlyChange,
   qualifiedOnly,
   onQualifiedOnlyChange,
+  minRating,
+  onMinRatingChange,
   autoLocation,
   manualLocation,
   isAutoLocationLoading,
@@ -96,8 +101,15 @@ const CoachFilters = ({
     onInPersonOnlyChange(false);
     onVerifiedOnlyChange(false);
     onQualifiedOnlyChange(false);
+    onMinRatingChange?.(undefined);
     onClearLocation?.();
   };
+
+  const ratingOptions = [
+    { value: undefined, label: 'Any rating' },
+    { value: 4.0, label: '⭐ 4.0+' },
+    { value: 4.5, label: '⭐ 4.5+' },
+  ];
 
   const hasActiveFilters =
     selectedTypes.length > 0 || 
@@ -106,6 +118,7 @@ const CoachFilters = ({
     inPersonOnly || 
     verifiedOnly || 
     qualifiedOnly ||
+    minRating !== undefined ||
     manualLocation !== null;
 
   // Filter content (shared between variants)
