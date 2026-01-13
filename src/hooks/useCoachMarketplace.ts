@@ -1,14 +1,17 @@
 /**
  * Hook for fetching coaches for the marketplace (/coaches and /dashboard/client/find-coaches)
  * 
- * STABILISED VERSION: Uses minimal get_simple_coaches(country, limit) function.
- * No ranking, no boosting, no scoring.
+ * V1 RANKING: Uses get_marketplace_coaches_v1 with two-layer deterministic ranking:
+ * - Layer 1: Location buckets (user-visible ordering)
+ * - Layer 2: Platform score (internal quality ranking within buckets)
+ * 
+ * Fallback: get_simple_coaches remains untouched as safety net.
  */
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
-// Minimal coach type matching the RPC return + placeholders for UI
+// Coach type matching the RPC return
 export type MarketplaceCoach = {
   id: string;
   username: string | null;
@@ -17,7 +20,6 @@ export type MarketplaceCoach = {
   location_country: string | null;
   location_country_code: string | null;
   created_at: string;
-  // Optional fields for backwards compatibility - will be null
   bio?: string | null;
   coach_types?: string[] | null;
   certifications?: unknown | null;
@@ -55,23 +57,41 @@ export type MarketplaceCoach = {
   reviews_count?: number | null;
   review_count?: number | null;
   is_sponsored?: boolean | null;
+  is_boosted?: boolean | null;
   tags?: string[] | null;
   verified_qualification_count?: number;
+  // Ranking fields (for debugging/transparency)
+  location_bucket?: number;
+  platform_score?: number;
 };
 
 export interface UseCoachMarketplaceOptions {
-  /** Filter coaches by country code (e.g., 'gb', 'pl') - STRICT filter, case insensitive */
+  /** Filter coaches by country code (e.g., 'gb', 'pl') - STRICT filter */
   countryCode?: string;
   /** Maximum number of coaches to return */
   limit?: number;
+  /** Offset for pagination */
+  offset?: number;
   /** Whether the query should execute (default: true) */
   enabled?: boolean;
-  // TEMPORARILY ACCEPTED BUT IGNORED - will be re-added after stabilisation
+  /** Search term for filtering by name/bio */
   search?: string;
+  /** Filter by specific coach types */
   coachTypes?: string[];
+  /** Filter by price range */
   priceRange?: { min: number; max: number };
+  /** Show only online-available coaches */
   onlineOnly?: boolean;
+  /** Show only in-person-available coaches */
   inPersonOnly?: boolean;
+  /** User latitude for distance-based bucketing */
+  userLat?: number;
+  /** User longitude for distance-based bucketing */
+  userLng?: number;
+  /** User city for city-match bucketing */
+  userCity?: string;
+  /** User region for region-match bucketing */
+  userRegion?: string;
 }
 
 export interface UseCoachMarketplaceResult {
@@ -83,19 +103,56 @@ export interface UseCoachMarketplaceResult {
 const EMPTY_RESULT: MarketplaceCoach[] = [];
 
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): UseCoachMarketplaceResult => {
+  // Stable query key - includes ALL filter parameters to prevent unnecessary refetches
   const queryKey = useMemo(() => [
-    "marketplace-coaches-stable",
+    "marketplace-coaches-v1",
     options.countryCode || null,
-    options.limit || 50,
-  ], [options.countryCode, options.limit]);
+    options.search || null,
+    options.coachTypes?.sort().join(',') || null,
+    options.priceRange?.min ?? null,
+    options.priceRange?.max ?? null,
+    options.onlineOnly ?? false,
+    options.inPersonOnly ?? false,
+    options.userLat ?? null,
+    options.userLng ?? null,
+    options.userCity ?? null,
+    options.userRegion ?? null,
+    options.limit ?? 50,
+    options.offset ?? 0,
+  ], [
+    options.countryCode,
+    options.search,
+    options.coachTypes,
+    options.priceRange?.min,
+    options.priceRange?.max,
+    options.onlineOnly,
+    options.inPersonOnly,
+    options.userLat,
+    options.userLng,
+    options.userCity,
+    options.userRegion,
+    options.limit,
+    options.offset,
+  ]);
   
   const query = useQuery({
     queryKey,
     queryFn: async () => {
-      // Call the minimal 2-parameter function
-      const { data, error } = await supabase.rpc('get_simple_coaches', {
+      // Call the new ranking function with all parameters
+      const { data, error } = await supabase.rpc('get_marketplace_coaches_v1', {
         p_filter_country_code: options.countryCode || null,
-        p_limit: options.limit || 50,
+        p_search_term: options.search || null,
+        p_coach_types: options.coachTypes && options.coachTypes.length > 0 ? options.coachTypes : null,
+        p_min_price: options.priceRange?.min ?? null,
+        p_max_price: options.priceRange?.max ?? null,
+        p_online_only: options.onlineOnly ?? false,
+        p_in_person_only: options.inPersonOnly ?? false,
+        p_user_lat: options.userLat ?? null,
+        p_user_lng: options.userLng ?? null,
+        p_user_city: options.userCity ?? null,
+        p_user_region: options.userRegion ?? null,
+        p_limit: options.limit ?? 50,
+        p_offset: options.offset ?? 0,
       });
 
       if (error) {
@@ -103,7 +160,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         throw error;
       }
 
-      // Map all 23 fields from enhanced RPC
+      // Map all fields from RPC - render in server-provided order (NO client-side sorting)
       const coaches: MarketplaceCoach[] = (data || []).map((row: any) => ({
         id: row.id,
         username: row.username,
@@ -121,21 +178,25 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         in_person_available: row.in_person_available,
         location: row.location,
         location_city: row.location_city,
+        location_region: row.location_region,
         card_image_url: row.card_image_url,
         is_verified: row.is_verified,
         verified_at: row.verified_at,
         gym_affiliation: row.gym_affiliation,
+        experience_years: row.experience_years,
         // Aggregated fields from RPC
         avg_rating: row.avg_rating,
         review_count: row.review_count,
         rating: row.avg_rating, // Alias for backwards compatibility
         reviews_count: row.review_count, // Alias for backwards compatibility
-        is_sponsored: row.is_sponsored,
+        is_boosted: row.is_boosted,
+        is_sponsored: row.is_boosted, // Alias for backwards compatibility
         verified_qualification_count: row.verified_qualification_count,
+        // Ranking fields (for debugging/transparency)
+        location_bucket: row.location_bucket,
+        platform_score: row.platform_score,
         // Remaining fields not in RPC - null/defaults
         certifications: null,
-        experience_years: null,
-        location_region: null,
         booking_mode: null,
         marketplace_visible: true,
         selected_avatar_id: null,
@@ -154,11 +215,12 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
 
       return coaches;
     },
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 15,
+    staleTime: 1000 * 60 * 5, // 5 minutes - stable results
+    gcTime: 1000 * 60 * 15, // 15 minutes
     enabled: options.enabled !== false,
     placeholderData: EMPTY_RESULT,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: false, // CRITICAL: Prevent reshuffling on focus
+    refetchOnReconnect: false, // Prevent reshuffling on reconnect
   });
 
   return {
