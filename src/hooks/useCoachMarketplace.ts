@@ -197,7 +197,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
       let data: any[] | null = null;
       let error: any = null;
 
-      // PATH 1: Ranking (NOT ACTIVE - requires MARKETPLACE_RANKING_ENABLED = true)
+      // PATH 1: Ranking (opt-in only via "Best match" toggle)
       if (shouldUseRanking) {
         const result = await supabase.rpc('get_ranked_coaches_v1', {
           p_country_code: options.countryCode || null,
@@ -208,8 +208,21 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
           p_limit: options.limit ?? 50,
           p_offset: options.offset ?? 0,
         });
-        data = result.data;
-        error = result.error;
+        
+        // Safety fallback: If ranking returns empty, fall back to stable order
+        // This ensures "Best match" never shows 0 results when coaches exist
+        if (result.data && result.data.length === 0 && !result.error) {
+          console.warn('[useCoachMarketplace] Ranking returned 0 results, falling back to stable order');
+          const fallback = await supabase.rpc('get_simple_coaches', {
+            p_filter_country_code: options.countryCode || null,
+            p_limit: options.limit ?? 50,
+          });
+          data = fallback.data;
+          error = fallback.error;
+        } else {
+          data = result.data;
+          error = result.error;
+        }
       }
       // PATH 2: Filters active (uses get_filtered_coaches_v1)
       else if (filtersActive) {
