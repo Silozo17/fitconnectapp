@@ -1,16 +1,16 @@
-// ⚠️ STABILITY LOCK
-// This function/hook must NOT include ranking, boost ordering, or distance logic.
-// Sorting here is intentionally deterministic to prevent UI reshuffle.
-// Any ranking must be implemented in a NEW function.
-
 /**
- * Hook for fetching coaches for the marketplace (/coaches and /dashboard/client/find-coaches)
+ * THREE-LAYER MARKETPLACE HOOK
  * 
- * STABILISATION: Uses get_simple_coaches when NO filters are active.
- * FILTERS: Uses get_filtered_coaches_v1 when ANY filter is active.
+ * Uses get_marketplace_coaches_v2 which implements:
+ * - LAYER A: Eligibility (who is visible)
+ * - LAYER B: Relevance buckets (grouping by proximity/availability)
+ * - LAYER C: Ordering (within bucket sorting)
  * 
- * Query key remains STABLE to prevent reshuffling.
- * Order is always created_at DESC - NO client-side sorting.
+ * CRITICAL RULES:
+ * - Online-only coaches are ALWAYS in bucket 2 (never city/region buckets)
+ * - Location filters NEVER exclude online-only coaches
+ * - Boost NEVER jumps buckets
+ * - Ordering is 100% deterministic (no flicker)
  */
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
@@ -115,20 +115,27 @@ export interface UseCoachMarketplaceResult {
 const EMPTY_RESULT: MarketplaceCoach[] = [];
 
 /**
- * Determines if any filter is active (beyond country code and min rating)
- * Note: minRating is handled by BASE view function, not considered a "filter"
+ * Determines if any filter is active (beyond country code)
+ * These are user-initiated filters that affect the result set
+ * 
+ * Note: minRating IS a filter (affects visibility)
+ * Note: city/region for LOCATION CONTEXT (with Best Match) is NOT a filter
  */
 function hasActiveFilters(options: UseCoachMarketplaceOptions): boolean {
   return !!(
-    options.userCity ||
-    options.userRegion ||
-    (options.coachTypes && options.coachTypes.length > 0) ||
-    options.priceRange?.min !== undefined ||
-    options.priceRange?.max !== undefined ||
+    // Availability filters
     options.onlineOnly ||
     options.inPersonOnly ||
+    // Type/speciality filter
+    (options.coachTypes && options.coachTypes.length > 0) ||
+    // Price filters
+    options.priceRange?.min !== undefined ||
+    options.priceRange?.max !== undefined ||
+    // Badge filters
     options.verifiedOnly ||
-    options.qualifiedOnly
+    options.qualifiedOnly ||
+    // Rating filter
+    options.minRating !== undefined
   );
 }
 
@@ -150,31 +157,29 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
       (options.userLat && options.userLng)
     );
   
-  // Query key includes filter state and ranking state to ensure proper cache invalidation
-  // But uses a stable structure to minimize unnecessary refetches
-  // ⚠️ CRITICAL: Query key must include shouldUseRanking to ensure cache separation
+  // Query key includes all state that affects the result
+  // Stable structure prevents unnecessary refetches
   const queryKey = useMemo(() => [
-    "marketplace-coaches-stable",
+    "marketplace-coaches-v2",
     options.countryCode || null,
     options.limit ?? 50,
-    // Ranking state (separate cache for ranked vs unranked)
-    shouldUseRanking ? 'ranked' : filtersActive ? 'filtered' : 'base',
-    // Rating filter (always included as it's supported in both base and filtered views)
-    options.minRating ?? null,
-    // Filter params included for cache invalidation
-    filtersActive ? {
-      city: options.userCity || null,
-      region: options.userRegion || null,
+    // Ranking state (affects location context usage)
+    shouldUseRanking ? 'ranked' : 'base',
+    // All filters (affects visibility)
+    {
+      onlineOnly: options.onlineOnly || false,
+      inPersonOnly: options.inPersonOnly || false,
       types: options.coachTypes || null,
       minPrice: options.priceRange?.min ?? null,
       maxPrice: options.priceRange?.max ?? null,
-      online: options.onlineOnly || false,
-      inPerson: options.inPersonOnly || false,
       verified: options.verifiedOnly || false,
       qualified: options.qualifiedOnly || false,
-    } : null,
-    // Location for ranking (only included when ranking is active)
+      minRating: options.minRating ?? null,
+    },
+    // Location context (only matters when ranking is active)
     shouldUseRanking ? {
+      city: options.userCity || null,
+      region: options.userRegion || null,
       lat: options.userLat ?? null,
       lng: options.userLng ?? null,
     } : null,
@@ -182,17 +187,16 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.countryCode,
     options.limit,
     shouldUseRanking,
-    filtersActive,
-    options.minRating,
-    options.userCity,
-    options.userRegion,
+    options.onlineOnly,
+    options.inPersonOnly,
     options.coachTypes,
     options.priceRange?.min,
     options.priceRange?.max,
-    options.onlineOnly,
-    options.inPersonOnly,
     options.verifiedOnly,
     options.qualifiedOnly,
+    options.minRating,
+    options.userCity,
+    options.userRegion,
     options.userLat,
     options.userLng,
   ]);
@@ -203,68 +207,57 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
       let data: any[] | null = null;
       let error: any = null;
 
-      // PATH 1: Ranking (opt-in only via "Best match" toggle)
-      if (shouldUseRanking) {
-        const result = await supabase.rpc('get_ranked_coaches_v1', {
-          p_country_code: options.countryCode || null,
-          p_city: options.userCity || null,
-          p_region: options.userRegion || null,
-          p_user_lat: options.userLat ?? null,
-          p_user_lng: options.userLng ?? null,
-          p_limit: options.limit ?? 50,
-          p_offset: options.offset ?? 0,
-        });
+      // ============================================
+      // UNIFIED THREE-LAYER MARKETPLACE FUNCTION
+      // ============================================
+      // Uses get_marketplace_coaches_v2 for ALL scenarios:
+      // - Layer A: Eligibility (filtering)
+      // - Layer B: Relevance buckets (grouping)  
+      // - Layer C: Ordering (within bucket)
+      //
+      // When "Best Match" is ON (shouldUseRanking=true):
+      //   Location context is passed → coaches grouped by proximity buckets
+      // When "Best Match" is OFF:
+      //   No location context → default bucket ordering
+      // ============================================
+      
+      const result = await supabase.rpc('get_marketplace_coaches_v2', {
+        // Country filter (always applied)
+        p_country_code: options.countryCode || null,
         
-        // Safety fallback: If ranking returns empty, fall back to base view
-        // This ensures "Best match" never shows 0 results when coaches exist
-        if (result.data && result.data.length === 0 && !result.error) {
-          console.warn('[useCoachMarketplace] Ranking returned 0 results, falling back to base view');
-          const fallback = await supabase.rpc('get_base_marketplace_coaches_v1', {
-            p_country_code: options.countryCode || null,
-            p_min_rating: options.minRating ?? null,
-            p_limit: options.limit ?? 50,
-          });
-          data = fallback.data;
-          error = fallback.error;
-        } else {
-          data = result.data;
-          error = result.error;
-        }
+        // Location context for bucket assignment (only when ranking enabled)
+        p_city: shouldUseRanking ? (options.userCity || null) : null,
+        p_region: shouldUseRanking ? (options.userRegion || null) : null,
+        p_user_lat: shouldUseRanking ? (options.userLat ?? null) : null,
+        p_user_lng: shouldUseRanking ? (options.userLng ?? null) : null,
+        
+        // Availability filters (Layer A)
+        p_online_only: options.onlineOnly ?? false,
+        p_in_person_only: options.inPersonOnly ?? false,
+        
+        // Other filters
+        p_coach_types: options.coachTypes && options.coachTypes.length > 0 
+          ? options.coachTypes 
+          : null,
+        p_min_price: options.priceRange?.min ?? null,
+        p_max_price: options.priceRange?.max ?? null,
+        p_verified_only: options.verifiedOnly ?? false,
+        p_qualified_only: options.qualifiedOnly ?? false,
+        p_min_rating: options.minRating ?? null,
+        
+        // Pagination
+        p_limit: options.limit ?? 50,
+        p_offset: options.offset ?? 0,
+      });
+      
+      // Safety fallback: If result is empty and we have no filters,
+      // this indicates a potential issue - log but don't crash
+      if (result.data && result.data.length === 0 && !result.error && !filtersActive) {
+        console.warn('[useCoachMarketplace] Query returned 0 coaches with no active filters');
       }
-      // PATH 2: Filters active (uses get_filtered_coaches_v1)
-      else if (filtersActive) {
-        const result = await supabase.rpc('get_filtered_coaches_v1', {
-          p_country_code: options.countryCode || null,
-          p_city: options.userCity || null,
-          p_region: options.userRegion || null,
-          p_coach_types: options.coachTypes && options.coachTypes.length > 0 
-            ? options.coachTypes 
-            : null,
-          p_min_price: options.priceRange?.min ?? null,
-          p_max_price: options.priceRange?.max ?? null,
-          p_online_only: options.onlineOnly ?? false,
-          p_in_person_only: options.inPersonOnly ?? false,
-          p_verified_only: options.verifiedOnly ?? false,
-          p_qualified_only: options.qualifiedOnly ?? false,
-          p_limit: options.limit ?? 50,
-        });
-        data = result.data;
-        error = result.error;
-      }
-      // PATH 3: Base view - no filters, no ranking 
-      // Uses get_base_marketplace_coaches_v1 with:
-      //   - Top 5 boosted coaches (hourly rotation)
-      //   - Quality-based sorting for non-boosted
-      //   - Optional minRating filter
-      else {
-        const result = await supabase.rpc('get_base_marketplace_coaches_v1', {
-          p_country_code: options.countryCode || null,
-          p_min_rating: options.minRating ?? null,
-          p_limit: options.limit ?? 50,
-        });
-        data = result.data;
-        error = result.error;
-      }
+      
+      data = result.data;
+      error = result.error;
 
       if (error) {
         console.error('[useCoachMarketplace] RPC error:', error);
