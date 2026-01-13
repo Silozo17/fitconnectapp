@@ -8821,6 +8821,47 @@ export type Database = {
         Args: { p_location_type?: string; p_location_value?: string }
         Returns: number
       }
+      get_ranked_coaches_v1: {
+        Args: {
+          p_city?: string
+          p_country_code: string
+          p_limit?: number
+          p_offset?: number
+          p_region?: string
+          p_user_lat?: number
+          p_user_lng?: number
+        }
+        Returns: {
+          avg_rating: number
+          bio: string
+          card_image_url: string
+          coach_types: string[]
+          created_at: string
+          currency: string
+          display_name: string
+          gym_affiliation: string
+          hourly_rate: number
+          id: string
+          in_person_available: boolean
+          is_sponsored: boolean
+          is_verified: boolean
+          location: string
+          location_bucket: number
+          location_city: string
+          location_country: string
+          location_country_code: string
+          location_lat: number
+          location_lng: number
+          location_region: string
+          online_available: boolean
+          platform_score: number
+          profile_image_url: string
+          review_count: number
+          username: string
+          verified_at: string
+          verified_qualification_count: number
+        }[]
+      }
       get_simple_coaches: {
         Args: { p_filter_country_code?: string; p_limit?: number }
         Returns: {
