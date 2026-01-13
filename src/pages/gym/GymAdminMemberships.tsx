@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useMembershipPlans, useMembershipStats } from "@/hooks/gym/useGymMemberships";
+import { useMembershipPlans, useMembershipStats, useUpdateMembershipPlan, MembershipPlan } from "@/hooks/gym/useGymMemberships";
 import { useGym } from "@/contexts/GymContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,12 +27,34 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MembershipPlanForm } from "@/components/gym/admin/MembershipPlanForm";
 
 export default function GymAdminMemberships() {
   const { gymId } = useParams<{ gymId: string }>();
   const { gym } = useGym();
   const { data: plans, isLoading: isLoadingPlans } = useMembershipPlans();
   const { data: stats, isLoading: isLoadingStats } = useMembershipStats();
+  const updatePlan = useUpdateMembershipPlan();
+  
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingPlan, setEditingPlan] = useState<MembershipPlan | null>(null);
+
+  const handleEditPlan = (plan: MembershipPlan) => {
+    setEditingPlan(plan);
+    setIsFormOpen(true);
+  };
+
+  const handleCreatePlan = () => {
+    setEditingPlan(null);
+    setIsFormOpen(true);
+  };
+
+  const handleToggleActive = async (plan: MembershipPlan) => {
+    await updatePlan.mutateAsync({
+      planId: plan.id,
+      updates: { is_active: !plan.is_active },
+    });
+  };
 
   const formatPrice = (amount: number, interval?: string | null) => {
     const formatted = new Intl.NumberFormat("en-GB", {
@@ -71,11 +93,18 @@ export default function GymAdminMemberships() {
             Manage membership plans and view subscription analytics.
           </p>
         </div>
-        <Button>
+        <Button onClick={handleCreatePlan}>
           <Plus className="mr-2 h-4 w-4" />
           Create Plan
         </Button>
       </div>
+
+      {/* Plan Form Sheet */}
+      <MembershipPlanForm
+        open={isFormOpen}
+        onOpenChange={setIsFormOpen}
+        editPlan={editingPlan}
+      />
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
@@ -182,7 +211,7 @@ export default function GymAdminMemberships() {
                 <p className="text-sm text-muted-foreground mt-1 max-w-sm">
                   Create your first membership plan to start accepting signups.
                 </p>
-                <Button className="mt-4">
+                <Button className="mt-4" onClick={handleCreatePlan}>
                   <Plus className="mr-2 h-4 w-4" />
                   Create Plan
                 </Button>
@@ -217,7 +246,7 @@ export default function GymAdminMemberships() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => handleEditPlan(plan)}>
                             <Edit className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
@@ -280,7 +309,10 @@ export default function GymAdminMemberships() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">Active</span>
-                        <Switch checked={plan.is_active} />
+                        <Switch 
+                          checked={plan.is_active} 
+                          onCheckedChange={() => handleToggleActive(plan)}
+                        />
                       </div>
                     </div>
                   </CardContent>

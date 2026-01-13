@@ -33,6 +33,7 @@ export interface GymProfile {
   timezone: string;
   stripe_account_id: string | null;
   stripe_account_status: string | null;
+  stripe_onboarding_complete: boolean;
   platform_fee_percentage: number;
   status: string;
   verified_at: string | null;
