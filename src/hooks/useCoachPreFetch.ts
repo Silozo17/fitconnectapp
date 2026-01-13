@@ -1,16 +1,8 @@
 /**
  * useCoachPreFetch
  * 
- * Pre-fetches coaches in the background when a client enters the dashboard.
- * This ensures the Find Coaches page loads instantly without visible reordering.
- * 
- * Flow:
- * 1. On mount, restore last known location from localStorage
- * 2. If we have a saved location, immediately prefetch coaches
- * 3. In background: check location permission and refresh location
- * 4. If permission not yet asked AND not granted, silently check geolocation status
- * 5. Save updated location for next app open
- * 6. If location changed significantly, re-prefetch coaches
+ * STABILISATION: Pre-fetches coaches using get_simple_coaches (country filter only).
+ * No ranking logic.
  */
 import { useEffect, useRef, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -33,7 +25,6 @@ interface SavedLocation {
 
 // Check if browser supports permissions API
 const checkGeolocationPermission = async (): Promise<'granted' | 'denied' | 'prompt'> => {
-  // iOS WebKit doesn't support 'geolocation' in Permissions API - skip to avoid errors
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   if (isIOS) return 'prompt';
   
@@ -56,7 +47,7 @@ const getPreciseLocationSilently = (): Promise<GeolocationPosition | null> => {
     
     navigator.geolocation.getCurrentPosition(
       (position) => resolve(position),
-      () => resolve(null), // Silently fail if denied
+      () => resolve(null),
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
     );
   });
@@ -70,17 +61,10 @@ export const useCoachPreFetch = () => {
   const hasFetchedRef = useRef(false);
   const isProcessingRef = useRef(false);
 
-  // Prefetch coaches with given location
-  const prefetchCoaches = useCallback(async (location: SavedLocation | null, countryCode: string | null) => {
-    if (!location) return;
-    
+  // Prefetch coaches with country code only (simplified)
+  const prefetchCoaches = useCallback(async (countryCode: string | null) => {
     const queryKey = [
-      "marketplace-coaches-rpc",
-      location.city || null,
-      location.region || location.county || null,
-      location.countryCode || null,
-      location.lat || null,
-      location.lng || null,
+      "marketplace-coaches-simple",
       countryCode || null,
       null, // search
       null, // coachTypes
@@ -94,17 +78,14 @@ export const useCoachPreFetch = () => {
     // Check if we already have fresh data
     const existingData = queryClient.getQueryData(queryKey);
     if (existingData) {
-      return; // Already cached
+      return;
     }
 
     try {
       await queryClient.prefetchQuery({
         queryKey,
         queryFn: async () => {
-          const { data, error } = await supabase.rpc('get_ranked_coaches', {
-            p_user_city: location.city || null,
-            p_user_region: location.region || location.county || null,
-            p_user_country_code: location.countryCode || null,
+          const { data, error } = await supabase.rpc('get_simple_coaches', {
             p_filter_country_code: countryCode || null,
             p_search_term: null,
             p_coach_types: null,
@@ -113,13 +94,11 @@ export const useCoachPreFetch = () => {
             p_online_only: false,
             p_in_person_only: false,
             p_limit: 50,
-            p_user_lat: location.lat || null,
-            p_user_lng: location.lng || null,
           });
 
           if (error) throw error;
 
-          // Map to expected format (simplified - full mapping happens in useCoachMarketplace)
+          // Map to expected format (simplified - no ranking)
           const coaches = (data || []).map((row: any) => ({
             id: row.id,
             username: row.username,
@@ -130,23 +109,20 @@ export const useCoachPreFetch = () => {
             currency: row.currency,
             location_city: row.location_city,
             location_country: row.location_country,
+            location_country_code: row.location_country_code,
             online_available: row.online_available,
             in_person_available: row.in_person_available,
             profile_image_url: row.profile_image_url,
             card_image_url: row.card_image_url,
             is_verified: row.is_verified,
             selected_avatar_id: row.selected_avatar_id,
-            visibility_score: row.visibility_score,
-            location_tier: row.location_tier,
             review_count: row.review_count,
             avg_rating: row.avg_rating,
             is_sponsored: row.is_sponsored,
-            // Add remaining fields for full compatibility
             certifications: row.certifications,
             experience_years: row.experience_years,
             location: row.location,
             location_region: row.location_region,
-            location_country_code: row.location_country_code,
             booking_mode: row.booking_mode,
             verified_at: row.verified_at,
             gym_affiliation: row.gym_affiliation,
@@ -168,30 +144,12 @@ export const useCoachPreFetch = () => {
             } : null,
             rating: row.avg_rating,
             reviews_count: row.review_count,
-            verified_qualification_count: row.verified_qualification_count || 0,
-            ranking: {
-              locationScore: row.location_tier || 0,
-              engagementScore: 0,
-              profileScore: 0,
-              totalScore: row.visibility_score || 0,
-              matchLevel: row.location_tier >= 1000 ? 'exact_city' : 
-                         row.location_tier >= 700 ? 'same_region' :
-                         row.location_tier >= 400 ? 'same_country' :
-                         row.location_tier >= 300 ? 'online_only' : 'no_match',
-              isSponsored: row.is_sponsored || false,
-            },
+            tags: row.tags,
           }));
 
-          return {
-            coaches,
-            effectiveMatchLevel: coaches.length > 0 
-              ? (coaches[0].location_tier >= 1000 ? 'exact_city' : 
-                 coaches[0].location_tier >= 700 ? 'same_region' :
-                 coaches[0].location_tier >= 400 ? 'same_country' : 'no_match')
-              : 'no_match',
-          };
+          return coaches;
         },
-        staleTime: 1000 * 60 * 5, // 5 minutes
+        staleTime: 1000 * 60 * 5,
       });
     } catch (err) {
       console.error('[CoachPreFetch] Failed to prefetch coaches:', err);
@@ -214,23 +172,22 @@ export const useCoachPreFetch = () => {
 
     const runPreFetch = async () => {
       try {
-        // 1. Get saved location from localStorage
+        // Get saved location from localStorage
         const savedLocation = getStorage<SavedLocation>(STORAGE_KEYS.LAST_KNOWN_LOCATION);
         
-        // 2. If we have a saved location, immediately prefetch coaches
-        if (savedLocation) {
-          await prefetchCoaches(savedLocation, contextCountryCode);
-        }
+        // Use context country code or saved location country code
+        const effectiveCountryCode = contextCountryCode || savedLocation?.countryCode || null;
+        
+        // Immediately prefetch coaches with country code
+        await prefetchCoaches(effectiveCountryCode);
 
-        // 3. Check geolocation permission status
+        // Check geolocation permission status for location updates
         const permissionStatus = await checkGeolocationPermission();
         
-        // 4. If permission is granted, silently get fresh location
         if (permissionStatus === 'granted') {
           const position = await getPreciseLocationSilently();
           
           if (position) {
-            // Reverse geocode the position
             try {
               const { data: geoData } = await supabase.functions.invoke('reverse-geocode', {
                 body: { lat: position.coords.latitude, lng: position.coords.longitude }
@@ -248,19 +205,9 @@ export const useCoachPreFetch = () => {
                   accuracyLevel: 'precise',
                 };
 
-                // Save for next time
                 saveLocation(freshLocation);
 
-                // If location changed significantly, re-prefetch
-                const locationChanged = !savedLocation || 
-                  savedLocation.city !== freshLocation.city ||
-                  savedLocation.countryCode !== freshLocation.countryCode;
-
-                if (locationChanged) {
-                  await prefetchCoaches({ ...freshLocation, savedAt: Date.now() }, contextCountryCode);
-                }
-
-                // Also update user profile if logged in
+                // Update user profile if logged in
                 if (user) {
                   await supabase
                     .from('client_profiles')
@@ -279,66 +226,40 @@ export const useCoachPreFetch = () => {
               console.error('[CoachPreFetch] Reverse geocode failed:', geocodeErr);
             }
           }
-        } else if (permissionStatus === 'prompt') {
-          // Permission not yet asked - check if we should prompt on first app open
-          let hasAskedBefore: string | null = null;
+        } else if (permissionStatus === 'prompt' && !savedLocation) {
+          // Fall back to IP-based location
           try {
-            hasAskedBefore = localStorage.getItem(STORAGE_KEYS.LOCATION_PERMISSION_ASKED);
-          } catch {
-            // Storage access failed (private browsing, iOS restrictions, etc.)
-          }
-          
-          if (!hasAskedBefore && !savedLocation) {
-            // First time user without saved location - mark as asked but don't block
-            // The actual prompt will be shown via shouldShowLocationPrompt in useUserLocation
-            try {
-              localStorage.setItem(STORAGE_KEYS.LOCATION_PERMISSION_ASKED, 'pending');
-            } catch {
-              // Ignore storage write errors
+            const { data: ipData } = await supabase.functions.invoke('get-user-location');
+            if (ipData) {
+              const ipLocation: Omit<SavedLocation, 'savedAt'> = {
+                city: null,
+                region: ipData.region || null,
+                country: ipData.country || 'United Kingdom',
+                countryCode: ipData.countryCode || 'GB',
+                county: null,
+                lat: null,
+                lng: null,
+                accuracyLevel: 'approximate',
+              };
+              saveLocation(ipLocation);
             }
-          }
-          
-          // Fall back to IP-based location if no saved location
-          if (!savedLocation) {
-            try {
-              const { data: ipData } = await supabase.functions.invoke('get-user-location');
-              if (ipData) {
-                const ipLocation: Omit<SavedLocation, 'savedAt'> = {
-                  city: null,
-                  region: ipData.region || null,
-                  country: ipData.country || 'United Kingdom',
-                  countryCode: ipData.countryCode || 'GB',
-                  county: null,
-                  lat: null,
-                  lng: null,
-                  accuracyLevel: 'approximate',
-                };
-                saveLocation(ipLocation);
-                await prefetchCoaches({ ...ipLocation, savedAt: Date.now() }, contextCountryCode);
-              }
-            } catch (ipErr) {
-              console.error('[CoachPreFetch] IP location failed:', ipErr);
-            }
+          } catch (ipErr) {
+            console.error('[CoachPreFetch] IP location failed:', ipErr);
           }
         }
-        // If 'denied', just use whatever saved location we have
 
         hasFetchedRef.current = true;
       } catch (err) {
-        // Non-fatal: log but don't crash the app
         console.error('[CoachPreFetch] Pre-fetch error (non-fatal):', err);
-        hasFetchedRef.current = true; // Prevent retries
+        hasFetchedRef.current = true;
       } finally {
         isProcessingRef.current = false;
       }
     };
 
-    // Small delay to let the main UI render first - longer on native for WebView init
     const isNative = typeof navigator !== 'undefined' && /Despia/.test(navigator.userAgent);
     const delay = isNative ? 300 : 100;
     const timeoutId = setTimeout(runPreFetch, delay);
     return () => clearTimeout(timeoutId);
   }, [contextCountryCode, user, prefetchCoaches, saveLocation]);
-
-  // No return value needed - this is a side-effect only hook
 };

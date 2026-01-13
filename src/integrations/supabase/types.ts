@@ -8811,7 +8811,7 @@ export type Database = {
           bio: string
           booking_mode: string
           card_image_url: string
-          certifications: Json
+          certifications: string[]
           coach_types: string[]
           created_at: string
           currency: string
@@ -8837,11 +8837,11 @@ export type Database = {
           profile_image_url: string
           review_count: number
           selected_avatar_id: string
+          tags: string[]
           threads_url: string
           tiktok_url: string
           username: string
           verified_at: string
-          verified_qualification_count: number
           who_i_work_with: string
           x_url: string
           youtube_url: string
