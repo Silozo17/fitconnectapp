@@ -329,3 +329,15 @@ verify_jwt = false
 
 [functions.fetch-discipline-news]
 verify_jwt = false
+
+[functions.gym-stripe-connect-onboard]
+verify_jwt = true
+
+[functions.gym-create-membership-checkout]
+verify_jwt = true
+
+[functions.gym-check-membership]
+verify_jwt = true
+
+[functions.gym-verify-stripe-account]
+verify_jwt = true
