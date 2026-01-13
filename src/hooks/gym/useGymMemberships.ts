@@ -158,7 +158,7 @@ export function useUpdateMembershipPlan() {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as MembershipPlan;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["membership-plans", gym?.id] });
@@ -167,6 +167,31 @@ export function useUpdateMembershipPlan() {
     onError: (error) => {
       console.error("Failed to update plan:", error);
       toast.error("Failed to update membership plan");
+    },
+  });
+}
+
+// Delete membership plan
+export function useDeleteMembershipPlan() {
+  const { gym } = useGym();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (planId: string) => {
+      const { error } = await supabase
+        .from("membership_plans")
+        .delete()
+        .eq("id", planId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["membership-plans", gym?.id] });
+      toast.success("Membership plan deleted");
+    },
+    onError: (error) => {
+      console.error("Failed to delete plan:", error);
+      toast.error("Failed to delete membership plan");
     },
   });
 }
