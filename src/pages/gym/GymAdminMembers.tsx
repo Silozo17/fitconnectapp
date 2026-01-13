@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function GymAdminMembers() {
-  const { slug } = useParams<{ slug: string }>();
+  const { gymId } = useParams<{ gymId: string }>();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
 
@@ -77,7 +77,7 @@ export default function GymAdminMembers() {
           </p>
         </div>
         <Button asChild>
-          <Link to={`/gym/${slug}/admin/members/new`}>
+          <Link to={`/gym-admin/${gymId}/members/new`}>
             <UserPlus className="mr-2 h-4 w-4" />
             Add Member
           </Link>
@@ -150,7 +150,7 @@ export default function GymAdminMembers() {
               </p>
               {!search && (
                 <Button className="mt-4" asChild>
-                  <Link to={`/gym/${slug}/admin/members/new`}>
+                  <Link to={`/gym-admin/${gymId}/members/new`}>
                     <UserPlus className="mr-2 h-4 w-4" />
                     Add Member
                   </Link>
@@ -174,7 +174,7 @@ export default function GymAdminMembers() {
                   <TableRow key={member.id}>
                     <TableCell>
                       <Link
-                        to={`/gym/${slug}/admin/members/${member.id}`}
+                        to={`/gym-admin/${gymId}/members/${member.id}`}
                         className="flex items-center gap-3 hover:underline"
                       >
                         <Avatar className="h-10 w-10">
@@ -238,12 +238,12 @@ export default function GymAdminMembers() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem asChild>
-                            <Link to={`/gym/${slug}/admin/members/${member.id}`}>
+                            <Link to={`/gym-admin/${gymId}/members/${member.id}`}>
                               View Profile
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem asChild>
-                            <Link to={`/gym/${slug}/admin/members/${member.id}/edit`}>
+                            <Link to={`/gym-admin/${gymId}/members/${member.id}/edit`}>
                               Edit Member
                             </Link>
                           </DropdownMenuItem>

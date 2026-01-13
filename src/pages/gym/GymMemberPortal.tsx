@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 
 export default function GymMemberPortal() {
-  const { slug } = useParams<{ slug: string }>();
+  const { gymId } = useParams<{ gymId: string }>();
   const { gym, isMember, isLoading: gymLoading } = useGym();
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);

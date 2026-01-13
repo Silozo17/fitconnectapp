@@ -29,7 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function GymAdminMemberships() {
-  const { slug } = useParams<{ slug: string }>();
+  const { gymId } = useParams<{ gymId: string }>();
   const { gym } = useGym();
   const { data: plans, isLoading: isLoadingPlans } = useMembershipPlans();
   const { data: stats, isLoading: isLoadingStats } = useMembershipStats();

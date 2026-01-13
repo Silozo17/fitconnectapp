@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 export default function GymAdminDashboard() {
-  const { slug } = useParams<{ slug: string }>();
+  const { gymId } = useParams<{ gymId: string }>();
   const { gym } = useGym();
 
   const needsStripeSetup = !gym?.stripe_account_id || gym?.stripe_account_status === "pending";
@@ -34,13 +34,13 @@ export default function GymAdminDashboard() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" asChild>
-            <Link to={`/gym/${slug}/admin/members/new`}>
+            <Link to={`/gym-admin/${gymId}/members/new`}>
               <UserPlus className="mr-2 h-4 w-4" />
               Add Member
             </Link>
           </Button>
           <Button asChild>
-            <Link to={`/gym/${slug}/admin/schedule`}>
+            <Link to={`/gym-admin/${gymId}/schedule`}>
               <Calendar className="mr-2 h-4 w-4" />
               Schedule Class
             </Link>
@@ -64,7 +64,7 @@ export default function GymAdminDashboard() {
               </p>
             </div>
             <Button asChild>
-              <Link to={`/gym/${slug}/admin/billing`}>
+              <Link to={`/gym-admin/${gymId}/billing`}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Set Up Payments
               </Link>
@@ -88,7 +88,7 @@ export default function GymAdminDashboard() {
           </CardHeader>
           <CardContent className="space-y-3">
             <Link
-              to={`/gym/${slug}/admin/members`}
+              to={`/gym-admin/${gymId}/members`}
               className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -106,7 +106,7 @@ export default function GymAdminDashboard() {
             </Link>
 
             <Link
-              to={`/gym/${slug}/admin/classes`}
+              to={`/gym-admin/${gymId}/classes`}
               className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -124,7 +124,7 @@ export default function GymAdminDashboard() {
             </Link>
 
             <Link
-              to={`/gym/${slug}/admin/memberships`}
+              to={`/gym-admin/${gymId}/memberships`}
               className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -142,7 +142,7 @@ export default function GymAdminDashboard() {
             </Link>
 
             <Link
-              to={`/gym/${slug}`}
+              to={`/gym-portal/${gymId}`}
               target="_blank"
               className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
             >

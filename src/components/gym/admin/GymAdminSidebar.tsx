@@ -31,13 +31,13 @@ interface NavItem {
 }
 
 export function GymAdminSidebar() {
-  const { slug } = useParams<{ slug: string }>();
+  const { gymId } = useParams<{ gymId: string }>();
   const location = useLocation();
   const { gym, userRole } = useGym();
   const canManage = useCanManageGym();
   const canViewFinancials = useCanViewFinancials();
 
-  const basePath = `/gym/${slug}/admin`;
+  const basePath = `/gym-admin/${gymId}`;
 
   const mainNavItems: NavItem[] = [
     { label: "Dashboard", href: basePath, icon: LayoutDashboard },
