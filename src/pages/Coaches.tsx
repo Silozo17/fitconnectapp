@@ -41,14 +41,12 @@ const Coaches = () => {
     clearManualLocation,
   } = useMarketplaceLocationFilter();
 
-  /**
-   * Determine effective location for proximity ranking.
-   * Priority: manual selection > auto-detected location
-   * 
-   * IMPORTANT: If user explicitly selected a city/location, we MUST use it.
-   * We only fall back to auto-location if there's no manual selection.
-   */
-  const effectiveLocation = manualLocation ?? (autoLocationLoading ? null : autoLocation);
+  // Determine effective location for proximity ranking (manual overrides auto)
+  const effectiveLocation = isManualSelection
+    ? manualLocation
+    : autoLocationLoading
+      ? null
+      : autoLocation;
 
   // Get country from URL locale route - this is the default source of truth
   // URL: /en-gb/coaches → locationCode: 'gb' → shows UK coaches
@@ -65,7 +63,7 @@ const Coaches = () => {
    */
   const effectiveCountryCode = manualCountryCode ?? locationCode;
 
-  // Fetch coaches - enable immediately if manual selection, or wait for auto-location
+  // Defer fetching until auto-location is resolved (prevents double-render with reordering)
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
@@ -75,12 +73,11 @@ const Coaches = () => {
     userLocation: effectiveLocation,
     enableLocationRanking: true,
     countryCode: effectiveCountryCode,
-    // Enable query if: manual selection made OR auto-location resolved
-    enabled: isManualSelection || !autoLocationLoading,
+    enabled: !autoLocationLoading, // Only fetch when location is resolved
   });
 
-  // Show loader only if waiting for auto-location (not when manual selection made)
-  const isFullyLoading = (!isManualSelection && autoLocationLoading) || isLoading;
+  // Unified loading: show loader until both location AND coaches are ready
+  const isFullyLoading = autoLocationLoading || isLoading;
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);

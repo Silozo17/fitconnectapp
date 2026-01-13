@@ -11,9 +11,6 @@ interface StoredLocationFilter {
   county: string | null;
   country: string | null;
   countryCode: RouteLocationCode | null;
-  displayLocation?: string | null;
-  lat?: number | null;
-  lng?: number | null;
 }
 
 interface MarketplaceLocationFilter {
@@ -55,19 +52,12 @@ export function useMarketplaceLocationFilter(): MarketplaceLocationFilter {
       const stored = sessionStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed: StoredLocationFilter = JSON.parse(stored);
-        // Only restore if there's meaningful location data (city or region)
-        if (parsed.city || parsed.region) {
-          return {
-            city: parsed.city,
-            region: parsed.region,
-            county: parsed.county,
-            country: parsed.country,
-            countryCode: parsed.countryCode ?? undefined,
-            displayLocation: parsed.displayLocation ?? undefined,
-            lat: parsed.lat ?? undefined,
-            lng: parsed.lng ?? undefined,
-          };
-        }
+        return {
+          city: parsed.city,
+          region: parsed.region,
+          county: parsed.county,
+          country: parsed.country,
+        };
       }
     } catch {
       // Ignore parse errors
@@ -98,9 +88,6 @@ export function useMarketplaceLocationFilter(): MarketplaceLocationFilter {
         county: manualLocation?.county ?? null,
         country: manualLocation?.country ?? null,
         countryCode: manualCountryCode ?? deriveCountryCode(manualLocation?.country ?? null),
-        displayLocation: manualLocation?.displayLocation ?? null,
-        lat: manualLocation?.lat ?? null,
-        lng: manualLocation?.lng ?? null,
       };
       sessionStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
     } else {

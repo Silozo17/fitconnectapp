@@ -157,14 +157,11 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
   const query = useQuery({
     queryKey,
     queryFn: async () => {
-      // Determine user country code: prefer explicit from location, fallback to filter country
-      const userCountryCode = options.userLocation?.countryCode || options.countryCode || null;
-      
       // Call the SQL ranking function
       const { data, error } = await supabase.rpc('get_ranked_coaches', {
         p_user_city: options.userLocation?.city || null,
         p_user_region: options.userLocation?.region || options.userLocation?.county || null,
-        p_user_country_code: userCountryCode,
+        p_user_country_code: options.userLocation?.countryCode || null,
         p_filter_country_code: options.countryCode || null,
         p_search_term: options.search || null,
         p_coach_types: options.coachTypes && options.coachTypes.length > 0 ? options.coachTypes : null,
