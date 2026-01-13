@@ -8735,13 +8735,29 @@ export type Database = {
       get_simple_coaches: {
         Args: { p_filter_country_code?: string; p_limit?: number }
         Returns: {
+          avg_rating: number
+          bio: string
+          card_image_url: string
+          coach_types: string[]
           created_at: string
+          currency: string
           display_name: string
+          gym_affiliation: string
+          hourly_rate: number
           id: string
+          in_person_available: boolean
+          is_sponsored: boolean
+          is_verified: boolean
+          location: string
+          location_city: string
           location_country: string
           location_country_code: string
+          online_available: boolean
           profile_image_url: string
+          review_count: number
           username: string
+          verified_at: string
+          verified_qualification_count: number
         }[]
       }
       has_role:
