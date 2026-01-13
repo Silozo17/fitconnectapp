@@ -10,8 +10,10 @@ import CoachCard from "@/components/coaches/CoachCard";
 import CoachFilters from "@/components/coaches/CoachFilters";
 import BookSessionModal from "@/components/booking/BookSessionModal";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
+import { BestMatchToggle } from "@/components/coaches/BestMatchToggle";
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useLocationFromRoute } from "@/hooks/useLocationFromRoute";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LocationData } from "@/types/ranking";
 
@@ -26,8 +28,20 @@ const Coaches = () => {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [qualifiedOnly, setQualifiedOnly] = useState(false);
 
+  // "Best match" ranking toggle - OFF by default
+  const [useRanking, setUseRanking] = useState(false);
+  const [isActivatingRanking, setIsActivatingRanking] = useState(false);
+
   // Location filter state
   const [manualLocation, setManualLocation] = useState<LocationData | null>(null);
+  
+  // User location for ranking (GPS or IP-based)
+  const { 
+    location: userLocation, 
+    isRequestingPrecise,
+    requestPreciseLocation,
+    accuracyLevel,
+  } = useUserLocation();
 
   // Modal state
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
@@ -39,12 +53,30 @@ const Coaches = () => {
   // Determine effective country code: manual location overrides route
   const effectiveCountryCode = manualLocation?.countryCode || locationCode;
 
+  // Determine ranking location (priority: manual > GPS/IP)
+  // For ranking, we need city or lat/lng
+  const rankingCity = manualLocation?.city || userLocation?.city || undefined;
+  const rankingRegion = manualLocation?.region || userLocation?.region || undefined;
+  const rankingLat = manualLocation?.lat ?? userLocation?.lat ?? undefined;
+  const rankingLng = manualLocation?.lng ?? userLocation?.lng ?? undefined;
+
+  // Check if we have sufficient location for ranking
+  const hasLocationForRanking = !!(rankingCity || (rankingLat && rankingLng));
+
+  // Compute display location for the toggle
+  const rankingLocationDisplay = rankingCity 
+    ? `${rankingCity}${userLocation?.country ? `, ${userLocation.country}` : ''}`
+    : userLocation?.country || null;
+
   // Fetch coaches with ALL filters wired to SQL
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     countryCode: effectiveCountryCode,
-    // Location filters (from Google Places API)
+    // Location filters (from Google Places API for filtering)
     userCity: manualLocation?.city || undefined,
     userRegion: manualLocation?.region || undefined,
+    // For ranking - include GPS location if available
+    userLat: useRanking ? rankingLat : undefined,
+    userLng: useRanking ? rankingLng : undefined,
     // Speciality filters
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
     // Price filters
@@ -55,6 +87,8 @@ const Coaches = () => {
     // Badge filters
     verifiedOnly: verifiedOnly,
     qualifiedOnly: qualifiedOnly,
+    // ⚠️ RANKING: Only enabled when user explicitly opts in AND has location
+    useRanking: useRanking && hasLocationForRanking,
   });
 
   const handleLocationSelect = useCallback((location: LocationData) => {
@@ -64,6 +98,34 @@ const Coaches = () => {
   const handleClearLocation = useCallback(() => {
     setManualLocation(null);
   }, []);
+
+  /**
+   * Handle "Best match" toggle
+   * When enabled: Request precise location if not already available
+   * When disabled: Return to stable ordering
+   */
+  const handleBestMatchToggle = useCallback(async (enabled: boolean) => {
+    if (enabled) {
+      // Enable ranking
+      setUseRanking(true);
+      
+      // If we don't have precise location, request it
+      if (!hasLocationForRanking && accuracyLevel !== 'precise' && accuracyLevel !== 'manual') {
+        setIsActivatingRanking(true);
+        const success = await requestPreciseLocation();
+        setIsActivatingRanking(false);
+        
+        // If GPS denied and no location available, still keep ranking enabled
+        // It will use IP-based location or manual location if available
+        if (!success) {
+          console.log('[BestMatch] GPS denied, using available location data');
+        }
+      }
+    } else {
+      // Disable ranking - immediately return to stable order
+      setUseRanking(false);
+    }
+  }, [hasLocationForRanking, accuracyLevel, requestPreciseLocation]);
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);
@@ -225,6 +287,17 @@ const Coaches = () => {
 
               {/* Coaches Grid */}
               <div className="flex-1">
+                {/* Best Match Toggle - Above results */}
+                <div className="mb-4">
+                  <BestMatchToggle
+                    isEnabled={useRanking}
+                    onToggle={handleBestMatchToggle}
+                    isLoading={isActivatingRanking || isRequestingPrecise}
+                    hasLocation={hasLocationForRanking}
+                    locationDisplay={useRanking ? rankingLocationDisplay : null}
+                  />
+                </div>
+                
                 {isLoading ? (
                   <div className="flex items-center justify-center py-20">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -239,6 +312,9 @@ const Coaches = () => {
                       <Users className="w-5 h-5" />
                       <span>
                         {t('results.showing')} <strong className="text-foreground">{coaches.length}</strong> {coaches.length !== 1 ? t('results.coaches') : t('results.coach')}
+                        {useRanking && hasLocationForRanking && (
+                          <span className="text-primary ml-1">• Sorted by relevance</span>
+                        )}
                       </span>
                     </div>
                     <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">

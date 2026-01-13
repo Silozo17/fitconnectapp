@@ -11,6 +11,7 @@
  * When TRUE: Uses get_ranked_coaches_v1 when location is known.
  * When FALSE: Uses get_simple_coaches or get_filtered_coaches_v1 only.
  * 
- * ⚠️ MUST remain FALSE until ranking is explicitly approved for activation.
+ * ⚠️ Ranking is now ENABLED but requires user opt-in via "Best match" toggle.
+ * The flag alone does NOT activate ranking - user must explicitly enable it.
  */
-export const MARKETPLACE_RANKING_ENABLED = false;
+export const MARKETPLACE_RANKING_ENABLED = true;
