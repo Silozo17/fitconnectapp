@@ -1,15 +1,12 @@
 /**
  * Hook for fetching coaches for the marketplace (/coaches and /dashboard/client/find-coaches)
  * 
- * Uses SQL-first ranking via get_ranked_coaches RPC:
- * - Location tier is primary factor (city > region > country > online)
- * - Boost only reorders within the same location tier
- * - Verified, profile completeness, and engagement are secondary factors
+ * STABILISED VERSION: All ranking, boosting, and scoring logic has been REMOVED.
+ * Uses simple country-based filtering with deterministic ordering (created_at DESC).
  */
 import { useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { LocationData, RankingScore, LocationMatchLevel } from "@/types/ranking";
 
 // Type for public coach profile data (GDPR-safe columns only)
 export type MarketplaceCoach = {
@@ -54,20 +51,13 @@ export type MarketplaceCoach = {
     rarity: string;
     image_url: string | null;
   } | null;
-  // Profile completeness (from database computed column)
-  is_complete_profile?: boolean | null;
   // Computed/added fields
   rating?: number | null;
+  avg_rating?: number | null;
   reviews_count?: number | null;
+  review_count?: number | null;
   is_sponsored?: boolean | null;
   tags?: string[] | null;
-  // Ranking data (added after ranking)
-  ranking?: RankingScore;
-  // From RPC
-  visibility_score?: number;
-  location_tier?: number;
-  review_count?: number;
-  avg_rating?: number | null;
   // Qualification count
   verified_qualification_count?: number;
 };
@@ -79,20 +69,9 @@ export interface UseCoachMarketplaceOptions {
   onlineOnly?: boolean;
   inPersonOnly?: boolean;
   limit?: number;
-  featured?: boolean;
-  location?: string;
-  showSponsoredFirst?: boolean;
-  /** User's detected location for proximity ranking */
-  userLocation?: LocationData | null;
-  /** Enable location-based ranking (default: true) */
-  enableLocationRanking?: boolean;
-  /** Minimum results before expanding location radius (default: 5) - not used in SQL version */
-  minResultsBeforeExpansion?: number;
-  /** Filter coaches by country code (e.g., 'gb', 'pl') - case insensitive */
+  /** Filter coaches by country code (e.g., 'gb', 'pl') - STRICT filter, case insensitive */
   countryCode?: string;
-  /** Only show coaches with complete profiles (real coaches, not test/placeholder) - handled by RPC */
-  realCoachesOnly?: boolean;
-  /** Whether the query should execute (default: true) - use to defer until location is ready */
+  /** Whether the query should execute (default: true) */
   enabled?: boolean;
 }
 
@@ -100,35 +79,15 @@ export interface UseCoachMarketplaceResult {
   data: MarketplaceCoach[] | undefined;
   isLoading: boolean;
   error: Error | null;
-  /** Whether location radius was expanded to get more results */
-  locationExpanded?: boolean;
-  /** The effective match level used after any expansion */
-  effectiveMatchLevel?: string;
 }
 
-/**
- * Determines the match level based on location tier score from RPC
- */
-function getMatchLevelFromTier(locationTier: number): LocationMatchLevel {
-  if (locationTier >= 1000) return 'exact_city';
-  if (locationTier >= 700) return 'same_region';
-  if (locationTier >= 400) return 'same_country';
-  if (locationTier >= 300) return 'online_only';
-  return 'no_match';
-}
-
-// Empty result to prevent stale cache from showing during location resolution
-const EMPTY_RESULT = { coaches: [] as MarketplaceCoach[], effectiveMatchLevel: 'no_match' as const };
+// Empty result to prevent stale cache
+const EMPTY_RESULT: MarketplaceCoach[] = [];
 
 export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): UseCoachMarketplaceResult => {
-  // Create stable query key to prevent cache misses
+  // Create stable query key
   const queryKey = useMemo(() => [
-    "marketplace-coaches-rpc",
-    options.userLocation?.city || null,
-    options.userLocation?.region || options.userLocation?.county || null,
-    options.userLocation?.countryCode || null,
-    options.userLocation?.lat || null,
-    options.userLocation?.lng || null,
+    "marketplace-coaches-simple",
     options.countryCode || null,
     options.search || null,
     options.coachTypes?.join(',') || null,
@@ -138,12 +97,6 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.inPersonOnly || false,
     options.limit || 50,
   ], [
-    options.userLocation?.city,
-    options.userLocation?.region,
-    options.userLocation?.county,
-    options.userLocation?.countryCode,
-    options.userLocation?.lat,
-    options.userLocation?.lng,
     options.countryCode,
     options.search,
     options.coachTypes,
@@ -157,11 +110,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
   const query = useQuery({
     queryKey,
     queryFn: async () => {
-      // Call the SQL ranking function
-      const { data, error } = await supabase.rpc('get_ranked_coaches', {
-        p_user_city: options.userLocation?.city || null,
-        p_user_region: options.userLocation?.region || options.userLocation?.county || null,
-        p_user_country_code: options.userLocation?.countryCode || null,
+      // Call the simplified function - NO ranking, just country filter
+      const { data, error } = await supabase.rpc('get_simple_coaches', {
         p_filter_country_code: options.countryCode || null,
         p_search_term: options.search || null,
         p_coach_types: options.coachTypes && options.coachTypes.length > 0 ? options.coachTypes : null,
@@ -170,103 +120,75 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         p_online_only: options.onlineOnly || false,
         p_in_person_only: options.inPersonOnly || false,
         p_limit: options.limit || 50,
-        p_user_lat: options.userLocation?.lat || null,
-        p_user_lng: options.userLocation?.lng || null,
       });
 
       if (error) throw error;
 
-      // Map RPC results to MarketplaceCoach type with ranking data
-      const coaches: MarketplaceCoach[] = (data || []).map((row: any) => {
-        const locationTier = row.location_tier || 0;
-        const matchLevel = getMatchLevelFromTier(locationTier);
-        
-        return {
-          id: row.id,
-          username: row.username,
-          display_name: row.display_name,
-          bio: row.bio,
-          coach_types: row.coach_types,
-          certifications: row.certifications,
-          experience_years: row.experience_years,
-          hourly_rate: row.hourly_rate,
-          currency: row.currency,
-          location: row.location,
-          location_city: row.location_city,
-          location_region: row.location_region,
-          location_country: row.location_country,
-          location_country_code: row.location_country_code,
-          online_available: row.online_available,
-          in_person_available: row.in_person_available,
-          profile_image_url: row.profile_image_url,
-          card_image_url: row.card_image_url,
-          booking_mode: row.booking_mode,
-          is_verified: row.is_verified,
-          verified_at: row.verified_at,
-          gym_affiliation: row.gym_affiliation,
-          marketplace_visible: row.marketplace_visible,
-          selected_avatar_id: row.selected_avatar_id,
-          created_at: row.created_at,
-          onboarding_completed: row.onboarding_completed || false,
-          who_i_work_with: row.who_i_work_with,
-          facebook_url: row.facebook_url,
-          instagram_url: row.instagram_url,
-          tiktok_url: row.tiktok_url,
-          x_url: row.x_url,
-          threads_url: row.threads_url,
-          linkedin_url: row.linkedin_url,
-          youtube_url: row.youtube_url,
-          // Map avatar data from RPC flat fields to nested avatars object
-          avatars: row.avatar_slug ? {
-            slug: row.avatar_slug,
-            rarity: row.avatar_rarity,
-            image_url: null
-          } : null,
-          // Computed fields from RPC
-          is_sponsored: row.is_sponsored,
-          visibility_score: row.visibility_score,
-          location_tier: locationTier,
-          review_count: row.review_count,
-          avg_rating: row.avg_rating,
-          rating: row.avg_rating,
-          reviews_count: row.review_count,
-          // Ranking data for components that need it
-          ranking: {
-            locationScore: locationTier,
-            engagementScore: 0,
-            profileScore: 0,
-            totalScore: row.visibility_score || 0,
-            matchLevel,
-            isSponsored: row.is_sponsored || false,
-          },
-          // Qualification count
-          verified_qualification_count: row.verified_qualification_count || 0,
-        };
-      });
+      // Map RPC results to MarketplaceCoach type
+      const coaches: MarketplaceCoach[] = (data || []).map((row: any) => ({
+        id: row.id,
+        username: row.username,
+        display_name: row.display_name,
+        bio: row.bio,
+        coach_types: row.coach_types,
+        certifications: row.certifications,
+        experience_years: row.experience_years,
+        hourly_rate: row.hourly_rate,
+        currency: row.currency,
+        location: row.location,
+        location_city: row.location_city,
+        location_region: row.location_region,
+        location_country: row.location_country,
+        location_country_code: row.location_country_code,
+        online_available: row.online_available,
+        in_person_available: row.in_person_available,
+        profile_image_url: row.profile_image_url,
+        card_image_url: row.card_image_url,
+        booking_mode: row.booking_mode,
+        is_verified: row.is_verified,
+        verified_at: row.verified_at,
+        gym_affiliation: row.gym_affiliation,
+        marketplace_visible: row.marketplace_visible,
+        selected_avatar_id: row.selected_avatar_id,
+        created_at: row.created_at,
+        onboarding_completed: row.onboarding_completed || false,
+        who_i_work_with: row.who_i_work_with,
+        facebook_url: row.facebook_url,
+        instagram_url: row.instagram_url,
+        tiktok_url: row.tiktok_url,
+        x_url: row.x_url,
+        threads_url: row.threads_url,
+        linkedin_url: row.linkedin_url,
+        youtube_url: row.youtube_url,
+        // Map avatar data from RPC flat fields
+        avatars: row.avatar_slug ? {
+          slug: row.avatar_slug,
+          rarity: row.avatar_rarity,
+          image_url: null
+        } : null,
+        // Computed fields (kept for display, NOT used for ordering)
+        is_sponsored: row.is_sponsored,
+        rating: row.avg_rating,
+        avg_rating: row.avg_rating,
+        reviews_count: row.review_count,
+        review_count: row.review_count,
+        verified_qualification_count: row.verified_qualification_count || 0,
+        tags: null,
+      }));
 
-      // Determine effective match level from first coach (already sorted by tier)
-      const effectiveMatchLevel = coaches.length > 0 
-        ? getMatchLevelFromTier(coaches[0].location_tier || 0)
-        : 'no_match';
-
-      return {
-        coaches,
-        effectiveMatchLevel,
-      };
+      return coaches;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes - coaches don't change often
+    staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 15, // 15 minutes cache
-    enabled: options.enabled !== false, // Defer query until location is ready
-    placeholderData: EMPTY_RESULT, // Prevents stale cache from flashing wrong order
-    refetchOnWindowFocus: false, // Disable refetch on window focus for stable UX
+    enabled: options.enabled !== false,
+    placeholderData: EMPTY_RESULT,
+    refetchOnWindowFocus: false,
   });
 
   return {
-    data: query.data?.coaches,
+    data: query.data,
     isLoading: query.isLoading,
     error: query.error ?? null,
-    locationExpanded: false, // SQL handles this internally
-    effectiveMatchLevel: query.data?.effectiveMatchLevel,
   };
 };
 

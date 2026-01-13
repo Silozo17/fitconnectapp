@@ -11,8 +11,6 @@ import CoachFilters from "@/components/coaches/CoachFilters";
 import BookSessionModal from "@/components/booking/BookSessionModal";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
-import { useUserLocation } from "@/hooks/useUserLocation";
-import { useMarketplaceLocationFilter } from "@/hooks/useMarketplaceLocationFilter";
 import { useLocationFromRoute } from "@/hooks/useLocationFromRoute";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -29,55 +27,20 @@ const Coaches = () => {
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
   const [connectionCoach, setConnectionCoach] = useState<MarketplaceCoach | null>(null);
 
-  // Get auto-detected user location for proximity ranking
-  const { location: autoLocation, isLoading: autoLocationLoading } = useUserLocation();
-
-  // Manual location filter (persisted for session)
-  const {
-    manualLocation,
-    manualCountryCode,
-    isManualSelection,
-    setManualLocation,
-    clearManualLocation,
-  } = useMarketplaceLocationFilter();
-
-  // Determine effective location for proximity ranking (manual overrides auto)
-  const effectiveLocation = isManualSelection
-    ? manualLocation
-    : autoLocationLoading
-      ? null
-      : autoLocation;
-
-  // Get country from URL locale route - this is the default source of truth
+  // Get country from URL locale route - this is the source of truth
   // URL: /en-gb/coaches → locationCode: 'gb' → shows UK coaches
-  // URL: /pl-gb/coaches → locationCode: 'gb' → shows UK coaches (Polish UI)
   // URL: /pl-pl/coaches → locationCode: 'pl' → shows Polish coaches
   const { locationCode } = useLocationFromRoute();
 
-  /**
-   * Effective country code priority:
-   * 1. Manual selection from marketplace filter (user explicitly chose via city/location picker)
-   * 2. URL locale (e.g., /en-pl/coaches means show Polish coaches)
-   * 
-   * This ensures manual location selection ALWAYS overrides URL locale for filtering.
-   */
-  const effectiveCountryCode = manualCountryCode ?? locationCode;
-
-  // Defer fetching until auto-location is resolved (prevents double-render with reordering)
+  // Fetch coaches with STRICT country filtering
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
     priceRange,
     onlineOnly,
     inPersonOnly,
-    userLocation: effectiveLocation,
-    enableLocationRanking: true,
-    countryCode: effectiveCountryCode,
-    enabled: !autoLocationLoading, // Only fetch when location is resolved
+    countryCode: locationCode,
   });
-
-  // Unified loading: show loader until both location AND coaches are ready
-  const isFullyLoading = autoLocationLoading || isLoading;
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
     setBookingCoach(coach);
@@ -111,6 +74,15 @@ const Coaches = () => {
     "priceRange": "£40-£100"
   };
 
+  // Get country display name
+  const countryDisplay = locationCode
+    ? locationCode.toUpperCase() === 'GB'
+      ? 'United Kingdom'
+      : locationCode.toUpperCase() === 'PL'
+        ? 'Poland'
+        : locationCode.toUpperCase()
+    : null;
+
   return (
     <>
       <SEOHead
@@ -119,7 +91,7 @@ const Coaches = () => {
         canonicalPath="/coaches"
         keywords={["personal trainer near me", "find fitness coach UK", "book personal trainer", "hire PT", "online fitness coach", "local personal trainers"]}
         schema={[breadcrumbSchema, serviceSchema]}
-        noIndex={isFullyLoading}
+        noIndex={isLoading}
       />
 
       <div className="min-h-screen bg-background">
@@ -133,7 +105,7 @@ const Coaches = () => {
                 {t('header.title')} <span className="gradient-text">{t('header.titleHighlight')}</span>
               </h1>
               <p className="text-muted-foreground mb-6">
-                {t('header.subtitle')}
+                {countryDisplay ? `Showing coaches in ${countryDisplay}` : t('header.subtitle')}
               </p>
 
               {/* Search Bar */}
@@ -180,11 +152,6 @@ const Coaches = () => {
                         onOnlineOnlyChange={setOnlineOnly}
                         inPersonOnly={inPersonOnly}
                         onInPersonOnlyChange={setInPersonOnly}
-                        autoLocation={autoLocation}
-                        manualLocation={manualLocation}
-                        isAutoLocationLoading={autoLocationLoading}
-                        onLocationSelect={setManualLocation}
-                        onClearLocation={clearManualLocation}
                       />
                     </div>
                   </SheetContent>
@@ -206,18 +173,13 @@ const Coaches = () => {
                     onOnlineOnlyChange={setOnlineOnly}
                     inPersonOnly={inPersonOnly}
                     onInPersonOnlyChange={setInPersonOnly}
-                    autoLocation={autoLocation}
-                    manualLocation={manualLocation}
-                    isAutoLocationLoading={autoLocationLoading}
-                    onLocationSelect={setManualLocation}
-                    onClearLocation={clearManualLocation}
                   />
                 </aside>
               )}
 
               {/* Coaches Grid */}
               <div className="flex-1">
-                {isFullyLoading ? (
+                {isLoading ? (
                   <div className="flex items-center justify-center py-20">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
