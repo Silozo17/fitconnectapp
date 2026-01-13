@@ -3,15 +3,15 @@
  * 
  * ⚠️ STABILITY LOCK
  * These flags control marketplace behaviour.
- * Changes here affect coach visibility and ordering.
  */
 
 /**
- * Feature flag for enabling ranked coach results.
- * When TRUE: Uses get_ranked_coaches_v1 when location is known.
- * When FALSE: Uses get_simple_coaches or get_filtered_coaches_v1 only.
+ * Kill switch for ranked coach results.
  * 
- * ⚠️ Ranking is now ENABLED but requires user opt-in via "Best match" toggle.
+ * When TRUE: Ranking CAN be activated if user opts in via "Best match" toggle
+ * When FALSE: Ranking is disabled entirely (emergency kill switch)
+ * 
  * The flag alone does NOT activate ranking - user must explicitly enable it.
+ * All queries use get_marketplace_coaches_v2.
  */
 export const MARKETPLACE_RANKING_ENABLED = true;

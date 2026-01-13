@@ -78,7 +78,6 @@ const ClientFindCoaches = () => {
 
   // Fetch coaches with location-aware filtering and ranking
   const { data: coaches, isLoading, error } = useCoachMarketplace({
-    search: searchQuery || undefined,
     countryCode: effectiveCountryCode,
     // Location filters - pass city/region for filtering
     userCity: manualLocation?.city || undefined,
