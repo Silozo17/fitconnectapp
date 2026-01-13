@@ -20,7 +20,7 @@ import { useState } from "react";
 import { QrCode, Users, Clock } from "lucide-react";
 
 export default function GymCheckIn() {
-  const { slug } = useParams<{ slug: string }>();
+  const { gymId } = useParams<{ gymId: string }>();
   const { gym, isStaff, isLoading: gymLoading } = useGym();
   const { data: todaysClasses, isLoading: classesLoading } = useTodaysClasses();
   const [selectedClassId, setSelectedClassId] = useState<string>("");

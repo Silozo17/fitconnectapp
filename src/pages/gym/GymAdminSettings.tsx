@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 
 export default function GymAdminSettings() {
-  const { slug } = useParams<{ slug: string }>();
+  const { gymId } = useParams<{ gymId: string }>();
   const { gym } = useGym();
   const [isSaving, setIsSaving] = useState(false);
 

@@ -37,7 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 
 export default function GymAdminSchedule() {
-  const { slug } = useParams<{ slug: string }>();
+  const { gymId } = useParams<{ gymId: string }>();
   const { gym, isStaff } = useGym();
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedClassType, setSelectedClassType] = useState<string>("all");

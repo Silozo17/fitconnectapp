@@ -73,7 +73,7 @@ export function GymAdminHeader({ onMenuToggle }: GymAdminHeaderProps) {
 
         {/* View Public Site */}
         <Button variant="ghost" size="sm" className="hidden sm:flex" asChild>
-          <Link to={`/gym/${gym?.slug}`} target="_blank">
+          <Link to={`/gym-portal/${gym?.id}`} target="_blank">
             <ExternalLink className="mr-2 h-4 w-4" />
             View Site
           </Link>
@@ -115,7 +115,7 @@ export function GymAdminHeader({ onMenuToggle }: GymAdminHeaderProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to={`/gym/${gym?.slug}/admin/settings`}>
+              <Link to={`/gym-admin/${gym?.id}/settings`}>
                 <Settings className="mr-2 h-4 w-4" />
                 Gym Settings
               </Link>
