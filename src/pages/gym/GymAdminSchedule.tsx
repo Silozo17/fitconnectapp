@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useGymClasses, useGymClassTypes } from "@/hooks/gym/useGymClasses";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useClassBooking } from "@/hooks/gym/useClassBooking";
+import { useGym } from "@/contexts/GymContext";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { GymClassCard } from "@/components/gym/classes/GymClassCard";
+import { ClassBookingDialog } from "@/components/gym/classes/ClassBookingDialog";
+import { ClassAttendanceSheet } from "@/components/gym/classes/ClassAttendanceSheet";
 import {
   format,
   startOfWeek,
@@ -27,15 +32,17 @@ import {
   ChevronRight,
   Plus,
   Calendar,
-  Users,
-  Clock,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function GymAdminSchedule() {
   const { slug } = useParams<{ slug: string }>();
+  const { gym, isStaff } = useGym();
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedClassType, setSelectedClassType] = useState<string>("all");
+  const [selectedClass, setSelectedClass] = useState<any>(null);
+  const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
+  const [attendanceSheetOpen, setAttendanceSheetOpen] = useState(false);
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -47,6 +54,7 @@ export default function GymAdminSchedule() {
   });
 
   const { data: classTypes } = useGymClassTypes();
+  const { isBooked, getBooking } = useClassBooking(gym?.id || "");
 
   const weekDays = useMemo(() => {
     return eachDayOfInterval({ start: weekStart, end: weekEnd });
@@ -68,6 +76,32 @@ export default function GymAdminSchedule() {
   const goToNextWeek = () => setCurrentWeek(addWeeks(currentWeek, 1));
   const goToToday = () => setCurrentWeek(new Date());
 
+  const handleClassClick = (classItem: any) => {
+    setSelectedClass({
+      ...classItem,
+      gym_id: gym?.id,
+      max_capacity: classItem.capacity,
+      current_bookings: classItem.booked_count,
+      class_type: classItem.class_type,
+      instructor: classItem.instructor ? {
+        first_name: classItem.instructor.display_name?.split(" ")[0] || null,
+        last_name: classItem.instructor.display_name?.split(" ").slice(1).join(" ") || null,
+      } : null,
+      location: classItem.location,
+    });
+    setBookingDialogOpen(true);
+  };
+
+  const handleViewAttendance = (classItem: any) => {
+    setSelectedClass({
+      ...classItem,
+      max_capacity: classItem.capacity,
+      current_bookings: classItem.booked_count,
+      class_type: classItem.class_type,
+    });
+    setAttendanceSheetOpen(true);
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
@@ -78,10 +112,12 @@ export default function GymAdminSchedule() {
             View and manage your class schedule.
           </p>
         </div>
-        <Button>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Class
-        </Button>
+        {isStaff && (
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Class
+          </Button>
+        )}
       </div>
 
       {/* Controls */}
@@ -131,7 +167,7 @@ export default function GymAdminSchedule() {
       </Card>
 
       {/* Schedule Grid */}
-      <div className="grid grid-cols-7 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-7 gap-4">
         {weekDays.map((day) => {
           const dateKey = format(day, "yyyy-MM-dd");
           const dayClasses = classesByDay[dateKey] || [];
@@ -141,7 +177,7 @@ export default function GymAdminSchedule() {
             <Card
               key={dateKey}
               className={cn(
-                "min-h-[400px]",
+                "min-h-[300px] md:min-h-[400px]",
                 today && "ring-2 ring-primary"
               )}
             >
@@ -170,8 +206,8 @@ export default function GymAdminSchedule() {
               <CardContent className="space-y-2">
                 {isLoading ? (
                   <>
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
                   </>
                 ) : dayClasses.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-8 text-center">
@@ -180,51 +216,33 @@ export default function GymAdminSchedule() {
                   </div>
                 ) : (
                   dayClasses.map((classItem) => {
-                    const startTime = new Date(classItem.start_time);
-                    const isCancelled = classItem.status === "cancelled";
-                    const spotsLeft = classItem.capacity - classItem.booked_count;
-
+                    const booking = getBooking(classItem.id);
+                    
                     return (
-                      <div
+                      <GymClassCard
                         key={classItem.id}
-                        className={cn(
-                          "p-2 rounded-lg border text-xs cursor-pointer hover:shadow-sm transition-shadow",
-                          isCancelled && "opacity-50"
-                        )}
-                        style={{
-                          borderLeftWidth: 3,
-                          borderLeftColor: classItem.class_type?.color || "#FF6B35",
+                        classInfo={{
+                          id: classItem.id,
+                          gym_id: gym?.id || "",
+                          start_time: classItem.start_time,
+                          end_time: classItem.end_time,
+                          max_capacity: classItem.capacity,
+                          current_bookings: classItem.booked_count,
+                          status: classItem.status,
+                          notes: null,
+                          class_type: classItem.class_type,
+                          instructor: classItem.instructor ? {
+                            first_name: classItem.instructor.display_name?.split(" ")[0] || null,
+                            last_name: classItem.instructor.display_name?.split(" ").slice(1).join(" ") || null,
+                          } : null,
+                          location: classItem.location,
                         }}
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-medium text-[10px] uppercase text-muted-foreground">
-                            {format(startTime, "HH:mm")}
-                          </span>
-                          {isCancelled && (
-                            <Badge variant="destructive" className="text-[8px] px-1 py-0">
-                              Cancelled
-                            </Badge>
-                          )}
-                        </div>
-                        <p className="font-medium truncate">{classItem.name}</p>
-                        {classItem.instructor && (
-                          <p className="text-muted-foreground truncate">
-                            {classItem.instructor.display_name}
-                          </p>
-                        )}
-                        <div className="flex items-center gap-2 mt-1 text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Users className="h-3 w-3" />
-                            <span>
-                              {classItem.booked_count}/{classItem.capacity}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{classItem.duration_minutes}m</span>
-                          </div>
-                        </div>
-                      </div>
+                        isStaff={isStaff}
+                        onBook={() => handleClassClick(classItem)}
+                        onViewAttendance={() => handleViewAttendance(classItem)}
+                        isBooked={isBooked(classItem.id)}
+                        bookingStatus={booking?.status}
+                      />
                     );
                   })
                 )}
@@ -233,6 +251,20 @@ export default function GymAdminSchedule() {
           );
         })}
       </div>
+
+      {/* Booking Dialog */}
+      <ClassBookingDialog
+        classInfo={selectedClass}
+        open={bookingDialogOpen}
+        onOpenChange={setBookingDialogOpen}
+      />
+
+      {/* Attendance Sheet */}
+      <ClassAttendanceSheet
+        classInfo={selectedClass}
+        open={attendanceSheetOpen}
+        onOpenChange={setAttendanceSheetOpen}
+      />
     </div>
   );
 }

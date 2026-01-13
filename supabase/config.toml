@@ -341,3 +341,6 @@ verify_jwt = true
 
 [functions.gym-verify-stripe-account]
 verify_jwt = true
+
+[functions.gym-stripe-webhook]
+verify_jwt = false
