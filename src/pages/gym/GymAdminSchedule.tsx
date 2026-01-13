@@ -17,6 +17,7 @@ import {
 import { GymClassCard } from "@/components/gym/classes/GymClassCard";
 import { ClassBookingDialog } from "@/components/gym/classes/ClassBookingDialog";
 import { ClassAttendanceSheet } from "@/components/gym/classes/ClassAttendanceSheet";
+import { ClassFormDialog } from "@/components/gym/classes/ClassFormDialog";
 import {
   format,
   startOfWeek,
@@ -43,6 +44,8 @@ export default function GymAdminSchedule() {
   const [selectedClass, setSelectedClass] = useState<any>(null);
   const [bookingDialogOpen, setBookingDialogOpen] = useState(false);
   const [attendanceSheetOpen, setAttendanceSheetOpen] = useState(false);
+  const [classFormOpen, setClassFormOpen] = useState(false);
+  const [editingClass, setEditingClass] = useState<any>(null);
 
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -113,7 +116,10 @@ export default function GymAdminSchedule() {
           </p>
         </div>
         {isStaff && (
-          <Button>
+          <Button onClick={() => {
+            setEditingClass(null);
+            setClassFormOpen(true);
+          }}>
             <Plus className="mr-2 h-4 w-4" />
             Add Class
           </Button>
@@ -264,6 +270,13 @@ export default function GymAdminSchedule() {
         classInfo={selectedClass}
         open={attendanceSheetOpen}
         onOpenChange={setAttendanceSheetOpen}
+      />
+
+      {/* Class Form Dialog */}
+      <ClassFormDialog
+        open={classFormOpen}
+        onOpenChange={setClassFormOpen}
+        classToEdit={editingClass}
       />
     </div>
   );

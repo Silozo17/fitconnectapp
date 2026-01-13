@@ -141,6 +141,8 @@ const GymAdminSchedule = lazy(() => import('@/pages/gym/GymAdminSchedule'));
 const GymAdminClasses = lazy(() => import('@/pages/gym/GymAdminClasses'));
 const GymAdminMemberships = lazy(() => import('@/pages/gym/GymAdminMemberships'));
 const GymAdminSettings = lazy(() => import('@/pages/gym/GymAdminSettings'));
+const GymMemberPortal = lazy(() => import('@/pages/gym/GymMemberPortal'));
+const GymCheckIn = lazy(() => import('@/pages/gym/GymCheckIn'));
 
 // Shared Dashboard Pages
 const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
@@ -1874,6 +1876,26 @@ const App = () => (
                                   <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
                                       <GymAdminSettings />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              
+                              {/* Gym Member Routes */}
+                              <Route path="/gym/:slug/portal" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymMemberPortal />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym/:slug/checkin" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymCheckIn />
                                     </Suspense>
                                   </ProtectedRoute>
                                 </AppLocaleWrapper>
