@@ -26,8 +26,9 @@
     "title": "Filters",
     "coachType": "Coach Type",
     "priceRange": "Price Range",
-    "minPrice": "Min Price",
-    "maxPrice": "Max Price",
+    "minPrice": "Min",
+    "maxPrice": "Max",
+    "noLimit": "No limit",
     "sessionType": "Session Type",
     "onlineOnly": "Online Only",
     "inPersonOnly": "In-Person Only",
@@ -37,7 +38,10 @@
     "specialty": "Specialty",
     "availability": "Availability",
     "onlineSessions": "Online Sessions",
-    "inPersonSessions": "In-Person Sessions"
+    "inPersonSessions": "In-Person Sessions",
+    "badges": "Coach Badges",
+    "verifiedOnly": "Verified only",
+    "qualifiedOnly": "Qualified only"
   },
 
   "card": {

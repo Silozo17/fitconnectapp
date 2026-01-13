@@ -19,9 +19,11 @@ const Coaches = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
-  const [priceRange, setPriceRange] = useState<{ min: number; max: number } | undefined>();
+  const [priceRange, setPriceRange] = useState<{ min?: number; max?: number } | undefined>();
   const [onlineOnly, setOnlineOnly] = useState(false);
   const [inPersonOnly, setInPersonOnly] = useState(false);
+  const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [qualifiedOnly, setQualifiedOnly] = useState(false);
 
   // Modal state
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
@@ -39,6 +41,8 @@ const Coaches = () => {
     priceRange,
     onlineOnly,
     inPersonOnly,
+    verifiedOnly,
+    qualifiedOnly,
     countryCode: locationCode,
   });
 
@@ -152,6 +156,10 @@ const Coaches = () => {
                         onOnlineOnlyChange={setOnlineOnly}
                         inPersonOnly={inPersonOnly}
                         onInPersonOnlyChange={setInPersonOnly}
+                        verifiedOnly={verifiedOnly}
+                        onVerifiedOnlyChange={setVerifiedOnly}
+                        qualifiedOnly={qualifiedOnly}
+                        onQualifiedOnlyChange={setQualifiedOnly}
                       />
                     </div>
                   </SheetContent>
@@ -173,6 +181,10 @@ const Coaches = () => {
                     onOnlineOnlyChange={setOnlineOnly}
                     inPersonOnly={inPersonOnly}
                     onInPersonOnlyChange={setInPersonOnly}
+                    verifiedOnly={verifiedOnly}
+                    onVerifiedOnlyChange={setVerifiedOnly}
+                    qualifiedOnly={qualifiedOnly}
+                    onQualifiedOnlyChange={setQualifiedOnly}
                   />
                 </aside>
               )}

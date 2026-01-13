@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,16 +13,22 @@ import { COACH_TYPE_CATEGORIES, getCoachTypesByCategory } from "@/constants/coac
 import { LocationFilter } from "./LocationFilter";
 import { LocationData } from "@/types/ranking";
 import { useTranslation } from "@/hooks/useTranslation";
+import { BadgeCheck, Award } from "lucide-react";
 
 interface CoachFiltersProps {
   selectedTypes: string[];
   onTypesChange: (types: string[]) => void;
-  priceRange?: { min: number; max: number };
-  onPriceRangeChange: (range: { min: number; max: number } | undefined) => void;
+  priceRange?: { min?: number; max?: number };
+  onPriceRangeChange: (range: { min?: number; max?: number } | undefined) => void;
   onlineOnly: boolean;
   onOnlineOnlyChange: (value: boolean) => void;
   inPersonOnly: boolean;
   onInPersonOnlyChange: (value: boolean) => void;
+  // New filter props
+  verifiedOnly: boolean;
+  onVerifiedOnlyChange: (value: boolean) => void;
+  qualifiedOnly: boolean;
+  onQualifiedOnlyChange: (value: boolean) => void;
   // Location filter props
   autoLocation?: LocationData | null;
   manualLocation?: LocationData | null;
@@ -42,6 +48,10 @@ const CoachFilters = ({
   onOnlineOnlyChange,
   inPersonOnly,
   onInPersonOnlyChange,
+  verifiedOnly,
+  onVerifiedOnlyChange,
+  qualifiedOnly,
+  onQualifiedOnlyChange,
   autoLocation,
   manualLocation,
   isAutoLocationLoading,
@@ -50,6 +60,7 @@ const CoachFilters = ({
   variant = 'card',
 }: CoachFiltersProps) => {
   const { t } = useTranslation('coaches');
+  
   const handleTypeToggle = (typeId: string) => {
     if (selectedTypes.includes(typeId)) {
       onTypesChange(selectedTypes.filter((t) => t !== typeId));
@@ -58,8 +69,24 @@ const CoachFilters = ({
     }
   };
 
-  const handlePriceChange = (values: number[]) => {
-    onPriceRangeChange({ min: values[0], max: values[1] });
+  const handleMinPriceChange = (value: string) => {
+    const minVal = value === "" ? undefined : Number(value);
+    // If both are empty, clear the filter entirely
+    if (minVal === undefined && priceRange?.max === undefined) {
+      onPriceRangeChange(undefined);
+    } else {
+      onPriceRangeChange({ min: minVal, max: priceRange?.max });
+    }
+  };
+
+  const handleMaxPriceChange = (value: string) => {
+    const maxVal = value === "" ? undefined : Number(value);
+    // If both are empty, clear the filter entirely
+    if (maxVal === undefined && priceRange?.min === undefined) {
+      onPriceRangeChange(undefined);
+    } else {
+      onPriceRangeChange({ min: priceRange?.min, max: maxVal });
+    }
   };
 
   const clearFilters = () => {
@@ -67,11 +94,19 @@ const CoachFilters = ({
     onPriceRangeChange(undefined);
     onOnlineOnlyChange(false);
     onInPersonOnlyChange(false);
+    onVerifiedOnlyChange(false);
+    onQualifiedOnlyChange(false);
     onClearLocation?.();
   };
 
   const hasActiveFilters =
-    selectedTypes.length > 0 || priceRange || onlineOnly || inPersonOnly || manualLocation !== null;
+    selectedTypes.length > 0 || 
+    priceRange !== undefined || 
+    onlineOnly || 
+    inPersonOnly || 
+    verifiedOnly || 
+    qualifiedOnly ||
+    manualLocation !== null;
 
   // Filter content (shared between variants)
   const filterContent = (
@@ -142,19 +177,39 @@ const CoachFilters = ({
         </Accordion>
       </div>
 
-      {/* Price Range */}
+      {/* Price Range - Min/Max Input Fields */}
       <div>
         <h4 className="font-medium mb-3 text-sm">{t('filters.priceRange')}</h4>
-        <Slider
-          value={[priceRange?.min ?? 0, priceRange?.max ?? 500]}
-          onValueChange={handlePriceChange}
-          max={500}
-          step={10}
-          className="mb-2"
-        />
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>£{priceRange?.min ?? 0}</span>
-          <span>£{priceRange?.max ?? 500}+</span>
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <Label htmlFor={`${variant}-min-price`} className="text-xs text-muted-foreground">
+              {t('filters.minPrice')}
+            </Label>
+            <Input
+              id={`${variant}-min-price`}
+              type="number"
+              placeholder="£0"
+              min={0}
+              value={priceRange?.min ?? ""}
+              onChange={(e) => handleMinPriceChange(e.target.value)}
+              className="h-9 mt-1"
+            />
+          </div>
+          <span className="text-muted-foreground pt-5">-</span>
+          <div className="flex-1">
+            <Label htmlFor={`${variant}-max-price`} className="text-xs text-muted-foreground">
+              {t('filters.maxPrice')}
+            </Label>
+            <Input
+              id={`${variant}-max-price`}
+              type="number"
+              placeholder={t('filters.noLimit') || 'No limit'}
+              min={0}
+              value={priceRange?.max ?? ""}
+              onChange={(e) => handleMaxPriceChange(e.target.value)}
+              className="h-9 mt-1"
+            />
+          </div>
         </div>
       </div>
 
@@ -180,6 +235,35 @@ const CoachFilters = ({
             />
             <Label htmlFor={`${variant}-inPerson`} className="text-sm cursor-pointer">
               {t('filters.inPersonSessions')}
+            </Label>
+          </div>
+        </div>
+      </div>
+
+      {/* Coach Badges - Verified & Qualified */}
+      <div>
+        <h4 className="font-medium mb-3 text-sm">{t('filters.badges') || 'Coach Badges'}</h4>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id={`${variant}-verified`}
+              checked={verifiedOnly}
+              onCheckedChange={(checked) => onVerifiedOnlyChange(checked as boolean)}
+            />
+            <Label htmlFor={`${variant}-verified`} className="text-sm cursor-pointer flex items-center gap-1.5">
+              <BadgeCheck className="w-4 h-4 text-blue-500" />
+              {t('filters.verifiedOnly') || 'Verified only'}
+            </Label>
+          </div>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id={`${variant}-qualified`}
+              checked={qualifiedOnly}
+              onCheckedChange={(checked) => onQualifiedOnlyChange(checked as boolean)}
+            />
+            <Label htmlFor={`${variant}-qualified`} className="text-sm cursor-pointer flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-amber-500" />
+              {t('filters.qualifiedOnly') || 'Qualified only'}
             </Label>
           </div>
         </div>

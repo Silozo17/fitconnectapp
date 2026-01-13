@@ -78,12 +78,16 @@ export interface UseCoachMarketplaceOptions {
   search?: string;
   /** Filter by specific coach types */
   coachTypes?: string[];
-  /** Filter by price range */
-  priceRange?: { min: number; max: number };
+  /** Filter by price range - supports partial min/max */
+  priceRange?: { min?: number; max?: number };
   /** Show only online-available coaches */
   onlineOnly?: boolean;
   /** Show only in-person-available coaches */
   inPersonOnly?: boolean;
+  /** Show only verified coaches */
+  verifiedOnly?: boolean;
+  /** Show only coaches with verified qualifications */
+  qualifiedOnly?: boolean;
   /** User latitude for distance-based bucketing */
   userLat?: number;
   /** User longitude for distance-based bucketing */
@@ -113,6 +117,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.priceRange?.max ?? null,
     options.onlineOnly ?? false,
     options.inPersonOnly ?? false,
+    options.verifiedOnly ?? false,
+    options.qualifiedOnly ?? false,
     options.userLat ?? null,
     options.userLng ?? null,
     options.userCity ?? null,
@@ -127,6 +133,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     options.priceRange?.max,
     options.onlineOnly,
     options.inPersonOnly,
+    options.verifiedOnly,
+    options.qualifiedOnly,
     options.userLat,
     options.userLng,
     options.userCity,
@@ -147,6 +155,8 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         p_max_price: options.priceRange?.max ?? null,
         p_online_only: options.onlineOnly ?? false,
         p_in_person_only: options.inPersonOnly ?? false,
+        p_verified_only: options.verifiedOnly ?? false,
+        p_qualified_only: options.qualifiedOnly ?? false,
         p_user_lat: options.userLat ?? null,
         p_user_lng: options.userLng ?? null,
         p_user_city: options.userCity ?? null,
