@@ -133,6 +133,14 @@ const CoachWearableDashboard = lazy(() => import('@/pages/dashboard/coach/CoachW
 const CoachClientComparison = lazy(() => import('@/pages/dashboard/coach/CoachClientComparison'));
 const CoachCaseStudies = lazy(() => import('@/pages/dashboard/coach/CoachCaseStudies'));
 
+// Gym Admin Pages
+const GymAdminDashboard = lazy(() => import('@/pages/gym/GymAdminDashboard'));
+const GymAdminMembers = lazy(() => import('@/pages/gym/GymAdminMembers'));
+const GymAdminSchedule = lazy(() => import('@/pages/gym/GymAdminSchedule'));
+const GymAdminClasses = lazy(() => import('@/pages/gym/GymAdminClasses'));
+const GymAdminMemberships = lazy(() => import('@/pages/gym/GymAdminMemberships'));
+const GymAdminSettings = lazy(() => import('@/pages/gym/GymAdminSettings'));
+
 // Shared Dashboard Pages
 const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
 
@@ -1804,6 +1812,62 @@ const App = () => (
                                   </ProtectedRoute>
                                 } />
                               </Route>
+
+                              {/* Gym Admin Routes - outside dashboard, uses own context */}
+                              <Route path="/gym/:slug/admin" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminDashboard />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym/:slug/admin/members" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminMembers />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym/:slug/admin/schedule" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminSchedule />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym/:slug/admin/classes" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminClasses />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym/:slug/admin/memberships" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminMemberships />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym/:slug/admin/settings" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminSettings />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
                               
                               {/* Website routes - WITH locale URL logic (must be last) */}
                               <Route path="/*" element={<WebsiteRouter />} />
