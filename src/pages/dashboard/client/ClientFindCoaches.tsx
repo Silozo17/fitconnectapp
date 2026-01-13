@@ -10,11 +10,14 @@ import CoachCard from "@/components/coaches/CoachCard";
 import CoachFilters from "@/components/coaches/CoachFilters";
 import BookSessionModal from "@/components/booking/BookSessionModal";
 import RequestConnectionModal from "@/components/coaches/RequestConnectionModal";
+import { BestMatchToggle } from "@/components/coaches/BestMatchToggle";
 import { useCoachMarketplace, type MarketplaceCoach } from "@/hooks/useCoachMarketplace";
 import { useCountry } from "@/hooks/useCountry";
 import { useUserLocalePreference } from "@/hooks/useUserLocalePreference";
+import { useUserLocation } from "@/hooks/useUserLocation";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 import { CoachCardSkeleton } from "@/components/dashboard/CoachCardSkeleton";
+import type { UserLocationData } from "@/types/location";
 
 const ClientFindCoaches = () => {
   const { t } = useTranslation("client");
@@ -26,6 +29,14 @@ const ClientFindCoaches = () => {
   const [inPersonOnly, setInPersonOnly] = useState(false);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [qualifiedOnly, setQualifiedOnly] = useState(false);
+  const [minRating, setMinRating] = useState<number | undefined>(undefined);
+
+  // Best match ranking toggle - OFF by default
+  const [useRanking, setUseRanking] = useState(false);
+  const [isActivatingRanking, setIsActivatingRanking] = useState(false);
+
+  // Manual location filter state (for city selection)
+  const [manualLocation, setManualLocation] = useState<UserLocationData | null>(null);
 
   // Modal state
   const [bookingCoach, setBookingCoach] = useState<MarketplaceCoach | null>(null);
@@ -37,23 +48,54 @@ const ClientFindCoaches = () => {
   // Get user's saved location preference from DB (for authenticated users)
   const { countryPreference: userCountryPreference } = useUserLocalePreference();
 
+  // User location hook for GPS/IP detection
+  const { 
+    location: userLocation, 
+    isRequestingPrecise,
+    requestPreciseLocation,
+    accuracyLevel,
+  } = useUserLocation();
+
   /**
    * Effective country code priority:
-   * 1. User's saved preference in DB (from dashboard settings)
-   * 2. Context country (geo-detection fallback)
+   * 1. Manual location selection (city picker)
+   * 2. User's saved preference in DB (from dashboard settings)
+   * 3. Context country (geo-detection fallback)
    */
-  const effectiveCountryCode = userCountryPreference ?? contextCountryCode;
+  const effectiveCountryCode = manualLocation?.countryCode || userCountryPreference || contextCountryCode;
 
-  // Fetch coaches with STRICT country filtering
+  // Ranking location variables - manual location takes precedence
+  const rankingCity = manualLocation?.city || userLocation?.city || undefined;
+  const rankingRegion = manualLocation?.region || userLocation?.region || undefined;
+  const rankingLat = manualLocation?.lat ?? userLocation?.lat ?? undefined;
+  const rankingLng = manualLocation?.lng ?? userLocation?.lng ?? undefined;
+
+  const hasLocationForRanking = !!(rankingCity || (rankingLat && rankingLng));
+
+  const rankingLocationDisplay = rankingCity 
+    ? `${rankingCity}${userLocation?.country ? `, ${userLocation.country}` : ''}`
+    : userLocation?.country || null;
+
+  // Fetch coaches with location-aware filtering and ranking
   const { data: coaches, isLoading, error } = useCoachMarketplace({
     search: searchQuery || undefined,
+    countryCode: effectiveCountryCode,
+    // Location filters - pass city/region for filtering
+    userCity: manualLocation?.city || undefined,
+    userRegion: manualLocation?.region || undefined,
+    // GPS coords only used when ranking is enabled
+    userLat: useRanking ? rankingLat : undefined,
+    userLng: useRanking ? rankingLng : undefined,
+    // Type and availability filters
     coachTypes: selectedTypes.length > 0 ? selectedTypes : undefined,
     priceRange,
     onlineOnly,
     inPersonOnly,
     verifiedOnly,
     qualifiedOnly,
-    countryCode: effectiveCountryCode,
+    minRating,
+    // Enable ranking when toggle is on AND we have location
+    useRanking: useRanking && hasLocationForRanking,
   });
 
   const handleBook = useCallback((coach: MarketplaceCoach) => {
@@ -63,6 +105,30 @@ const ClientFindCoaches = () => {
   const handleRequestConnection = useCallback((coach: MarketplaceCoach) => {
     setConnectionCoach(coach);
   }, []);
+
+  // Location filter handlers
+  const handleLocationSelect = useCallback((location: UserLocationData) => {
+    setManualLocation(location);
+  }, []);
+
+  const handleClearLocation = useCallback(() => {
+    setManualLocation(null);
+  }, []);
+
+  // Best match toggle handler
+  const handleBestMatchToggle = useCallback(async (enabled: boolean) => {
+    if (enabled) {
+      setUseRanking(true);
+      // Request precise location if we don't have one yet
+      if (!hasLocationForRanking && accuracyLevel !== 'precise' && accuracyLevel !== 'manual') {
+        setIsActivatingRanking(true);
+        await requestPreciseLocation();
+        setIsActivatingRanking(false);
+      }
+    } else {
+      setUseRanking(false);
+    }
+  }, [hasLocationForRanking, accuracyLevel, requestPreciseLocation]);
 
   // Get country display name
   const countryDisplay = effectiveCountryCode
@@ -149,6 +215,12 @@ const ClientFindCoaches = () => {
                   onVerifiedOnlyChange={setVerifiedOnly}
                   qualifiedOnly={qualifiedOnly}
                   onQualifiedOnlyChange={setQualifiedOnly}
+                  minRating={minRating}
+                  onMinRatingChange={setMinRating}
+                  autoLocation={null}
+                  manualLocation={manualLocation}
+                  onLocationSelect={handleLocationSelect}
+                  onClearLocation={handleClearLocation}
                 />
               </div>
             </SheetContent>
@@ -174,12 +246,29 @@ const ClientFindCoaches = () => {
               onVerifiedOnlyChange={setVerifiedOnly}
               qualifiedOnly={qualifiedOnly}
               onQualifiedOnlyChange={setQualifiedOnly}
+              minRating={minRating}
+              onMinRatingChange={setMinRating}
+              autoLocation={null}
+              manualLocation={manualLocation}
+              onLocationSelect={handleLocationSelect}
+              onClearLocation={handleClearLocation}
             />
           </aside>
         )}
 
         {/* Coaches Grid */}
         <div className="flex-1">
+          {/* Best Match Toggle */}
+          <div className="mb-4">
+            <BestMatchToggle
+              isEnabled={useRanking}
+              onToggle={handleBestMatchToggle}
+              isLoading={isActivatingRanking || isRequestingPrecise}
+              hasLocation={hasLocationForRanking}
+              locationDisplay={useRanking ? rankingLocationDisplay : null}
+            />
+          </div>
+
           {isLoading ? (
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
