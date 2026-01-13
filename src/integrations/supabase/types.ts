@@ -8721,11 +8721,13 @@ export type Database = {
           p_min_price?: number
           p_offset?: number
           p_online_only?: boolean
+          p_qualified_only?: boolean
           p_search_term?: string
           p_user_city?: string
           p_user_lat?: number
           p_user_lng?: number
           p_user_region?: string
+          p_verified_only?: boolean
         }
         Returns: {
           avg_rating: number

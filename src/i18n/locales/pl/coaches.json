@@ -26,8 +26,9 @@
     "title": "Filtry",
     "coachType": "Typ trenera",
     "priceRange": "Zakres cenowy",
-    "minPrice": "Cena minimalna",
-    "maxPrice": "Cena maksymalna",
+    "minPrice": "Min",
+    "maxPrice": "Maks",
+    "noLimit": "Bez limitu",
     "sessionType": "Typ sesji",
     "onlineOnly": "Tylko online",
     "inPersonOnly": "Tylko osobiście",
@@ -37,7 +38,10 @@
     "specialty": "Specjalizacja",
     "availability": "Dostępność",
     "onlineSessions": "Sesje online",
-    "inPersonSessions": "Sesje osobiście"
+    "inPersonSessions": "Sesje osobiście",
+    "badges": "Odznaki trenera",
+    "verifiedOnly": "Tylko zweryfikowani",
+    "qualifiedOnly": "Tylko z kwalifikacjami"
   },
 
   "card": {
