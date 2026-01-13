@@ -98,7 +98,7 @@ export interface UseCoachMarketplaceOptions {
   /** User longitude for distance calculations */
   userLng?: number;
   /** 
-   * ⚠️ OPT-IN RANKING: When true AND location is available, uses get_ranked_coaches_v1.
+   * ⚠️ OPT-IN RANKING: When true AND location is available, enables ranked ordering.
    * This must be explicitly set by user action (e.g., "Best match" toggle).
    * Default: false - uses stable ordering.
    */
@@ -165,7 +165,7 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
     // Flattened filters (primitives only)
     options.onlineOnly ?? false,
     options.inPersonOnly ?? false,
-    JSON.stringify(options.coachTypes ?? []),
+    JSON.stringify([...(options.coachTypes ?? [])].sort()),
     options.priceRange?.min ?? null,
     options.priceRange?.max ?? null,
     options.verifiedOnly ?? false,
