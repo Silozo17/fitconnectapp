@@ -108,6 +108,12 @@ verify_jwt = true
 [functions.delete-account]
 verify_jwt = true
 
+[functions.send-booking-request-to-coach]
+verify_jwt = false
+
+[functions.video-delete-meeting]
+verify_jwt = true
+
 [functions.generate-doc-screenshot]
 verify_jwt = true
 
