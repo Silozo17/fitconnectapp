@@ -8700,6 +8700,39 @@ export type Database = {
         Returns: string
       }
       generate_unique_username: { Args: { base_name: string }; Returns: string }
+      get_base_marketplace_coaches_v1: {
+        Args: {
+          p_country_code?: string
+          p_limit?: number
+          p_min_rating?: number
+        }
+        Returns: {
+          avg_rating: number
+          bio: string
+          card_image_url: string
+          coach_types: string[]
+          created_at: string
+          currency: string
+          display_name: string
+          gym_affiliation: string
+          hourly_rate: number
+          id: string
+          in_person_available: boolean
+          is_sponsored: boolean
+          is_verified: boolean
+          location: string
+          location_city: string
+          location_country: string
+          location_country_code: string
+          location_region: string
+          online_available: boolean
+          profile_image_url: string
+          review_count: number
+          username: string
+          verified_at: string
+          verified_qualification_count: number
+        }[]
+      }
       get_client_leaderboard_rank: {
         Args: { client_id_param: string }
         Returns: number
