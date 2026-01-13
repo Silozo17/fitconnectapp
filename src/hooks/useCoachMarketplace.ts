@@ -2,7 +2,7 @@
  * Hook for fetching coaches for the marketplace (/coaches and /dashboard/client/find-coaches)
  * 
  * STABILISATION: Uses get_simple_coaches with 2 parameters only.
- * Returns minimal fields: id, username, display_name, profile_image_url, location_country, location_country_code, created_at
+ * Maps ALL fields returned by the RPC for coach card display.
  * 
  * DO NOT add joins, ranking, boost logic, or any complexity.
  * This is Layer 0: Visibility only.
@@ -12,7 +12,8 @@ import { useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { isDespia } from "@/lib/despia";
 
-// Minimal coach type matching exactly what get_simple_coaches returns
+// Coach type matching what get_simple_coaches returns
+// Core fields required, aggregated fields optional for compatibility with direct table queries
 export type MarketplaceCoach = {
   id: string;
   username: string | null;
@@ -21,23 +22,33 @@ export type MarketplaceCoach = {
   location_country: string | null;
   location_country_code: string | null;
   created_at: string;
-  // Fields NOT returned by get_simple_coaches - kept for type compatibility
+  // Display fields from RPC
   bio?: string | null;
   coach_types?: string[] | null;
-  certifications?: unknown | null;
-  experience_years?: number | null;
   hourly_rate?: number | null;
   currency?: string | null;
-  location?: string | null;
-  location_city?: string | null;
-  location_region?: string | null;
   online_available?: boolean | null;
   in_person_available?: boolean | null;
+  location?: string | null;
+  location_city?: string | null;
   card_image_url?: string | null;
-  booking_mode?: string | null;
   is_verified?: boolean | null;
   verified_at?: string | null;
   gym_affiliation?: string | null;
+  // Aggregated fields from RPC (optional for direct table queries)
+  avg_rating?: number | null;
+  review_count?: number | null;
+  is_sponsored?: boolean | null;
+  verified_qualification_count?: number;
+  // Backwards compatibility aliases
+  rating?: number | null;
+  reviews_count?: number | null;
+  is_boosted?: boolean | null;
+  // Type compatibility fields (not from RPC)
+  location_region?: string | null;
+  certifications?: unknown | null;
+  experience_years?: number | null;
+  booking_mode?: string | null;
   marketplace_visible?: boolean | null;
   selected_avatar_id?: string | null;
   onboarding_completed?: boolean;
@@ -54,14 +65,7 @@ export type MarketplaceCoach = {
     rarity: string;
     image_url: string | null;
   } | null;
-  rating?: number | null;
-  avg_rating?: number | null;
-  reviews_count?: number | null;
-  review_count?: number | null;
-  is_sponsored?: boolean | null;
-  is_boosted?: boolean | null;
   tags?: string[] | null;
-  verified_qualification_count?: number;
   location_bucket?: number;
   platform_score?: number;
 };
@@ -73,7 +77,7 @@ export interface UseCoachMarketplaceOptions {
   limit?: number;
   /** Whether the query should execute (default: true) */
   enabled?: boolean;
-  // Remaining options kept for interface compatibility but NOT USED
+  // Remaining options kept for interface compatibility but NOT USED by get_simple_coaches
   offset?: number;
   search?: string;
   coachTypes?: string[];
@@ -118,15 +122,39 @@ export const useCoachMarketplace = (options: UseCoachMarketplaceOptions = {}): U
         throw error;
       }
 
-      // Direct mapping - get_simple_coaches returns minimal fields
+      // Map ALL fields returned by get_simple_coaches for coach card display
       const coaches: MarketplaceCoach[] = (data || []).map((row: any) => ({
+        // Core identity
         id: row.id,
         username: row.username,
         display_name: row.display_name,
         profile_image_url: row.profile_image_url,
+        created_at: row.created_at,
+        // Location
+        location: row.location,
+        location_city: row.location_city,
         location_country: row.location_country,
         location_country_code: row.location_country_code,
-        created_at: row.created_at,
+        // Display fields
+        bio: row.bio,
+        coach_types: row.coach_types,
+        hourly_rate: row.hourly_rate,
+        currency: row.currency,
+        online_available: row.online_available,
+        in_person_available: row.in_person_available,
+        card_image_url: row.card_image_url,
+        is_verified: row.is_verified,
+        verified_at: row.verified_at,
+        gym_affiliation: row.gym_affiliation,
+        // Aggregated fields
+        avg_rating: row.avg_rating ?? 0,
+        review_count: row.review_count ?? 0,
+        is_sponsored: row.is_sponsored ?? false,
+        verified_qualification_count: row.verified_qualification_count ?? 0,
+        // Backwards compatibility aliases
+        rating: row.avg_rating ?? 0,
+        reviews_count: row.review_count ?? 0,
+        is_boosted: row.is_sponsored ?? false,
       }));
 
       return coaches;
