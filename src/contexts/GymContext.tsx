@@ -42,6 +42,15 @@ export interface GymProfile {
   updated_at: string;
 }
 
+export interface GymLocation {
+  id: string;
+  gym_id: string;
+  name: string;
+  address_line1: string | null;
+  city: string | null;
+  is_primary: boolean;
+}
+
 export interface GymStaff {
   id: string;
   gym_id: string;
@@ -51,6 +60,8 @@ export interface GymStaff {
   display_name: string | null;
   job_title: string | null;
   status: string;
+  assigned_location_ids: string[] | null;
+  permissions: Record<string, boolean> | null;
 }
 
 interface GymContextType {
@@ -65,6 +76,10 @@ interface GymContextType {
   staffRecord: GymStaff | null;
   refetch: () => void;
   setGymId: (id: string | null) => void;
+  // Location context
+  currentLocationId: string | null;
+  setCurrentLocationId: (id: string | null) => void;
+  availableLocations: GymLocation[];
 }
 
 const GymContext = createContext<GymContextType | undefined>(undefined);
@@ -97,6 +112,11 @@ export function GymProvider({ children, initialGymId }: GymProviderProps) {
   const [gymId, setGymIdState] = useState<string | null>(
     params.gymId ?? initialGymId ?? getStoredGymId()
   );
+  
+  // Location state
+  const [currentLocationId, setCurrentLocationIdState] = useState<string | null>(
+    localStorage.getItem("selectedGymLocationId")
+  );
 
   // Sync gymId when URL params change
   useEffect(() => {
@@ -109,6 +129,15 @@ export function GymProvider({ children, initialGymId }: GymProviderProps) {
   const setGymId = useCallback((id: string | null) => {
     setGymIdState(id);
     setStoredGymId(id);
+  }, []);
+  
+  const setCurrentLocationId = useCallback((id: string | null) => {
+    setCurrentLocationIdState(id);
+    if (id) {
+      localStorage.setItem("selectedGymLocationId", id);
+    } else {
+      localStorage.removeItem("selectedGymLocationId");
+    }
   }, []);
 
   // Fetch gym profile by ID
@@ -177,6 +206,31 @@ export function GymProvider({ children, initialGymId }: GymProviderProps) {
     enabled: !!gym?.id && !!user?.id,
   });
 
+  // Fetch gym locations
+  const { data: locations = [] } = useQuery({
+    queryKey: ["gym-locations", gym?.id],
+    queryFn: async () => {
+      if (!gym?.id) return [];
+      
+      const { data, error } = await supabase
+        .from("gym_locations")
+        .select("id, gym_id, name, address_line_1, city, is_primary")
+        .eq("gym_id", gym.id)
+        .order("is_primary", { ascending: false });
+      
+      if (error) throw error;
+      return (data || []).map(loc => ({
+        id: loc.id,
+        gym_id: loc.gym_id,
+        name: loc.name,
+        address_line1: loc.address_line_1,
+        city: loc.city,
+        is_primary: loc.is_primary,
+      })) as GymLocation[];
+    },
+    enabled: !!gym?.id,
+  });
+
   const isOwner = useMemo(() => {
     return !!gym && !!user && gym.user_id === user.id;
   }, [gym, user]);
@@ -194,6 +248,23 @@ export function GymProvider({ children, initialGymId }: GymProviderProps) {
     return staffRecord?.role ?? null;
   }, [isOwner, staffRecord]);
 
+  // Filter available locations based on role and assignment
+  const availableLocations = useMemo(() => {
+    if (!locations.length) return [];
+    
+    // Owners see all locations
+    if (isOwner) return locations;
+    
+    // Staff see only assigned locations (or all if none assigned)
+    if (staffRecord?.assigned_location_ids?.length) {
+      return locations.filter(loc => 
+        staffRecord.assigned_location_ids?.includes(loc.id)
+      );
+    }
+    
+    return locations;
+  }, [locations, isOwner, staffRecord]);
+
   const refetch = useCallback(() => {
     refetchGym();
   }, [refetchGym]);
@@ -210,7 +281,10 @@ export function GymProvider({ children, initialGymId }: GymProviderProps) {
     staffRecord,
     refetch,
     setGymId,
-  }), [gym, gymId, isLoadingGym, isLoadingStaff, gymError, isOwner, isStaff, isMember, userRole, staffRecord, refetch, setGymId]);
+    currentLocationId,
+    setCurrentLocationId,
+    availableLocations,
+  }), [gym, gymId, isLoadingGym, isLoadingStaff, gymError, isOwner, isStaff, isMember, userRole, staffRecord, refetch, setGymId, currentLocationId, setCurrentLocationId, availableLocations]);
 
   return (
     <GymContext.Provider value={value}>
