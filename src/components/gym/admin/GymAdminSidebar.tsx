@@ -20,6 +20,7 @@ import {
   Globe,
   Newspaper,
   FileText,
+  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,6 +68,7 @@ export function GymAdminSidebar() {
     { label: "Website", href: `${basePath}/website`, icon: Globe, requiredPermission: "manage" },
     { label: "Announcements", href: `${basePath}/announcements`, icon: Newspaper, requiredPermission: "manage" },
     { label: "Marketing", href: `${basePath}/marketing`, icon: Megaphone, requiredPermission: "manage" },
+    { label: "Automation", href: `${basePath}/automation`, icon: Zap, requiredPermission: "manage" },
     { label: "Settings", href: `${basePath}/settings`, icon: Settings, requiredPermission: "manage" },
   ];
 
