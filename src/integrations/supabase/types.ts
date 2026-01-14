@@ -7742,6 +7742,7 @@ export type Database = {
           paused_at: string | null
           plan_id: string | null
           price_amount: number | null
+          signed_up_by: string | null
           started_at: string | null
           status: string | null
           stripe_customer_id: string | null
@@ -7771,6 +7772,7 @@ export type Database = {
           paused_at?: string | null
           plan_id?: string | null
           price_amount?: number | null
+          signed_up_by?: string | null
           started_at?: string | null
           status?: string | null
           stripe_customer_id?: string | null
@@ -7800,6 +7802,7 @@ export type Database = {
           paused_at?: string | null
           plan_id?: string | null
           price_amount?: number | null
+          signed_up_by?: string | null
           started_at?: string | null
           status?: string | null
           stripe_customer_id?: string | null
@@ -7827,6 +7830,13 @@ export type Database = {
             columns: ["plan_id"]
             isOneToOne: false
             referencedRelation: "membership_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_memberships_signed_up_by_fkey"
+            columns: ["signed_up_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
             referencedColumns: ["id"]
           },
         ]
@@ -8652,6 +8662,112 @@ export type Database = {
           },
         ]
       }
+      gym_refund_requests: {
+        Row: {
+          amount: number | null
+          approved_by: string | null
+          created_at: string
+          currency: string | null
+          gym_id: string
+          id: string
+          location_id: string | null
+          member_id: string
+          membership_id: string | null
+          processed_at: string | null
+          proof_url: string | null
+          reason: string
+          reason_category: string
+          rejection_reason: string | null
+          request_type: string
+          requested_by: string
+          reviewed_at: string | null
+          status: string
+        }
+        Insert: {
+          amount?: number | null
+          approved_by?: string | null
+          created_at?: string
+          currency?: string | null
+          gym_id: string
+          id?: string
+          location_id?: string | null
+          member_id: string
+          membership_id?: string | null
+          processed_at?: string | null
+          proof_url?: string | null
+          reason: string
+          reason_category: string
+          rejection_reason?: string | null
+          request_type?: string
+          requested_by: string
+          reviewed_at?: string | null
+          status?: string
+        }
+        Update: {
+          amount?: number | null
+          approved_by?: string | null
+          created_at?: string
+          currency?: string | null
+          gym_id?: string
+          id?: string
+          location_id?: string | null
+          member_id?: string
+          membership_id?: string | null
+          processed_at?: string | null
+          proof_url?: string | null
+          reason?: string
+          reason_category?: string
+          rejection_reason?: string | null
+          request_type?: string
+          requested_by?: string
+          reviewed_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_refund_requests_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_refund_requests_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_refund_requests_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_refund_requests_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_refund_requests_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "gym_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_refund_requests_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_signed_contracts: {
         Row: {
           created_at: string | null
@@ -8762,6 +8878,7 @@ export type Database = {
           bio: string | null
           can_take_bookings: boolean | null
           coach_profile_id: string | null
+          commission_rate: number | null
           created_at: string | null
           display_name: string | null
           email: string | null
@@ -8772,6 +8889,7 @@ export type Database = {
           job_title: string | null
           permissions: Json | null
           phone: string | null
+          reports_to: string | null
           role: Database["public"]["Enums"]["gym_role"]
           specializations: string[] | null
           status: string | null
@@ -8785,6 +8903,7 @@ export type Database = {
           bio?: string | null
           can_take_bookings?: boolean | null
           coach_profile_id?: string | null
+          commission_rate?: number | null
           created_at?: string | null
           display_name?: string | null
           email?: string | null
@@ -8795,6 +8914,7 @@ export type Database = {
           job_title?: string | null
           permissions?: Json | null
           phone?: string | null
+          reports_to?: string | null
           role: Database["public"]["Enums"]["gym_role"]
           specializations?: string[] | null
           status?: string | null
@@ -8808,6 +8928,7 @@ export type Database = {
           bio?: string | null
           can_take_bookings?: boolean | null
           coach_profile_id?: string | null
+          commission_rate?: number | null
           created_at?: string | null
           display_name?: string | null
           email?: string | null
@@ -8818,6 +8939,7 @@ export type Database = {
           job_title?: string | null
           permissions?: Json | null
           phone?: string | null
+          reports_to?: string | null
           role?: Database["public"]["Enums"]["gym_role"]
           specializations?: string[] | null
           status?: string | null
@@ -8844,6 +8966,13 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_reports_to_fkey"
+            columns: ["reports_to"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
             referencedColumns: ["id"]
           },
         ]
@@ -8930,6 +9059,57 @@ export type Database = {
           },
           {
             foreignKeyName: "gym_staff_action_logs_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_staff_notifications: {
+        Row: {
+          created_at: string
+          data: Json | null
+          gym_id: string
+          id: string
+          message: string | null
+          read: boolean
+          staff_id: string
+          title: string
+          type: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          gym_id: string
+          id?: string
+          message?: string | null
+          read?: boolean
+          staff_id: string
+          title: string
+          type: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          gym_id?: string
+          id?: string
+          message?: string | null
+          read?: boolean
+          staff_id?: string
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_staff_notifications_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_notifications_staff_id_fkey"
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "gym_staff"
@@ -9142,6 +9322,83 @@ export type Database = {
             columns: ["staff_id"]
             isOneToOne: false
             referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_staff_tasks: {
+        Row: {
+          assigned_to: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          gym_id: string
+          id: string
+          location_id: string | null
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date?: string | null
+          gym_id: string
+          id?: string
+          location_id?: string | null
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          gym_id?: string
+          id?: string
+          location_id?: string | null
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_staff_tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_tasks_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_tasks_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
             referencedColumns: ["id"]
           },
         ]
@@ -13007,7 +13264,13 @@ export type Database = {
         | "template"
         | "audio"
         | "other"
-      gym_role: "owner" | "manager" | "coach" | "marketing" | "staff"
+      gym_role:
+        | "owner"
+        | "area_manager"
+        | "manager"
+        | "coach"
+        | "marketing"
+        | "staff"
       video_provider: "zoom" | "google_meet"
       wearable_provider:
         | "health_connect"
@@ -13152,7 +13415,14 @@ export const Constants = {
         "audio",
         "other",
       ],
-      gym_role: ["owner", "manager", "coach", "marketing", "staff"],
+      gym_role: [
+        "owner",
+        "area_manager",
+        "manager",
+        "coach",
+        "marketing",
+        "staff",
+      ],
       video_provider: ["zoom", "google_meet"],
       wearable_provider: [
         "health_connect",
