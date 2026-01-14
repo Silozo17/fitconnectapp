@@ -174,53 +174,17 @@ export default function GymAdminStaff() {
             Manage your team, schedules, and payroll
           </p>
         </div>
-        <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
-          <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite Staff
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invite Staff Member</DialogTitle>
-              <DialogDescription>
-                Send an invitation to join your gym as staff
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Email Address</Label>
-                <Input type="email" placeholder="staff@example.com" />
-              </div>
-              <div className="space-y-2">
-                <Label>Role</Label>
-                <Select>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="manager">Manager</SelectItem>
-                    <SelectItem value="instructor">Instructor</SelectItem>
-                    <SelectItem value="staff">Staff</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowInviteDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={() => {
-                toast.success("Invitation sent!");
-                setShowInviteDialog(false);
-              }}>
-                <Mail className="mr-2 h-4 w-4" />
-                Send Invitation
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button onClick={() => setShowInviteDialog(true)}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Invite Staff
+        </Button>
+        <InviteStaffDialog
+          open={showInviteDialog}
+          onOpenChange={setShowInviteDialog}
+          onSuccess={() => {
+            // Refresh staff list
+          }}
+        />
       </div>
 
       {/* Stats */}

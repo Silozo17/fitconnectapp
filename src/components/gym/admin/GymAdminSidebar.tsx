@@ -1,6 +1,6 @@
 import { Link, useLocation, useParams } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { useGym, useCanManageGym, useCanViewFinancials, useIsOwnerOrAreaManager, GymRole } from "@/contexts/GymContext";
+import { useGym, useIsOwnerOrAreaManager, GymRole } from "@/contexts/GymContext";
 import {
   LayoutDashboard,
   Users,
@@ -19,7 +19,6 @@ import {
   Wallet,
   Newspaper,
   FileText,
-  Zap,
   Package,
   FileBarChart,
   Receipt,
@@ -27,12 +26,18 @@ import {
   Bot,
   ClipboardList,
   RefreshCcw,
+  Briefcase,
+  Target,
+  TrendingUp,
+  UserPlus,
+  Cog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LocationSwitcher } from "./LocationSwitcher";
+import { CollapsibleNavSection } from "./CollapsibleNavSection";
 import { usePendingRefundRequestsCount } from "@/hooks/gym/useGymRefundRequests";
 
 interface NavItem {
@@ -40,36 +45,36 @@ interface NavItem {
   href: string;
   icon: React.ElementType;
   badge?: string | number;
-  // Roles that can see this item. Empty = all roles
   allowedRoles?: GymRole[];
-  // Hide from specific roles
-  hiddenFromRoles?: GymRole[];
 }
 
 export function GymAdminSidebar() {
   const { gymId } = useParams<{ gymId: string }>();
   const location = useLocation();
   const { gym, userRole } = useGym();
-  const canManage = useCanManageGym();
-  const canViewFinancials = useCanViewFinancials();
   const isOwnerOrAreaManager = useIsOwnerOrAreaManager();
   const { data: pendingRefundsCount } = usePendingRefundRequestsCount();
 
   const basePath = `/gym-admin/${gymId}`;
 
-  // Main navigation - visible to all staff
-  const mainNavItems: NavItem[] = [
-    { label: "Dashboard", href: basePath, icon: LayoutDashboard },
+  // Operations section
+  const operationsItems: NavItem[] = [
     { label: "Schedule", href: `${basePath}/schedule`, icon: Calendar },
     { label: "Classes", href: `${basePath}/classes`, icon: Dumbbell },
-    { label: "Members", href: `${basePath}/members`, icon: Users },
     { label: "Check-ins", href: `${basePath}/check-ins`, icon: ScanLine },
+    { 
+      label: "POS", 
+      href: `${basePath}/pos`, 
+      icon: ShoppingCart,
+      allowedRoles: ["owner", "area_manager", "manager", "staff"],
+    },
   ];
 
-  // Management section - role-specific access
-  const managementNavItems: NavItem[] = [
+  // Members section
+  const membersItems: NavItem[] = [
+    { label: "All Members", href: `${basePath}/members`, icon: Users },
     { 
-      label: "Memberships", 
+      label: "Membership Plans", 
       href: `${basePath}/memberships`, 
       icon: CreditCard, 
       allowedRoles: ["owner", "area_manager", "manager"],
@@ -77,14 +82,8 @@ export function GymAdminSidebar() {
     { 
       label: "Credits", 
       href: `${basePath}/credits`, 
-      icon: CreditCard,
+      icon: Wallet,
       allowedRoles: ["owner", "area_manager", "manager"],
-    },
-    { 
-      label: "Contracts", 
-      href: `${basePath}/contracts`, 
-      icon: FileText,
-      allowedRoles: ["owner", "area_manager"], // Hidden from managers
     },
     { 
       label: "Grading", 
@@ -92,6 +91,10 @@ export function GymAdminSidebar() {
       icon: Award,
       allowedRoles: ["owner", "area_manager", "manager", "coach"],
     },
+  ];
+
+  // Team section
+  const teamItems: NavItem[] = [
     { 
       label: "Staff", 
       href: `${basePath}/staff`, 
@@ -99,32 +102,32 @@ export function GymAdminSidebar() {
       allowedRoles: ["owner", "area_manager", "manager"],
     },
     { 
-      label: "Locations", 
-      href: `${basePath}/locations`, 
-      icon: MapPin,
-      allowedRoles: ["owner", "area_manager"], // Hidden from managers
+      label: "Announcements", 
+      href: `${basePath}/announcements`, 
+      icon: Newspaper,
+      allowedRoles: ["owner", "area_manager", "manager"],
     },
     { 
-      label: "Products", 
-      href: `${basePath}/products`, 
-      icon: Package,
+      label: "Activity Log", 
+      href: `${basePath}/activity-log`, 
+      icon: ClipboardList,
       allowedRoles: ["owner", "area_manager", "manager"],
     },
   ];
 
-  // Business section - mostly owner/area_manager only
-  const businessNavItems: NavItem[] = [
+  // Business section (owner/area_manager only)
+  const businessItems: NavItem[] = [
     { 
       label: "Analytics", 
       href: `${basePath}/analytics`, 
       icon: BarChart3,
-      allowedRoles: ["owner", "area_manager"], // Hidden from managers
+      allowedRoles: ["owner", "area_manager"],
     },
     { 
       label: "Reports", 
       href: `${basePath}/reports`, 
       icon: FileBarChart,
-      allowedRoles: ["owner", "area_manager", "manager"], // Managers get limited reports
+      allowedRoles: ["owner", "area_manager", "manager"],
     },
     { 
       label: "Payments", 
@@ -138,12 +141,6 @@ export function GymAdminSidebar() {
       icon: Receipt,
       allowedRoles: ["owner", "area_manager"],
     },
-    { 
-      label: "POS", 
-      href: `${basePath}/pos`, 
-      icon: ShoppingCart,
-      allowedRoles: ["owner", "area_manager", "manager", "staff"],
-    },
     {
       label: "Refund Requests",
       href: `${basePath}/refund-requests`,
@@ -151,29 +148,49 @@ export function GymAdminSidebar() {
       allowedRoles: ["owner", "area_manager", "manager"],
       badge: isOwnerOrAreaManager ? pendingRefundsCount || undefined : undefined,
     },
+  ];
+
+  // Marketing section
+  const marketingItems: NavItem[] = [
     { 
-      label: "Activity Log", 
-      href: `${basePath}/activity-log`, 
-      icon: ClipboardList,
-      allowedRoles: ["owner", "area_manager", "manager"],
-    },
-    { 
-      label: "Announcements", 
-      href: `${basePath}/announcements`, 
-      icon: Newspaper,
-      allowedRoles: ["owner", "area_manager", "manager"],
-    },
-    { 
-      label: "Marketing", 
+      label: "Campaigns", 
       href: `${basePath}/marketing`, 
       icon: Megaphone,
       allowedRoles: ["owner", "area_manager", "marketing"],
     },
     { 
-      label: "Automation", 
-      href: `${basePath}/automation`, 
-      icon: Zap,
+      label: "Leads", 
+      href: `${basePath}/leads`, 
+      icon: UserPlus,
+      allowedRoles: ["owner", "area_manager", "marketing"],
+    },
+    { 
+      label: "Referrals", 
+      href: `${basePath}/referrals`, 
+      icon: Target,
+      allowedRoles: ["owner", "area_manager", "marketing"],
+    },
+  ];
+
+  // Settings section (owner/area_manager only)
+  const settingsItems: NavItem[] = [
+    { 
+      label: "Locations", 
+      href: `${basePath}/locations`, 
+      icon: MapPin,
       allowedRoles: ["owner", "area_manager"],
+    },
+    { 
+      label: "Contracts", 
+      href: `${basePath}/contracts`, 
+      icon: FileText,
+      allowedRoles: ["owner", "area_manager"],
+    },
+    { 
+      label: "Products", 
+      href: `${basePath}/products`, 
+      icon: Package,
+      allowedRoles: ["owner", "area_manager", "manager"],
     },
     { 
       label: "Automations", 
@@ -182,10 +199,10 @@ export function GymAdminSidebar() {
       allowedRoles: ["owner", "area_manager"],
     },
     { 
-      label: "Settings", 
+      label: "General", 
       href: `${basePath}/settings`, 
-      icon: Settings,
-      allowedRoles: ["owner", "area_manager"], // Hidden from managers
+      icon: Cog,
+      allowedRoles: ["owner", "area_manager"],
     },
   ];
 
@@ -193,10 +210,7 @@ export function GymAdminSidebar() {
     if (!userRole) return [];
     
     return items.filter((item) => {
-      // If no role restrictions, show to all
       if (!item.allowedRoles || item.allowedRoles.length === 0) return true;
-      
-      // Check if user's role is in the allowed list
       return item.allowedRoles.includes(userRole);
     });
   };
@@ -205,7 +219,15 @@ export function GymAdminSidebar() {
     if (href === basePath) {
       return location.pathname === basePath;
     }
+    // Use exact match for conflicting routes
+    if (href.endsWith('/members') || href.endsWith('/memberships')) {
+      return location.pathname === href || location.pathname.startsWith(href + '/');
+    }
     return location.pathname.startsWith(href);
+  };
+
+  const hasActiveChild = (items: NavItem[]) => {
+    return items.some(item => isActive(item.href));
   };
 
   const NavLink = ({ item }: { item: NavItem }) => {
@@ -252,8 +274,12 @@ export function GymAdminSidebar() {
     }
   };
 
-  const filteredManagementItems = filterByRole(managementNavItems);
-  const filteredBusinessItems = filterByRole(businessNavItems);
+  const filteredOperations = filterByRole(operationsItems);
+  const filteredMembers = filterByRole(membersItems);
+  const filteredTeam = filterByRole(teamItems);
+  const filteredBusiness = filterByRole(businessItems);
+  const filteredMarketing = filterByRole(marketingItems);
+  const filteredSettings = filterByRole(settingsItems);
 
   return (
     <div className="flex h-full w-64 flex-col border-r bg-card">
@@ -282,40 +308,105 @@ export function GymAdminSidebar() {
 
       {/* Navigation */}
       <ScrollArea className="flex-1 px-3 py-4">
-        <div className="space-y-6">
-          {/* Main Navigation - visible to all */}
-          <div className="space-y-1">
-            {mainNavItems.map((item) => (
-              <NavLink key={item.href} item={item} />
-            ))}
-          </div>
+        <div className="space-y-2">
+          {/* Dashboard - always visible at top */}
+          <Link
+            to={basePath}
+            className={cn(
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              isActive(basePath) && location.pathname === basePath
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+            )}
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Dashboard</span>
+          </Link>
 
-          {/* Management Section */}
-          {filteredManagementItems.length > 0 && (
-            <div>
-              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Management
-              </p>
-              <div className="space-y-1">
-                {filteredManagementItems.map((item) => (
-                  <NavLink key={item.href} item={item} />
-                ))}
-              </div>
-            </div>
+          {/* Operations Section */}
+          {filteredOperations.length > 0 && (
+            <CollapsibleNavSection
+              title="Operations"
+              icon={Briefcase}
+              storageKey="operations"
+              hasActiveChild={hasActiveChild(filteredOperations)}
+              defaultOpen
+            >
+              {filteredOperations.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
+
+          {/* Members Section */}
+          {filteredMembers.length > 0 && (
+            <CollapsibleNavSection
+              title="Members"
+              icon={Users}
+              storageKey="members"
+              hasActiveChild={hasActiveChild(filteredMembers)}
+              defaultOpen
+            >
+              {filteredMembers.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
+
+          {/* Team Section */}
+          {filteredTeam.length > 0 && (
+            <CollapsibleNavSection
+              title="Team"
+              icon={UserCog}
+              storageKey="team"
+              hasActiveChild={hasActiveChild(filteredTeam)}
+            >
+              {filteredTeam.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
           )}
 
           {/* Business Section */}
-          {filteredBusinessItems.length > 0 && (
-            <div>
-              <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Business
-              </p>
-              <div className="space-y-1">
-                {filteredBusinessItems.map((item) => (
-                  <NavLink key={item.href} item={item} />
-                ))}
-              </div>
-            </div>
+          {filteredBusiness.length > 0 && (
+            <CollapsibleNavSection
+              title="Business"
+              icon={TrendingUp}
+              storageKey="business"
+              hasActiveChild={hasActiveChild(filteredBusiness)}
+            >
+              {filteredBusiness.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
+
+          {/* Marketing Section */}
+          {filteredMarketing.length > 0 && (
+            <CollapsibleNavSection
+              title="Marketing"
+              icon={Megaphone}
+              storageKey="marketing"
+              hasActiveChild={hasActiveChild(filteredMarketing)}
+            >
+              {filteredMarketing.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
+
+          {/* Settings Section */}
+          {filteredSettings.length > 0 && (
+            <CollapsibleNavSection
+              title="Settings"
+              icon={Settings}
+              storageKey="settings"
+              hasActiveChild={hasActiveChild(filteredSettings)}
+            >
+              {filteredSettings.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
           )}
         </div>
       </ScrollArea>

@@ -6379,6 +6379,7 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_required: boolean | null
+          location_id: string | null
           name: string
           type: string
           updated_at: string | null
@@ -6391,6 +6392,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_required?: boolean | null
+          location_id?: string | null
           name: string
           type?: string
           updated_at?: string | null
@@ -6403,6 +6405,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_required?: boolean | null
+          location_id?: string | null
           name?: string
           type?: string
           updated_at?: string | null
@@ -6414,6 +6417,13 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_contract_templates_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
             referencedColumns: ["id"]
           },
         ]
@@ -7462,6 +7472,64 @@ export type Database = {
           },
         ]
       }
+      gym_member_notes: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          gym_id: string
+          id: string
+          is_pinned: boolean | null
+          member_id: string
+          staff_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          content: string
+          created_at?: string
+          gym_id: string
+          id?: string
+          is_pinned?: boolean | null
+          member_id: string
+          staff_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          gym_id?: string
+          id?: string
+          is_pinned?: boolean | null
+          member_id?: string
+          staff_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_member_notes_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_notes_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_notes_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_member_progress: {
         Row: {
           body_fat_percentage: number | null
@@ -7527,6 +7595,7 @@ export type Database = {
           avatar_url: string | null
           city: string | null
           client_profile_id: string | null
+          contracts_signed_at: string | null
           country: string | null
           created_at: string | null
           current_grade: string | null
@@ -7542,12 +7611,16 @@ export type Database = {
           grade_achieved_at: string | null
           grading_history: Json | null
           gym_id: string
+          home_location_id: string | null
           id: string
+          injuries: string[] | null
           is_minor: boolean | null
           joined_at: string | null
           last_name: string | null
           last_visit_at: string | null
           marketing_consent: boolean | null
+          marketing_source: string | null
+          marketing_source_other: string | null
           medical_conditions: string[] | null
           member_number: string | null
           notes: string | null
@@ -7562,6 +7635,7 @@ export type Database = {
           referred_by: string | null
           referred_by_member_id: string | null
           rfid_tag_id: string | null
+          signup_completed_at: string | null
           status: string | null
           tags: string[] | null
           terms_accepted_at: string | null
@@ -7576,6 +7650,7 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           client_profile_id?: string | null
+          contracts_signed_at?: string | null
           country?: string | null
           created_at?: string | null
           current_grade?: string | null
@@ -7591,12 +7666,16 @@ export type Database = {
           grade_achieved_at?: string | null
           grading_history?: Json | null
           gym_id: string
+          home_location_id?: string | null
           id?: string
+          injuries?: string[] | null
           is_minor?: boolean | null
           joined_at?: string | null
           last_name?: string | null
           last_visit_at?: string | null
           marketing_consent?: boolean | null
+          marketing_source?: string | null
+          marketing_source_other?: string | null
           medical_conditions?: string[] | null
           member_number?: string | null
           notes?: string | null
@@ -7611,6 +7690,7 @@ export type Database = {
           referred_by?: string | null
           referred_by_member_id?: string | null
           rfid_tag_id?: string | null
+          signup_completed_at?: string | null
           status?: string | null
           tags?: string[] | null
           terms_accepted_at?: string | null
@@ -7625,6 +7705,7 @@ export type Database = {
           avatar_url?: string | null
           city?: string | null
           client_profile_id?: string | null
+          contracts_signed_at?: string | null
           country?: string | null
           created_at?: string | null
           current_grade?: string | null
@@ -7640,12 +7721,16 @@ export type Database = {
           grade_achieved_at?: string | null
           grading_history?: Json | null
           gym_id?: string
+          home_location_id?: string | null
           id?: string
+          injuries?: string[] | null
           is_minor?: boolean | null
           joined_at?: string | null
           last_name?: string | null
           last_visit_at?: string | null
           marketing_consent?: boolean | null
+          marketing_source?: string | null
+          marketing_source_other?: string | null
           medical_conditions?: string[] | null
           member_number?: string | null
           notes?: string | null
@@ -7660,6 +7745,7 @@ export type Database = {
           referred_by?: string | null
           referred_by_member_id?: string | null
           rfid_tag_id?: string | null
+          signup_completed_at?: string | null
           status?: string | null
           tags?: string[] | null
           terms_accepted_at?: string | null
@@ -7694,6 +7780,13 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_members_home_location_id_fkey"
+            columns: ["home_location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
             referencedColumns: ["id"]
           },
           {
@@ -8882,11 +8975,13 @@ export type Database = {
           created_at: string | null
           display_name: string | null
           email: string | null
+          first_name: string | null
           gym_id: string
           id: string
           invited_at: string | null
           is_visible_to_members: boolean | null
           job_title: string | null
+          last_name: string | null
           permissions: Json | null
           phone: string | null
           reports_to: string | null
@@ -8907,11 +9002,13 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           gym_id: string
           id?: string
           invited_at?: string | null
           is_visible_to_members?: boolean | null
           job_title?: string | null
+          last_name?: string | null
           permissions?: Json | null
           phone?: string | null
           reports_to?: string | null
@@ -8932,11 +9029,13 @@ export type Database = {
           created_at?: string | null
           display_name?: string | null
           email?: string | null
+          first_name?: string | null
           gym_id?: string
           id?: string
           invited_at?: string | null
           is_visible_to_members?: boolean | null
           job_title?: string | null
+          last_name?: string | null
           permissions?: Json | null
           phone?: string | null
           reports_to?: string | null
