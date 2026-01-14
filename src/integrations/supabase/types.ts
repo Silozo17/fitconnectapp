@@ -8271,6 +8271,7 @@ export type Database = {
           postcode: string | null
           primary_color: string | null
           secondary_color: string | null
+          service_settings: Json
           settings: Json | null
           slug: string
           status: string | null
@@ -8309,6 +8310,7 @@ export type Database = {
           postcode?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          service_settings?: Json
           settings?: Json | null
           slug: string
           status?: string | null
@@ -8347,6 +8349,7 @@ export type Database = {
           postcode?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          service_settings?: Json
           settings?: Json | null
           slug?: string
           status?: string | null
