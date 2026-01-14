@@ -8280,6 +8280,8 @@ export type Database = {
           timezone: string | null
           updated_at: string | null
           user_id: string
+          vat_number: string | null
+          vat_registered: boolean
           verified_at: string | null
           website: string | null
         }
@@ -8319,6 +8321,8 @@ export type Database = {
           timezone?: string | null
           updated_at?: string | null
           user_id: string
+          vat_number?: string | null
+          vat_registered?: boolean
           verified_at?: string | null
           website?: string | null
         }
@@ -8358,6 +8362,8 @@ export type Database = {
           timezone?: string | null
           updated_at?: string | null
           user_id?: string
+          vat_number?: string | null
+          vat_registered?: boolean
           verified_at?: string | null
           website?: string | null
         }
