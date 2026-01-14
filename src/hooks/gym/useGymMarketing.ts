@@ -15,7 +15,7 @@ interface Campaign {
   scheduled_at: string | null;
   sent_at: string | null;
   completed_at: string | null;
-  stats: { sent: number; opened: number; clicked: number };
+  stats: { sent: number; opened: number; clicked: number; failed?: number };
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -139,7 +139,54 @@ export function useCampaignMutations(gymId: string | undefined) {
     },
   });
 
-  return { createCampaign, updateCampaign, deleteCampaign };
+  const sendCampaign = useMutation({
+    mutationFn: async (campaignId: string) => {
+      const { data, error } = await supabase.functions.invoke("gym-send-campaign", {
+        body: { campaignId, gymId },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["gym-campaigns", gymId] });
+      toast({ 
+        title: "Campaign sent!", 
+        description: `Successfully sent to ${data.sent} recipients.` 
+      });
+    },
+    onError: (error) => {
+      toast({ title: "Failed to send campaign", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const scheduleCampaign = useMutation({
+    mutationFn: async ({ campaignId, scheduledAt }: { campaignId: string; scheduledAt: string }) => {
+      const { data: result, error } = await supabase
+        .from("gym_campaigns")
+        .update({ 
+          scheduled_at: scheduledAt, 
+          status: "scheduled",
+          updated_at: new Date().toISOString() 
+        })
+        .eq("id", campaignId)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return result;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gym-campaigns", gymId] });
+      toast({ title: "Campaign scheduled" });
+    },
+    onError: (error) => {
+      toast({ title: "Failed to schedule campaign", description: error.message, variant: "destructive" });
+    },
+  });
+
+  return { createCampaign, updateCampaign, deleteCampaign, sendCampaign, scheduleCampaign };
 }
 
 export function usePromotionMutations(gymId: string | undefined) {
