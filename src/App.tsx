@@ -134,8 +134,7 @@ const CoachClientComparison = lazy(() => import('@/pages/dashboard/coach/CoachCl
 const CoachCaseStudies = lazy(() => import('@/pages/dashboard/coach/CoachCaseStudies'));
 
 // Gym Admin Pages
-const GymRegister = lazy(() => import('@/pages/gym/GymRegister'));
-const GymLogin = lazy(() => import('@/pages/gym/GymLogin'));
+const GymAuth = lazy(() => import('@/pages/gym/GymAuth'));
 const GymAdminDashboard = lazy(() => import('@/pages/gym/GymAdminDashboard'));
 const GymAdminMembers = lazy(() => import('@/pages/gym/GymAdminMembers'));
 const GymAdminSchedule = lazy(() => import('@/pages/gym/GymAdminSchedule'));
@@ -1850,21 +1849,15 @@ const App = () => (
                               </Route>
 
                               {/* Gym Login & Registration */}
-                              <Route path="/gym-login" element={
+<Route path="/gym-login" element={
                                 <AppLocaleWrapper>
                                   <Suspense fallback={<PageLoadingSpinner />}>
-                                    <GymLogin />
+                                    <GymAuth />
                                   </Suspense>
                                 </AppLocaleWrapper>
                               } />
                               <Route path="/gym-register" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymRegister />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
+                                <Navigate to="/gym-login?mode=register" replace />
                               } />
                               {/* Legacy route redirects */}
                               <Route path="/gym/register" element={<Navigate to="/gym-register" replace />} />
