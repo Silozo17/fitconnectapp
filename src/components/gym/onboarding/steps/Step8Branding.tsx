@@ -285,42 +285,59 @@ export function Step8Branding({
                   alt="Cover" 
                   className="w-full h-full object-cover"
                 />
-                <button
-                  onClick={removeCover}
-                  className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-background rounded-full"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <div 
-                className="aspect-[3/1] rounded-lg border-2 border-dashed border-border bg-secondary/50 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors"
-                onClick={() => coverInputRef.current?.click()}
-              >
-                <div className="text-center">
-                  <ImageIcon className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">
-                    Click to upload cover image
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Recommended: 1200x400px
-                  </p>
+                <div className="absolute top-2 right-2 flex gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => coverInputRef.current?.click()}
+                    disabled={isUploadingCover}
+                    className="bg-background/80 hover:bg-background"
+                  >
+                    {isUploadingCover ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                  </Button>
+                  <button
+                    onClick={removeCover}
+                    className="p-1.5 bg-background/80 hover:bg-background rounded-full"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full aspect-[3/1] rounded-lg border-2 border-dashed border-border bg-secondary/50 flex flex-col items-center justify-center hover:border-primary/50 transition-colors h-auto"
+                onClick={() => coverInputRef.current?.click()}
+                disabled={isUploadingCover}
+              >
+                {isUploadingCover ? (
+                  <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
+                ) : (
+                  <>
+                    <ImageIcon className="w-8 h-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      Click to upload cover image
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Recommended: 1200x400px, max 5MB
+                    </p>
+                  </>
+                )}
+              </Button>
             )}
             <input
               ref={coverInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={handleCoverUpload}
               className="hidden"
             />
-            {isUploadingCover && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Uploading...
-              </div>
-            )}
           </div>
         </div>
 
