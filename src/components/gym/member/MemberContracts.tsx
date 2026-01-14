@@ -26,7 +26,7 @@ interface SignedContract {
     id: string;
     name: string;
     version: number;
-    is_waiver: boolean;
+    type: string;
   } | null;
 }
 
@@ -73,7 +73,7 @@ export function MemberContracts() {
 
       const { data: templates } = await supabase
         .from("gym_contract_templates")
-        .select("id, name, version, is_waiver")
+        .select("id, name, version, type")
         .in("id", templateIds);
 
       const templateMap = new Map((templates || []).map(t => [t.id, t]));
@@ -104,7 +104,7 @@ export function MemberContracts() {
       // Get all required contracts
       const { data: allContracts } = await supabase
         .from("gym_contract_templates")
-        .select("id, name, version, is_waiver, is_required")
+        .select("id, name, version, type, is_required")
         .eq("gym_id", gym.id)
         .eq("is_required", true)
         .eq("is_active", true);
@@ -125,8 +125,8 @@ export function MemberContracts() {
     enabled: !!gym?.id && !!user?.id,
   });
 
-  const waivers = signedContracts?.filter(c => c.contract?.is_waiver) || [];
-  const contracts = signedContracts?.filter(c => !c.contract?.is_waiver) || [];
+  const waivers = signedContracts?.filter(c => c.contract?.type === 'waiver') || [];
+  const contracts = signedContracts?.filter(c => c.contract?.type !== 'waiver') || [];
 
   return (
     <div className="space-y-6">
@@ -154,7 +154,7 @@ export function MemberContracts() {
                     <div>
                       <p className="font-medium">{contract.name}</p>
                       <p className="text-sm text-muted-foreground">
-                        {contract.is_waiver ? "Waiver" : "Contract"} • v{contract.version}
+                        {contract.type === 'waiver' ? "Waiver" : "Contract"} • v{contract.version}
                       </p>
                     </div>
                   </div>
