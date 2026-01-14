@@ -5768,6 +5768,7 @@ export type Database = {
         Row: {
           allow_drop_in: boolean | null
           cancellation_deadline_hours: number | null
+          cancellation_window_hours: number | null
           color: string | null
           created_at: string | null
           credits_required: number | null
@@ -5781,6 +5782,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_active: boolean | null
+          late_cancel_credits: number | null
           name: string
           requires_booking: boolean | null
           short_description: string | null
@@ -5790,6 +5792,7 @@ export type Database = {
         Insert: {
           allow_drop_in?: boolean | null
           cancellation_deadline_hours?: number | null
+          cancellation_window_hours?: number | null
           color?: string | null
           created_at?: string | null
           credits_required?: number | null
@@ -5803,6 +5806,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          late_cancel_credits?: number | null
           name: string
           requires_booking?: boolean | null
           short_description?: string | null
@@ -5812,6 +5816,7 @@ export type Database = {
         Update: {
           allow_drop_in?: boolean | null
           cancellation_deadline_hours?: number | null
+          cancellation_window_hours?: number | null
           color?: string | null
           created_at?: string | null
           credits_required?: number | null
@@ -5825,6 +5830,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_active?: boolean | null
+          late_cancel_credits?: number | null
           name?: string
           requires_booking?: boolean | null
           short_description?: string | null
@@ -5861,6 +5867,7 @@ export type Database = {
           id: string
           instructor_id: string | null
           is_recurring: boolean | null
+          is_recurring_template: boolean | null
           late_cancel_penalty_credits: number | null
           location_id: string | null
           name: string
@@ -5869,6 +5876,7 @@ export type Database = {
           public_notes: string | null
           recurrence_end_date: string | null
           recurrence_rule: string | null
+          recurring_pattern: Json | null
           room: string | null
           start_time: string
           status: string | null
@@ -5895,6 +5903,7 @@ export type Database = {
           id?: string
           instructor_id?: string | null
           is_recurring?: boolean | null
+          is_recurring_template?: boolean | null
           late_cancel_penalty_credits?: number | null
           location_id?: string | null
           name: string
@@ -5903,6 +5912,7 @@ export type Database = {
           public_notes?: string | null
           recurrence_end_date?: string | null
           recurrence_rule?: string | null
+          recurring_pattern?: Json | null
           room?: string | null
           start_time: string
           status?: string | null
@@ -5929,6 +5939,7 @@ export type Database = {
           id?: string
           instructor_id?: string | null
           is_recurring?: boolean | null
+          is_recurring_template?: boolean | null
           late_cancel_penalty_credits?: number | null
           location_id?: string | null
           name?: string
@@ -5937,6 +5948,7 @@ export type Database = {
           public_notes?: string | null
           recurrence_end_date?: string | null
           recurrence_rule?: string | null
+          recurring_pattern?: Json | null
           room?: string | null
           start_time?: string
           status?: string | null
@@ -5978,6 +5990,63 @@ export type Database = {
             columns: ["parent_class_id"]
             isOneToOne: false
             referencedRelation: "gym_classes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_credit_transactions: {
+        Row: {
+          amount: number
+          balance_after: number
+          created_at: string
+          created_by: string | null
+          gym_id: string
+          id: string
+          member_id: string
+          notes: string | null
+          reference_id: string | null
+          reference_type: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          balance_after: number
+          created_at?: string
+          created_by?: string | null
+          gym_id: string
+          id?: string
+          member_id: string
+          notes?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_type: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number
+          created_at?: string
+          created_by?: string | null
+          gym_id?: string
+          id?: string
+          member_id?: string
+          notes?: string | null
+          reference_id?: string | null
+          reference_type?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_credit_transactions_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_credit_transactions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
             referencedColumns: ["id"]
           },
         ]
@@ -6508,15 +6577,19 @@ export type Database = {
           gym_id: string
           gym_payout: number | null
           id: string
+          last_retry_at: string | null
           member_id: string | null
           membership_id: string | null
           metadata: Json | null
+          next_retry_at: string | null
           paid_at: string | null
+          payment_method: string | null
           payment_type: string
           platform_fee: number | null
           refund_amount: number | null
           refund_reason: string | null
           refunded_at: string | null
+          retry_count: number | null
           status: string | null
           stripe_charge_id: string | null
           stripe_invoice_id: string | null
@@ -6534,15 +6607,19 @@ export type Database = {
           gym_id: string
           gym_payout?: number | null
           id?: string
+          last_retry_at?: string | null
           member_id?: string | null
           membership_id?: string | null
           metadata?: Json | null
+          next_retry_at?: string | null
           paid_at?: string | null
+          payment_method?: string | null
           payment_type: string
           platform_fee?: number | null
           refund_amount?: number | null
           refund_reason?: string | null
           refunded_at?: string | null
+          retry_count?: number | null
           status?: string | null
           stripe_charge_id?: string | null
           stripe_invoice_id?: string | null
@@ -6560,15 +6637,19 @@ export type Database = {
           gym_id?: string
           gym_payout?: number | null
           id?: string
+          last_retry_at?: string | null
           member_id?: string | null
           membership_id?: string | null
           metadata?: Json | null
+          next_retry_at?: string | null
           paid_at?: string | null
+          payment_method?: string | null
           payment_type?: string
           platform_fee?: number | null
           refund_amount?: number | null
           refund_reason?: string | null
           refunded_at?: string | null
+          retry_count?: number | null
           status?: string | null
           stripe_charge_id?: string | null
           stripe_invoice_id?: string | null
