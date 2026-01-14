@@ -170,6 +170,8 @@ const GymAdminReports = lazy(() => import('@/pages/gym/GymAdminReports'));
 const GymAdminActivityLog = lazy(() => import('@/pages/gym/GymAdminActivityLog'));
 const GymAdminMessages = lazy(() => import('@/pages/gym/GymAdminMessages'));
 const GymAdminRefundRequests = lazy(() => import('@/pages/gym/GymAdminRefundRequests'));
+const GymAdminAddMember = lazy(() => import('@/pages/gym/GymAdminAddMember'));
+const GymAdminEditMember = lazy(() => import('@/pages/gym/GymAdminEditMember'));
 const GymCoachClasses = lazy(() => import('@/pages/gym/coach/CoachClasses'));
 const EmbedTimetable = lazy(() => import('@/pages/gym/embed/EmbedTimetable'));
 const EmbedSignup = lazy(() => import('@/pages/gym/embed/EmbedSignup'));
@@ -1909,9 +1911,19 @@ const App = () => (
                                     <GymAdminMembers />
                                   </Suspense>
                                 } />
+                                <Route path="members/add" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminAddMember />
+                                  </Suspense>
+                                } />
                                 <Route path="members/:memberId" element={
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <GymMemberProfile />
+                                  </Suspense>
+                                } />
+                                <Route path="members/:memberId/edit" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminEditMember />
                                   </Suspense>
                                 } />
                                 <Route path="schedule" element={
