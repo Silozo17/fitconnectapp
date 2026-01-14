@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGym } from "@/contexts/GymContext";
 import { useGymStaff } from "@/hooks/gym/useGymStaff";
+import { InviteStaffDialog } from "@/components/gym/admin/dialogs/InviteStaffDialog";
 import {
   useGymStaffShifts,
   useCreateStaffShift,
