@@ -5694,6 +5694,62 @@ export type Database = {
           },
         ]
       }
+      gym_automations: {
+        Row: {
+          action_config: Json
+          automation_type: string
+          created_at: string
+          gym_id: string
+          id: string
+          is_active: boolean
+          message_template: string | null
+          name: string
+          send_email: boolean | null
+          send_push: boolean | null
+          send_sms: boolean | null
+          trigger_config: Json
+          updated_at: string
+        }
+        Insert: {
+          action_config?: Json
+          automation_type: string
+          created_at?: string
+          gym_id: string
+          id?: string
+          is_active?: boolean
+          message_template?: string | null
+          name: string
+          send_email?: boolean | null
+          send_push?: boolean | null
+          send_sms?: boolean | null
+          trigger_config?: Json
+          updated_at?: string
+        }
+        Update: {
+          action_config?: Json
+          automation_type?: string
+          created_at?: string
+          gym_id?: string
+          id?: string
+          is_active?: boolean
+          message_template?: string | null
+          name?: string
+          send_email?: boolean | null
+          send_push?: boolean | null
+          send_sms?: boolean | null
+          trigger_config?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_automations_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_campaigns: {
         Row: {
           audience_filter: Json | null
@@ -6821,6 +6877,128 @@ export type Database = {
             columns: ["payment_id"]
             isOneToOne: false
             referencedRelation: "gym_payments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          item_type: string | null
+          membership_id: string | null
+          product_id: string | null
+          quantity: number
+          total_price: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          item_type?: string | null
+          membership_id?: string | null
+          product_id?: string | null
+          quantity?: number
+          total_price: number
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          item_type?: string | null
+          membership_id?: string | null
+          product_id?: string | null
+          quantity?: number
+          total_price?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "gym_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_invoices: {
+        Row: {
+          created_at: string
+          currency: string
+          discount_amount: number
+          due_date: string | null
+          gym_id: string
+          id: string
+          invoice_number: string
+          member_id: string
+          notes: string | null
+          paid_at: string | null
+          status: string
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          subtotal: number
+          tax_amount: number
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          discount_amount?: number
+          due_date?: string | null
+          gym_id: string
+          id?: string
+          invoice_number: string
+          member_id: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          discount_amount?: number
+          due_date?: string | null
+          gym_id?: string
+          id?: string
+          invoice_number?: string
+          member_id?: string
+          notes?: string | null
+          paid_at?: string | null
+          status?: string
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tax_amount?: number
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_invoices_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_invoices_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
             referencedColumns: ["id"]
           },
         ]
