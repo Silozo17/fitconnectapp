@@ -156,6 +156,7 @@ const GymAdminReferrals = lazy(() => import('@/pages/gym/GymAdminReferrals'));
 const GymAdminWebsite = lazy(() => import('@/pages/gym/GymAdminWebsite'));
 const GymAdminAnnouncements = lazy(() => import('@/pages/gym/GymAdminAnnouncements'));
 const GymPublicWebsite = lazy(() => import('@/pages/gym/GymPublicWebsite'));
+const GymAdminStaff = lazy(() => import('@/pages/gym/GymAdminStaff'));
 
 // Gym Admin Layout Wrapper (provides GymProvider context)
 import { GymAdminRouteWrapper } from '@/components/gym/admin/GymAdminRouteWrapper';
@@ -1938,6 +1939,11 @@ const App = () => (
                                 <Route path="announcements" element={
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <GymAdminAnnouncements />
+                                  </Suspense>
+                                } />
+                                <Route path="staff" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminStaff />
                                   </Suspense>
                                 } />
                               </Route>
