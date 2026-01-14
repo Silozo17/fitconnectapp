@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Building2, Users, Calendar, CreditCard, BarChart3, Shield, ArrowRight, Clock, Bell, Check, Zap } from "lucide-react";
+import { Building2, Users, Calendar, CreditCard, BarChart3, Shield, ArrowRight, Bell, Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import Navbar from "@/components/layout/Navbar";
@@ -67,10 +67,10 @@ const ForGyms = () => {
         
         <div className="container mx-auto relative z-10">
           <div className="max-w-4xl mx-auto text-center">
-            {/* Coming Soon Badge */}
+            {/* Free Trial Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
-              <Clock className="w-4 h-4 text-primary" />
-              <span className="text-sm font-medium text-primary">Coming Soon</span>
+              <Zap className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-primary">14-Day Free Trial • No Card Required</span>
             </div>
             
             <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
@@ -161,6 +161,9 @@ const ForGyms = () => {
                   <p className="text-muted-foreground mt-2 text-sm">
                     We only charge when your members pay
                   </p>
+                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20">
+                    <span className="text-sm font-medium text-primary">🎉 14-day free trial • No card required</span>
+                  </div>
                 </div>
 
                 {/* Features Grid */}
@@ -203,7 +206,7 @@ const ForGyms = () => {
                     </Link>
                   </GradientButton>
                   <p className="text-sm text-muted-foreground mt-4">
-                    No contract required. Cancel anytime.
+                    14-day free trial • No card required • Cancel anytime
                   </p>
                 </div>
               </div>
@@ -230,7 +233,7 @@ const ForGyms = () => {
               </Link>
             </GradientButton>
             <p className="text-sm text-muted-foreground mt-4">
-              £99/month + £1 per member payment
+              14-day free trial • Then £99/month + £1 per member payment
             </p>
           </div>
         </div>
