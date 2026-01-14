@@ -16,3 +16,4 @@ export { default as GymAdminContracts } from "./GymAdminContracts";
 export { default as GymAdminPayments } from "./GymAdminPayments";
 export { default as GymAdminLeads } from "./GymAdminLeads";
 export { default as GymAdminReferrals } from "./GymAdminReferrals";
+export { default as GymOnboarding } from "./GymOnboarding";
