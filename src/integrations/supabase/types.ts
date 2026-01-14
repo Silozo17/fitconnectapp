@@ -7444,6 +7444,292 @@ export type Database = {
           },
         ]
       }
+      gym_staff_pay_rates: {
+        Row: {
+          created_at: string
+          effective_from: string
+          effective_to: string | null
+          gym_id: string
+          hourly_rate: number
+          id: string
+          is_current: boolean | null
+          overtime_rate: number | null
+          staff_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          gym_id: string
+          hourly_rate: number
+          id?: string
+          is_current?: boolean | null
+          overtime_rate?: number | null
+          staff_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          effective_from?: string
+          effective_to?: string | null
+          gym_id?: string
+          hourly_rate?: number
+          id?: string
+          is_current?: boolean | null
+          overtime_rate?: number | null
+          staff_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_staff_pay_rates_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_pay_rates_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_staff_payroll: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          gross_pay: number | null
+          gym_id: string
+          hourly_rate: number | null
+          id: string
+          notes: string | null
+          overtime_hours: number | null
+          paid_at: string | null
+          period_end: string
+          period_start: string
+          regular_hours: number | null
+          staff_id: string
+          status: string | null
+          total_hours: number | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          gross_pay?: number | null
+          gym_id: string
+          hourly_rate?: number | null
+          id?: string
+          notes?: string | null
+          overtime_hours?: number | null
+          paid_at?: string | null
+          period_end: string
+          period_start: string
+          regular_hours?: number | null
+          staff_id: string
+          status?: string | null
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          gross_pay?: number | null
+          gym_id?: string
+          hourly_rate?: number | null
+          id?: string
+          notes?: string | null
+          overtime_hours?: number | null
+          paid_at?: string | null
+          period_end?: string
+          period_start?: string
+          regular_hours?: number | null
+          staff_id?: string
+          status?: string | null
+          total_hours?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_staff_payroll_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_payroll_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_payroll_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_staff_shifts: {
+        Row: {
+          actual_end_time: string | null
+          actual_start_time: string | null
+          break_minutes: number | null
+          created_at: string
+          end_time: string
+          gym_id: string
+          id: string
+          location_id: string | null
+          notes: string | null
+          shift_date: string
+          staff_id: string
+          start_time: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          break_minutes?: number | null
+          created_at?: string
+          end_time: string
+          gym_id: string
+          id?: string
+          location_id?: string | null
+          notes?: string | null
+          shift_date: string
+          staff_id: string
+          start_time: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_end_time?: string | null
+          actual_start_time?: string | null
+          break_minutes?: number | null
+          created_at?: string
+          end_time?: string
+          gym_id?: string
+          id?: string
+          location_id?: string | null
+          notes?: string | null
+          shift_date?: string
+          staff_id?: string
+          start_time?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_staff_shifts_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_shifts_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_shifts_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_staff_time_entries: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          break_minutes: number | null
+          clock_in: string
+          clock_out: string | null
+          created_at: string
+          gym_id: string
+          id: string
+          notes: string | null
+          shift_id: string | null
+          staff_id: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          break_minutes?: number | null
+          clock_in: string
+          clock_out?: string | null
+          created_at?: string
+          gym_id: string
+          id?: string
+          notes?: string | null
+          shift_id?: string | null
+          staff_id: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          break_minutes?: number | null
+          clock_in?: string
+          clock_out?: string | null
+          created_at?: string
+          gym_id?: string
+          id?: string
+          notes?: string | null
+          shift_id?: string | null
+          staff_id?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_staff_time_entries_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_time_entries_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_time_entries_shift_id_fkey"
+            columns: ["shift_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff_shifts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_time_entries_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_testimonials: {
         Row: {
           author_image_url: string | null
