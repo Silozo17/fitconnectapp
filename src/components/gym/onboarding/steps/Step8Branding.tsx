@@ -55,7 +55,24 @@ export function Step8Branding({
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !gymId) return;
+    
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+    
+    if (!file) return;
+    
+    if (!gymId) {
+      console.error('Logo upload failed: gymId is missing', { currentStep, gymId });
+      toast.error('Unable to upload. Please refresh and try again.');
+      return;
+    }
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a JPEG, PNG, GIF, or WebP image');
+      return;
+    }
 
     if (file.size > 2 * 1024 * 1024) {
       toast.error('Logo must be less than 2MB');
@@ -89,7 +106,24 @@ export function Step8Branding({
 
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !gymId) return;
+    
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+    
+    if (!file) return;
+    
+    if (!gymId) {
+      console.error('Cover upload failed: gymId is missing', { currentStep, gymId });
+      toast.error('Unable to upload. Please refresh and try again.');
+      return;
+    }
+
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Please upload a JPEG, PNG, GIF, or WebP image');
+      return;
+    }
 
     if (file.size > 5 * 1024 * 1024) {
       toast.error('Cover image must be less than 5MB');
