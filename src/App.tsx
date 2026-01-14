@@ -135,7 +135,7 @@ const CoachCaseStudies = lazy(() => import('@/pages/dashboard/coach/CoachCaseStu
 
 // Gym Admin Pages
 const GymRegister = lazy(() => import('@/pages/gym/GymRegister'));
-const ClubLogin = lazy(() => import('@/pages/gym/ClubLogin'));
+const GymLogin = lazy(() => import('@/pages/gym/GymLogin'));
 const GymAdminDashboard = lazy(() => import('@/pages/gym/GymAdminDashboard'));
 const GymAdminMembers = lazy(() => import('@/pages/gym/GymAdminMembers'));
 const GymAdminSchedule = lazy(() => import('@/pages/gym/GymAdminSchedule'));
@@ -288,6 +288,9 @@ const DocsGarmin = lazy(() => import('@/pages/docs/integrations/GarminIntegratio
 // Debug pages
 const Debug = lazy(() => import('@/pages/Debug'));
 const NativeDiagnostics = lazy(() => import('@/pages/NativeDiagnostics'));
+
+// Landing Pages
+const ForGyms = lazy(() => import('@/pages/ForGyms'));
 
 // Subscribe pages
 const Subscribe = lazy(() => import('@/pages/Subscribe'));
@@ -1837,15 +1840,15 @@ const App = () => (
                                 } />
                               </Route>
 
-                              {/* Club Login & Registration */}
-                              <Route path="/club-login" element={
+                              {/* Gym Login & Registration */}
+                              <Route path="/gym-login" element={
                                 <AppLocaleWrapper>
                                   <Suspense fallback={<PageLoadingSpinner />}>
-                                    <ClubLogin />
+                                    <GymLogin />
                                   </Suspense>
                                 </AppLocaleWrapper>
                               } />
-                              <Route path="/club-register" element={
+                              <Route path="/gym-register" element={
                                 <AppLocaleWrapper>
                                   <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
@@ -1854,8 +1857,10 @@ const App = () => (
                                   </ProtectedRoute>
                                 </AppLocaleWrapper>
                               } />
-                              {/* Legacy route redirect */}
-                              <Route path="/gym/register" element={<Navigate to="/club-register" replace />} />
+                              {/* Legacy route redirects */}
+                              <Route path="/gym/register" element={<Navigate to="/gym-register" replace />} />
+                              <Route path="/club-login" element={<Navigate to="/gym-login" replace />} />
+                              <Route path="/club-register" element={<Navigate to="/gym-register" replace />} />
                               
                               {/* New Gym Onboarding Flow */}
                               <Route path="/onboarding/gym" element={
@@ -1864,6 +1869,13 @@ const App = () => (
                                     <GymOnboarding />
                                   </Suspense>
                                 </AppLocaleWrapper>
+                              } />
+
+                              {/* For Gyms Landing Page */}
+                              <Route path="/club-management" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <ForGyms />
+                                </Suspense>
                               } />
 
                               {/* Gym Admin Routes - uses gymId with nested routing */}
