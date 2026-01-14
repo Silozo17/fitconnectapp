@@ -17,7 +17,6 @@ import {
   Building2,
   ScanLine,
   Wallet,
-  Globe,
   Newspaper,
   FileText,
   Zap,
@@ -65,7 +64,6 @@ export function GymAdminSidebar() {
   const businessNavItems: NavItem[] = [
     { label: "Analytics", href: `${basePath}/analytics`, icon: BarChart3, requiredPermission: "financials" },
     { label: "Payments", href: `${basePath}/payments`, icon: Wallet, requiredPermission: "financials" },
-    { label: "Website", href: `${basePath}/website`, icon: Globe, requiredPermission: "manage" },
     { label: "Announcements", href: `${basePath}/announcements`, icon: Newspaper, requiredPermission: "manage" },
     { label: "Marketing", href: `${basePath}/marketing`, icon: Megaphone, requiredPermission: "manage" },
     { label: "Automation", href: `${basePath}/automation`, icon: Zap, requiredPermission: "manage" },

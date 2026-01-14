@@ -199,6 +199,14 @@ const Navbar = () => {
               )}
             </div>
 
+            {/* For Gyms Link */}
+            <Link 
+              to="/club-management" 
+              className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50"
+            >
+              {t("website.nav.forGyms", "For Gyms")}
+            </Link>
+
             {navLinks.map((link) => (
               <Link key={link.href} to={link.href} className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50">
                 {link.name}
@@ -297,6 +305,20 @@ const Navbar = () => {
                       {item.name}
                     </Link>
                   ))}
+                </div>
+
+                <div className="border-t border-border/50 mx-6" />
+
+                {/* Mobile For Gyms Section */}
+                <div className="px-6 py-4">
+                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{t("website.nav.forGyms", "For Gyms")}</p>
+                  <Link
+                    to="/club-management"
+                    className="flex items-center gap-3 py-2.5 text-foreground hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {t("website.nav.gymManagement", "Gym Management")}
+                  </Link>
                 </div>
 
                 <div className="border-t border-border/50 mx-6" />

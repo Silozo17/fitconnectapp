@@ -68,6 +68,11 @@ const Footer = () => {
       { name: t("website.footer.links.pricingPlans"), href: "/pricing" },
       { name: t("website.footer.links.contactUs"), href: "/contact" },
     ],
+    [t("website.footer.sections.forGyms", "For Gyms")]: [
+      { name: t("website.footer.links.gymManagement", "Gym Management"), href: "/club-management" },
+      { name: t("website.footer.links.gymLogin", "Gym Staff Login"), href: "/gym-login" },
+      { name: t("website.footer.links.registerGym", "Register Your Gym"), href: "/gym-register" },
+    ],
     [t("website.footer.sections.legal")]: [
       { name: t("website.footer.links.aboutUs"), href: "/about" },
       { name: t("website.footer.links.privacyPolicy"), href: "/privacy" },

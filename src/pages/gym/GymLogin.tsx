@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Building2, Loader2, Search, LogIn, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Building2, Loader2, Search, LogIn, ArrowRight, Shield } from "lucide-react";
+import { OTPVerification } from "@/components/auth/OTPVerification";
+import { useTranslation } from "react-i18next";
 
 interface GymResult {
   id: string;
@@ -18,7 +19,8 @@ interface GymResult {
   country: string;
 }
 
-export default function ClubLogin() {
+export default function GymLogin() {
+  const { t } = useTranslation("common");
   const navigate = useNavigate();
   const { user, signIn } = useAuth();
   const [email, setEmail] = useState("");
@@ -29,13 +31,60 @@ export default function ClubLogin() {
   const [isSearching, setIsSearching] = useState(false);
   const [userGyms, setUserGyms] = useState<GymResult[]>([]);
   const [isLoadingGyms, setIsLoadingGyms] = useState(false);
+  
+  // OTP state for mandatory 2FA
+  const [pendingEmail, setPendingEmail] = useState<string | null>(null);
+  const [showOTP, setShowOTP] = useState(false);
+  const [isOTPVerified, setIsOTPVerified] = useState(false);
 
-  // Load user's gyms when logged in
+  // Check if user has already verified OTP this session
   useEffect(() => {
     if (user) {
-      loadUserGyms();
+      const otpVerified = sessionStorage.getItem(`gym_otp_verified_${user.id}`);
+      if (otpVerified) {
+        setIsOTPVerified(true);
+        loadUserGyms();
+      } else {
+        // User is logged in but hasn't verified OTP - trigger OTP
+        triggerOTPForUser(user.email || "");
+      }
     }
   }, [user]);
+
+  const triggerOTPForUser = async (userEmail: string) => {
+    try {
+      const { error } = await supabase.functions.invoke("send-otp-email", {
+        body: { email: userEmail, purpose: "2fa" },
+      });
+      
+      if (error) throw error;
+      
+      setPendingEmail(userEmail);
+      setShowOTP(true);
+      toast.info(t("gymLogin.otpSent", "A verification code has been sent to your email"));
+    } catch (error: any) {
+      console.error("Error sending OTP:", error);
+      toast.error(t("gymLogin.otpFailed", "Failed to send verification code"));
+    }
+  };
+
+  const handleOTPVerified = () => {
+    if (user) {
+      sessionStorage.setItem(`gym_otp_verified_${user.id}`, "true");
+    }
+    setIsOTPVerified(true);
+    setShowOTP(false);
+    setPendingEmail(null);
+    toast.success(t("gymLogin.verified", "Identity verified successfully"));
+    loadUserGyms();
+  };
+
+  const handleOTPBack = async () => {
+    // Sign out and go back to login
+    await supabase.auth.signOut();
+    setShowOTP(false);
+    setPendingEmail(null);
+  };
 
   const loadUserGyms = async () => {
     if (!user) return;
@@ -101,7 +150,7 @@ export default function ClubLogin() {
       setSearchResults(data as GymResult[]);
     } catch (error: any) {
       console.error("Error searching gyms:", error);
-      toast.error("Failed to search gyms");
+      toast.error(t("gymLogin.searchFailed", "Failed to search gyms"));
     } finally {
       setIsSearching(false);
     }
@@ -113,19 +162,49 @@ export default function ClubLogin() {
 
     try {
       await signIn(email, password);
-      toast.success("Logged in successfully");
+      // After successful login, triggerOTPForUser will be called via useEffect
+      toast.success(t("gymLogin.loggedIn", "Logged in successfully"));
     } catch (error: any) {
-      toast.error(error.message || "Failed to login");
+      toast.error(error.message || t("gymLogin.loginFailed", "Failed to login"));
     } finally {
       setIsLoggingIn(false);
     }
   };
 
   const selectGym = (gymId: string) => {
-    // Store selected gym in localStorage for persistence
     localStorage.setItem("selectedGymId", gymId);
     navigate(`/gym-admin/${gymId}`);
   };
+
+  // Show OTP verification screen
+  if (showOTP && pendingEmail) {
+    return (
+      <div className="min-h-screen bg-background py-12 px-4">
+        <div className="max-w-md mx-auto">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+              <Shield className="w-8 h-8 text-primary" />
+            </div>
+            <h1 className="text-3xl font-bold">{t("gymLogin.verifyIdentity", "Verify Your Identity")}</h1>
+            <p className="text-muted-foreground mt-2">
+              {t("gymLogin.securityCheck", "For security, please verify your identity to access gym management.")}
+            </p>
+          </div>
+
+          <Card>
+            <CardContent className="pt-6">
+              <OTPVerification
+                email={pendingEmail}
+                purpose="2fa"
+                onVerified={handleOTPVerified}
+                onBack={handleOTPBack}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background py-12 px-4">
@@ -134,24 +213,24 @@ export default function ClubLogin() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <Building2 className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">Club Login</h1>
+          <h1 className="text-3xl font-bold">{t("gymLogin.title", "Gym Login")}</h1>
           <p className="text-muted-foreground mt-2">
-            Access your gym's admin dashboard
+            {t("gymLogin.subtitle", "Access your gym's admin dashboard")}
           </p>
         </div>
 
-        {!user ? (
+        {!user || !isOTPVerified ? (
           <Card>
             <CardHeader>
-              <CardTitle>Staff Login</CardTitle>
+              <CardTitle>{t("gymLogin.staffLogin", "Staff Login")}</CardTitle>
               <CardDescription>
-                Sign in with your FitConnect account to access your gym
+                {t("gymLogin.signInPrompt", "Sign in with your FitConnect account to access your gym")}
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{t("gymLogin.email", "Email")}</Label>
                   <Input
                     id="email"
                     type="email"
@@ -162,7 +241,7 @@ export default function ClubLogin() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">{t("gymLogin.password", "Password")}</Label>
                   <Input
                     id="password"
                     type="password"
@@ -176,21 +255,21 @@ export default function ClubLogin() {
                   {isLoggingIn ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing in...
+                      {t("gymLogin.signingIn", "Signing in...")}
                     </>
                   ) : (
                     <>
                       <LogIn className="mr-2 h-4 w-4" />
-                      Sign In
+                      {t("gymLogin.signIn", "Sign In")}
                     </>
                   )}
                 </Button>
               </form>
               
               <div className="mt-6 text-center text-sm text-muted-foreground">
-                <p>Don't have an account?</p>
+                <p>{t("gymLogin.noAccount", "Don't have an account?")}</p>
                 <Link to="/auth" className="text-primary hover:underline">
-                  Create a FitConnect account
+                  {t("gymLogin.createAccount", "Create a FitConnect account")}
                 </Link>
               </div>
             </CardContent>
@@ -201,9 +280,9 @@ export default function ClubLogin() {
             {userGyms.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Your Gyms</CardTitle>
+                  <CardTitle>{t("gymLogin.yourGyms", "Your Gyms")}</CardTitle>
                   <CardDescription>
-                    Select a gym to manage
+                    {t("gymLogin.selectGym", "Select a gym to manage")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
@@ -246,15 +325,15 @@ export default function ClubLogin() {
             {/* Search for other gyms */}
             <Card>
               <CardHeader>
-                <CardTitle>Find a Gym</CardTitle>
+                <CardTitle>{t("gymLogin.findGym", "Find a Gym")}</CardTitle>
                 <CardDescription>
-                  Search for a gym by name
+                  {t("gymLogin.searchByName", "Search for a gym by name")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Search gym name..."
+                    placeholder={t("gymLogin.searchPlaceholder", "Search gym name...")}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleSearch()}
@@ -304,10 +383,10 @@ export default function ClubLogin() {
             {/* Register new gym */}
             <div className="text-center">
               <p className="text-sm text-muted-foreground mb-2">
-                Want to register a new gym?
+                {t("gymLogin.wantToRegister", "Want to register a new gym?")}
               </p>
               <Button variant="outline" asChild>
-                <Link to="/club-register">Register Your Gym</Link>
+                <Link to="/gym-register">{t("gymLogin.registerGym", "Register Your Gym")}</Link>
               </Button>
             </div>
           </div>
