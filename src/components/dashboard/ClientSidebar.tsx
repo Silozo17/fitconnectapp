@@ -32,6 +32,7 @@ import {
   Plug,
   Receipt,
   Bug,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useUnreadMessages } from "@/hooks/useUnreadMessages";
@@ -143,6 +144,15 @@ const menuGroupsConfig: MenuGroup[] = [
       { titleKey: "navigation.client.receipts", icon: Receipt, path: "/dashboard/client/receipts" },
       { titleKey: "navigation.client.favourites", icon: Heart, path: "/dashboard/client/favourites" },
       // Hidden for now - uncomment to restore: { titleKey: "Debug", icon: Bug, path: "/debug" },
+    ],
+  },
+  {
+    id: "myGyms",
+    labelKey: "navigation.client.myGyms",
+    icon: Building2,
+    collapsible: true,
+    items: [
+      { titleKey: "navigation.client.myGymsList", icon: Building2, path: "/dashboard/client/my-gyms" },
     ],
   },
 ];

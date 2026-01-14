@@ -12,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GymClassCard } from "@/components/gym/classes/GymClassCard";
 import { ClassBookingDialog } from "@/components/gym/classes/ClassBookingDialog";
 import { MemberQRCode, MemberMessages, MemberProgress, MemberGoals } from "@/components/gym/member";
+import { MemberContracts } from "@/components/gym/member/MemberContracts";
+import { MembershipUpgrade } from "@/components/gym/member/MembershipUpgrade";
 import { format, startOfWeek, endOfWeek, addDays, startOfDay, endOfDay } from "date-fns";
 import { 
   Calendar, 
@@ -21,7 +23,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Dumbbell,
-  Loader2
+  Loader2,
+  FileText,
+  ArrowUpDown
 } from "lucide-react";
 
 export default function GymMemberPortal() {
@@ -34,6 +38,10 @@ export default function GymMemberPortal() {
   const { data: membership, isLoading: membershipLoading } = useMyGymMembership();
   const { data: credits } = useMyGymCredits();
   const customerPortal = useGymCustomerPortal();
+
+  // Get class display settings from gym
+  const gymSettings = (gym?.settings as { class_display?: { show_coach_name?: boolean } }) || {};
+  const showCoachName = gymSettings.class_display?.show_coach_name ?? true;
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekEnd = endOfWeek(selectedDate, { weekStartsOn: 1 });
@@ -164,10 +172,12 @@ export default function GymMemberPortal() {
 
       {/* Main Tabs */}
       <Tabs defaultValue="schedule" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-5 md:grid-cols-9 max-w-4xl">
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
           <TabsTrigger value="bookings">Bookings</TabsTrigger>
           <TabsTrigger value="membership">Membership</TabsTrigger>
+          <TabsTrigger value="contracts">Contracts</TabsTrigger>
+          <TabsTrigger value="upgrade">Plans</TabsTrigger>
           <TabsTrigger value="messages">Messages</TabsTrigger>
           <TabsTrigger value="progress">Progress</TabsTrigger>
           <TabsTrigger value="goals">Goals</TabsTrigger>
@@ -229,6 +239,7 @@ export default function GymMemberPortal() {
                         onBook={() => handleBookClass(classItem)}
                         isBooked={isBooked(classItem.id)}
                         bookingStatus={booking?.status}
+                        showCoachName={showCoachName}
                       />
                     );
                   })}
@@ -361,6 +372,16 @@ export default function GymMemberPortal() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Contracts Tab */}
+        <TabsContent value="contracts">
+          <MemberContracts />
+        </TabsContent>
+
+        {/* Upgrade/Plans Tab */}
+        <TabsContent value="upgrade">
+          <MembershipUpgrade />
         </TabsContent>
 
         {/* Messages Tab */}

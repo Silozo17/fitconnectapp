@@ -34,6 +34,7 @@ interface GymClassCardProps {
   onViewAttendance?: () => void;
   isBooked?: boolean;
   bookingStatus?: string;
+  showCoachName?: boolean;
 }
 
 export function GymClassCard({ 
@@ -42,7 +43,8 @@ export function GymClassCard({
   onBook, 
   onViewAttendance,
   isBooked,
-  bookingStatus
+  bookingStatus,
+  showCoachName = true
 }: GymClassCardProps) {
   const startTime = new Date(classInfo.start_time);
   const endTime = new Date(classInfo.end_time);
@@ -72,7 +74,7 @@ export function GymClassCard({
                 </span>
               </div>
               
-              {classInfo.instructor && (
+              {classInfo.instructor && (showCoachName || isStaff) && (
                 <div className="flex items-center gap-2">
                   <User className="h-3.5 w-3.5 flex-shrink-0" />
                   <span className="truncate">

@@ -103,6 +103,7 @@ const ClientFoodDiary = lazy(() => import('@/pages/dashboard/client/ClientFoodDi
 const ClientTrainingLogs = lazy(() => import('@/pages/dashboard/client/ClientTrainingLogs'));
 const ClientHealthHistory = lazy(() => import('@/pages/dashboard/client/ClientHealthHistory'));
 const DisciplineSetup = lazy(() => import('@/pages/dashboard/client/DisciplineSetup'));
+const ClientMyGyms = lazy(() => import('@/pages/dashboard/client/MyGyms'));
 
 // Coach Dashboard Pages
 const CoachOverview = lazy(() => import('@/pages/dashboard/coach/CoachOverview'));
@@ -167,6 +168,8 @@ const GymAdminInvoices = lazy(() => import('@/pages/gym/GymAdminInvoices'));
 const GymAdminAutomations = lazy(() => import('@/pages/gym/GymAdminAutomations'));
 const GymAdminReports = lazy(() => import('@/pages/gym/GymAdminReports'));
 const GymAdminActivityLog = lazy(() => import('@/pages/gym/GymAdminActivityLog'));
+const GymAdminMessages = lazy(() => import('@/pages/gym/GymAdminMessages'));
+const GymCoachClasses = lazy(() => import('@/pages/gym/coach/CoachClasses'));
 const EmbedTimetable = lazy(() => import('@/pages/gym/embed/EmbedTimetable'));
 const EmbedSignup = lazy(() => import('@/pages/gym/embed/EmbedSignup'));
 
@@ -1639,6 +1642,13 @@ const App = () => (
                                     </Suspense>
                                   </ProtectedRoute>
                                 } />
+                                <Route path="client/my-gyms" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientMyGyms />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
                                 
                                 {/* Coach Dashboard Routes */}
                                 <Route path="coach" element={
@@ -2021,6 +2031,16 @@ const App = () => (
                                 <Route path="activity-log" element={
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <GymAdminActivityLog />
+                                  </Suspense>
+                                } />
+                                <Route path="messages" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminMessages />
+                                  </Suspense>
+                                } />
+                                <Route path="coach/classes" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymCoachClasses />
                                   </Suspense>
                                 } />
                               </Route>
