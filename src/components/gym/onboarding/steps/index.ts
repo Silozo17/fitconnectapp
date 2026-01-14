@@ -1,4 +1,3 @@
-export { Step1AccountCreation } from './Step1AccountCreation';
 export { Step2GymBasics } from './Step2GymBasics';
 export { Step3Locations } from './Step3Locations';
 export { Step4Services } from './Step4Services';

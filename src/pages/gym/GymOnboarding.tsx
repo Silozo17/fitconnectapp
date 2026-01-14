@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useGymOnboarding } from '@/hooks/gym/useGymOnboarding';
 import {
-  Step1AccountCreation,
   Step2GymBasics,
   Step3Locations,
   Step4Services,
@@ -25,8 +24,6 @@ export default function GymOnboarding() {
     goToStep,
     isLoading,
     gymId,
-    userId,
-    createAccount,
     saveGymBasics,
     saveLocations,
     saveServices,
@@ -61,20 +58,13 @@ export default function GymOnboarding() {
     switch (currentStep) {
       case 0:
         return (
-          <Step1AccountCreation
-            {...commonProps}
-            onNext={createAccount}
-          />
-        );
-      case 1:
-        return (
           <Step2GymBasics
             {...commonProps}
             onNext={saveGymBasics}
             onBack={prevStep}
           />
         );
-      case 2:
+      case 1:
         return (
           <Step3Locations
             {...commonProps}
@@ -82,7 +72,7 @@ export default function GymOnboarding() {
             onBack={prevStep}
           />
         );
-      case 3:
+      case 2:
         return (
           <Step4Services
             {...commonProps}
@@ -90,7 +80,7 @@ export default function GymOnboarding() {
             onBack={prevStep}
           />
         );
-      case 4:
+      case 3:
         return (
           <Step5Team
             {...commonProps}
@@ -98,7 +88,7 @@ export default function GymOnboarding() {
             onBack={prevStep}
           />
         );
-      case 5:
+      case 4:
         return (
           <Step6Memberships
             {...commonProps}
@@ -106,7 +96,7 @@ export default function GymOnboarding() {
             onBack={prevStep}
           />
         );
-      case 6:
+      case 5:
         return (
           <Step7Payments
             {...commonProps}
@@ -115,7 +105,7 @@ export default function GymOnboarding() {
             gymId={gymId}
           />
         );
-      case 7:
+      case 6:
         return (
           <Step8Branding
             {...commonProps}
@@ -124,7 +114,7 @@ export default function GymOnboarding() {
             gymId={gymId}
           />
         );
-      case 8:
+      case 7:
         return (
           <Step9Review
             {...commonProps}
