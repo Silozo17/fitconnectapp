@@ -162,6 +162,12 @@ const GymAdminMarketing = lazy(() => import('@/pages/gym/GymAdminMarketing'));
 const GymAdminAutomation = lazy(() => import('@/pages/gym/GymAdminAutomation'));
 const GymOnboarding = lazy(() => import('@/pages/gym/GymOnboarding'));
 const GymAdminGrading = lazy(() => import('@/pages/gym/GymAdminGrading'));
+const GymAdminProducts = lazy(() => import('@/pages/gym/GymAdminProducts'));
+const GymAdminPOS = lazy(() => import('@/pages/gym/GymAdminPOS'));
+const GymAdminInvoices = lazy(() => import('@/pages/gym/GymAdminInvoices'));
+const GymAdminAutomations = lazy(() => import('@/pages/gym/GymAdminAutomations'));
+const EmbedTimetable = lazy(() => import('@/pages/gym/embed/EmbedTimetable'));
+const EmbedSignup = lazy(() => import('@/pages/gym/embed/EmbedSignup'));
 
 // Gym Admin Layout Wrapper (provides GymProvider context)
 import { GymAdminRouteWrapper } from '@/components/gym/admin/GymAdminRouteWrapper';
@@ -1992,7 +1998,39 @@ const App = () => (
                                     <GymAdminGrading />
                                   </Suspense>
                                 } />
+                                <Route path="products" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminProducts />
+                                  </Suspense>
+                                } />
+                                <Route path="pos" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminPOS />
+                                  </Suspense>
+                                } />
+                                <Route path="invoices" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminInvoices />
+                                  </Suspense>
+                                } />
+                                <Route path="automations" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminAutomations />
+                                  </Suspense>
+                                } />
                               </Route>
+                              
+                              {/* Embed Routes (public) */}
+                              <Route path="/embed/:gymId/timetable" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <EmbedTimetable />
+                                </Suspense>
+                              } />
+                              <Route path="/embed/:gymId/signup" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <EmbedSignup />
+                                </Suspense>
+                              } />
                               
                               {/* Club Member Signup (public route) */}
                               <Route path="/club/:gymSlug/signup" element={
