@@ -212,7 +212,13 @@ export function useLeadMutations(gymId: string | undefined) {
     mutationFn: async (data: { lead_id: string; staff_id?: string | null; activity_type: string; description?: string | null; metadata?: Record<string, unknown> | null }) => {
       const { data: result, error } = await supabase
         .from("gym_lead_activities")
-        .insert(data)
+        .insert([{
+          lead_id: data.lead_id,
+          staff_id: data.staff_id ?? null,
+          activity_type: data.activity_type,
+          description: data.description ?? null,
+          metadata: data.metadata as any ?? null,
+        }])
         .select()
         .single();
 

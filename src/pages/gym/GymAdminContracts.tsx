@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { GymAdminLayout } from "@/components/gym/admin/GymAdminLayout";
+
 
 const CONTRACT_TYPES = [
   { value: "waiver", label: "Liability Waiver" },
@@ -83,7 +83,14 @@ export default function GymAdminContracts() {
       );
     } else {
       createTemplate.mutate(
-        { ...data, gym_id: gymId! },
+        { 
+          name: data.name,
+          type: data.type,
+          content: data.content,
+          is_required: data.is_required,
+          is_active: data.is_active,
+          gym_id: gymId!,
+        },
         {
           onSuccess: () => {
             setIsDialogOpen(false);
@@ -116,8 +123,7 @@ export default function GymAdminContracts() {
   const totalSigned = signedContracts.length;
 
   return (
-    <GymAdminLayout gymId={gymId!} gymName={gym?.name || "Loading..."}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Contracts & Waivers</h1>
@@ -459,7 +465,6 @@ export default function GymAdminContracts() {
             </div>
           </DialogContent>
         </Dialog>
-      </div>
-    </GymAdminLayout>
+    </div>
   );
 }
