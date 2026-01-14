@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useGymMember, useUpdateGymMember } from "@/hooks/gym/useGymMembers";
+import { useAuth } from "@/contexts/AuthContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +43,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { MemberActivitySummary } from "@/components/gym/admin/members/MemberActivitySummary";
+import { MemberNotesTab } from "@/components/gym/admin/members/MemberNotesTab";
 
 export default function GymMemberProfile() {
   const { gymId, memberId } = useParams<{ gymId: string; memberId: string }>();
@@ -332,11 +335,15 @@ export default function GymMemberProfile() {
         </Card>
       </div>
 
+      {/* Activity Summary */}
+      <MemberActivitySummary member={member} />
+
       {/* Tabs for History */}
       <Tabs defaultValue="bookings" className="space-y-4">
         <TabsList>
           <TabsTrigger value="bookings">Class Bookings</TabsTrigger>
           <TabsTrigger value="checkins">Check-ins</TabsTrigger>
+          <TabsTrigger value="notes">Notes</TabsTrigger>
           <TabsTrigger value="memberships">Membership History</TabsTrigger>
         </TabsList>
 
@@ -424,6 +431,10 @@ export default function GymMemberProfile() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="notes">
+          <MemberNotesTab memberId={memberId!} />
         </TabsContent>
 
         <TabsContent value="memberships">
