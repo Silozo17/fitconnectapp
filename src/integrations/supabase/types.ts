@@ -8689,6 +8689,7 @@ export type Database = {
       gym_staff: {
         Row: {
           accepted_at: string | null
+          assigned_location_ids: string[] | null
           avatar_url: string | null
           bio: string | null
           can_take_bookings: boolean | null
@@ -8711,6 +8712,7 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
+          assigned_location_ids?: string[] | null
           avatar_url?: string | null
           bio?: string | null
           can_take_bookings?: boolean | null
@@ -8733,6 +8735,7 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
+          assigned_location_ids?: string[] | null
           avatar_url?: string | null
           bio?: string | null
           can_take_bookings?: boolean | null
@@ -8773,6 +8776,95 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_staff_action_logs: {
+        Row: {
+          action_category: string
+          action_type: string
+          created_at: string | null
+          description: string
+          gym_id: string
+          id: string
+          ip_address: string | null
+          location_id: string | null
+          new_values: Json | null
+          old_values: Json | null
+          requires_owner_review: boolean | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          staff_id: string
+          target_entity_id: string | null
+          target_entity_type: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action_category: string
+          action_type: string
+          created_at?: string | null
+          description: string
+          gym_id: string
+          id?: string
+          ip_address?: string | null
+          location_id?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          requires_owner_review?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          staff_id: string
+          target_entity_id?: string | null
+          target_entity_type?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action_category?: string
+          action_type?: string
+          created_at?: string | null
+          description?: string
+          gym_id?: string
+          id?: string
+          ip_address?: string | null
+          location_id?: string | null
+          new_values?: Json | null
+          old_values?: Json | null
+          requires_owner_review?: boolean | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          staff_id?: string
+          target_entity_id?: string | null
+          target_entity_type?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_staff_action_logs_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_action_logs_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_action_logs_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_staff_action_logs_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
             referencedColumns: ["id"]
           },
         ]
@@ -12494,6 +12586,10 @@ export type Database = {
         Args: { start_date: string }
         Returns: number
       }
+      can_view_gym_action_log: {
+        Args: { _log_id: string; _user_id: string }
+        Returns: boolean
+      }
       check_and_award_health_badges: {
         Args: { p_client_id: string }
         Returns: {
@@ -12594,6 +12690,10 @@ export type Database = {
       get_client_leaderboard_rank: {
         Args: { client_id_param: string }
         Returns: number
+      }
+      get_gym_staff_role: {
+        Args: { _gym_id: string; _user_id: string }
+        Returns: string
       }
       get_leaderboard_locations: {
         Args: { p_location_type: string }
