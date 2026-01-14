@@ -8248,6 +8248,7 @@ export type Database = {
           accent_color: string | null
           address_line_1: string | null
           address_line_2: string | null
+          brand_color: string | null
           business_types: string[] | null
           city: string | null
           country: string | null
@@ -8289,6 +8290,7 @@ export type Database = {
           accent_color?: string | null
           address_line_1?: string | null
           address_line_2?: string | null
+          brand_color?: string | null
           business_types?: string[] | null
           city?: string | null
           country?: string | null
@@ -8330,6 +8332,7 @@ export type Database = {
           accent_color?: string | null
           address_line_1?: string | null
           address_line_2?: string | null
+          brand_color?: string | null
           business_types?: string[] | null
           city?: string | null
           country?: string | null
