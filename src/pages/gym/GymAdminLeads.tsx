@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { GymAdminLayout } from "@/components/gym/admin/GymAdminLayout";
+
 
 const leadFormSchema = z.object({
   first_name: z.string().min(1, "First name is required"),
@@ -149,7 +149,7 @@ export default function GymAdminLeads() {
 
   const { data: leads = [], isLoading } = useGymLeads(gymId, { status: statusFilter });
   const { data: stats } = useLeadStats(gymId);
-  const { data: staff = [] } = useGymStaff(gymId);
+  const { data: staff = [] } = useGymStaff();
   const { createLead, updateLead, updateLeadStatus, deleteLead } = useLeadMutations(gymId);
 
   const form = useForm<LeadFormData>({
@@ -223,8 +223,7 @@ export default function GymAdminLeads() {
   }, {} as Record<string, GymLead[]>);
 
   return (
-    <GymAdminLayout gymId={gymId!} gymName={gym?.name || "Loading..."}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold">Lead Management</h1>
@@ -491,7 +490,6 @@ export default function GymAdminLeads() {
             )}
           </div>
         )}
-      </div>
-    </GymAdminLayout>
+    </div>
   );
 }

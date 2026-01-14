@@ -18,7 +18,7 @@ import {
   Award
 } from "lucide-react";
 import { format } from "date-fns";
-import { GymAdminLayout } from "@/components/gym/admin/GymAdminLayout";
+
 
 export default function GymAdminReferrals() {
   const { gymId } = useParams();
@@ -67,8 +67,7 @@ export default function GymAdminReferrals() {
   };
 
   return (
-    <GymAdminLayout gymId={gymId!} gymName={gym?.name || "Loading..."}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Referral Programme</h1>
           <p className="text-muted-foreground">Manage member referrals and rewards</p>
@@ -284,7 +283,6 @@ export default function GymAdminReferrals() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
-    </GymAdminLayout>
+    </div>
   );
 }
