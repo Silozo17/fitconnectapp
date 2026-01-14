@@ -169,6 +169,7 @@ const GymAdminAutomations = lazy(() => import('@/pages/gym/GymAdminAutomations')
 const GymAdminReports = lazy(() => import('@/pages/gym/GymAdminReports'));
 const GymAdminActivityLog = lazy(() => import('@/pages/gym/GymAdminActivityLog'));
 const GymAdminMessages = lazy(() => import('@/pages/gym/GymAdminMessages'));
+const GymAdminRefundRequests = lazy(() => import('@/pages/gym/GymAdminRefundRequests'));
 const GymCoachClasses = lazy(() => import('@/pages/gym/coach/CoachClasses'));
 const EmbedTimetable = lazy(() => import('@/pages/gym/embed/EmbedTimetable'));
 const EmbedSignup = lazy(() => import('@/pages/gym/embed/EmbedSignup'));
@@ -2036,6 +2037,11 @@ const App = () => (
                                 <Route path="messages" element={
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <GymAdminMessages />
+                                  </Suspense>
+                                } />
+                                <Route path="refund-requests" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminRefundRequests />
                                   </Suspense>
                                 } />
                                 <Route path="coach/classes" element={

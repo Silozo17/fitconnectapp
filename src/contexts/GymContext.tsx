@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
 // Types
-export type GymRole = "owner" | "manager" | "coach" | "marketing" | "staff";
+export type GymRole = "owner" | "area_manager" | "manager" | "coach" | "marketing" | "staff";
 
 export interface GymProfile {
   id: string;
@@ -318,7 +318,7 @@ export function useGymPermission(requiredRoles: GymRole[]) {
 }
 
 export function useCanManageGym() {
-  return useGymPermission(["owner", "manager"]);
+  return useGymPermission(["owner", "area_manager", "manager"]);
 }
 
 export function useCanManageClasses() {
@@ -330,5 +330,10 @@ export function useCanManageMembers() {
 }
 
 export function useCanViewFinancials() {
-  return useGymPermission(["owner", "manager"]);
+  return useGymPermission(["owner", "area_manager"]);
+}
+
+// Check if user is owner or area_manager (full access)
+export function useIsOwnerOrAreaManager() {
+  return useGymPermission(["owner", "area_manager"]);
 }

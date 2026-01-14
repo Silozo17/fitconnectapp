@@ -6,7 +6,7 @@ import PageLoadingSpinner from '@/components/shared/PageLoadingSpinner';
 
 interface GymProtectedRouteProps {
   children: React.ReactNode;
-  requiredRoles?: ('owner' | 'manager' | 'coach' | 'marketing' | 'staff')[];
+  requiredRoles?: ('owner' | 'area_manager' | 'manager' | 'coach' | 'marketing' | 'staff')[];
 }
 
 /**
