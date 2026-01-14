@@ -5832,6 +5832,92 @@ export type Database = {
           },
         ]
       }
+      gym_class_schedules: {
+        Row: {
+          capacity: number
+          class_type_id: string
+          created_at: string
+          current_bookings: number
+          end_time: string
+          gym_id: string
+          id: string
+          instructor_id: string | null
+          is_recurring: boolean
+          notes: string | null
+          parent_schedule_id: string | null
+          recurring_pattern: string | null
+          room: string | null
+          start_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          capacity?: number
+          class_type_id: string
+          created_at?: string
+          current_bookings?: number
+          end_time: string
+          gym_id: string
+          id?: string
+          instructor_id?: string | null
+          is_recurring?: boolean
+          notes?: string | null
+          parent_schedule_id?: string | null
+          recurring_pattern?: string | null
+          room?: string | null
+          start_time: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          capacity?: number
+          class_type_id?: string
+          created_at?: string
+          current_bookings?: number
+          end_time?: string
+          gym_id?: string
+          id?: string
+          instructor_id?: string | null
+          is_recurring?: boolean
+          notes?: string | null
+          parent_schedule_id?: string | null
+          recurring_pattern?: string | null
+          room?: string | null
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_class_schedules_class_type_id_fkey"
+            columns: ["class_type_id"]
+            isOneToOne: false
+            referencedRelation: "gym_class_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_class_schedules_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_class_schedules_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_class_schedules_parent_schedule_id_fkey"
+            columns: ["parent_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "gym_class_schedules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_class_types: {
         Row: {
           allow_drop_in: boolean | null
@@ -5911,6 +5997,57 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_class_waitlists: {
+        Row: {
+          class_schedule_id: string
+          created_at: string
+          id: string
+          member_id: string
+          offer_expires_at: string | null
+          offered_at: string | null
+          position: number
+          responded_at: string | null
+          status: string
+        }
+        Insert: {
+          class_schedule_id: string
+          created_at?: string
+          id?: string
+          member_id: string
+          offer_expires_at?: string | null
+          offered_at?: string | null
+          position: number
+          responded_at?: string | null
+          status?: string
+        }
+        Update: {
+          class_schedule_id?: string
+          created_at?: string
+          id?: string
+          member_id?: string
+          offer_expires_at?: string | null
+          offered_at?: string | null
+          position?: number
+          responded_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_class_waitlists_class_schedule_id_fkey"
+            columns: ["class_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "gym_class_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_class_waitlists_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
             referencedColumns: ["id"]
           },
         ]
@@ -6102,6 +6239,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "gym_contract_templates_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_credit_packages: {
+        Row: {
+          created_at: string
+          credit_type: string
+          credits_amount: number
+          currency: string
+          description: string | null
+          display_order: number
+          gym_id: string
+          id: string
+          is_active: boolean
+          name: string
+          price: number
+          updated_at: string
+          validity_days: number | null
+        }
+        Insert: {
+          created_at?: string
+          credit_type?: string
+          credits_amount: number
+          currency?: string
+          description?: string | null
+          display_order?: number
+          gym_id: string
+          id?: string
+          is_active?: boolean
+          name: string
+          price: number
+          updated_at?: string
+          validity_days?: number | null
+        }
+        Update: {
+          created_at?: string
+          credit_type?: string
+          credits_amount?: number
+          currency?: string
+          description?: string | null
+          display_order?: number
+          gym_id?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          price?: number
+          updated_at?: string
+          validity_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_credit_packages_gym_id_fkey"
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
@@ -7192,6 +7385,73 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      gym_recurring_bookings: {
+        Row: {
+          auto_book: boolean
+          class_type_id: string
+          created_at: string
+          day_of_week: number
+          end_date: string | null
+          gym_id: string
+          id: string
+          is_active: boolean
+          member_id: string
+          preferred_time: string
+          start_date: string
+          updated_at: string
+        }
+        Insert: {
+          auto_book?: boolean
+          class_type_id: string
+          created_at?: string
+          day_of_week: number
+          end_date?: string | null
+          gym_id: string
+          id?: string
+          is_active?: boolean
+          member_id: string
+          preferred_time: string
+          start_date?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_book?: boolean
+          class_type_id?: string
+          created_at?: string
+          day_of_week?: number
+          end_date?: string | null
+          gym_id?: string
+          id?: string
+          is_active?: boolean
+          member_id?: string
+          preferred_time?: string
+          start_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_recurring_bookings_class_type_id_fkey"
+            columns: ["class_type_id"]
+            isOneToOne: false
+            referencedRelation: "gym_class_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_recurring_bookings_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_recurring_bookings_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gym_referral_rewards: {
         Row: {
