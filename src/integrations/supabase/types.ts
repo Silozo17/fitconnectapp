@@ -7332,11 +7332,14 @@ export type Database = {
       }
       gym_member_messages: {
         Row: {
+          assigned_at: string | null
+          assigned_to_staff_id: string | null
           content: string
           created_at: string | null
           gym_id: string
           id: string
           is_read: boolean | null
+          location_id: string | null
           parent_message_id: string | null
           read_at: string | null
           recipient_member_id: string | null
@@ -7347,11 +7350,14 @@ export type Database = {
           subject: string | null
         }
         Insert: {
+          assigned_at?: string | null
+          assigned_to_staff_id?: string | null
           content: string
           created_at?: string | null
           gym_id: string
           id?: string
           is_read?: boolean | null
+          location_id?: string | null
           parent_message_id?: string | null
           read_at?: string | null
           recipient_member_id?: string | null
@@ -7362,11 +7368,14 @@ export type Database = {
           subject?: string | null
         }
         Update: {
+          assigned_at?: string | null
+          assigned_to_staff_id?: string | null
           content?: string
           created_at?: string | null
           gym_id?: string
           id?: string
           is_read?: boolean | null
+          location_id?: string | null
           parent_message_id?: string | null
           read_at?: string | null
           recipient_member_id?: string | null
@@ -7378,10 +7387,24 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "gym_member_messages_assigned_to_staff_id_fkey"
+            columns: ["assigned_to_staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "gym_member_messages_gym_id_fkey"
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_messages_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
             referencedColumns: ["id"]
           },
           {
