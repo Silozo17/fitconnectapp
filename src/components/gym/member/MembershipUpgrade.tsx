@@ -21,12 +21,12 @@ interface MembershipPlan {
   id: string;
   name: string;
   description: string | null;
-  price: number;
+  price_amount: number;
   currency: string;
   billing_interval: string;
-  features: string[];
-  is_popular: boolean;
-  credits_per_period: number | null;
+  features: string[] | null;
+  is_featured: boolean;
+  class_credits: number | null;
   unlimited_classes: boolean;
 }
 
@@ -44,13 +44,24 @@ export function MembershipUpgrade() {
 
       const { data, error } = await supabase
         .from("membership_plans")
-        .select("*")
+        .select(`
+          id,
+          name,
+          description,
+          price_amount,
+          currency,
+          billing_interval,
+          features,
+          is_featured,
+          class_credits,
+          unlimited_classes
+        `)
         .eq("gym_id", gym.id)
         .eq("is_active", true)
-        .order("price", { ascending: true });
+        .order("price_amount", { ascending: true });
 
       if (error) throw error;
-      return data as MembershipPlan[];
+      return (data || []) as MembershipPlan[];
     },
     enabled: !!gym?.id,
   });
@@ -155,9 +166,9 @@ export function MembershipUpgrade() {
               return (
                 <Card 
                   key={plan.id}
-                  className={`relative ${plan.is_popular ? "border-primary shadow-md" : ""} ${isCurrent ? "ring-2 ring-primary" : ""}`}
+                  className={`relative ${plan.is_featured ? "border-primary shadow-md" : ""} ${isCurrent ? "ring-2 ring-primary" : ""}`}
                 >
-                  {plan.is_popular && (
+                  {plan.is_featured && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                       <Badge className="gap-1">
                         <Star className="h-3 w-3" />
@@ -179,7 +190,7 @@ export function MembershipUpgrade() {
                   <CardContent className="space-y-4">
                     <div>
                       <span className="text-3xl font-bold">
-                        {formatPrice(plan.price, plan.currency)}
+                        {formatPrice(plan.price_amount / 100, plan.currency)}
                       </span>
                       <span className="text-muted-foreground">
                         /{plan.billing_interval}
@@ -193,10 +204,10 @@ export function MembershipUpgrade() {
                           <span className="font-medium">Unlimited classes</span>
                         </div>
                       )}
-                      {plan.credits_per_period && !plan.unlimited_classes && (
+                      {plan.class_credits && !plan.unlimited_classes && (
                         <div className="flex items-center gap-2 text-sm">
                           <Check className="h-4 w-4 text-green-500" />
-                          <span>{plan.credits_per_period} credits per {plan.billing_interval}</span>
+                          <span>{plan.class_credits} credits per {plan.billing_interval}</span>
                         </div>
                       )}
                       {features.map((feature, idx) => (
@@ -215,7 +226,7 @@ export function MembershipUpgrade() {
                       </Button>
                     ) : (
                       <Button 
-                        variant={plan.is_popular ? "default" : "outline"} 
+                        variant={plan.is_featured ? "default" : "outline"} 
                         className="w-full"
                         onClick={handleManageSubscription}
                         disabled={customerPortal.isPending}

@@ -44,7 +44,7 @@ interface CoachClass {
 
 export default function CoachClasses() {
   const { gymId } = useParams<{ gymId: string }>();
-  const { gym, staff } = useGym();
+  const { gym, staffRecord: staff } = useGym();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedClass, setSelectedClass] = useState<CoachClass | null>(null);
   const [showRegister, setShowRegister] = useState(false);

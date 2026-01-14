@@ -50,7 +50,7 @@ export function ClassBroadcast({
   classId,
   className,
 }: ClassBroadcastProps) {
-  const { gym, staff } = useGym();
+  const { gym, staffRecord: staff } = useGym();
   const queryClient = useQueryClient();
   const [subject, setSubject] = useState(`Update from ${className}`);
   const [message, setMessage] = useState("");
@@ -99,6 +99,7 @@ export function ClassBroadcast({
       // Create messages for each selected member
       const messages = membersToMessage.map(memberId => ({
         gym_id: gym.id,
+        sender_type: "staff" as const,
         sender_staff_id: staff.id,
         recipient_member_id: memberId,
         subject,

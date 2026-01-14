@@ -70,7 +70,7 @@ interface GymMessage {
 
 export default function GymAdminMessages() {
   const { gymId } = useParams<{ gymId: string }>();
-  const { gym, staff } = useGym();
+  const { gym, staffRecord: staff } = useGym();
   const queryClient = useQueryClient();
   const [selectedMessage, setSelectedMessage] = useState<GymMessage | null>(null);
   const [replyDialogOpen, setReplyDialogOpen] = useState(false);
@@ -172,6 +172,7 @@ export default function GymAdminMessages() {
         .from("gym_member_messages")
         .insert({
           gym_id: gymId,
+          sender_type: "staff" as const,
           sender_staff_id: staff.id,
           recipient_member_id: recipientMemberId,
           subject: `Re: ${selectedMessage?.subject || "Message"}`,
