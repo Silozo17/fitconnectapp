@@ -175,10 +175,10 @@ export function useGymOnboarding() {
     if (!gymId) return;
     
     try {
-      await supabase
+      await (supabase as any)
         .from('gym_profiles')
         .update({
-          onboarding_progress: { step, data: { ...data, ...newData } },
+          onboarding_progress: { step, data: { ...data, ...newData } } as unknown,
           updated_at: new Date().toISOString(),
         })
         .eq('id', gymId);
@@ -241,7 +241,7 @@ export function useGymOnboarding() {
       setUserId(authData.user.id);
 
       // Create minimal gym profile
-      const { data: gymData, error: gymError } = await supabase
+      const { data: gymData, error: gymError } = await (supabase as any)
         .from('gym_profiles')
         .insert({
           user_id: authData.user.id,
@@ -250,7 +250,7 @@ export function useGymOnboarding() {
           owner_name: data.ownerName,
           owner_phone: data.phone,
           onboarding_completed: false,
-          onboarding_progress: { step: 1, data },
+          onboarding_progress: { step: 1, data } as unknown,
         })
         .select('id')
         .single();
@@ -297,7 +297,7 @@ export function useGymOnboarding() {
           return;
         }
 
-        const { data: gymData, error: createError } = await supabase
+        const { data: gymData, error: createError } = await (supabase as any)
           .from('gym_profiles')
           .insert({
             user_id: user.id,
@@ -311,7 +311,7 @@ export function useGymOnboarding() {
             owner_name: data.ownerName,
             owner_phone: data.phone,
             onboarding_completed: false,
-            onboarding_progress: { step: 1, data },
+            onboarding_progress: { step: 1, data } as unknown,
           })
           .select('id')
           .single();
@@ -321,7 +321,7 @@ export function useGymOnboarding() {
         setGymId(currentGymId);
       } else {
         // Update existing gym
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('gym_profiles')
           .update({
             name: data.gymName,
@@ -331,7 +331,7 @@ export function useGymOnboarding() {
             country: data.country,
             currency: data.currency,
             description: data.description || null,
-            onboarding_progress: { step: 1, data },
+            onboarding_progress: { step: 1, data } as unknown,
           })
           .eq('id', currentGymId);
 
@@ -464,13 +464,13 @@ export function useGymOnboarding() {
     if (!gymId) return;
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('gym_profiles')
         .update({
           stripe_account_id: data.stripeAccountId || null,
           vat_registered: data.vatRegistered,
           vat_number: data.vatNumber || null,
-          onboarding_progress: { step: 7, data },
+          onboarding_progress: { step: 7, data } as unknown,
         })
         .eq('id', gymId);
 
@@ -488,13 +488,13 @@ export function useGymOnboarding() {
     if (!gymId) return;
     setIsLoading(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('gym_profiles')
         .update({
           logo_url: data.logoUrl || null,
           brand_color: data.brandColor || null,
           cover_image_url: data.coverImageUrl || null,
-          onboarding_progress: { step: 8, data },
+          onboarding_progress: { step: 8, data } as unknown,
         })
         .eq('id', gymId);
 
