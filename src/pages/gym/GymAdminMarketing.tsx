@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
@@ -24,7 +24,10 @@ import {
   Calendar,
   Users,
   Percent,
-  Copy
+  Copy,
+  Send,
+  Clock,
+  Loader2
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -52,14 +55,18 @@ export default function GymAdminMarketing() {
   const { gym } = useGym();
   const [isCampaignDialogOpen, setIsCampaignDialogOpen] = useState(false);
   const [isPromotionDialogOpen, setIsPromotionDialogOpen] = useState(false);
+  const [isScheduleDialogOpen, setIsScheduleDialogOpen] = useState(false);
+  const [isSendConfirmOpen, setIsSendConfirmOpen] = useState(false);
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const [scheduleDate, setScheduleDate] = useState("");
+  const [scheduleTime, setScheduleTime] = useState("09:00");
   const [editingCampaign, setEditingCampaign] = useState<any>(null);
   const [editingPromotion, setEditingPromotion] = useState<any>(null);
 
   const { data: campaigns = [], isLoading: campaignsLoading } = useCampaigns(gymId);
   const { data: promotions = [], isLoading: promotionsLoading } = usePromotions(gymId);
-  const { createCampaign, updateCampaign, deleteCampaign } = useCampaignMutations(gymId);
+  const { createCampaign, updateCampaign, deleteCampaign, sendCampaign, scheduleCampaign } = useCampaignMutations(gymId);
   const { createPromotion, updatePromotion, deletePromotion } = usePromotionMutations(gymId);
-
   // Campaign form state
   const [campaignForm, setCampaignForm] = useState({
     name: "",
@@ -211,6 +218,35 @@ export default function GymAdminMarketing() {
     }
   };
 
+  const handleSendCampaign = (campaignId: string) => {
+    setSelectedCampaignId(campaignId);
+    setIsSendConfirmOpen(true);
+  };
+
+  const confirmSendCampaign = async () => {
+    if (selectedCampaignId) {
+      await sendCampaign.mutateAsync(selectedCampaignId);
+      setIsSendConfirmOpen(false);
+      setSelectedCampaignId(null);
+    }
+  };
+
+  const handleOpenScheduleDialog = (campaignId: string) => {
+    setSelectedCampaignId(campaignId);
+    setScheduleDate(format(new Date(Date.now() + 86400000), "yyyy-MM-dd"));
+    setScheduleTime("09:00");
+    setIsScheduleDialogOpen(true);
+  };
+
+  const handleScheduleCampaign = async () => {
+    if (selectedCampaignId && scheduleDate && scheduleTime) {
+      const scheduledAt = new Date(`${scheduleDate}T${scheduleTime}`).toISOString();
+      await scheduleCampaign.mutateAsync({ campaignId: selectedCampaignId, scheduledAt });
+      setIsScheduleDialogOpen(false);
+      setSelectedCampaignId(null);
+    }
+  };
+
   const copyPromoCode = (code: string) => {
     navigator.clipboard.writeText(code);
   };
@@ -352,7 +388,31 @@ export default function GymAdminMarketing() {
                       <span>Opened: {campaign.stats?.opened || 0}</span>
                       <span>Clicked: {campaign.stats?.clicked || 0}</span>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      {campaign.status === "draft" && (
+                        <>
+                          <Button
+                            size="sm"
+                            onClick={() => handleSendCampaign(campaign.id)}
+                            disabled={sendCampaign.isPending}
+                          >
+                            {sendCampaign.isPending ? (
+                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            ) : (
+                              <Send className="h-4 w-4 mr-1" />
+                            )}
+                            Send Now
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleOpenScheduleDialog(campaign.id)}
+                          >
+                            <Clock className="h-4 w-4 mr-1" />
+                            Schedule
+                          </Button>
+                        </>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -656,6 +716,80 @@ export default function GymAdminMarketing() {
               disabled={!promotionForm.name || createPromotion.isPending || updatePromotion.isPending}
             >
               {editingPromotion ? "Update" : "Create"} Promotion
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Send Confirmation Dialog */}
+      <Dialog open={isSendConfirmOpen} onOpenChange={setIsSendConfirmOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send Campaign Now?</DialogTitle>
+            <DialogDescription>
+              This will immediately send the campaign to all selected recipients. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsSendConfirmOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmSendCampaign} disabled={sendCampaign.isPending}>
+              {sendCampaign.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sending...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Send Now
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Schedule Dialog */}
+      <Dialog open={isScheduleDialogOpen} onOpenChange={setIsScheduleDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Schedule Campaign</DialogTitle>
+            <DialogDescription>
+              Choose when to send this campaign.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label>Date</Label>
+              <Input
+                type="date"
+                value={scheduleDate}
+                onChange={(e) => setScheduleDate(e.target.value)}
+                min={format(new Date(), "yyyy-MM-dd")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Time</Label>
+              <Input
+                type="time"
+                value={scheduleTime}
+                onChange={(e) => setScheduleTime(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsScheduleDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleScheduleCampaign} disabled={scheduleCampaign.isPending || !scheduleDate}>
+              {scheduleCampaign.isPending ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Clock className="h-4 w-4 mr-2" />
+              )}
+              Schedule
             </Button>
           </DialogFooter>
         </DialogContent>
