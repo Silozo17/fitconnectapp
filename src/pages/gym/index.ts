@@ -11,3 +11,4 @@ export { default as GymAdminCredits } from "./GymAdminCredits";
 export { default as GymAdminStaff } from "./GymAdminStaff";
 export { default as GymPublicWebsite } from "./GymPublicWebsite";
 export { default as GymAdminMarketing } from "./GymAdminMarketing";
+export { default as GymAdminAutomation } from "./GymAdminAutomation";
