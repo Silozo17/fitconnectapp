@@ -49,7 +49,7 @@ export function useAddFamilyMember() {
       emergency_contact_name?: string;
       emergency_contact_phone?: string;
     }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("gym_members")
         .insert({
           gym_id: gym?.id,
