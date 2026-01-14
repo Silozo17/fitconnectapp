@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GymClassCard } from "@/components/gym/classes/GymClassCard";
 import { ClassBookingDialog } from "@/components/gym/classes/ClassBookingDialog";
-import { MemberQRCode } from "@/components/gym/member/MemberQRCode";
+import { MemberQRCode, MemberMessages, MemberProgress, MemberGoals } from "@/components/gym/member";
 import { format, startOfWeek, endOfWeek, addDays, startOfDay, endOfDay } from "date-fns";
 import { 
   Calendar, 
@@ -164,10 +164,13 @@ export default function GymMemberPortal() {
 
       {/* Main Tabs */}
       <Tabs defaultValue="schedule" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-md">
+        <TabsList className="grid w-full grid-cols-7 max-w-2xl">
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="bookings">My Bookings</TabsTrigger>
+          <TabsTrigger value="bookings">Bookings</TabsTrigger>
           <TabsTrigger value="membership">Membership</TabsTrigger>
+          <TabsTrigger value="messages">Messages</TabsTrigger>
+          <TabsTrigger value="progress">Progress</TabsTrigger>
+          <TabsTrigger value="goals">Goals</TabsTrigger>
           <TabsTrigger value="checkin">Check-In</TabsTrigger>
         </TabsList>
 
@@ -358,6 +361,21 @@ export default function GymMemberPortal() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Messages Tab */}
+        <TabsContent value="messages">
+          <MemberMessages />
+        </TabsContent>
+
+        {/* Progress Tab */}
+        <TabsContent value="progress">
+          <MemberProgress />
+        </TabsContent>
+
+        {/* Goals Tab */}
+        <TabsContent value="goals">
+          <MemberGoals />
         </TabsContent>
 
         {/* Check-In Tab */}
