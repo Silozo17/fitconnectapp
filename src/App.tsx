@@ -149,6 +149,7 @@ const GymMemberSignup = lazy(() => import('@/pages/gym/GymMemberSignup'));
 const GymMemberProfile = lazy(() => import('@/pages/gym/GymMemberProfile'));
 const GymAdminCheckIns = lazy(() => import('@/pages/gym/GymAdminCheckIns'));
 const GymAdminAnalytics = lazy(() => import('@/pages/gym/GymAdminAnalytics'));
+const GymAdminPayments = lazy(() => import('@/pages/gym/GymAdminPayments'));
 
 // Shared Dashboard Pages
 const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
@@ -1916,6 +1917,15 @@ const App = () => (
                                   <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
                                       <GymAdminAnalytics />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym-admin/:gymId/payments" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminPayments />
                                     </Suspense>
                                   </ProtectedRoute>
                                 </AppLocaleWrapper>

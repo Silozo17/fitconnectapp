@@ -2,8 +2,9 @@ import { format } from "date-fns";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, User, Users, Loader2 } from "lucide-react";
+import { Calendar, Clock, MapPin, User, Users, Loader2, Coins } from "lucide-react";
 import { useClassBooking } from "@/hooks/gym/useClassBooking";
+import { useGymCredits } from "@/hooks/gym/useGymCredits";
 
 interface ClassInfo {
   id: string;
@@ -18,6 +19,7 @@ interface ClassInfo {
     name: string;
     description: string | null;
     color: string | null;
+    credit_cost?: number | null;
   };
   instructor?: {
     first_name: string | null;
@@ -36,6 +38,7 @@ interface ClassBookingDialogProps {
 
 export function ClassBookingDialog({ classInfo, open, onOpenChange }: ClassBookingDialogProps) {
   const { bookClass, cancelBooking, isBooked, getBooking, memberId } = useClassBooking(classInfo?.gym_id || "");
+  const { balance } = useGymCredits(classInfo?.gym_id || "");
 
   if (!classInfo) return null;
 
@@ -43,6 +46,9 @@ export function ClassBookingDialog({ classInfo, open, onOpenChange }: ClassBooki
   const hasBooked = isBooked(classInfo.id);
   const spotsLeft = classInfo.max_capacity - classInfo.current_bookings;
   const isFull = spotsLeft <= 0;
+  const creditCost = classInfo.class_type?.credit_cost || 0;
+  const creditBalance = balance?.credits_remaining || 0;
+  const hasEnoughCredits = balance?.unlimited_classes || creditBalance >= creditCost;
 
   const handleBook = async () => {
     await bookClass.mutateAsync(classInfo.id);
@@ -125,6 +131,19 @@ export function ClassBookingDialog({ classInfo, open, onOpenChange }: ClassBooki
             </div>
           </div>
 
+          {/* Credit Cost */}
+          {creditCost > 0 && (
+            <div className="flex items-center gap-3 text-sm">
+              <Coins className="h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2">
+                <span>{creditCost} credit{creditCost !== 1 ? 's' : ''}</span>
+                <Badge variant={hasEnoughCredits ? "secondary" : "destructive"} className="text-xs">
+                  Balance: {creditBalance || 0}
+                </Badge>
+              </div>
+            </div>
+          )}
+
           {/* Current booking status */}
           {hasBooked && booking && (
             <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
@@ -159,13 +178,17 @@ export function ClassBookingDialog({ classInfo, open, onOpenChange }: ClassBooki
               {cancelBooking.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Cancel Booking
             </Button>
+          ) : creditCost > 0 && !hasEnoughCredits ? (
+            <p className="text-sm text-destructive">
+              Not enough credits. You need {creditCost} but have {creditBalance || 0}.
+            </p>
           ) : (
             <Button 
               onClick={handleBook}
               disabled={bookClass.isPending}
             >
               {bookClass.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isFull ? "Join Waitlist" : "Book Class"}
+              {isFull ? "Join Waitlist" : creditCost > 0 ? `Book (${creditCost} credit${creditCost !== 1 ? 's' : ''})` : "Book Class"}
             </Button>
           )}
         </DialogFooter>
