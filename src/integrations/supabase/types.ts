@@ -7032,6 +7032,274 @@ export type Database = {
           },
         ]
       }
+      gym_member_achievements: {
+        Row: {
+          achievement_type: string
+          badge_icon: string | null
+          description: string | null
+          earned_at: string | null
+          gym_id: string
+          id: string
+          member_id: string
+          metadata: Json | null
+          title: string
+        }
+        Insert: {
+          achievement_type: string
+          badge_icon?: string | null
+          description?: string | null
+          earned_at?: string | null
+          gym_id: string
+          id?: string
+          member_id: string
+          metadata?: Json | null
+          title: string
+        }
+        Update: {
+          achievement_type?: string
+          badge_icon?: string | null
+          description?: string | null
+          earned_at?: string | null
+          gym_id?: string
+          id?: string
+          member_id?: string
+          metadata?: Json | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_member_achievements_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_achievements_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_member_goals: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          current_value: number | null
+          description: string | null
+          goal_type: string
+          gym_id: string
+          id: string
+          member_id: string
+          start_date: string | null
+          status: string | null
+          target_date: string | null
+          target_value: number | null
+          title: string
+          unit: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          description?: string | null
+          goal_type: string
+          gym_id: string
+          id?: string
+          member_id: string
+          start_date?: string | null
+          status?: string | null
+          target_date?: string | null
+          target_value?: number | null
+          title: string
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          description?: string | null
+          goal_type?: string
+          gym_id?: string
+          id?: string
+          member_id?: string
+          start_date?: string | null
+          status?: string | null
+          target_date?: string | null
+          target_value?: number | null
+          title?: string
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_member_goals_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_goals_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_member_messages: {
+        Row: {
+          content: string
+          created_at: string | null
+          gym_id: string
+          id: string
+          is_read: boolean | null
+          parent_message_id: string | null
+          read_at: string | null
+          recipient_member_id: string | null
+          recipient_staff_id: string | null
+          sender_member_id: string | null
+          sender_staff_id: string | null
+          sender_type: string
+          subject: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          gym_id: string
+          id?: string
+          is_read?: boolean | null
+          parent_message_id?: string | null
+          read_at?: string | null
+          recipient_member_id?: string | null
+          recipient_staff_id?: string | null
+          sender_member_id?: string | null
+          sender_staff_id?: string | null
+          sender_type: string
+          subject?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          gym_id?: string
+          id?: string
+          is_read?: boolean | null
+          parent_message_id?: string | null
+          read_at?: string | null
+          recipient_member_id?: string | null
+          recipient_staff_id?: string | null
+          sender_member_id?: string | null
+          sender_staff_id?: string | null
+          sender_type?: string
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_member_messages_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_messages_parent_message_id_fkey"
+            columns: ["parent_message_id"]
+            isOneToOne: false
+            referencedRelation: "gym_member_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_messages_recipient_member_id_fkey"
+            columns: ["recipient_member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_messages_recipient_staff_id_fkey"
+            columns: ["recipient_staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_messages_sender_member_id_fkey"
+            columns: ["sender_member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_messages_sender_staff_id_fkey"
+            columns: ["sender_staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_member_progress: {
+        Row: {
+          body_fat_percentage: number | null
+          created_at: string | null
+          gym_id: string
+          id: string
+          measurements: Json | null
+          member_id: string
+          notes: string | null
+          photo_urls: string[] | null
+          recorded_at: string | null
+          updated_at: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          body_fat_percentage?: number | null
+          created_at?: string | null
+          gym_id: string
+          id?: string
+          measurements?: Json | null
+          member_id: string
+          notes?: string | null
+          photo_urls?: string[] | null
+          recorded_at?: string | null
+          updated_at?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          body_fat_percentage?: number | null
+          created_at?: string | null
+          gym_id?: string
+          id?: string
+          measurements?: Json | null
+          member_id?: string
+          notes?: string | null
+          photo_urls?: string[] | null
+          recorded_at?: string | null
+          updated_at?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_member_progress_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_member_progress_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_members: {
         Row: {
           address_line_1: string | null
@@ -7049,12 +7317,14 @@ export type Database = {
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           emergency_contact_relation: string | null
+          emergency_contact_relationship: string | null
           first_name: string | null
           gender: string | null
           grade_achieved_at: string | null
           grading_history: Json | null
           gym_id: string
           id: string
+          is_minor: boolean | null
           joined_at: string | null
           last_name: string | null
           last_visit_at: string | null
@@ -7062,6 +7332,7 @@ export type Database = {
           medical_conditions: string[] | null
           member_number: string | null
           notes: string | null
+          parent_member_id: string | null
           phone: string | null
           photo_consent: boolean | null
           pin_code: string | null
@@ -7095,12 +7366,14 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
+          emergency_contact_relationship?: string | null
           first_name?: string | null
           gender?: string | null
           grade_achieved_at?: string | null
           grading_history?: Json | null
           gym_id: string
           id?: string
+          is_minor?: boolean | null
           joined_at?: string | null
           last_name?: string | null
           last_visit_at?: string | null
@@ -7108,6 +7381,7 @@ export type Database = {
           medical_conditions?: string[] | null
           member_number?: string | null
           notes?: string | null
+          parent_member_id?: string | null
           phone?: string | null
           photo_consent?: boolean | null
           pin_code?: string | null
@@ -7141,12 +7415,14 @@ export type Database = {
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
+          emergency_contact_relationship?: string | null
           first_name?: string | null
           gender?: string | null
           grade_achieved_at?: string | null
           grading_history?: Json | null
           gym_id?: string
           id?: string
+          is_minor?: boolean | null
           joined_at?: string | null
           last_name?: string | null
           last_visit_at?: string | null
@@ -7154,6 +7430,7 @@ export type Database = {
           medical_conditions?: string[] | null
           member_number?: string | null
           notes?: string | null
+          parent_member_id?: string | null
           phone?: string | null
           photo_consent?: boolean | null
           pin_code?: string | null
@@ -7198,6 +7475,13 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_members_parent_member_id_fkey"
+            columns: ["parent_member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
             referencedColumns: ["id"]
           },
           {
