@@ -20,12 +20,14 @@ interface SignedContract {
   id: string;
   signed_at: string;
   ip_address: string | null;
+  template_id: string;
+  template_version: number;
   contract: {
     id: string;
     name: string;
-    version: string;
+    version: number;
     is_waiver: boolean;
-  };
+  } | null;
 }
 
 export function MemberContracts() {
@@ -54,18 +56,32 @@ export function MemberContracts() {
           id,
           signed_at,
           ip_address,
-          contract:contract_id (
-            id,
-            name,
-            version,
-            is_waiver
-          )
+          template_id,
+          template_version
         `)
         .eq("member_id", member.id)
         .order("signed_at", { ascending: false });
 
       if (error) throw error;
-      return data as unknown as SignedContract[];
+      
+      // Fetch contract template details separately
+      const templateIds = [...new Set((data || []).map(c => c.template_id))];
+      
+      if (templateIds.length === 0) {
+        return (data || []).map(d => ({ ...d, contract: null })) as SignedContract[];
+      }
+
+      const { data: templates } = await supabase
+        .from("gym_contract_templates")
+        .select("id, name, version, is_waiver")
+        .in("id", templateIds);
+
+      const templateMap = new Map((templates || []).map(t => [t.id, t]));
+
+      return (data || []).map(d => ({
+        ...d,
+        contract: templateMap.get(d.template_id) || null,
+      })) as SignedContract[];
     },
     enabled: !!gym?.id && !!user?.id,
   });
@@ -87,7 +103,7 @@ export function MemberContracts() {
 
       // Get all required contracts
       const { data: allContracts } = await supabase
-        .from("gym_contracts")
+        .from("gym_contract_templates")
         .select("id, name, version, is_waiver, is_required")
         .eq("gym_id", gym.id)
         .eq("is_required", true)
@@ -98,10 +114,10 @@ export function MemberContracts() {
       // Get signed contract IDs
       const { data: signed } = await supabase
         .from("gym_signed_contracts")
-        .select("contract_id")
+        .select("template_id")
         .eq("member_id", member.id);
 
-      const signedIds = new Set(signed?.map(s => s.contract_id) || []);
+      const signedIds = new Set(signed?.map(s => s.template_id) || []);
 
       // Return contracts that haven't been signed
       return allContracts.filter(c => !signedIds.has(c.id));
@@ -109,8 +125,8 @@ export function MemberContracts() {
     enabled: !!gym?.id && !!user?.id,
   });
 
-  const waivers = signedContracts?.filter(c => c.contract.is_waiver) || [];
-  const contracts = signedContracts?.filter(c => !c.contract.is_waiver) || [];
+  const waivers = signedContracts?.filter(c => c.contract?.is_waiver) || [];
+  const contracts = signedContracts?.filter(c => !c.contract?.is_waiver) || [];
 
   return (
     <div className="space-y-6">
@@ -225,12 +241,12 @@ function ContractCard({ signed }: { signed: SignedContract }) {
           <FileText className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <p className="font-medium">{signed.contract.name}</p>
+          <p className="font-medium">{signed.contract?.name || "Document"}</p>
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="h-3 w-3" />
             Signed {format(new Date(signed.signed_at), "MMM d, yyyy")}
             <span className="text-muted-foreground">•</span>
-            <span>v{signed.contract.version}</span>
+            <span>v{signed.contract?.version || signed.template_version}</span>
           </div>
         </div>
       </div>
