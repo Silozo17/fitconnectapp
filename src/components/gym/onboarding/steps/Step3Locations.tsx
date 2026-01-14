@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { OnboardingLayout } from '@/components/onboarding/OnboardingLayout';
-import { LocationAutocomplete } from '@/components/shared/LocationAutocomplete';
-import { MapPin, Phone, Mail, Plus, Trash2, Building } from 'lucide-react';
+import { VenueAutocomplete } from '@/components/shared/VenueAutocomplete';
+import { Phone, Mail, Plus, Trash2, Building } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { GymOnboardingData, GymLocationData } from '@/hooks/gym/useGymOnboarding';
 
@@ -190,22 +190,20 @@ export function Step3Locations({
                   )}
                 </div>
 
-                {/* Address */}
+                {/* Address - Venue Search */}
                 <div className="space-y-2">
-                  <Label>Address *</Label>
-                  <LocationAutocomplete
+                  <Label>Search for your gym/venue *</Label>
+                  <VenueAutocomplete
                     value={location.address}
-                    onLocationChange={(address, locationData) => {
+                    onVenueChange={(address, venueData) => {
                       updateLocation(index, {
                         address,
-                        city: locationData?.city || '',
-                        country: locationData?.country || '',
-                        postcode: (locationData as any)?.postal_code || location.postcode,
-                        lat: locationData?.lat,
-                        lng: locationData?.lng,
+                        name: venueData?.name || location.name,
+                        lat: venueData?.lat,
+                        lng: venueData?.lng,
                       });
                     }}
-                    placeholder="Search for your address..."
+                    placeholder="Search for your gym, studio, fitness center..."
                   />
                   {errors[`location_${index}_address`] && (
                     <p className="text-sm text-destructive">{errors[`location_${index}_address`]}</p>
