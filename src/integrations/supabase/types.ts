@@ -5650,6 +5650,78 @@ export type Database = {
           },
         ]
       }
+      gym_campaigns: {
+        Row: {
+          audience_filter: Json | null
+          campaign_type: string
+          completed_at: string | null
+          content: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          gym_id: string
+          id: string
+          name: string
+          scheduled_at: string | null
+          sent_at: string | null
+          stats: Json | null
+          status: string
+          target_audience: string
+          updated_at: string
+        }
+        Insert: {
+          audience_filter?: Json | null
+          campaign_type?: string
+          completed_at?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          gym_id: string
+          id?: string
+          name: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          stats?: Json | null
+          status?: string
+          target_audience?: string
+          updated_at?: string
+        }
+        Update: {
+          audience_filter?: Json | null
+          campaign_type?: string
+          completed_at?: string | null
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          gym_id?: string
+          id?: string
+          name?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          stats?: Json | null
+          status?: string
+          target_audience?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_campaigns_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_campaigns_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_check_ins: {
         Row: {
           check_in_method: string
@@ -7385,6 +7457,71 @@ export type Database = {
           website?: string | null
         }
         Relationships: []
+      }
+      gym_promotions: {
+        Row: {
+          applicable_plans: string[] | null
+          created_at: string
+          current_redemptions: number
+          description: string | null
+          discount_value: number | null
+          end_date: string | null
+          gym_id: string
+          id: string
+          is_active: boolean
+          max_redemptions: number | null
+          name: string
+          promo_code: string | null
+          promotion_type: string
+          start_date: string
+          terms_conditions: string | null
+          updated_at: string
+        }
+        Insert: {
+          applicable_plans?: string[] | null
+          created_at?: string
+          current_redemptions?: number
+          description?: string | null
+          discount_value?: number | null
+          end_date?: string | null
+          gym_id: string
+          id?: string
+          is_active?: boolean
+          max_redemptions?: number | null
+          name: string
+          promo_code?: string | null
+          promotion_type?: string
+          start_date: string
+          terms_conditions?: string | null
+          updated_at?: string
+        }
+        Update: {
+          applicable_plans?: string[] | null
+          created_at?: string
+          current_redemptions?: number
+          description?: string | null
+          discount_value?: number | null
+          end_date?: string | null
+          gym_id?: string
+          id?: string
+          is_active?: boolean
+          max_redemptions?: number | null
+          name?: string
+          promo_code?: string | null
+          promotion_type?: string
+          start_date?: string
+          terms_conditions?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_promotions_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       gym_recurring_bookings: {
         Row: {
