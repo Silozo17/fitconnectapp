@@ -24,3 +24,5 @@ export * from "./useGymReports";
 export * from "./useGymStaff";
 export * from "./useGymStaffManagement";
 export * from "./useGymWebsite";
+export * from "./useGymActionLog";
+export * from "./useGymStaffPermissions";

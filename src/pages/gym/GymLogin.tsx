@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Building2, Loader2, Search, LogIn, ArrowRight, Shield } from "lucide-react";
+import { Building2, Loader2, LogIn, ArrowRight, Shield, AlertCircle } from "lucide-react";
 import { OTPVerification } from "@/components/auth/OTPVerification";
 import { useTranslation } from "react-i18next";
 
@@ -17,6 +17,7 @@ interface GymResult {
   logo_url: string | null;
   city: string | null;
   country: string;
+  role?: string;
 }
 
 export default function GymLogin() {
@@ -26,9 +27,6 @@ export default function GymLogin() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<GymResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [userGyms, setUserGyms] = useState<GymResult[]>([]);
   const [isLoadingGyms, setIsLoadingGyms] = useState(false);
   
@@ -105,6 +103,7 @@ export default function GymLogin() {
         .from("gym_staff")
         .select(`
           gym_id,
+          role,
           gym_profiles!inner(id, name, logo_url, city, country)
         `)
         .eq("user_id", user.id)
@@ -116,43 +115,28 @@ export default function GymLogin() {
       const gymsMap = new Map<string, GymResult>();
       
       ownedGyms?.forEach(gym => {
-        gymsMap.set(gym.id, gym as GymResult);
+        gymsMap.set(gym.id, { ...gym, role: "owner" } as GymResult);
       });
       
       staffGyms?.forEach((record: any) => {
         const gym = record.gym_profiles;
         if (gym && !gymsMap.has(gym.id)) {
-          gymsMap.set(gym.id, gym as GymResult);
+          gymsMap.set(gym.id, { ...gym, role: record.role } as GymResult);
         }
       });
 
-      setUserGyms(Array.from(gymsMap.values()));
+      const gyms = Array.from(gymsMap.values());
+      setUserGyms(gyms);
+      
+      // Auto-navigate if user has exactly one gym
+      if (gyms.length === 1) {
+        localStorage.setItem("selectedGymId", gyms[0].id);
+        navigate(`/gym-admin/${gyms[0].id}`);
+      }
     } catch (error: any) {
       console.error("Error loading user gyms:", error);
     } finally {
       setIsLoadingGyms(false);
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-    
-    setIsSearching(true);
-    try {
-      const { data, error } = await supabase
-        .from("gym_profiles")
-        .select("id, name, logo_url, city, country")
-        .ilike("name", `%${searchQuery}%`)
-        .eq("status", "active")
-        .limit(10);
-
-      if (error) throw error;
-      setSearchResults(data as GymResult[]);
-    } catch (error: any) {
-      console.error("Error searching gyms:", error);
-      toast.error(t("gymLogin.searchFailed", "Failed to search gyms"));
-    } finally {
-      setIsSearching(false);
     }
   };
 
@@ -174,6 +158,23 @@ export default function GymLogin() {
   const selectGym = (gymId: string) => {
     localStorage.setItem("selectedGymId", gymId);
     navigate(`/gym-admin/${gymId}`);
+  };
+
+  const getRoleBadgeColor = (role: string) => {
+    switch (role) {
+      case "owner":
+        return "bg-primary text-primary-foreground";
+      case "manager":
+        return "bg-blue-500 text-white";
+      case "coach":
+        return "bg-green-500 text-white";
+      case "marketing":
+        return "bg-purple-500 text-white";
+      case "staff":
+        return "bg-muted text-muted-foreground";
+      default:
+        return "bg-muted";
+    }
   };
 
   // Show OTP verification screen
@@ -213,9 +214,9 @@ export default function GymLogin() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
             <Building2 className="w-8 h-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold">{t("gymLogin.title", "Gym Login")}</h1>
+          <h1 className="text-3xl font-bold">{t("gymLogin.title", "Gym Staff Login")}</h1>
           <p className="text-muted-foreground mt-2">
-            {t("gymLogin.subtitle", "Access your gym's admin dashboard")}
+            {t("gymLogin.subtitle", "Access your gym's management dashboard")}
           </p>
         </div>
 
@@ -224,7 +225,7 @@ export default function GymLogin() {
             <CardHeader>
               <CardTitle>{t("gymLogin.staffLogin", "Staff Login")}</CardTitle>
               <CardDescription>
-                {t("gymLogin.signInPrompt", "Sign in with your FitConnect account to access your gym")}
+                {t("gymLogin.signInPrompt", "Sign in with your credentials to access your gym")}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -267,129 +268,85 @@ export default function GymLogin() {
               </form>
               
               <div className="mt-6 text-center text-sm text-muted-foreground">
-                <p>{t("gymLogin.noAccount", "Don't have an account?")}</p>
-                <Link to="/auth" className="text-primary hover:underline">
-                  {t("gymLogin.createAccount", "Create a FitConnect account")}
+                <p>{t("gymLogin.needHelp", "Need help accessing your account?")}</p>
+                <Link to="/forgot-password" className="text-primary hover:underline">
+                  {t("gymLogin.resetPassword", "Reset your password")}
                 </Link>
               </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="space-y-6">
-            {/* User's Gyms */}
-            {userGyms.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t("gymLogin.yourGyms", "Your Gyms")}</CardTitle>
-                  <CardDescription>
-                    {t("gymLogin.selectGym", "Select a gym to manage")}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {isLoadingGyms ? (
-                    <div className="flex items-center justify-center py-4">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : (
-                    userGyms.map((gym) => (
-                      <button
-                        key={gym.id}
-                        onClick={() => selectGym(gym.id)}
-                        className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
-                      >
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          {gym.logo_url ? (
-                            <img
-                              src={gym.logo_url}
-                              alt={gym.name}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            <Building2 className="w-5 h-5 text-primary" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{gym.name}</p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {gym.city ? `${gym.city}, ` : ""}{gym.country}
-                          </p>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Search for other gyms */}
-            <Card>
-              <CardHeader>
-                <CardTitle>{t("gymLogin.findGym", "Find a Gym")}</CardTitle>
-                <CardDescription>
-                  {t("gymLogin.searchByName", "Search for a gym by name")}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder={t("gymLogin.searchPlaceholder", "Search gym name...")}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  />
-                  <Button onClick={handleSearch} disabled={isSearching}>
-                    {isSearching ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Search className="h-4 w-4" />
-                    )}
-                  </Button>
+        ) : isLoadingGyms ? (
+          <Card>
+            <CardContent className="py-8">
+              <div className="flex flex-col items-center justify-center gap-4">
+                <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                <p className="text-muted-foreground">Loading your gyms...</p>
+              </div>
+            </CardContent>
+          </Card>
+        ) : userGyms.length === 0 ? (
+          <Card>
+            <CardContent className="py-8">
+              <div className="flex flex-col items-center justify-center gap-4 text-center">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
+                  <AlertCircle className="h-8 w-8 text-muted-foreground" />
                 </div>
-
-                {searchResults.length > 0 && (
-                  <div className="mt-4 space-y-2">
-                    {searchResults.map((gym) => (
-                      <button
-                        key={gym.id}
-                        onClick={() => selectGym(gym.id)}
-                        className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
-                      >
-                        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                          {gym.logo_url ? (
-                            <img
-                              src={gym.logo_url}
-                              alt={gym.name}
-                              className="w-full h-full object-cover rounded-lg"
-                            />
-                          ) : (
-                            <Building2 className="w-5 h-5 text-primary" />
-                          )}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{gym.name}</p>
-                          <p className="text-sm text-muted-foreground truncate">
-                            {gym.city ? `${gym.city}, ` : ""}{gym.country}
-                          </p>
-                        </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                      </button>
-                    ))}
+                <div>
+                  <h3 className="font-semibold text-lg">No Gym Access</h3>
+                  <p className="text-muted-foreground mt-1">
+                    You don't have access to any gym. Please contact your gym administrator to get invited as staff.
+                  </p>
+                </div>
+                <Button variant="outline" onClick={() => supabase.auth.signOut()}>
+                  Sign Out
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>{t("gymLogin.selectGym", "Select Your Gym")}</CardTitle>
+              <CardDescription>
+                {t("gymLogin.multipleGyms", "You have access to multiple gyms. Select one to continue.")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {userGyms.map((gym) => (
+                <button
+                  key={gym.id}
+                  onClick={() => selectGym(gym.id)}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent transition-colors text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                    {gym.logo_url ? (
+                      <img
+                        src={gym.logo_url}
+                        alt={gym.name}
+                        className="w-full h-full object-cover rounded-lg"
+                      />
+                    ) : (
+                      <Building2 className="w-5 h-5 text-primary" />
+                    )}
                   </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Register new gym */}
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground mb-2">
-                {t("gymLogin.wantToRegister", "Want to register a new gym?")}
-              </p>
-              <Button variant="outline" asChild>
-                <Link to="/gym-register">{t("gymLogin.registerGym", "Register Your Gym")}</Link>
-              </Button>
-            </div>
-          </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium truncate">{gym.name}</p>
+                      {gym.role && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${getRoleBadgeColor(gym.role)}`}>
+                          {gym.role}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground truncate">
+                      {gym.city ? `${gym.city}, ` : ""}{gym.country}
+                    </p>
+                  </div>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
+                </button>
+              ))}
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
