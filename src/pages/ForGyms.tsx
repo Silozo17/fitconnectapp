@@ -43,7 +43,7 @@ const ForGyms = () => {
   ];
 
   const pricingFeatures = [
-    "Unlimited locations",
+    "1 location included (+£25/month each additional)",
     "Unlimited staff accounts",
     "Full member management",
     "Class scheduling & bookings",
