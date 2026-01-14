@@ -17,6 +17,8 @@ import {
   Building2,
   ScanLine,
   Wallet,
+  Globe,
+  Newspaper,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -59,6 +61,8 @@ export function GymAdminSidebar() {
   const businessNavItems: NavItem[] = [
     { label: "Analytics", href: `${basePath}/analytics`, icon: BarChart3, requiredPermission: "financials" },
     { label: "Payments", href: `${basePath}/payments`, icon: Wallet, requiredPermission: "financials" },
+    { label: "Website", href: `${basePath}/website`, icon: Globe, requiredPermission: "manage" },
+    { label: "Announcements", href: `${basePath}/announcements`, icon: Newspaper, requiredPermission: "manage" },
     { label: "Marketing", href: `${basePath}/marketing`, icon: Megaphone, requiredPermission: "manage" },
     { label: "Settings", href: `${basePath}/settings`, icon: Settings, requiredPermission: "manage" },
   ];
