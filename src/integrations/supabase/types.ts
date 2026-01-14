@@ -7828,6 +7828,202 @@ export type Database = {
           },
         ]
       }
+      gym_product_sale_items: {
+        Row: {
+          discount_percent: number | null
+          id: string
+          line_total: number
+          product_id: string | null
+          product_name: string
+          quantity: number
+          sale_id: string
+          unit_price: number
+        }
+        Insert: {
+          discount_percent?: number | null
+          id?: string
+          line_total: number
+          product_id?: string | null
+          product_name: string
+          quantity?: number
+          sale_id: string
+          unit_price: number
+        }
+        Update: {
+          discount_percent?: number | null
+          id?: string
+          line_total?: number
+          product_id?: string | null
+          product_name?: string
+          quantity?: number
+          sale_id?: string
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_product_sale_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "gym_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_product_sale_items_sale_id_fkey"
+            columns: ["sale_id"]
+            isOneToOne: false
+            referencedRelation: "gym_product_sales"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_product_sales: {
+        Row: {
+          created_at: string | null
+          discount_amount: number | null
+          gym_id: string
+          id: string
+          location_id: string | null
+          member_id: string | null
+          notes: string | null
+          payment_method: string
+          payment_reference: string | null
+          refund_amount: number | null
+          refunded_at: string | null
+          staff_id: string | null
+          status: string | null
+          subtotal: number
+          tax_amount: number | null
+          total_amount: number
+        }
+        Insert: {
+          created_at?: string | null
+          discount_amount?: number | null
+          gym_id: string
+          id?: string
+          location_id?: string | null
+          member_id?: string | null
+          notes?: string | null
+          payment_method: string
+          payment_reference?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
+          staff_id?: string | null
+          status?: string | null
+          subtotal: number
+          tax_amount?: number | null
+          total_amount: number
+        }
+        Update: {
+          created_at?: string | null
+          discount_amount?: number | null
+          gym_id?: string
+          id?: string
+          location_id?: string | null
+          member_id?: string | null
+          notes?: string | null
+          payment_method?: string
+          payment_reference?: string | null
+          refund_amount?: number | null
+          refunded_at?: string | null
+          staff_id?: string | null
+          status?: string | null
+          subtotal?: number
+          tax_amount?: number | null
+          total_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_product_sales_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_product_sales_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_product_sales_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_product_sales_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_products: {
+        Row: {
+          category: string | null
+          cost_price: number | null
+          created_at: string | null
+          description: string | null
+          gym_id: string
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          low_stock_threshold: number | null
+          name: string
+          price: number
+          sku: string | null
+          stock_quantity: number | null
+          track_inventory: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          category?: string | null
+          cost_price?: number | null
+          created_at?: string | null
+          description?: string | null
+          gym_id: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          low_stock_threshold?: number | null
+          name: string
+          price: number
+          sku?: string | null
+          stock_quantity?: number | null
+          track_inventory?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string | null
+          cost_price?: number | null
+          created_at?: string | null
+          description?: string | null
+          gym_id?: string
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          low_stock_threshold?: number | null
+          name?: string
+          price?: number
+          sku?: string | null
+          stock_quantity?: number | null
+          track_inventory?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_products_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_profiles: {
         Row: {
           accent_color: string | null
