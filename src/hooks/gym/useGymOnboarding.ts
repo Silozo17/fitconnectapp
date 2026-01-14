@@ -359,7 +359,7 @@ export function useGymOnboarding() {
       const locationsToInsert = data.locations.map((loc, index) => ({
         gym_id: gymId,
         name: loc.name,
-        address: loc.address,
+        address_line_1: loc.address,
         city: loc.city,
         county: loc.county,
         country: loc.country,
@@ -369,8 +369,8 @@ export function useGymOnboarding() {
         access_type: loc.accessType,
         timezone: loc.timezone,
         is_primary: index === 0,
-        lat: loc.lat,
-        lng: loc.lng,
+        location_lat: loc.lat,
+        location_lng: loc.lng,
       }));
 
       const { error } = await supabase

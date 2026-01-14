@@ -7135,6 +7135,7 @@ export type Database = {
       }
       gym_locations: {
         Row: {
+          access_type: string | null
           address_line_1: string | null
           address_line_2: string | null
           amenities: string[] | null
@@ -7158,9 +7159,11 @@ export type Database = {
           stripe_account_id: string | null
           stripe_account_status: string | null
           stripe_onboarding_complete: boolean | null
+          timezone: string | null
           updated_at: string | null
         }
         Insert: {
+          access_type?: string | null
           address_line_1?: string | null
           address_line_2?: string | null
           amenities?: string[] | null
@@ -7184,9 +7187,11 @@ export type Database = {
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           stripe_onboarding_complete?: boolean | null
+          timezone?: string | null
           updated_at?: string | null
         }
         Update: {
+          access_type?: string | null
           address_line_1?: string | null
           address_line_2?: string | null
           amenities?: string[] | null
@@ -7210,6 +7215,7 @@ export type Database = {
           stripe_account_id?: string | null
           stripe_account_status?: string | null
           stripe_onboarding_complete?: boolean | null
+          timezone?: string | null
           updated_at?: string | null
         }
         Relationships: [
