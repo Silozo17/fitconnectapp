@@ -147,6 +147,8 @@ const GymMemberPortal = lazy(() => import('@/pages/gym/GymMemberPortal'));
 const GymCheckIn = lazy(() => import('@/pages/gym/GymCheckIn'));
 const GymMemberSignup = lazy(() => import('@/pages/gym/GymMemberSignup'));
 const GymMemberProfile = lazy(() => import('@/pages/gym/GymMemberProfile'));
+const GymAdminCheckIns = lazy(() => import('@/pages/gym/GymAdminCheckIns'));
+const GymAdminAnalytics = lazy(() => import('@/pages/gym/GymAdminAnalytics'));
 
 // Shared Dashboard Pages
 const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
@@ -1896,6 +1898,24 @@ const App = () => (
                                   <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
                                       <GymAdminMemberships />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym-admin/:gymId/check-ins" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminCheckIns />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                </AppLocaleWrapper>
+                              } />
+                              <Route path="/gym-admin/:gymId/analytics" element={
+                                <AppLocaleWrapper>
+                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <GymAdminAnalytics />
                                     </Suspense>
                                   </ProtectedRoute>
                                 </AppLocaleWrapper>
