@@ -34,7 +34,7 @@ serve(async (req) => {
     // Use Google Places Details API
     const url = new URL("https://maps.googleapis.com/maps/api/place/details/json");
     url.searchParams.set("place_id", place_id);
-    url.searchParams.set("fields", "address_components,geometry,formatted_address,name");
+    url.searchParams.set("fields", "address_components,geometry,formatted_address,name,formatted_phone_number");
     url.searchParams.set("key", apiKey);
 
     const response = await fetch(url.toString());
@@ -58,8 +58,11 @@ serve(async (req) => {
     }))));
 
     // Extract all potential address components
+    let streetNumber = "";
+    let route = "";
     let locality = "";
     let postalTown = "";
+    let postalCode = "";
     let adminArea1 = "";  // e.g., "England" for UK (constituent country)
     let adminArea2 = "";  // e.g., "Greater London", "Buckinghamshire" for UK (actual county)
     let countryName = "";
@@ -67,11 +70,20 @@ serve(async (req) => {
 
     for (const component of addressComponents) {
       const types = component.types || [];
+      if (types.includes("street_number")) {
+        streetNumber = component.long_name;
+      }
+      if (types.includes("route")) {
+        route = component.long_name;
+      }
       if (types.includes("locality")) {
         locality = component.long_name;
       }
       if (types.includes("postal_town")) {
         postalTown = component.long_name;
+      }
+      if (types.includes("postal_code")) {
+        postalCode = component.long_name;
       }
       if (types.includes("administrative_area_level_1")) {
         adminArea1 = component.long_name;
@@ -84,6 +96,9 @@ serve(async (req) => {
         countryCode = component.short_name;
       }
     }
+
+    // Build street address from components
+    const streetAddress = [streetNumber, route].filter(Boolean).join(" ");
 
     // City: prefer locality, fallback to postal_town, then name
     const city = locality || postalTown || result.name || "";
@@ -102,10 +117,13 @@ serve(async (req) => {
     const placeDetails = {
       place_id,
       formatted_address: result.formatted_address,
+      street_address: streetAddress,
       city,
       region,
       country: countryName,
       country_code: countryCode,
+      postal_code: postalCode,
+      phone: result.formatted_phone_number || null,
       lat: result.geometry?.location?.lat,
       lng: result.geometry?.location?.lng,
     };

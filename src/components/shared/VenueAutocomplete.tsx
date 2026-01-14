@@ -11,12 +11,18 @@ interface VenuePrediction {
   secondary_text: string;
 }
 
-interface VenueData {
+export interface VenueData {
   place_id: string;
   formatted_address: string;
   name: string;
   lat: number;
   lng: number;
+  street_address?: string;
+  city?: string;
+  region?: string;
+  country?: string;
+  postal_code?: string;
+  phone?: string;
 }
 
 interface VenueAutocompleteProps {
@@ -116,13 +122,19 @@ export function VenueAutocomplete({
 
       if (error) throw error;
 
-      // Use the venue name and address
+      // Use all the venue data from places-details
       const venueData: VenueData = {
         place_id: data.place_id,
         formatted_address: data.formatted_address,
         name: prediction.main_text,
         lat: data.lat,
         lng: data.lng,
+        street_address: data.street_address,
+        city: data.city,
+        region: data.region,
+        country: data.country,
+        postal_code: data.postal_code,
+        phone: data.phone,
       };
       
       // Display as "Venue Name, Address"

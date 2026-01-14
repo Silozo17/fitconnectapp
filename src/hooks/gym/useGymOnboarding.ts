@@ -52,7 +52,10 @@ export interface GymOnboardingData {
 export interface GymLocationData {
   id?: string;
   name: string;
-  address: string;
+  address: string;  // Street address
+  city?: string;
+  county?: string;
+  country?: string;
   postcode: string;
   phone: string;
   email: string;
@@ -61,8 +64,6 @@ export interface GymLocationData {
   isPrimary: boolean;
   lat?: number;
   lng?: number;
-  city?: string;
-  country?: string;
 }
 
 export interface StaffInvite {
@@ -359,6 +360,9 @@ export function useGymOnboarding() {
         gym_id: gymId,
         name: loc.name,
         address: loc.address,
+        city: loc.city,
+        county: loc.county,
+        country: loc.country,
         postcode: loc.postcode,
         phone: loc.phone,
         email: loc.email,
@@ -367,8 +371,6 @@ export function useGymOnboarding() {
         is_primary: index === 0,
         lat: loc.lat,
         lng: loc.lng,
-        city: loc.city,
-        country: loc.country,
       }));
 
       const { error } = await supabase
