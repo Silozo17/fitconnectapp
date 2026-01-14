@@ -20,6 +20,11 @@ import {
   Newspaper,
   FileText,
   Zap,
+  Package,
+  FileBarChart,
+  Receipt,
+  ShoppingCart,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -59,14 +64,19 @@ export function GymAdminSidebar() {
     { label: "Grading", href: `${basePath}/grading`, icon: Award },
     { label: "Staff", href: `${basePath}/staff`, icon: UserCog, requiredPermission: "manage" },
     { label: "Locations", href: `${basePath}/locations`, icon: MapPin, requiredPermission: "manage" },
+    { label: "Products", href: `${basePath}/products`, icon: Package, requiredPermission: "manage" },
   ];
 
   const businessNavItems: NavItem[] = [
     { label: "Analytics", href: `${basePath}/analytics`, icon: BarChart3, requiredPermission: "financials" },
+    { label: "Reports", href: `${basePath}/reports`, icon: FileBarChart, requiredPermission: "financials" },
     { label: "Payments", href: `${basePath}/payments`, icon: Wallet, requiredPermission: "financials" },
+    { label: "Invoices", href: `${basePath}/invoices`, icon: Receipt, requiredPermission: "financials" },
+    { label: "POS", href: `${basePath}/pos`, icon: ShoppingCart, requiredPermission: "financials" },
     { label: "Announcements", href: `${basePath}/announcements`, icon: Newspaper, requiredPermission: "manage" },
     { label: "Marketing", href: `${basePath}/marketing`, icon: Megaphone, requiredPermission: "manage" },
     { label: "Automation", href: `${basePath}/automation`, icon: Zap, requiredPermission: "manage" },
+    { label: "Automations", href: `${basePath}/automations`, icon: Bot, requiredPermission: "manage" },
     { label: "Settings", href: `${basePath}/settings`, icon: Settings, requiredPermission: "manage" },
   ];
 
