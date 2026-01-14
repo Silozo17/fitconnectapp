@@ -141,24 +141,6 @@ export default function GymAdminDashboard() {
               <ArrowRight className="h-4 w-4 text-muted-foreground" />
             </Link>
 
-            <Link
-              to={`/gym-portal/${gymId}`}
-              target="_blank"
-              className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <ExternalLink className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-medium">View Public Site</h4>
-                  <p className="text-xs text-muted-foreground">
-                    See what members see
-                  </p>
-                </div>
-              </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            </Link>
           </CardContent>
         </Card>
       </div>
