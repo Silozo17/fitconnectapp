@@ -7143,6 +7143,7 @@ export type Database = {
           country: string | null
           county: string | null
           created_at: string | null
+          currency: string | null
           email: string | null
           gym_id: string
           id: string
@@ -7154,6 +7155,9 @@ export type Database = {
           opening_hours: Json | null
           phone: string | null
           postcode: string | null
+          stripe_account_id: string | null
+          stripe_account_status: string | null
+          stripe_onboarding_complete: boolean | null
           updated_at: string | null
         }
         Insert: {
@@ -7165,6 +7169,7 @@ export type Database = {
           country?: string | null
           county?: string | null
           created_at?: string | null
+          currency?: string | null
           email?: string | null
           gym_id: string
           id?: string
@@ -7176,6 +7181,9 @@ export type Database = {
           opening_hours?: Json | null
           phone?: string | null
           postcode?: string | null
+          stripe_account_id?: string | null
+          stripe_account_status?: string | null
+          stripe_onboarding_complete?: boolean | null
           updated_at?: string | null
         }
         Update: {
@@ -7187,6 +7195,7 @@ export type Database = {
           country?: string | null
           county?: string | null
           created_at?: string | null
+          currency?: string | null
           email?: string | null
           gym_id?: string
           id?: string
@@ -7198,6 +7207,9 @@ export type Database = {
           opening_hours?: Json | null
           phone?: string | null
           postcode?: string | null
+          stripe_account_id?: string | null
+          stripe_account_status?: string | null
+          stripe_onboarding_complete?: boolean | null
           updated_at?: string | null
         }
         Relationships: [

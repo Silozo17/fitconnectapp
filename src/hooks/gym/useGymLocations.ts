@@ -21,6 +21,11 @@ export interface GymLocation {
   is_active: boolean;
   timezone: string | null;
   amenities: string[] | null;
+  // Stripe Connect fields for per-location payments
+  stripe_account_id: string | null;
+  stripe_account_status: string | null;
+  stripe_onboarding_complete: boolean;
+  currency: string | null;
 }
 
 export function useGymLocations() {
@@ -60,6 +65,10 @@ export function useGymLocations() {
         is_active: l.is_active ?? true,
         timezone: l.timezone,
         amenities: l.amenities,
+        stripe_account_id: l.stripe_account_id || null,
+        stripe_account_status: l.stripe_account_status || null,
+        stripe_onboarding_complete: l.stripe_onboarding_complete ?? false,
+        currency: l.currency || null,
       })) as GymLocation[];
     },
     enabled: !!gym?.id,
