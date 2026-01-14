@@ -160,6 +160,7 @@ const GymAdminStaff = lazy(() => import('@/pages/gym/GymAdminStaff'));
 const GymAdminCredits = lazy(() => import('@/pages/gym/GymAdminCredits'));
 const GymAdminMarketing = lazy(() => import('@/pages/gym/GymAdminMarketing'));
 const GymAdminAutomation = lazy(() => import('@/pages/gym/GymAdminAutomation'));
+const GymOnboarding = lazy(() => import('@/pages/gym/GymOnboarding'));
 
 // Gym Admin Layout Wrapper (provides GymProvider context)
 import { GymAdminRouteWrapper } from '@/components/gym/admin/GymAdminRouteWrapper';
@@ -1855,6 +1856,15 @@ const App = () => (
                               } />
                               {/* Legacy route redirect */}
                               <Route path="/gym/register" element={<Navigate to="/club-register" replace />} />
+                              
+                              {/* New Gym Onboarding Flow */}
+                              <Route path="/onboarding/gym" element={
+                                <AppLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymOnboarding />
+                                  </Suspense>
+                                </AppLocaleWrapper>
+                              } />
 
                               {/* Gym Admin Routes - uses gymId with nested routing */}
                               <Route path="/gym-admin/:gymId" element={
