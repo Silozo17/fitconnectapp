@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useGym } from "@/contexts/GymContext";
 import { useGymClasses } from "@/hooks/gym/useGymClasses";
 import { useClassBooking } from "@/hooks/gym/useClassBooking";
-import { useMyGymMembership, useGymCustomerPortal, useGymCredits } from "@/hooks/gym/useGymMembership";
+import { useMyGymMembership, useGymCustomerPortal, useMyGymCredits } from "@/hooks/gym/useGymMembership";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +32,7 @@ export default function GymMemberPortal() {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const { data: membership, isLoading: membershipLoading } = useMyGymMembership();
-  const { data: credits } = useGymCredits();
+  const { data: credits } = useMyGymCredits();
   const customerPortal = useGymCustomerPortal();
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
