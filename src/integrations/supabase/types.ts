@@ -7328,6 +7328,56 @@ export type Database = {
           },
         ]
       }
+      gym_onboarding_staff_invites: {
+        Row: {
+          accepted_at: string | null
+          created_at: string | null
+          email: string
+          gym_id: string
+          id: string
+          invited_at: string | null
+          location_ids: string[] | null
+          name: string
+          role: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string | null
+          email: string
+          gym_id: string
+          id?: string
+          invited_at?: string | null
+          location_ids?: string[] | null
+          name: string
+          role: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string | null
+          email?: string
+          gym_id?: string
+          id?: string
+          invited_at?: string | null
+          location_ids?: string[] | null
+          name?: string
+          role?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_onboarding_staff_invites_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_opening_hours: {
         Row: {
           close_time: string | null
