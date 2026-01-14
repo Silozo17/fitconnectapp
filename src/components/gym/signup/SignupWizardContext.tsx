@@ -26,12 +26,16 @@ export interface SignupFormData {
   emergencyContactPhone: string;
   emergencyContactRelation: string;
   
-  // Step 4: Marketing
+  // Step 4: Email Verification (for existing users)
+  emailVerified: boolean;
+  requiresOtpVerification: boolean;
+  
+  // Step 5: Marketing
   referredByEmail: string;
   marketingSource: string;
   marketingSourceOther: string;
   
-  // Step 5: Contracts
+  // Step 6: Contracts
   signedContractIds: string[];
 }
 
@@ -60,6 +64,8 @@ const initialFormData: SignupFormData = {
   emergencyContactName: "",
   emergencyContactPhone: "",
   emergencyContactRelation: "",
+  emailVerified: false,
+  requiresOtpVerification: false,
   referredByEmail: "",
   marketingSource: "",
   marketingSourceOther: "",
@@ -71,7 +77,7 @@ const SignupWizardContext = createContext<SignupWizardContextType | undefined>(u
 export function SignupWizardProvider({ children }: { children: ReactNode }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<SignupFormData>(initialFormData);
-  const totalSteps = 6;
+  const totalSteps = 7; // Added email verification step
 
   const updateFormData = (data: Partial<SignupFormData>) => {
     setFormData((prev) => ({ ...prev, ...data }));
