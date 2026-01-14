@@ -7,4 +7,6 @@ export { default as GymAdminMemberships } from "./GymAdminMemberships";
 export { default as GymAdminSettings } from "./GymAdminSettings";
 export { default as GymAdminWebsite } from "./GymAdminWebsite";
 export { default as GymAdminAnnouncements } from "./GymAdminAnnouncements";
+export { default as GymAdminCredits } from "./GymAdminCredits";
+export { default as GymAdminStaff } from "./GymAdminStaff";
 export { default as GymPublicWebsite } from "./GymPublicWebsite";

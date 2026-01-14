@@ -157,6 +157,7 @@ const GymAdminWebsite = lazy(() => import('@/pages/gym/GymAdminWebsite'));
 const GymAdminAnnouncements = lazy(() => import('@/pages/gym/GymAdminAnnouncements'));
 const GymPublicWebsite = lazy(() => import('@/pages/gym/GymPublicWebsite'));
 const GymAdminStaff = lazy(() => import('@/pages/gym/GymAdminStaff'));
+const GymAdminCredits = lazy(() => import('@/pages/gym/GymAdminCredits'));
 
 // Gym Admin Layout Wrapper (provides GymProvider context)
 import { GymAdminRouteWrapper } from '@/components/gym/admin/GymAdminRouteWrapper';
@@ -1944,6 +1945,11 @@ const App = () => (
                                 <Route path="staff" element={
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <GymAdminStaff />
+                                  </Suspense>
+                                } />
+                                <Route path="credits" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminCredits />
                                   </Suspense>
                                 } />
                               </Route>
