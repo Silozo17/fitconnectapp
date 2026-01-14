@@ -41,10 +41,12 @@ import {
   CheckCircle,
   XCircle,
   AlertCircle,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 import { MemberActivitySummary } from "@/components/gym/admin/members/MemberActivitySummary";
 import { MemberNotesTab } from "@/components/gym/admin/members/MemberNotesTab";
+import { AssignMembershipDialog } from "@/components/gym/admin/dialogs/AssignMembershipDialog";
 
 export default function GymMemberProfile() {
   const { gymId, memberId } = useParams<{ gymId: string; memberId: string }>();
@@ -52,6 +54,7 @@ export default function GymMemberProfile() {
   const { data: member, isLoading, error } = useGymMember(memberId);
   const updateMember = useUpdateGymMember();
   const [suspendDialogOpen, setSuspendDialogOpen] = useState(false);
+  const [assignMembershipOpen, setAssignMembershipOpen] = useState(false);
 
   const handleStatusChange = async (newStatus: string) => {
     if (!memberId) return;
@@ -326,7 +329,13 @@ export default function GymMemberProfile() {
               <div className="text-center py-6 text-muted-foreground">
                 <CreditCard className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>No active membership</p>
-                <Button variant="outline" size="sm" className="mt-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="mt-2"
+                  onClick={() => setAssignMembershipOpen(true)}
+                >
+                  <Plus className="mr-2 h-4 w-4" />
                   Assign Membership
                 </Button>
               </div>
@@ -483,6 +492,14 @@ export default function GymMemberProfile() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {/* Assign Membership Dialog */}
+      <AssignMembershipDialog
+        memberId={memberId!}
+        memberName={`${member.first_name} ${member.last_name}`}
+        open={assignMembershipOpen}
+        onOpenChange={setAssignMembershipOpen}
+      />
     </div>
   );
 }

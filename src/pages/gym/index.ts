@@ -27,3 +27,5 @@ export { default as GymAdminReports } from "./GymAdminReports";
 export { default as GymAdminActivityLog } from "./GymAdminActivityLog";
 export { default as EmbedTimetable } from "./embed/EmbedTimetable";
 export { default as EmbedSignup } from "./embed/EmbedSignup";
+export { default as GymAdminAddMember } from "./GymAdminAddMember";
+export { default as GymAdminEditMember } from "./GymAdminEditMember";
