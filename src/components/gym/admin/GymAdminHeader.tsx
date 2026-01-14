@@ -71,14 +71,6 @@ export function GymAdminHeader({ onMenuToggle }: GymAdminHeaderProps) {
           </Badge>
         )}
 
-        {/* View Public Site */}
-        <Button variant="ghost" size="sm" className="hidden sm:flex" asChild>
-          <Link to={`/gym-portal/${gym?.id}`} target="_blank">
-            <ExternalLink className="mr-2 h-4 w-4" />
-            View Site
-          </Link>
-        </Button>
-
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative">
           <Bell className="h-5 w-5" />
