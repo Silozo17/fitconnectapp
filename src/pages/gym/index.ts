@@ -18,3 +18,4 @@ export { default as GymAdminLeads } from "./GymAdminLeads";
 export { default as GymAdminReferrals } from "./GymAdminReferrals";
 export { default as GymOnboarding } from "./GymOnboarding";
 export { default as GymLogin } from "./GymLogin";
+export { default as GymAdminGrading } from "./GymAdminGrading";
