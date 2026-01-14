@@ -23,3 +23,5 @@ export { default as GymAdminProducts } from "./GymAdminProducts";
 export { default as GymAdminPOS } from "./GymAdminPOS";
 export { default as EmbedTimetable } from "./embed/EmbedTimetable";
 export { default as EmbedSignup } from "./embed/EmbedSignup";
+export { default as GymAdminInvoices } from "./GymAdminInvoices";
+export { default as GymAdminAutomations } from "./GymAdminAutomations";
