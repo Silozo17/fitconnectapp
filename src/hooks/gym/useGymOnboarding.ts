@@ -118,12 +118,20 @@ export function useGymOnboarding() {
   const [gymId, setGymId] = useState<string | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
 
-  // Load saved progress on mount
+  // Load saved progress on mount - skip to step 2 if user is already logged in
   useEffect(() => {
     const loadProgress = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
+        
+        // Pre-fill data from user info
+        const phone = sessionStorage.getItem('gym_onboarding_phone');
+        if (phone) {
+          setData(prev => ({ ...prev, phone }));
+          sessionStorage.removeItem('gym_onboarding_phone');
+        }
+        
         // Check if they have an existing gym profile with onboarding in progress
         const { data: gym } = await supabase
           .from('gym_profiles')
@@ -139,6 +147,26 @@ export function useGymOnboarding() {
             if (progress.step !== undefined) setCurrentStep(progress.step);
             if (progress.data) setData(prev => ({ ...prev, ...progress.data }));
           }
+        } else {
+          // User is logged in but has no gym - skip account creation (step 1), go to gym basics (step 2)
+          // We need to fetch user info for the owner name
+          const { data: userProfile } = await supabase
+            .from('user_profiles')
+            .select('first_name, last_name')
+            .eq('user_id', user.id)
+            .single();
+          
+          if (userProfile) {
+            const ownerName = [userProfile.first_name, userProfile.last_name].filter(Boolean).join(' ');
+            setData(prev => ({ 
+              ...prev, 
+              ownerName: ownerName || prev.ownerName,
+              email: user.email || prev.email,
+            }));
+          }
+          
+          // Skip to step 1 (index 1 = gym basics) since user is already logged in
+          setCurrentStep(1);
         }
       }
     };

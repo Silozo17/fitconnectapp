@@ -115,8 +115,8 @@ serve(async (req) => {
       logStep("Found existing Stripe customer", { customerId });
     }
 
-    // Calculate platform fee (application_fee_percent for subscriptions)
-    const platformFeePercent = gym.platform_fee_percentage || 2.5;
+    // Flat £1 platform fee per member payment
+    const PLATFORM_FEE_AMOUNT = 100; // £1 = 100 pence
 
     // Determine checkout mode based on plan type
     const isSubscription = plan.plan_type === "recurring";
@@ -170,7 +170,10 @@ serve(async (req) => {
         user_id: string;
       };
       subscription_data?: {
-        application_fee_percent: number;
+        application_fee_amount?: number;
+        transfer_data?: {
+          destination: string;
+        };
         metadata: {
           gym_id: string;
           member_id: string;
@@ -200,10 +203,10 @@ serve(async (req) => {
       },
     };
 
-    // For subscriptions, use application_fee_percent
+    // For subscriptions, use flat £1 application fee per payment
     if (isSubscription) {
       sessionParams.subscription_data = {
-        application_fee_percent: platformFeePercent,
+        application_fee_amount: PLATFORM_FEE_AMOUNT, // £1 flat fee
         metadata: {
           gym_id: gymId,
           member_id: member.id,
@@ -211,10 +214,9 @@ serve(async (req) => {
         },
       };
     } else {
-      // For one-time payments, calculate application_fee_amount
-      const feeAmount = Math.round(plan.price_amount * (platformFeePercent / 100));
+      // For one-time payments, use flat £1 application fee
       sessionParams.payment_intent_data = {
-        application_fee_amount: feeAmount,
+        application_fee_amount: PLATFORM_FEE_AMOUNT, // £1 flat fee
         transfer_data: {
           destination: gym.stripe_account_id,
         },
