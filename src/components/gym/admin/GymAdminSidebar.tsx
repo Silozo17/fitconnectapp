@@ -19,6 +19,7 @@ import {
   Wallet,
   Globe,
   Newspaper,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -54,6 +55,7 @@ export function GymAdminSidebar() {
   const managementNavItems: NavItem[] = [
     { label: "Memberships", href: `${basePath}/memberships`, icon: CreditCard, requiredPermission: "manage" },
     { label: "Credits", href: `${basePath}/credits`, icon: CreditCard, requiredPermission: "manage" },
+    { label: "Contracts", href: `${basePath}/contracts`, icon: FileText, requiredPermission: "manage" },
     { label: "Grading", href: `${basePath}/grading`, icon: Award },
     { label: "Staff", href: `${basePath}/staff`, icon: UserCog, requiredPermission: "manage" },
     { label: "Locations", href: `${basePath}/locations`, icon: MapPin, requiredPermission: "manage" },
