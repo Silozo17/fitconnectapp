@@ -134,6 +134,45 @@ export function useCreateRefundRequest() {
   });
 }
 
+export function useUpdateRefundRequest() {
+  const queryClient = useQueryClient();
+  const { staffRecord } = useGym();
+
+  return useMutation({
+    mutationFn: async ({ 
+      requestId, 
+      status, 
+      rejectionReason 
+    }: { 
+      requestId: string; 
+      status: 'approved' | 'rejected';
+      rejectionReason?: string;
+    }) => {
+      if (!staffRecord?.id) throw new Error("Not authenticated");
+
+      const updateData: Record<string, unknown> = {
+        status,
+        approved_by: staffRecord.id,
+        reviewed_at: new Date().toISOString(),
+      };
+
+      if (status === 'rejected' && rejectionReason) {
+        updateData.rejection_reason = rejectionReason;
+      }
+
+      const { error } = await supabase
+        .from("gym_refund_requests")
+        .update(updateData)
+        .eq("id", requestId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gym-refund-requests"] });
+    },
+  });
+}
+
 export function useApproveRefundRequest() {
   const queryClient = useQueryClient();
   const { staffRecord } = useGym();
