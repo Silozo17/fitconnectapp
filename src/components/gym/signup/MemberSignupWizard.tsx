@@ -21,15 +21,21 @@ function WizardContent({ gymId, gymSlug }: MemberSignupWizardProps) {
   const { data: locations = [], isLoading: locationsLoading } = useQuery({
     queryKey: ["gym-locations-public", gymId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("gym_locations")
-        .select("id, name, address, city, postcode")
+        .select("id, name, address_line_1, city, postal_code")
         .eq("gym_id", gymId)
         .eq("is_active", true)
         .order("is_primary", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return (data || []).map((l: any) => ({
+        id: l.id,
+        name: l.name,
+        address: l.address_line_1 || "",
+        city: l.city || "",
+        postcode: l.postal_code || "",
+      }));
     },
     enabled: !!gymId,
   });
