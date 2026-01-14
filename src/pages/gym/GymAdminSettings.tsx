@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGym } from "@/contexts/GymContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,6 +9,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   Building2,
   Upload,
@@ -18,12 +21,25 @@ import {
   Shield,
   CreditCard,
   Save,
+  Calendar,
 } from "lucide-react";
 
 export default function GymAdminSettings() {
   const { gymId } = useParams<{ gymId: string }>();
-  const { gym } = useGym();
+  const { gym, refetch } = useGym();
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Parse settings from gym
+  const gymSettings = (gym?.settings as { class_display?: { show_coach_name?: boolean } }) || {};
+  const classDisplaySettings = gymSettings.class_display || { show_coach_name: true };
+  
+  const [showCoachName, setShowCoachName] = useState(classDisplaySettings.show_coach_name ?? true);
+
+  // Update local state when gym data changes
+  useEffect(() => {
+    const settings = (gym?.settings as { class_display?: { show_coach_name?: boolean } }) || {};
+    setShowCoachName(settings.class_display?.show_coach_name ?? true);
+  }, [gym?.settings]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -40,10 +56,45 @@ export default function GymAdminSettings() {
   });
 
   const handleSave = async () => {
+    if (!gym?.id) return;
     setIsSaving(true);
-    // TODO: Implement save functionality
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setIsSaving(false);
+    
+    try {
+      // Merge new settings with existing settings
+      const updatedSettings = {
+        ...(gym.settings as object || {}),
+        class_display: {
+          show_coach_name: showCoachName,
+        },
+      };
+
+      const { error } = await supabase
+        .from("gym_profiles")
+        .update({
+          name: formData.name,
+          description: formData.description,
+          email: formData.email,
+          phone: formData.phone,
+          website: formData.website,
+          address_line_1: formData.address_line_1,
+          address_line_2: formData.address_line_2,
+          city: formData.city,
+          postcode: formData.postcode,
+          country: formData.country,
+          settings: updatedSettings,
+        })
+        .eq("id", gym.id);
+
+      if (error) throw error;
+      
+      toast.success("Settings saved successfully");
+      refetch?.();
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      toast.error("Failed to save settings");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -63,10 +114,14 @@ export default function GymAdminSettings() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 lg:w-auto lg:grid-cols-none lg:flex">
+        <TabsList className="grid w-full grid-cols-3 md:grid-cols-6 lg:w-auto lg:grid-cols-none lg:flex">
           <TabsTrigger value="general">
             <Building2 className="mr-2 h-4 w-4" />
             General
+          </TabsTrigger>
+          <TabsTrigger value="classes">
+            <Calendar className="mr-2 h-4 w-4" />
+            Classes
           </TabsTrigger>
           <TabsTrigger value="branding">
             <Palette className="mr-2 h-4 w-4" />
@@ -291,6 +346,35 @@ export default function GymAdminSettings() {
                     }
                   />
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Classes Settings */}
+        <TabsContent value="classes" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Class Display Settings</CardTitle>
+              <CardDescription>
+                Control how classes appear to members on booking calendars.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label htmlFor="show-coach-name" className="text-base font-medium">
+                    Show Coach Name on Schedule
+                  </Label>
+                  <p className="text-sm text-muted-foreground">
+                    Display the instructor/coach name on member-facing class schedules and booking calendar.
+                  </p>
+                </div>
+                <Switch
+                  id="show-coach-name"
+                  checked={showCoachName}
+                  onCheckedChange={setShowCoachName}
+                />
               </div>
             </CardContent>
           </Card>
