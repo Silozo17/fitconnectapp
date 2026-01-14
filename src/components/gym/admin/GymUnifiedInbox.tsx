@@ -133,14 +133,14 @@ export function GymUnifiedInbox() {
     queryFn: async () => {
       if (!gym?.id) return [];
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("gym_staff")
         .select("id, display_name, role")
         .eq("gym_id", gym.id)
         .eq("is_active", true);
 
       if (error) throw error;
-      return data as Staff[];
+      return (data || []) as Staff[];
     },
     enabled: !!gym?.id,
   });
