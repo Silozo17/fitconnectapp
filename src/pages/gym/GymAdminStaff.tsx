@@ -52,9 +52,11 @@ import {
   UserPlus,
   Mail,
   Shield,
+  Settings,
 } from "lucide-react";
 import { format, addDays, startOfWeek, parseISO } from "date-fns";
 import { toast } from "sonner";
+import StaffPermissionEditor from "@/components/gym/admin/StaffPermissionEditor";
 
 export default function GymAdminStaff() {
   const { gym, staffRecord } = useGym();
@@ -64,6 +66,8 @@ export default function GymAdminStaff() {
   const [showAddShiftDialog, setShowAddShiftDialog] = useState(false);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showPayRateDialog, setShowPayRateDialog] = useState(false);
+  const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
+  const [selectedStaffForPermissions, setSelectedStaffForPermissions] = useState<any>(null);
 
   // Date range for shifts (current week)
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 });
@@ -268,6 +272,10 @@ export default function GymAdminStaff() {
             <Users className="mr-2 h-4 w-4" />
             Staff Roster
           </TabsTrigger>
+          <TabsTrigger value="permissions">
+            <Shield className="mr-2 h-4 w-4" />
+            Permissions
+          </TabsTrigger>
           <TabsTrigger value="schedule">
             <Calendar className="mr-2 h-4 w-4" />
             Schedule
@@ -341,13 +349,96 @@ export default function GymAdminStaff() {
                           >
                             <DollarSign className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setSelectedStaffForPermissions(staff);
+                              setShowPermissionsDialog(true);
+                            }}
+                          >
                             <Shield className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Permissions Tab */}
+        <TabsContent value="permissions" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Staff Permissions</CardTitle>
+              <CardDescription>
+                Configure what each staff member can access and manage
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Staff Member</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Assigned Locations</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {staffList.filter((s: any) => s.role !== "owner").map((staff: any) => (
+                    <TableRow key={staff.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={staff.avatar_url || undefined} />
+                            <AvatarFallback>
+                              {staff.display_name?.charAt(0) || "S"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-medium">{staff.display_name || "Unnamed"}</p>
+                            <p className="text-sm text-muted-foreground">{staff.email}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getRoleBadgeColor(staff.role)}>
+                          {staff.role}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="text-sm text-muted-foreground">
+                          {staff.assigned_location_ids?.length 
+                            ? `${staff.assigned_location_ids.length} location(s)` 
+                            : "All locations"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setSelectedStaffForPermissions(staff);
+                            setShowPermissionsDialog(true);
+                          }}
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          Configure
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                  {staffList.filter((s: any) => s.role !== "owner").length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={4} className="text-center text-muted-foreground">
+                        No staff members to configure. Invite staff first.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
@@ -732,6 +823,15 @@ export default function GymAdminStaff() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Permissions Editor */}
+      {selectedStaffForPermissions && (
+        <StaffPermissionEditor
+          staff={selectedStaffForPermissions}
+          open={showPermissionsDialog}
+          onOpenChange={setShowPermissionsDialog}
+        />
+      )}
     </div>
   );
 }

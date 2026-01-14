@@ -25,12 +25,14 @@ import {
   Receipt,
   ShoppingCart,
   Bot,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { LocationSwitcher } from "./LocationSwitcher";
 
 interface NavItem {
   label: string;
@@ -73,6 +75,7 @@ export function GymAdminSidebar() {
     { label: "Payments", href: `${basePath}/payments`, icon: Wallet, requiredPermission: "financials" },
     { label: "Invoices", href: `${basePath}/invoices`, icon: Receipt, requiredPermission: "financials" },
     { label: "POS", href: `${basePath}/pos`, icon: ShoppingCart, requiredPermission: "financials" },
+    { label: "Activity Log", href: `${basePath}/activity-log`, icon: ClipboardList, requiredPermission: "manage" },
     { label: "Announcements", href: `${basePath}/announcements`, icon: Newspaper, requiredPermission: "manage" },
     { label: "Marketing", href: `${basePath}/marketing`, icon: Megaphone, requiredPermission: "manage" },
     { label: "Automation", href: `${basePath}/automation`, icon: Zap, requiredPermission: "manage" },
@@ -135,6 +138,11 @@ export function GymAdminSidebar() {
           <h2 className="truncate font-semibold">{gym?.name || "Loading..."}</h2>
           <p className="truncate text-xs text-muted-foreground capitalize">{userRole || "Staff"}</p>
         </div>
+      </div>
+      
+      {/* Location Switcher */}
+      <div className="border-b px-3 py-2">
+        <LocationSwitcher />
       </div>
 
       {/* Navigation */}
