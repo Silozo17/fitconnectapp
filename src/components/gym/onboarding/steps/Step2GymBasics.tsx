@@ -29,23 +29,24 @@ const BUSINESS_TYPES = [
 
 const COUNTRIES = [
   { code: 'GB', name: 'United Kingdom', currency: 'GBP' },
+  { code: 'PL', name: 'Poland', currency: 'PLN' },
   { code: 'US', name: 'United States', currency: 'USD' },
   { code: 'CA', name: 'Canada', currency: 'CAD' },
+  { code: 'AE', name: 'United Arab Emirates', currency: 'AED' },
   { code: 'AU', name: 'Australia', currency: 'AUD' },
+  { code: 'NZ', name: 'New Zealand', currency: 'NZD' },
   { code: 'IE', name: 'Ireland', currency: 'EUR' },
-  { code: 'DE', name: 'Germany', currency: 'EUR' },
-  { code: 'FR', name: 'France', currency: 'EUR' },
-  { code: 'ES', name: 'Spain', currency: 'EUR' },
-  { code: 'IT', name: 'Italy', currency: 'EUR' },
-  { code: 'NL', name: 'Netherlands', currency: 'EUR' },
 ];
 
 const CURRENCIES = [
   { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'PLN', symbol: 'zł', name: 'Polish Zloty' },
   { code: 'USD', symbol: '$', name: 'US Dollar' },
-  { code: 'EUR', symbol: '€', name: 'Euro' },
   { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+  { code: 'AED', symbol: 'د.إ', name: 'UAE Dirham' },
   { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
 ];
 
 export function Step2GymBasics({
@@ -148,8 +149,8 @@ export function Step2GymBasics({
             <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               id="website"
-              type="url"
-              placeholder="https://www.yourgym.com"
+              type="text"
+              placeholder="www.yourgym.com"
               value={data.website}
               onChange={(e) => updateData({ website: e.target.value })}
               className="pl-10"

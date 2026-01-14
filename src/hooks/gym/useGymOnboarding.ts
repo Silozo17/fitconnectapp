@@ -72,7 +72,7 @@ export interface StaffInvite {
   locationIds: string[];
 }
 
-const TOTAL_STEPS = 9;
+const TOTAL_STEPS = 8;
 
 const initialData: GymOnboardingData = {
   ownerName: '',
@@ -148,8 +148,7 @@ export function useGymOnboarding() {
             if (progress.data) setData(prev => ({ ...prev, ...progress.data }));
           }
         } else {
-          // User is logged in but has no gym - skip account creation (step 1), go to gym basics (step 2)
-          // We need to fetch user info for the owner name
+          // User is logged in but has no gym - fetch user info for the owner name
           const { data: userProfile } = await supabase
             .from('user_profiles')
             .select('first_name, last_name')
@@ -164,9 +163,7 @@ export function useGymOnboarding() {
               email: user.email || prev.email,
             }));
           }
-          
-          // Skip to step 1 (index 1 = gym basics) since user is already logged in
-          setCurrentStep(1);
+          // Stay at step 0 (Gym Basics) - no need to skip since Step 1 is removed
         }
       }
     };
@@ -271,30 +268,76 @@ export function useGymOnboarding() {
     }
   }, [data, nextStep]);
 
-  // Step 2: Save gym basics
+  // Normalize website URL - add https:// if missing
+  const normalizeWebsite = (url: string): string => {
+    if (!url.trim()) return '';
+    if (!/^https?:\/\//i.test(url)) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+
+  // Step 1: Save gym basics (now the first step)
   const saveGymBasics = useCallback(async () => {
-    if (!gymId) return;
     setIsLoading(true);
     try {
       // Generate unique slug from gym name
       const baseSlug = data.gymName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       const slug = `${baseSlug}-${Date.now().toString(36)}`;
+      const normalizedWebsite = normalizeWebsite(data.website);
 
-      const { error } = await supabase
-        .from('gym_profiles')
-        .update({
-          name: data.gymName,
-          slug,
-          website: data.website || null,
-          business_types: data.businessTypes,
-          country: data.country,
-          currency: data.currency,
-          description: data.description || null,
-          onboarding_progress: { step: 2, data },
-        })
-        .eq('id', gymId);
+      let currentGymId = gymId;
 
-      if (error) throw error;
+      // Create gym profile if it doesn't exist
+      if (!currentGymId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast.error('Please log in to continue');
+          setIsLoading(false);
+          return;
+        }
+
+        const { data: gymData, error: createError } = await supabase
+          .from('gym_profiles')
+          .insert({
+            user_id: user.id,
+            name: data.gymName,
+            slug,
+            website: normalizedWebsite || null,
+            business_types: data.businessTypes,
+            country: data.country,
+            currency: data.currency,
+            description: data.description || null,
+            owner_name: data.ownerName,
+            owner_phone: data.phone,
+            onboarding_completed: false,
+            onboarding_progress: { step: 1, data },
+          })
+          .select('id')
+          .single();
+
+        if (createError) throw createError;
+        currentGymId = gymData.id;
+        setGymId(currentGymId);
+      } else {
+        // Update existing gym
+        const { error } = await supabase
+          .from('gym_profiles')
+          .update({
+            name: data.gymName,
+            slug,
+            website: normalizedWebsite || null,
+            business_types: data.businessTypes,
+            country: data.country,
+            currency: data.currency,
+            description: data.description || null,
+            onboarding_progress: { step: 1, data },
+          })
+          .eq('id', currentGymId);
+
+        if (error) throw error;
+      }
+
       nextStep();
     } catch (error: any) {
       toast.error(error.message || 'Failed to save gym details');
