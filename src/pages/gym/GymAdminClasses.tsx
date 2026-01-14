@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useGymClassTypes } from "@/hooks/gym/useGymClasses";
+import { useGym } from "@/contexts/GymContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,10 +23,73 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ClassTypeDialog } from "@/components/gym/admin/dialogs/ClassTypeDialog";
+import { DeleteConfirmDialog } from "@/components/gym/admin/dialogs/DeleteConfirmDialog";
+import { GymClassType } from "@/hooks/gym/useGymClasses";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export default function GymAdminClasses() {
   const { slug } = useParams<{ slug: string }>();
+  const { gym } = useGym();
   const { data: classTypes, isLoading } = useGymClassTypes();
+  const queryClient = useQueryClient();
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingClassType, setEditingClassType] = useState<GymClassType | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingClassType, setDeletingClassType] = useState<GymClassType | null>(null);
+
+  const handleAddClick = () => {
+    setEditingClassType(null);
+    setDialogOpen(true);
+  };
+
+  const handleEditClick = (classType: GymClassType) => {
+    setEditingClassType(classType);
+    setDialogOpen(true);
+  };
+
+  const handleDeleteClick = (classType: GymClassType) => {
+    setDeletingClassType(classType);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingClassType || !gym?.id) return;
+
+    const { error } = await supabase
+      .from("gym_class_types")
+      .delete()
+      .eq("id", deletingClassType.id);
+
+    if (error) {
+      console.error("Failed to delete class type:", error);
+      toast.error("Failed to delete class type");
+      throw error;
+    }
+
+    toast.success("Class type deleted successfully");
+    queryClient.invalidateQueries({ queryKey: ["gym-class-types", gym.id] });
+  };
+
+  const handleToggleActive = async (classType: GymClassType) => {
+    if (!gym?.id) return;
+
+    const { error } = await supabase
+      .from("gym_class_types")
+      .update({ is_active: !classType.is_active })
+      .eq("id", classType.id);
+
+    if (error) {
+      console.error("Failed to update class type:", error);
+      toast.error("Failed to update class type");
+      return;
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["gym-class-types", gym.id] });
+  };
 
   const getDifficultyBadge = (level: string | null) => {
     switch (level) {
@@ -52,7 +116,7 @@ export default function GymAdminClasses() {
             Manage the types of classes you offer at your gym.
           </p>
         </div>
-        <Button>
+        <Button onClick={handleAddClick}>
           <Plus className="mr-2 h-4 w-4" />
           Add Class Type
         </Button>
@@ -86,7 +150,7 @@ export default function GymAdminClasses() {
             <p className="text-sm text-muted-foreground mt-1 max-w-sm">
               Create your first class type to start scheduling classes.
             </p>
-            <Button className="mt-4">
+            <Button className="mt-4" onClick={handleAddClick}>
               <Plus className="mr-2 h-4 w-4" />
               Add Class Type
             </Button>
@@ -126,11 +190,14 @@ export default function GymAdminClasses() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleEditClick(classType)}>
                         <Edit className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">
+                      <DropdownMenuItem 
+                        className="text-destructive"
+                        onClick={() => handleDeleteClick(classType)}
+                      >
                         <Trash2 className="mr-2 h-4 w-4" />
                         Delete
                       </DropdownMenuItem>
@@ -184,7 +251,10 @@ export default function GymAdminClasses() {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-muted-foreground">Active</span>
-                    <Switch checked={classType.is_active} />
+                    <Switch 
+                      checked={classType.is_active} 
+                      onCheckedChange={() => handleToggleActive(classType)}
+                    />
                   </div>
                 </div>
               </CardContent>
@@ -192,6 +262,21 @@ export default function GymAdminClasses() {
           ))}
         </div>
       )}
+
+      {/* Dialogs */}
+      <ClassTypeDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        classTypeToEdit={editingClassType}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Class Type"
+        description={`Are you sure you want to delete "${deletingClassType?.name}"? This action cannot be undone. Any scheduled classes of this type will need to be handled separately.`}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
