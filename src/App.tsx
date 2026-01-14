@@ -150,6 +150,12 @@ const GymMemberProfile = lazy(() => import('@/pages/gym/GymMemberProfile'));
 const GymAdminCheckIns = lazy(() => import('@/pages/gym/GymAdminCheckIns'));
 const GymAdminAnalytics = lazy(() => import('@/pages/gym/GymAdminAnalytics'));
 const GymAdminPayments = lazy(() => import('@/pages/gym/GymAdminPayments'));
+const GymAdminLeads = lazy(() => import('@/pages/gym/GymAdminLeads'));
+const GymAdminContracts = lazy(() => import('@/pages/gym/GymAdminContracts'));
+const GymAdminReferrals = lazy(() => import('@/pages/gym/GymAdminReferrals'));
+
+// Gym Admin Layout Wrapper (provides GymProvider context)
+import { GymAdminRouteWrapper } from '@/components/gym/admin/GymAdminRouteWrapper';
 
 // Shared Dashboard Pages
 const Notifications = lazy(() => import('@/pages/dashboard/Notifications'));
@@ -1843,110 +1849,91 @@ const App = () => (
                               {/* Legacy route redirect */}
                               <Route path="/gym/register" element={<Navigate to="/club-register" replace />} />
 
-                              {/* Gym Admin Routes - uses gymId */}
+                              {/* Gym Admin Routes - uses gymId with nested routing */}
                               <Route path="/gym-admin/:gymId" element={
                                 <AppLocaleWrapper>
                                   <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminDashboard />
-                                    </Suspense>
+                                    <GymAdminRouteWrapper />
                                   </ProtectedRoute>
                                 </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/members" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminMembers />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/members/:memberId" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymMemberProfile />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
+                              }>
+                                <Route index element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminDashboard />
+                                  </Suspense>
+                                } />
+                                <Route path="members" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminMembers />
+                                  </Suspense>
+                                } />
+                                <Route path="members/:memberId" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymMemberProfile />
+                                  </Suspense>
+                                } />
+                                <Route path="schedule" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminSchedule />
+                                  </Suspense>
+                                } />
+                                <Route path="classes" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminClasses />
+                                  </Suspense>
+                                } />
+                                <Route path="memberships" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminMemberships />
+                                  </Suspense>
+                                } />
+                                <Route path="check-ins" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminCheckIns />
+                                  </Suspense>
+                                } />
+                                <Route path="analytics" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminAnalytics />
+                                  </Suspense>
+                                } />
+                                <Route path="payments" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminPayments />
+                                  </Suspense>
+                                } />
+                                <Route path="locations" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminLocations />
+                                  </Suspense>
+                                } />
+                                <Route path="settings" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminSettings />
+                                  </Suspense>
+                                } />
+                                <Route path="leads" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminLeads />
+                                  </Suspense>
+                                } />
+                                <Route path="contracts" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminContracts />
+                                  </Suspense>
+                                } />
+                                <Route path="referrals" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminReferrals />
+                                  </Suspense>
+                                } />
+                              </Route>
+                              
+                              {/* Club Member Signup (public route) */}
                               <Route path="/club/:gymSlug/signup" element={
                                 <Suspense fallback={<PageLoadingSpinner />}>
                                   <GymMemberSignup />
                                 </Suspense>
-                              } />
-                              <Route path="/gym-admin/:gymId/schedule" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminSchedule />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/classes" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminClasses />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/memberships" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminMemberships />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/check-ins" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminCheckIns />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/analytics" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminAnalytics />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/payments" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminPayments />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/locations" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminLocations />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
-                              } />
-                              <Route path="/gym-admin/:gymId/settings" element={
-                                <AppLocaleWrapper>
-                                  <ProtectedRoute allowedRoles={["client", "coach", "admin"]}>
-                                    <Suspense fallback={<PageLoadingSpinner />}>
-                                      <GymAdminSettings />
-                                    </Suspense>
-                                  </ProtectedRoute>
-                                </AppLocaleWrapper>
                               } />
                               
                               {/* Gym Member/Portal Routes */}
