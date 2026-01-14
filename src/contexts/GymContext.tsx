@@ -33,13 +33,19 @@ export interface GymProfile {
   timezone: string;
   stripe_account_id: string | null;
   stripe_account_status: string | null;
-  stripe_onboarding_complete: boolean;
+  stripe_onboarding_complete?: boolean;
   platform_fee_percentage: number;
   status: string;
   verified_at: string | null;
   settings: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+  // Onboarding fields
+  business_types?: string[];
+  owner_name?: string | null;
+  owner_phone?: string | null;
+  onboarding_completed?: boolean;
+  onboarding_progress?: Record<string, unknown> | null;
 }
 
 export interface GymLocation {

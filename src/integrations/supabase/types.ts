@@ -8230,6 +8230,7 @@ export type Database = {
           accent_color: string | null
           address_line_1: string | null
           address_line_2: string | null
+          business_types: string[] | null
           city: string | null
           country: string | null
           county: string | null
@@ -8243,6 +8244,10 @@ export type Database = {
           location_lng: number | null
           logo_url: string | null
           name: string
+          onboarding_completed: boolean | null
+          onboarding_progress: Json | null
+          owner_name: string | null
+          owner_phone: string | null
           phone: string | null
           platform_fee_percentage: number | null
           postcode: string | null
@@ -8263,6 +8268,7 @@ export type Database = {
           accent_color?: string | null
           address_line_1?: string | null
           address_line_2?: string | null
+          business_types?: string[] | null
           city?: string | null
           country?: string | null
           county?: string | null
@@ -8276,6 +8282,10 @@ export type Database = {
           location_lng?: number | null
           logo_url?: string | null
           name: string
+          onboarding_completed?: boolean | null
+          onboarding_progress?: Json | null
+          owner_name?: string | null
+          owner_phone?: string | null
           phone?: string | null
           platform_fee_percentage?: number | null
           postcode?: string | null
@@ -8296,6 +8306,7 @@ export type Database = {
           accent_color?: string | null
           address_line_1?: string | null
           address_line_2?: string | null
+          business_types?: string[] | null
           city?: string | null
           country?: string | null
           county?: string | null
@@ -8309,6 +8320,10 @@ export type Database = {
           location_lng?: number | null
           logo_url?: string | null
           name?: string
+          onboarding_completed?: boolean | null
+          onboarding_progress?: Json | null
+          owner_name?: string | null
+          owner_phone?: string | null
           phone?: string | null
           platform_fee_percentage?: number | null
           postcode?: string | null
