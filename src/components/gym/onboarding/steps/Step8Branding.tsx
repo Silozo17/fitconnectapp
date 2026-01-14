@@ -309,12 +309,9 @@ export function Step8Branding({
                 </div>
               </div>
             ) : (
-              <Button
-                type="button"
-                variant="outline"
-                className="w-full aspect-[3/1] rounded-lg border-2 border-dashed border-border bg-secondary/50 flex flex-col items-center justify-center hover:border-primary/50 transition-colors h-auto"
-                onClick={() => coverInputRef.current?.click()}
-                disabled={isUploadingCover}
+              <label
+                htmlFor="cover-upload"
+                className={`w-full aspect-[3/1] rounded-lg border-2 border-dashed border-border bg-secondary/50 flex flex-col items-center justify-center hover:border-primary/50 transition-colors cursor-pointer ${isUploadingCover ? 'pointer-events-none' : ''}`}
               >
                 {isUploadingCover ? (
                   <Loader2 className="w-8 h-8 text-muted-foreground animate-spin" />
@@ -329,10 +326,11 @@ export function Step8Branding({
                     </p>
                   </>
                 )}
-              </Button>
+              </label>
             )}
             <input
               ref={coverInputRef}
+              id="cover-upload"
               type="file"
               accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={handleCoverUpload}
