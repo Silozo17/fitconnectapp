@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { Building2, Users, Calendar, CreditCard, BarChart3, Shield, ArrowRight, Clock, Bell } from "lucide-react";
+import { Building2, Users, Calendar, CreditCard, BarChart3, Shield, ArrowRight, Clock, Bell, Check, Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { GradientButton } from "@/components/ui/gradient-button";
 import Navbar from "@/components/layout/Navbar";
@@ -40,6 +40,18 @@ const ForGyms = () => {
       title: "Automated Communications",
       description: "Keep members engaged with automated reminders and announcements."
     }
+  ];
+
+  const pricingFeatures = [
+    "Unlimited locations",
+    "Unlimited staff accounts",
+    "Full member management",
+    "Class scheduling & bookings",
+    "Payment processing (Stripe)",
+    "Staff access control & activity logs",
+    "QR check-in system",
+    "Analytics & reporting",
+    "Automated communications"
   ];
 
   return (
@@ -118,6 +130,88 @@ const ForGyms = () => {
         </div>
       </section>
 
+      {/* Pricing Section */}
+      <section className="py-20 px-4 bg-secondary/30">
+        <div className="container mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-3xl md:text-4xl font-bold mb-4">
+              Simple, Transparent Pricing
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              No hidden fees, no complicated tiers. Just straightforward pricing that scales with you.
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-card border border-border rounded-3xl p-8 md:p-12 relative overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              
+              <div className="relative z-10">
+                {/* Price */}
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-baseline gap-1">
+                    <span className="font-display text-5xl md:text-6xl font-bold text-foreground">£99</span>
+                    <span className="text-muted-foreground text-lg">/month</span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" />
+                    <span className="text-lg text-foreground font-medium">+ £1 per member payment</span>
+                  </div>
+                  <p className="text-muted-foreground mt-2 text-sm">
+                    We only charge when your members pay
+                  </p>
+                </div>
+
+                {/* Features Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+                  {pricingFeatures.map((feature, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <Check className="w-3 h-3 text-primary" />
+                      </div>
+                      <span className="text-sm text-foreground">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Examples */}
+                <div className="bg-secondary/50 rounded-xl p-6 mb-8">
+                  <h4 className="font-medium text-foreground mb-4">Example monthly costs:</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                    <div className="p-4 bg-background rounded-lg">
+                      <p className="text-2xl font-bold text-foreground">£149</p>
+                      <p className="text-sm text-muted-foreground">50 member payments</p>
+                    </div>
+                    <div className="p-4 bg-background rounded-lg border-2 border-primary">
+                      <p className="text-2xl font-bold text-foreground">£199</p>
+                      <p className="text-sm text-muted-foreground">100 member payments</p>
+                    </div>
+                    <div className="p-4 bg-background rounded-lg">
+                      <p className="text-2xl font-bold text-foreground">£599</p>
+                      <p className="text-sm text-muted-foreground">500 member payments</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center">
+                  <GradientButton size="lg" asChild>
+                    <Link to="/gym-register">
+                      Get Started
+                      <ArrowRight className="ml-2 w-5 h-5" />
+                    </Link>
+                  </GradientButton>
+                  <p className="text-sm text-muted-foreground mt-4">
+                    No contract required. Cancel anytime.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto">
@@ -127,14 +221,17 @@ const ForGyms = () => {
               Ready to Transform Your Gym?
             </h2>
             <p className="text-muted-foreground mb-8">
-              Join the waitlist to be notified when we launch. Early adopters get exclusive benefits.
+              Join hundreds of gyms already using FitConnect to streamline their operations.
             </p>
             <GradientButton size="lg" asChild>
               <Link to="/gym-register">
-                Get Started Free
+                Start Free Trial
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Link>
             </GradientButton>
+            <p className="text-sm text-muted-foreground mt-4">
+              £99/month + £1 per member payment
+            </p>
           </div>
         </div>
       </section>

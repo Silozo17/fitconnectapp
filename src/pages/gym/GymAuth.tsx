@@ -28,19 +28,13 @@ const loginSchema = z.object({
 });
 
 // Schema for registration
+// Simplified registration - only user info, gym details collected in onboarding
 const registerSchema = z.object({
   firstName: z.string().min(1, "First name is required").max(50, "First name is too long"),
   lastName: z.string().max(50, "Last name is too long").optional(),
   email: z.string().email("Please enter a valid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   phone: z.string().optional(),
-  gymName: z.string().min(2, "Gym name must be at least 2 characters"),
-  address_line_1: z.string().min(1, "Address is required"),
-  address_line_2: z.string().optional(),
-  city: z.string().min(1, "City is required"),
-  county: z.string().optional(),
-  postcode: z.string().min(1, "Postal code is required"),
-  country: z.string().min(1, "Country is required"),
 });
 
 type LoginFormData = z.infer<typeof loginSchema>;
@@ -112,7 +106,7 @@ export default function GymAuth() {
     defaultValues: { email: "", password: "" },
   });
 
-  // Register form
+  // Register form - simplified to user info only
   const registerForm = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -121,13 +115,6 @@ export default function GymAuth() {
       email: "",
       password: "",
       phone: "",
-      gymName: "",
-      address_line_1: "",
-      address_line_2: "",
-      city: "",
-      county: "",
-      postcode: "",
-      country: "United Kingdom",
     },
   });
 
@@ -350,13 +337,13 @@ export default function GymAuth() {
     setAuthState("gym-select");
   };
 
-  // Handle OTP verified for registration
+  // Handle OTP verified for registration - now redirects to onboarding
   const handleRegisterOTPVerified = async () => {
     if (!pendingRegisterData) return;
 
     setIsSubmitting(true);
     try {
-      // Create user account
+      // Create user account only - gym details collected in onboarding
       const { error: signUpError } = await signUp(
         pendingRegisterData.email,
         pendingRegisterData.password,
@@ -385,69 +372,19 @@ export default function GymAuth() {
         return;
       }
 
-      // Generate unique slug
-      const slug = await generateUniqueSlug(pendingRegisterData.gymName);
+      // Store phone if provided for later use in onboarding
+      if (pendingRegisterData.phone) {
+        sessionStorage.setItem('gym_onboarding_phone', pendingRegisterData.phone);
+      }
 
-      // Create gym profile
-      const { data: gym, error: gymError } = await supabase
-        .from("gym_profiles")
-        .insert({
-          name: pendingRegisterData.gymName,
-          slug: slug,
-          email: pendingRegisterData.email,
-          phone: pendingRegisterData.phone || null,
-          user_id: newUser.id,
-          address_line_1: pendingRegisterData.address_line_1,
-          address_line_2: pendingRegisterData.address_line_2 || null,
-          city: pendingRegisterData.city,
-          county: pendingRegisterData.county || null,
-          postcode: pendingRegisterData.postcode,
-          country: pendingRegisterData.country,
-        } as any)
-        .select()
-        .single();
-
-      if (gymError) throw gymError;
-
-      // Add user as owner in gym_staff
-      const { error: staffError } = await supabase
-        .from("gym_staff")
-        .insert({
-          gym_id: gym.id,
-          user_id: newUser.id,
-          role: "owner",
-          status: "active",
-        } as any);
-
-      if (staffError) throw staffError;
-
-      // Create first location
-      await supabase
-        .from("gym_locations")
-        .insert({
-          gym_id: gym.id,
-          name: "Main Location",
-          address_line_1: pendingRegisterData.address_line_1,
-          address_line_2: pendingRegisterData.address_line_2 || null,
-          city: pendingRegisterData.city,
-          county: pendingRegisterData.county || null,
-          postcode: pendingRegisterData.postcode,
-          country: pendingRegisterData.country,
-          phone: pendingRegisterData.phone || null,
-          email: pendingRegisterData.email,
-          is_primary: true,
-          is_active: true,
-        } as any);
-
-      toast.success(t("gymRegister.success", "Gym registered successfully!"));
+      toast.success(t("gymRegister.accountCreated", "Account created! Let's set up your gym."));
       
-      // Store selected gym and navigate
-      localStorage.setItem("selectedGymId", gym.id);
+      // Mark as verified and redirect to gym onboarding
       sessionStorage.setItem(`gym_otp_verified_${newUser.id}`, "true");
-      navigate(`/gym-admin/${gym.id}`);
+      navigate('/onboarding/gym');
     } catch (error: any) {
-      logError("GymAuth.createGym", error);
-      toast.error(error.message || t("gymRegister.failed", "Failed to register gym"));
+      logError("GymAuth.register", error);
+      toast.error(error.message || t("gymRegister.failed", "Failed to create account"));
     } finally {
       setIsSubmitting(false);
       setPendingRegisterData(null);
@@ -927,129 +864,11 @@ export default function GymAuth() {
                   />
                 </div>
 
-                {/* Gym Details Section */}
-                <div className="border-t border-border pt-4 mt-4">
-                  <h3 className="font-medium text-foreground mb-3">{t("gymAuth.gymDetails", "Gym Details")}</h3>
-                  
-                  <div className="space-y-3">
-                    <div>
-                      <Label htmlFor="gymName" className="text-foreground text-sm sm:text-base">
-                        {t("gymAuth.gymName", "Gym Name")} <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="gymName"
-                        type="text"
-                        placeholder="Iron Fitness"
-                        className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                        {...registerForm.register("gymName")}
-                      />
-                      {registerForm.formState.errors.gymName && (
-                        <p className="text-destructive text-sm mt-1">
-                          {registerForm.formState.errors.gymName.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="address_line_1" className="text-foreground text-sm sm:text-base">
-                        {t("form.streetAddress", "Street Address")} <span className="text-destructive">*</span>
-                      </Label>
-                      <Input
-                        id="address_line_1"
-                        type="text"
-                        placeholder="123 Fitness Street"
-                        className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                        {...registerForm.register("address_line_1")}
-                      />
-                      {registerForm.formState.errors.address_line_1 && (
-                        <p className="text-destructive text-sm mt-1">
-                          {registerForm.formState.errors.address_line_1.message}
-                        </p>
-                      )}
-                    </div>
-
-                    <div>
-                      <Label htmlFor="address_line_2" className="text-foreground text-sm sm:text-base">
-                        {t("form.addressLine2", "Address Line 2")}
-                      </Label>
-                      <Input
-                        id="address_line_2"
-                        type="text"
-                        placeholder="Suite 100 (optional)"
-                        className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                        {...registerForm.register("address_line_2")}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div>
-                        <Label htmlFor="city" className="text-foreground text-sm sm:text-base">
-                          {t("form.city", "City")} <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                          id="city"
-                          type="text"
-                          placeholder="London"
-                          className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                          {...registerForm.register("city")}
-                        />
-                        {registerForm.formState.errors.city && (
-                          <p className="text-destructive text-sm mt-1">
-                            {registerForm.formState.errors.city.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor="county" className="text-foreground text-sm sm:text-base">
-                          {t("form.county", "County")}
-                        </Label>
-                        <Input
-                          id="county"
-                          type="text"
-                          placeholder="Greater London"
-                          className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                          {...registerForm.register("county")}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                      <div>
-                        <Label htmlFor="postcode" className="text-foreground text-sm sm:text-base">
-                          {t("form.postcode", "Postal Code")} <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                          id="postcode"
-                          type="text"
-                          placeholder="SW1A 1AA"
-                          className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                          {...registerForm.register("postcode")}
-                        />
-                        {registerForm.formState.errors.postcode && (
-                          <p className="text-destructive text-sm mt-1">
-                            {registerForm.formState.errors.postcode.message}
-                          </p>
-                        )}
-                      </div>
-                      <div>
-                        <Label htmlFor="country" className="text-foreground text-sm sm:text-base">
-                          {t("form.country", "Country")} <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                          id="country"
-                          type="text"
-                          placeholder="United Kingdom"
-                          className="mt-1 sm:mt-1.5 bg-background border-border text-foreground placeholder:text-muted-foreground rounded-xl h-10 sm:h-12"
-                          {...registerForm.register("country")}
-                        />
-                        {registerForm.formState.errors.country && (
-                          <p className="text-destructive text-sm mt-1">
-                            {registerForm.formState.errors.country.message}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
+                {/* Info about onboarding */}
+                <div className="p-4 bg-secondary/50 rounded-xl border border-border">
+                  <p className="text-sm text-muted-foreground">
+                    💡 After creating your account, you'll set up your gym details, location, services, and payment processing.
+                  </p>
                 </div>
 
                 <GradientButton
