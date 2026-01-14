@@ -153,6 +153,9 @@ const GymAdminPayments = lazy(() => import('@/pages/gym/GymAdminPayments'));
 const GymAdminLeads = lazy(() => import('@/pages/gym/GymAdminLeads'));
 const GymAdminContracts = lazy(() => import('@/pages/gym/GymAdminContracts'));
 const GymAdminReferrals = lazy(() => import('@/pages/gym/GymAdminReferrals'));
+const GymAdminWebsite = lazy(() => import('@/pages/gym/GymAdminWebsite'));
+const GymAdminAnnouncements = lazy(() => import('@/pages/gym/GymAdminAnnouncements'));
+const GymPublicWebsite = lazy(() => import('@/pages/gym/GymPublicWebsite'));
 
 // Gym Admin Layout Wrapper (provides GymProvider context)
 import { GymAdminRouteWrapper } from '@/components/gym/admin/GymAdminRouteWrapper';
@@ -1927,12 +1930,29 @@ const App = () => (
                                     <GymAdminReferrals />
                                   </Suspense>
                                 } />
+                                <Route path="website" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminWebsite />
+                                  </Suspense>
+                                } />
+                                <Route path="announcements" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminAnnouncements />
+                                  </Suspense>
+                                } />
                               </Route>
                               
                               {/* Club Member Signup (public route) */}
                               <Route path="/club/:gymSlug/signup" element={
                                 <Suspense fallback={<PageLoadingSpinner />}>
                                   <GymMemberSignup />
+                                </Suspense>
+                              } />
+                              
+                              {/* Public Gym Website */}
+                              <Route path="/club/:gymSlug" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <GymPublicWebsite />
                                 </Suspense>
                               } />
                               
