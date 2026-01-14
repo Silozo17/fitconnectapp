@@ -15,6 +15,8 @@ import {
   UserCog,
   ChevronLeft,
   Building2,
+  ScanLine,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -44,6 +46,7 @@ export function GymAdminSidebar() {
     { label: "Schedule", href: `${basePath}/schedule`, icon: Calendar },
     { label: "Classes", href: `${basePath}/classes`, icon: Dumbbell },
     { label: "Members", href: `${basePath}/members`, icon: Users },
+    { label: "Check-ins", href: `${basePath}/check-ins`, icon: ScanLine },
   ];
 
   const managementNavItems: NavItem[] = [
@@ -54,8 +57,8 @@ export function GymAdminSidebar() {
   ];
 
   const businessNavItems: NavItem[] = [
-    { label: "Reports", href: `${basePath}/reports`, icon: BarChart3, requiredPermission: "financials" },
-    { label: "Billing", href: `${basePath}/billing`, icon: CreditCard, requiredPermission: "financials" },
+    { label: "Analytics", href: `${basePath}/analytics`, icon: BarChart3, requiredPermission: "financials" },
+    { label: "Payments", href: `${basePath}/payments`, icon: Wallet, requiredPermission: "financials" },
     { label: "Marketing", href: `${basePath}/marketing`, icon: Megaphone, requiredPermission: "manage" },
     { label: "Settings", href: `${basePath}/settings`, icon: Settings, requiredPermission: "manage" },
   ];
