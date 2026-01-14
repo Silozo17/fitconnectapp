@@ -5650,6 +5650,50 @@ export type Database = {
           },
         ]
       }
+      gym_automation_logs: {
+        Row: {
+          automation_type: string
+          executed_at: string | null
+          gym_id: string
+          id: string
+          message: string | null
+          metadata: Json | null
+          related_entity_id: string | null
+          related_entity_type: string | null
+          status: string | null
+        }
+        Insert: {
+          automation_type: string
+          executed_at?: string | null
+          gym_id: string
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          status?: string | null
+        }
+        Update: {
+          automation_type?: string
+          executed_at?: string | null
+          gym_id?: string
+          id?: string
+          message?: string | null
+          metadata?: Json | null
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_automation_logs_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_campaigns: {
         Row: {
           audience_filter: Json | null
@@ -6427,6 +6471,100 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_failed_payments: {
+        Row: {
+          amount: number
+          created_at: string | null
+          currency: string | null
+          failure_reason: string | null
+          gym_id: string
+          id: string
+          last_retry_at: string | null
+          max_retries: number | null
+          member_id: string
+          member_notified: boolean | null
+          member_notified_at: string | null
+          membership_id: string | null
+          next_retry_at: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          retry_count: number | null
+          staff_notified: boolean | null
+          staff_notified_at: string | null
+          status: string | null
+          stripe_payment_intent_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          currency?: string | null
+          failure_reason?: string | null
+          gym_id: string
+          id?: string
+          last_retry_at?: string | null
+          max_retries?: number | null
+          member_id: string
+          member_notified?: boolean | null
+          member_notified_at?: string | null
+          membership_id?: string | null
+          next_retry_at?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          retry_count?: number | null
+          staff_notified?: boolean | null
+          staff_notified_at?: string | null
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          currency?: string | null
+          failure_reason?: string | null
+          gym_id?: string
+          id?: string
+          last_retry_at?: string | null
+          max_retries?: number | null
+          member_id?: string
+          member_notified?: boolean | null
+          member_notified_at?: string | null
+          membership_id?: string | null
+          next_retry_at?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          retry_count?: number | null
+          staff_notified?: boolean | null
+          staff_notified_at?: string | null
+          status?: string | null
+          stripe_payment_intent_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_failed_payments_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_failed_payments_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_failed_payments_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "gym_memberships"
             referencedColumns: ["id"]
           },
         ]
@@ -7590,6 +7728,96 @@ export type Database = {
           },
         ]
       }
+      gym_recurring_schedules: {
+        Row: {
+          auto_generate_weeks_ahead: number | null
+          capacity: number | null
+          class_type_id: string
+          created_at: string | null
+          created_by: string | null
+          day_of_week: number
+          duration_minutes: number
+          gym_id: string
+          id: string
+          instructor_id: string | null
+          is_active: boolean | null
+          location_id: string | null
+          notes: string | null
+          start_time: string
+          updated_at: string | null
+        }
+        Insert: {
+          auto_generate_weeks_ahead?: number | null
+          capacity?: number | null
+          class_type_id: string
+          created_at?: string | null
+          created_by?: string | null
+          day_of_week: number
+          duration_minutes?: number
+          gym_id: string
+          id?: string
+          instructor_id?: string | null
+          is_active?: boolean | null
+          location_id?: string | null
+          notes?: string | null
+          start_time: string
+          updated_at?: string | null
+        }
+        Update: {
+          auto_generate_weeks_ahead?: number | null
+          capacity?: number | null
+          class_type_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          day_of_week?: number
+          duration_minutes?: number
+          gym_id?: string
+          id?: string
+          instructor_id?: string | null
+          is_active?: boolean | null
+          location_id?: string | null
+          notes?: string | null
+          start_time?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_recurring_schedules_class_type_id_fkey"
+            columns: ["class_type_id"]
+            isOneToOne: false
+            referencedRelation: "gym_class_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_recurring_schedules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_recurring_schedules_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_recurring_schedules_instructor_id_fkey"
+            columns: ["instructor_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_recurring_schedules_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_referral_rewards: {
         Row: {
           awarded_at: string | null
@@ -8183,6 +8411,111 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_waitlist_promotions: {
+        Row: {
+          class_schedule_id: string
+          gym_id: string
+          id: string
+          member_id: string
+          notification_sent: boolean | null
+          notification_sent_at: string | null
+          promoted_at: string | null
+          promoted_from_position: number
+          promotion_type: string
+        }
+        Insert: {
+          class_schedule_id: string
+          gym_id: string
+          id?: string
+          member_id: string
+          notification_sent?: boolean | null
+          notification_sent_at?: string | null
+          promoted_at?: string | null
+          promoted_from_position: number
+          promotion_type?: string
+        }
+        Update: {
+          class_schedule_id?: string
+          gym_id?: string
+          id?: string
+          member_id?: string
+          notification_sent?: boolean | null
+          notification_sent_at?: string | null
+          promoted_at?: string | null
+          promoted_from_position?: number
+          promotion_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_waitlist_promotions_class_schedule_id_fkey"
+            columns: ["class_schedule_id"]
+            isOneToOne: false
+            referencedRelation: "gym_class_schedules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_waitlist_promotions_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_waitlist_promotions_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_waitlist_settings: {
+        Row: {
+          auto_promote_enabled: boolean | null
+          created_at: string | null
+          gym_id: string
+          id: string
+          max_auto_promotions: number | null
+          notify_on_promotion: boolean | null
+          notify_on_waitlist_join: boolean | null
+          promotion_message_template: string | null
+          promotion_window_hours: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          auto_promote_enabled?: boolean | null
+          created_at?: string | null
+          gym_id: string
+          id?: string
+          max_auto_promotions?: number | null
+          notify_on_promotion?: boolean | null
+          notify_on_waitlist_join?: boolean | null
+          promotion_message_template?: string | null
+          promotion_window_hours?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          auto_promote_enabled?: boolean | null
+          created_at?: string | null
+          gym_id?: string
+          id?: string
+          max_auto_promotions?: number | null
+          notify_on_promotion?: boolean | null
+          notify_on_waitlist_join?: boolean | null
+          promotion_message_template?: string | null
+          promotion_window_hours?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_waitlist_settings_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: true
+            referencedRelation: "gym_profiles"
             referencedColumns: ["id"]
           },
         ]
