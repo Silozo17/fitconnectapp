@@ -37,6 +37,9 @@ const TIMEZONES = [
 const emptyLocation: GymLocationData = {
   name: '',
   address: '',
+  city: '',
+  county: '',
+  country: '',
   postcode: '',
   phone: '',
   email: '',
@@ -177,6 +180,31 @@ export function Step3Locations({
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Venue Search - Auto-populates all fields below */}
+                <div className="space-y-2">
+                  <Label>Search for your gym/venue</Label>
+                  <VenueAutocomplete
+                    value={location.address}
+                    onVenueChange={(address, venueData) => {
+                      updateLocation(index, {
+                        address: venueData?.street_address || address,
+                        name: location.name || venueData?.name || '',
+                        city: venueData?.city || location.city || '',
+                        county: venueData?.region || location.county || '',
+                        country: venueData?.country || location.country || '',
+                        postcode: venueData?.postal_code || location.postcode || '',
+                        phone: venueData?.phone || location.phone || '',
+                        lat: venueData?.lat,
+                        lng: venueData?.lng,
+                      });
+                    }}
+                    placeholder="Search for your gym, studio, fitness center..."
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Search to auto-fill address details below
+                  </p>
+                </div>
+
                 {/* Location Name */}
                 <div className="space-y-2">
                   <Label>Location name *</Label>
@@ -190,34 +218,57 @@ export function Step3Locations({
                   )}
                 </div>
 
-                {/* Address - Venue Search */}
+                {/* Street Address */}
                 <div className="space-y-2">
-                  <Label>Search for your gym/venue *</Label>
-                  <VenueAutocomplete
+                  <Label>Street address *</Label>
+                  <Input
+                    placeholder="e.g., 123 High Street"
                     value={location.address}
-                    onVenueChange={(address, venueData) => {
-                      updateLocation(index, {
-                        address,
-                        name: venueData?.name || location.name,
-                        lat: venueData?.lat,
-                        lng: venueData?.lng,
-                      });
-                    }}
-                    placeholder="Search for your gym, studio, fitness center..."
+                    onChange={(e) => updateLocation(index, { address: e.target.value })}
                   />
                   {errors[`location_${index}_address`] && (
                     <p className="text-sm text-destructive">{errors[`location_${index}_address`]}</p>
                   )}
                 </div>
 
-                {/* Postcode */}
-                <div className="space-y-2">
-                  <Label>Postcode</Label>
-                  <Input
-                    placeholder="e.g., SW1A 1AA"
-                    value={location.postcode}
-                    onChange={(e) => updateLocation(index, { postcode: e.target.value })}
-                  />
+                {/* City & County */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>City</Label>
+                    <Input
+                      placeholder="e.g., Manchester"
+                      value={location.city || ''}
+                      onChange={(e) => updateLocation(index, { city: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>County</Label>
+                    <Input
+                      placeholder="e.g., Greater Manchester"
+                      value={location.county || ''}
+                      onChange={(e) => updateLocation(index, { county: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                {/* Postcode & Country */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Postcode</Label>
+                    <Input
+                      placeholder="e.g., M1 2AB"
+                      value={location.postcode}
+                      onChange={(e) => updateLocation(index, { postcode: e.target.value })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Country</Label>
+                    <Input
+                      placeholder="e.g., United Kingdom"
+                      value={location.country || ''}
+                      onChange={(e) => updateLocation(index, { country: e.target.value })}
+                    />
+                  </div>
                 </div>
 
                 {/* Phone & Email */}
