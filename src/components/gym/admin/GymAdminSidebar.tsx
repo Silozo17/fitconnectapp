@@ -53,6 +53,7 @@ export function GymAdminSidebar() {
 
   const managementNavItems: NavItem[] = [
     { label: "Memberships", href: `${basePath}/memberships`, icon: CreditCard, requiredPermission: "manage" },
+    { label: "Credits", href: `${basePath}/credits`, icon: CreditCard, requiredPermission: "manage" },
     { label: "Grading", href: `${basePath}/grading`, icon: Award },
     { label: "Staff", href: `${basePath}/staff`, icon: UserCog, requiredPermission: "manage" },
     { label: "Locations", href: `${basePath}/locations`, icon: MapPin, requiredPermission: "manage" },
