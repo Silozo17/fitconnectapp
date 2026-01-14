@@ -166,6 +166,7 @@ const GymAdminProducts = lazy(() => import('@/pages/gym/GymAdminProducts'));
 const GymAdminPOS = lazy(() => import('@/pages/gym/GymAdminPOS'));
 const GymAdminInvoices = lazy(() => import('@/pages/gym/GymAdminInvoices'));
 const GymAdminAutomations = lazy(() => import('@/pages/gym/GymAdminAutomations'));
+const GymAdminReports = lazy(() => import('@/pages/gym/GymAdminReports'));
 const EmbedTimetable = lazy(() => import('@/pages/gym/embed/EmbedTimetable'));
 const EmbedSignup = lazy(() => import('@/pages/gym/embed/EmbedSignup'));
 
@@ -2016,6 +2017,11 @@ const App = () => (
                                 <Route path="automations" element={
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <GymAdminAutomations />
+                                  </Suspense>
+                                } />
+                                <Route path="reports" element={
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <GymAdminReports />
                                   </Suspense>
                                 } />
                               </Route>

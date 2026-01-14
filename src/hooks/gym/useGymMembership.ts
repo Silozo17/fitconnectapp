@@ -156,9 +156,9 @@ export function useGymPaymentHistory() {
 }
 
 /**
- * Hook to get member's remaining credits
+ * Hook to get member's remaining credits (simple version for portal)
  */
-export function useGymCredits() {
+export function useMyGymCredits() {
   const { user } = useAuth();
   const { gym } = useGym();
 
