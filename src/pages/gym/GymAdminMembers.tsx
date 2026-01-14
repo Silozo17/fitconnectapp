@@ -3,17 +3,9 @@ import { Link, useParams } from "react-router-dom";
 import { useGymMembers } from "@/hooks/gym/useGymMembers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -24,9 +16,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import {
-  Search,
   UserPlus,
-  Filter,
   MoreHorizontal,
   Mail,
   Phone,
@@ -39,15 +29,32 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { MemberFiltersPanel } from "@/components/gym/admin/members/MemberFiltersPanel";
 
 export default function GymAdminMembers() {
   const { gymId } = useParams<{ gymId: string }>();
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("active");
+  const [filters, setFilters] = useState({
+    search: "",
+    status: "active",
+    planId: "",
+    joinedFrom: "",
+    joinedTo: "",
+    dobFrom: "",
+    dobTo: "",
+    noActiveMembership: false,
+    expiringWithinDays: undefined as number | undefined,
+  });
 
   const { data, isLoading } = useGymMembers({
-    status: statusFilter,
-    search: search || undefined,
+    status: filters.status,
+    search: filters.search || undefined,
+    planId: filters.planId || undefined,
+    joinedFrom: filters.joinedFrom || undefined,
+    joinedTo: filters.joinedTo || undefined,
+    dobFrom: filters.dobFrom || undefined,
+    dobTo: filters.dobTo || undefined,
+    noActiveMembership: filters.noActiveMembership,
+    expiringWithinDays: filters.expiringWithinDays,
   });
 
   const members = data?.members || [];
@@ -87,31 +94,7 @@ export default function GymAdminMembers() {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by name or email..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-[140px]">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Status</SelectItem>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <MemberFiltersPanel filters={filters} onFiltersChange={setFilters} />
         </CardContent>
       </Card>
 
@@ -144,11 +127,11 @@ export default function GymAdminMembers() {
               <UserPlus className="h-12 w-12 text-muted-foreground mb-4" />
               <h3 className="font-medium text-lg">No members found</h3>
               <p className="text-sm text-muted-foreground mt-1 max-w-sm">
-                {search
+                {filters.search
                   ? "Try adjusting your search or filters."
                   : "Get started by adding your first member."}
               </p>
-              {!search && (
+              {!filters.search && (
                 <Button className="mt-4" asChild>
                   <Link to={`/gym-admin/${gymId}/members/new`}>
                     <UserPlus className="mr-2 h-4 w-4" />

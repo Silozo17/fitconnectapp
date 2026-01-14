@@ -35,16 +35,35 @@ export interface GymMember {
 interface UseGymMembersOptions {
   status?: string;
   search?: string;
+  planId?: string;
+  joinedFrom?: string;
+  joinedTo?: string;
+  dobFrom?: string;
+  dobTo?: string;
+  noActiveMembership?: boolean;
+  expiringWithinDays?: number;
   limit?: number;
   offset?: number;
 }
 
 export function useGymMembers(options: UseGymMembersOptions = {}) {
   const { gym } = useGym();
-  const { status = "active", search, limit = 50, offset = 0 } = options;
+  const { 
+    status = "active", 
+    search, 
+    planId,
+    joinedFrom,
+    joinedTo,
+    dobFrom,
+    dobTo,
+    noActiveMembership,
+    expiringWithinDays,
+    limit = 50, 
+    offset = 0 
+  } = options;
 
   return useQuery({
-    queryKey: ["gym-members", gym?.id, status, search, limit, offset],
+    queryKey: ["gym-members", gym?.id, status, search, planId, joinedFrom, joinedTo, dobFrom, dobTo, noActiveMembership, expiringWithinDays, limit, offset],
     queryFn: async () => {
       if (!gym?.id) return { members: [], count: 0 };
 
@@ -57,6 +76,7 @@ export function useGymMembers(options: UseGymMembersOptions = {}) {
             status,
             credits_remaining,
             current_period_end,
+            plan_id,
             plan:membership_plans(name)
           )
         `, { count: "exact" })
@@ -72,12 +92,28 @@ export function useGymMembers(options: UseGymMembersOptions = {}) {
         query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
       }
 
+      // Join date range filter
+      if (joinedFrom) {
+        query = query.gte("joined_at", joinedFrom);
+      }
+      if (joinedTo) {
+        query = query.lte("joined_at", joinedTo);
+      }
+
+      // DOB range filter
+      if (dobFrom) {
+        query = query.gte("date_of_birth", dobFrom);
+      }
+      if (dobTo) {
+        query = query.lte("date_of_birth", dobTo);
+      }
+
       const { data, error, count } = await query;
 
       if (error) throw error;
 
-      // Transform the data to flatten active_membership
-      const members = (data || []).map((member) => {
+      // Transform the data to flatten active_membership and apply client-side filters
+      let members = (data || []).map((member) => {
         const activeMembership = member.active_membership?.find(
           (m: { status: string }) => m.status === "active"
         );
@@ -86,6 +122,7 @@ export function useGymMembers(options: UseGymMembersOptions = {}) {
           active_membership: activeMembership
             ? {
                 id: activeMembership.id,
+                plan_id: activeMembership.plan_id,
                 plan_name: activeMembership.plan?.name || "Unknown Plan",
                 status: activeMembership.status,
                 credits_remaining: activeMembership.credits_remaining,
@@ -94,6 +131,25 @@ export function useGymMembers(options: UseGymMembersOptions = {}) {
             : null,
         };
       });
+
+      // Client-side filters for membership-related conditions
+      if (planId) {
+        members = members.filter(m => m.active_membership?.plan_id === planId);
+      }
+
+      if (noActiveMembership) {
+        members = members.filter(m => !m.active_membership);
+      }
+
+      if (expiringWithinDays) {
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + expiringWithinDays);
+        members = members.filter(m => {
+          if (!m.active_membership?.current_period_end) return false;
+          const endDate = new Date(m.active_membership.current_period_end);
+          return endDate <= futureDate && endDate >= new Date();
+        });
+      }
 
       return { members: members as GymMember[], count: count || 0 };
     },
