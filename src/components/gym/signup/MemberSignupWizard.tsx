@@ -5,6 +5,7 @@ import { SignupProgress } from "./SignupProgress";
 import { LocationStep } from "./steps/LocationStep";
 import { PlanStep } from "./steps/PlanStep";
 import { DetailsStep } from "./steps/DetailsStep";
+import { EmailVerificationStep } from "./steps/EmailVerificationStep";
 import { MarketingStep } from "./steps/MarketingStep";
 import { ContractsStep } from "./steps/ContractsStep";
 import { PaymentStep } from "./steps/PaymentStep";
@@ -78,7 +79,7 @@ function WizardContent({ gymId, gymSlug }: MemberSignupWizardProps) {
       if (error) throw error;
       return data;
     },
-    enabled: !!gymId && currentStep >= 5,
+    enabled: !!gymId && currentStep >= 6,
   });
 
   const selectedPlan = plans.find((p) => p.id === formData.planId);
@@ -92,6 +93,7 @@ function WizardContent({ gymId, gymSlug }: MemberSignupWizardProps) {
       <SignupProgress currentStep={currentStep} totalSteps={totalSteps} />
 
       <div className="min-h-[400px]">
+        {/* Step 1: Location */}
         {currentStep === 1 && (
           <LocationStep
             locations={locations}
@@ -99,6 +101,7 @@ function WizardContent({ gymId, gymSlug }: MemberSignupWizardProps) {
             onNext={goNext}
           />
         )}
+        {/* Step 2: Plan */}
         {currentStep === 2 && (
           <PlanStep
             plans={plans}
@@ -107,13 +110,20 @@ function WizardContent({ gymId, gymSlug }: MemberSignupWizardProps) {
             onBack={goBack}
           />
         )}
+        {/* Step 3: Personal Details */}
         {currentStep === 3 && (
           <DetailsStep onNext={goNext} onBack={goBack} />
         )}
+        {/* Step 4: Email Verification */}
         {currentStep === 4 && (
+          <EmailVerificationStep onNext={goNext} onBack={goBack} />
+        )}
+        {/* Step 5: Marketing */}
+        {currentStep === 5 && (
           <MarketingStep onNext={goNext} onBack={goBack} />
         )}
-        {currentStep === 5 && (
+        {/* Step 6: Contracts */}
+        {currentStep === 6 && (
           <ContractsStep
             contracts={contracts}
             isLoading={contractsLoading}
@@ -121,7 +131,8 @@ function WizardContent({ gymId, gymSlug }: MemberSignupWizardProps) {
             onBack={goBack}
           />
         )}
-        {currentStep === 6 && (
+        {/* Step 7: Payment */}
+        {currentStep === 7 && (
           <PaymentStep
             plan={selectedPlan}
             location={selectedLocation}

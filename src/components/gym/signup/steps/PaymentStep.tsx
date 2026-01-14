@@ -78,6 +78,7 @@ export function PaymentStep({ plan, location, gymId, gymSlug, onBack }: PaymentS
               marketingSourceOther: formData.marketingSourceOther || null,
             },
             contractIds: formData.signedContractIds,
+            emailVerified: formData.emailVerified, // Pass email verification status
             successUrl: `${window.location.origin}/club/${gymSlug}/signup?success=true`,
             cancelUrl: `${window.location.origin}/club/${gymSlug}/signup?cancelled=true`,
           },

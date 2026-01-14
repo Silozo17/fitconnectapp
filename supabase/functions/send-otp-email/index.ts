@@ -66,7 +66,8 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
     );
 
-    // Only check email existence for signup flow (not for 2FA)
+    // Only check email existence for signup flow (not for 2FA or gym_signup)
+    // gym_signup purpose is for gym member registration - allow both new and existing users
     if (purpose === "signup") {
       const { data: emailExists, error: checkError } = await supabaseAdmin.rpc('check_email_exists', {
         email_to_check: email
@@ -87,7 +88,7 @@ serve(async (req) => {
         );
       }
     } else {
-      console.log(`[send-otp-email] Skipping email existence check for 2FA purpose`);
+      console.log(`[send-otp-email] Skipping email existence check for purpose: ${purpose}`);
     }
 
     // Generate OTP code
