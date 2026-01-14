@@ -19,3 +19,7 @@ export { default as GymAdminReferrals } from "./GymAdminReferrals";
 export { default as GymOnboarding } from "./GymOnboarding";
 export { default as GymLogin } from "./GymLogin";
 export { default as GymAdminGrading } from "./GymAdminGrading";
+export { default as GymAdminProducts } from "./GymAdminProducts";
+export { default as GymAdminPOS } from "./GymAdminPOS";
+export { default as EmbedTimetable } from "./embed/EmbedTimetable";
+export { default as EmbedSignup } from "./embed/EmbedSignup";
