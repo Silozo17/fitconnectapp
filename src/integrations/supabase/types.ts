@@ -5582,6 +5582,74 @@ export type Database = {
           },
         ]
       }
+      gym_announcements: {
+        Row: {
+          author_name: string | null
+          category: string | null
+          content: string
+          created_at: string
+          excerpt: string | null
+          featured_image_url: string | null
+          gym_id: string
+          id: string
+          is_published: boolean | null
+          meta_description: string | null
+          meta_title: string | null
+          published_at: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          views_count: number | null
+        }
+        Insert: {
+          author_name?: string | null
+          category?: string | null
+          content: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
+          gym_id: string
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          views_count?: number | null
+        }
+        Update: {
+          author_name?: string | null
+          category?: string | null
+          content?: string
+          created_at?: string
+          excerpt?: string | null
+          featured_image_url?: string | null
+          gym_id?: string
+          id?: string
+          is_published?: boolean | null
+          meta_description?: string | null
+          meta_title?: string | null
+          published_at?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_announcements_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_check_ins: {
         Row: {
           check_in_method: string
@@ -6094,6 +6162,107 @@ export type Database = {
             columns: ["member_id"]
             isOneToOne: false
             referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_featured_trainers: {
+        Row: {
+          bio: string | null
+          certifications: string[] | null
+          created_at: string
+          display_order: number | null
+          gym_id: string
+          id: string
+          is_active: boolean | null
+          name: string
+          photo_url: string | null
+          specialties: string[] | null
+          staff_id: string | null
+          title: string | null
+        }
+        Insert: {
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string
+          display_order?: number | null
+          gym_id: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          photo_url?: string | null
+          specialties?: string[] | null
+          staff_id?: string | null
+          title?: string | null
+        }
+        Update: {
+          bio?: string | null
+          certifications?: string[] | null
+          created_at?: string
+          display_order?: number | null
+          gym_id?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          photo_url?: string | null
+          specialties?: string[] | null
+          staff_id?: string | null
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_featured_trainers_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_featured_trainers_staff_id_fkey"
+            columns: ["staff_id"]
+            isOneToOne: false
+            referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_gallery_images: {
+        Row: {
+          alt_text: string | null
+          caption: string | null
+          created_at: string
+          display_order: number | null
+          gym_id: string
+          id: string
+          image_url: string
+          is_featured: boolean | null
+        }
+        Insert: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          display_order?: number | null
+          gym_id: string
+          id?: string
+          image_url: string
+          is_featured?: boolean | null
+        }
+        Update: {
+          alt_text?: string | null
+          caption?: string | null
+          created_at?: string
+          display_order?: number | null
+          gym_id?: string
+          id?: string
+          image_url?: string
+          is_featured?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_gallery_images_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -6756,6 +6925,57 @@ export type Database = {
           },
         ]
       }
+      gym_opening_hours: {
+        Row: {
+          close_time: string | null
+          created_at: string
+          day_of_week: number
+          gym_id: string
+          id: string
+          is_closed: boolean | null
+          location_id: string | null
+          open_time: string | null
+          special_note: string | null
+        }
+        Insert: {
+          close_time?: string | null
+          created_at?: string
+          day_of_week: number
+          gym_id: string
+          id?: string
+          is_closed?: boolean | null
+          location_id?: string | null
+          open_time?: string | null
+          special_note?: string | null
+        }
+        Update: {
+          close_time?: string | null
+          created_at?: string
+          day_of_week?: number
+          gym_id?: string
+          id?: string
+          is_closed?: boolean | null
+          location_id?: string | null
+          open_time?: string | null
+          special_note?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_opening_hours_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_opening_hours_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_payments: {
         Row: {
           amount: number
@@ -7098,6 +7318,41 @@ export type Database = {
           },
         ]
       }
+      gym_social_links: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          gym_id: string
+          id: string
+          platform: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          gym_id: string
+          id?: string
+          platform: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          gym_id?: string
+          id?: string
+          platform?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_social_links_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_staff: {
         Row: {
           accepted_at: string | null
@@ -7184,6 +7439,164 @@ export type Database = {
             foreignKeyName: "gym_staff_gym_id_fkey"
             columns: ["gym_id"]
             isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_testimonials: {
+        Row: {
+          author_image_url: string | null
+          author_name: string
+          author_role: string | null
+          content: string
+          created_at: string
+          display_order: number | null
+          gym_id: string
+          id: string
+          is_approved: boolean | null
+          is_featured: boolean | null
+          member_id: string | null
+          rating: number | null
+        }
+        Insert: {
+          author_image_url?: string | null
+          author_name: string
+          author_role?: string | null
+          content: string
+          created_at?: string
+          display_order?: number | null
+          gym_id: string
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          member_id?: string | null
+          rating?: number | null
+        }
+        Update: {
+          author_image_url?: string | null
+          author_name?: string
+          author_role?: string | null
+          content?: string
+          created_at?: string
+          display_order?: number | null
+          gym_id?: string
+          id?: string
+          is_approved?: boolean | null
+          is_featured?: boolean | null
+          member_id?: string | null
+          rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_testimonials_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_testimonials_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gym_website_settings: {
+        Row: {
+          about_content: string | null
+          about_title: string | null
+          canonical_url: string | null
+          classes_enabled: boolean | null
+          contact_enabled: boolean | null
+          created_at: string
+          custom_css: string | null
+          facebook_pixel_id: string | null
+          features_enabled: boolean | null
+          features_title: string | null
+          gallery_enabled: boolean | null
+          google_analytics_id: string | null
+          gym_id: string
+          hero_image_url: string | null
+          hero_subtitle: string | null
+          hero_title: string | null
+          id: string
+          meta_description: string | null
+          meta_title: string | null
+          mission_statement: string | null
+          og_image_url: string | null
+          pricing_enabled: boolean | null
+          secondary_color: string | null
+          testimonials_enabled: boolean | null
+          theme_color: string | null
+          trainers_enabled: boolean | null
+          updated_at: string
+        }
+        Insert: {
+          about_content?: string | null
+          about_title?: string | null
+          canonical_url?: string | null
+          classes_enabled?: boolean | null
+          contact_enabled?: boolean | null
+          created_at?: string
+          custom_css?: string | null
+          facebook_pixel_id?: string | null
+          features_enabled?: boolean | null
+          features_title?: string | null
+          gallery_enabled?: boolean | null
+          google_analytics_id?: string | null
+          gym_id: string
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          mission_statement?: string | null
+          og_image_url?: string | null
+          pricing_enabled?: boolean | null
+          secondary_color?: string | null
+          testimonials_enabled?: boolean | null
+          theme_color?: string | null
+          trainers_enabled?: boolean | null
+          updated_at?: string
+        }
+        Update: {
+          about_content?: string | null
+          about_title?: string | null
+          canonical_url?: string | null
+          classes_enabled?: boolean | null
+          contact_enabled?: boolean | null
+          created_at?: string
+          custom_css?: string | null
+          facebook_pixel_id?: string | null
+          features_enabled?: boolean | null
+          features_title?: string | null
+          gallery_enabled?: boolean | null
+          google_analytics_id?: string | null
+          gym_id?: string
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string | null
+          id?: string
+          meta_description?: string | null
+          meta_title?: string | null
+          mission_statement?: string | null
+          og_image_url?: string | null
+          pricing_enabled?: boolean | null
+          secondary_color?: string | null
+          testimonials_enabled?: boolean | null
+          theme_color?: string | null
+          trainers_enabled?: boolean | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_website_settings_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: true
             referencedRelation: "gym_profiles"
             referencedColumns: ["id"]
           },
