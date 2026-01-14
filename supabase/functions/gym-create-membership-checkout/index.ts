@@ -41,8 +41,8 @@ serve(async (req) => {
     if (!user?.email) throw new Error("User not authenticated or email not available");
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    // Parse request body
-    const { gymId, planId, successUrl, cancelUrl } = await req.json();
+    // Parse request body - locationId is now required for checkout
+    const { gymId, planId, locationId, successUrl, cancelUrl } = await req.json();
     if (!gymId || !planId || !successUrl || !cancelUrl) {
       throw new Error("Missing required parameters");
     }
@@ -56,8 +56,6 @@ serve(async (req) => {
           id,
           name,
           slug,
-          stripe_account_id,
-          stripe_account_status,
           platform_fee_percentage
         )
       `)
@@ -70,11 +68,66 @@ serve(async (req) => {
     if (!plan) throw new Error("Membership plan not found");
 
     const gym = plan.gym;
-    if (!gym.stripe_account_id || gym.stripe_account_status !== "active") {
-      throw new Error("Gym has not completed Stripe Connect setup");
+    logStep("Plan found", { planId: plan.id, planName: plan.name, gymId: gym.id });
+
+    // Get Stripe account from the location
+    let stripeAccountId: string | null = null;
+    let locationName: string | null = null;
+
+    if (locationId) {
+      // Get Stripe account from specific location
+      const { data: location, error: locationError } = await supabaseClient
+        .from("gym_locations")
+        .select("id, name, stripe_account_id, stripe_account_status, stripe_onboarding_complete")
+        .eq("id", locationId)
+        .eq("gym_id", gymId)
+        .eq("is_active", true)
+        .single();
+
+      if (locationError) throw new Error(`Failed to fetch location: ${locationError.message}`);
+      if (!location) throw new Error("Location not found");
+      if (!location.stripe_account_id || !location.stripe_onboarding_complete) {
+        throw new Error("This location has not completed Stripe Connect setup");
+      }
+
+      stripeAccountId = location.stripe_account_id;
+      locationName = location.name;
+      logStep("Using location Stripe account", { locationId: location.id, locationName });
+    } else {
+      // Fallback: Get primary location or any location with Stripe setup
+      const { data: locations, error: locationsError } = await supabaseClient
+        .from("gym_locations")
+        .select("id, name, stripe_account_id, stripe_account_status, stripe_onboarding_complete, is_primary")
+        .eq("gym_id", gymId)
+        .eq("is_active", true)
+        .eq("stripe_onboarding_complete", true)
+        .order("is_primary", { ascending: false })
+        .limit(1);
+
+      if (locationsError) throw new Error(`Failed to fetch locations: ${locationsError.message}`);
+      
+      if (locations && locations.length > 0) {
+        stripeAccountId = locations[0].stripe_account_id;
+        locationName = locations[0].name;
+        logStep("Using primary location Stripe account", { locationId: locations[0].id, locationName });
+      } else {
+        // Last fallback: Check gym_profiles for legacy Stripe setup
+        const { data: gymProfile } = await supabaseClient
+          .from("gym_profiles")
+          .select("stripe_account_id, stripe_account_status")
+          .eq("id", gymId)
+          .single();
+
+        if (gymProfile?.stripe_account_id && gymProfile.stripe_account_status === "active") {
+          stripeAccountId = gymProfile.stripe_account_id;
+          logStep("Using legacy gym profile Stripe account");
+        }
+      }
     }
 
-    logStep("Plan found", { planId: plan.id, planName: plan.name, gymId: gym.id });
+    if (!stripeAccountId) {
+      throw new Error("No active Stripe Connect account found for this gym. Please complete payment setup first.");
+    }
 
     // Get or create gym member record
     let { data: member, error: memberError } = await supabaseClient
@@ -139,11 +192,15 @@ serve(async (req) => {
       quantity: number;
     }
 
+    const productName = locationName 
+      ? `${plan.name} - ${locationName}`
+      : plan.name;
+
     const lineItems: LineItem[] = [{
       price_data: {
         currency: plan.currency?.toLowerCase() || "gbp",
         product_data: {
-          name: plan.name,
+          name: productName,
           description: plan.description || undefined,
         },
         unit_amount: plan.price_amount,
@@ -168,6 +225,7 @@ serve(async (req) => {
         member_id: string;
         plan_id: string;
         user_id: string;
+        location_id?: string;
       };
       subscription_data?: {
         application_fee_amount?: number;
@@ -178,6 +236,7 @@ serve(async (req) => {
           gym_id: string;
           member_id: string;
           plan_id: string;
+          location_id?: string;
         };
       };
       payment_intent_data?: {
@@ -200,6 +259,7 @@ serve(async (req) => {
         member_id: member.id,
         plan_id: planId,
         user_id: user.id,
+        location_id: locationId || undefined,
       },
     };
 
@@ -211,6 +271,7 @@ serve(async (req) => {
           gym_id: gymId,
           member_id: member.id,
           plan_id: planId,
+          location_id: locationId || undefined,
         },
       };
     } else {
@@ -218,13 +279,13 @@ serve(async (req) => {
       sessionParams.payment_intent_data = {
         application_fee_amount: PLATFORM_FEE_AMOUNT, // £1 flat fee
         transfer_data: {
-          destination: gym.stripe_account_id,
+          destination: stripeAccountId,
         },
       };
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams, {
-      stripeAccount: isSubscription ? gym.stripe_account_id : undefined,
+      stripeAccount: isSubscription ? stripeAccountId : undefined,
     });
 
     logStep("Checkout session created", { sessionId: session.id, mode });

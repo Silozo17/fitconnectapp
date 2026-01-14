@@ -38,9 +38,10 @@ serve(async (req) => {
     const user = userData.user;
     if (!user) throw new Error("User not authenticated");
 
-    const { gymId, planId } = await req.json();
+    // Now accepts optional locationId for per-location product sync
+    const { gymId, planId, locationId } = await req.json();
     if (!gymId || !planId) throw new Error("Missing gymId or planId");
-    logStep("Request received", { gymId, planId });
+    logStep("Request received", { gymId, planId, locationId });
 
     // Check if user is staff at this gym
     const { data: staffRecord } = await supabaseClient
@@ -54,18 +55,60 @@ serve(async (req) => {
       throw new Error("Unauthorized - must be gym owner or manager");
     }
 
-    // Get gym profile with Stripe account
-    const { data: gym, error: gymError } = await supabaseClient
-      .from("gym_profiles")
-      .select("id, name, stripe_account_id, stripe_onboarding_complete, currency")
-      .eq("id", gymId)
-      .single();
+    // Get Stripe account - prioritize location, then gym profile
+    let stripeAccountId: string | null = null;
+    let currency = "gbp";
 
-    if (gymError || !gym) throw new Error("Gym not found");
-    if (!gym.stripe_account_id || !gym.stripe_onboarding_complete) {
-      throw new Error("Gym must complete Stripe Connect setup first");
+    if (locationId) {
+      // Get Stripe account from specific location
+      const { data: location, error: locationError } = await supabaseClient
+        .from("gym_locations")
+        .select("id, name, stripe_account_id, stripe_onboarding_complete, currency")
+        .eq("id", locationId)
+        .eq("gym_id", gymId)
+        .single();
+
+      if (locationError) throw new Error(`Location not found: ${locationError.message}`);
+      if (!location.stripe_account_id || !location.stripe_onboarding_complete) {
+        throw new Error("Location must complete Stripe Connect setup first");
+      }
+      
+      stripeAccountId = location.stripe_account_id;
+      currency = location.currency || "gbp";
+      logStep("Using location Stripe account", { locationId: location.id, stripeAccount: stripeAccountId });
+    } else {
+      // Try to get from primary location first
+      const { data: locations } = await supabaseClient
+        .from("gym_locations")
+        .select("id, name, stripe_account_id, stripe_onboarding_complete, currency, is_primary")
+        .eq("gym_id", gymId)
+        .eq("is_active", true)
+        .eq("stripe_onboarding_complete", true)
+        .order("is_primary", { ascending: false })
+        .limit(1);
+
+      if (locations && locations.length > 0) {
+        stripeAccountId = locations[0].stripe_account_id;
+        currency = locations[0].currency || "gbp";
+        logStep("Using primary location Stripe account", { locationId: locations[0].id, stripeAccount: stripeAccountId });
+      } else {
+        // Fallback to gym profile for legacy setups
+        const { data: gym, error: gymError } = await supabaseClient
+          .from("gym_profiles")
+          .select("id, name, stripe_account_id, stripe_onboarding_complete, currency")
+          .eq("id", gymId)
+          .single();
+
+        if (gymError || !gym) throw new Error("Gym not found");
+        if (!gym.stripe_account_id || !gym.stripe_onboarding_complete) {
+          throw new Error("Gym must complete Stripe Connect setup first");
+        }
+        
+        stripeAccountId = gym.stripe_account_id;
+        currency = gym.currency || "gbp";
+        logStep("Using legacy gym Stripe account", { gymId: gym.id, stripeAccount: stripeAccountId });
+      }
     }
-    logStep("Gym found", { gymId: gym.id, stripeAccount: gym.stripe_account_id });
 
     // Get the membership plan
     const { data: plan, error: planError } = await supabaseClient
@@ -96,6 +139,7 @@ serve(async (req) => {
       gym_id: gymId,
       plan_id: planId,
       plan_type: plan.plan_type,
+      location_id: locationId || "all",
     };
 
     let stripeProductId = plan.stripe_product_id;
@@ -112,7 +156,7 @@ serve(async (req) => {
           description: plan.description || undefined,
           metadata: productMetadata,
         },
-        { stripeAccount: gym.stripe_account_id }
+        { stripeAccount: stripeAccountId }
       );
     } else {
       // Create new product
@@ -123,7 +167,7 @@ serve(async (req) => {
           description: plan.description || undefined,
           metadata: productMetadata,
         },
-        { stripeAccount: gym.stripe_account_id }
+        { stripeAccount: stripeAccountId }
       );
       stripeProductId = product.id;
       logStep("Product created", { productId: stripeProductId });
@@ -139,10 +183,11 @@ serve(async (req) => {
       const priceData: Stripe.PriceCreateParams = {
         product: stripeProductId,
         unit_amount: plan.price_amount,
-        currency: plan.currency.toLowerCase(),
+        currency: (plan.currency || currency).toLowerCase(),
         metadata: {
           plan_id: planId,
           gym_id: gymId,
+          location_id: locationId || "all",
         },
       };
 
@@ -156,7 +201,7 @@ serve(async (req) => {
 
       const price = await stripe.prices.create(
         priceData,
-        { stripeAccount: gym.stripe_account_id }
+        { stripeAccount: stripeAccountId }
       );
       stripePriceId = price.id;
       logStep("Price created", { priceId: stripePriceId });
