@@ -99,7 +99,7 @@ export function ClassFormDialog({
       class_schedule_type: "one_off",
       start_time: format(defaultDate, "yyyy-MM-dd'T'HH:mm"),
       end_time: format(new Date(defaultDate.getTime() + 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"),
-      instructor_id: "",
+      instructor_id: "none",
       capacity: 20,
       waitlist_capacity: 5,
       room: "",
@@ -116,7 +116,7 @@ export function ClassFormDialog({
         class_schedule_type: classToEdit.is_recurring ? "recurring" : "one_off",
         start_time: format(new Date(classToEdit.start_time), "yyyy-MM-dd'T'HH:mm"),
         end_time: format(new Date(classToEdit.end_time), "yyyy-MM-dd'T'HH:mm"),
-        instructor_id: classToEdit.instructor_id || "",
+        instructor_id: classToEdit.instructor_id || "none",
         capacity: classToEdit.capacity,
         waitlist_capacity: classToEdit.waitlist_capacity,
         room: classToEdit.room || "",
@@ -129,7 +129,7 @@ export function ClassFormDialog({
         class_schedule_type: "one_off",
         start_time: format(defaultDate, "yyyy-MM-dd'T'HH:mm"),
         end_time: format(new Date(defaultDate.getTime() + 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"),
-        instructor_id: "",
+        instructor_id: "none",
         capacity: 20,
         waitlist_capacity: 5,
         room: "",
@@ -170,7 +170,7 @@ export function ClassFormDialog({
         class_type_id: values.class_type_id,
         start_time: new Date(values.start_time).toISOString(),
         end_time: new Date(values.end_time).toISOString(),
-        instructor_id: values.instructor_id || null,
+        instructor_id: values.instructor_id === "none" ? null : values.instructor_id || null,
         location_id: values.location_id || null,
         capacity: values.capacity,
         waitlist_capacity: values.waitlist_capacity,
@@ -430,7 +430,7 @@ export function ClassFormDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">No instructor assigned</SelectItem>
+                      <SelectItem value="none">No instructor assigned</SelectItem>
                       {staff?.filter(s => s.can_teach_classes)?.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.display_name || member.email}

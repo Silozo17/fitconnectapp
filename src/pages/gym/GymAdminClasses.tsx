@@ -16,6 +16,8 @@ import {
   MoreHorizontal,
   Edit,
   Trash2,
+  Info,
+  ArrowRight,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -121,6 +123,25 @@ export default function GymAdminClasses() {
           Add Class Type
         </Button>
       </div>
+
+      {/* Info Card - Explaining Class Types */}
+      <Card className="bg-muted/50 border-dashed">
+        <CardContent className="flex flex-col sm:flex-row items-start sm:items-center gap-3 py-4">
+          <Info className="h-5 w-5 text-primary shrink-0 mt-0.5 sm:mt-0" />
+          <div className="flex-1">
+            <p className="text-sm font-medium">Class Types are templates</p>
+            <p className="text-xs text-muted-foreground">
+              Create class types here, then go to Schedule to add actual class sessions.
+            </p>
+          </div>
+          <Button variant="outline" size="sm" asChild className="shrink-0">
+            <Link to="../schedule">
+              Go to Schedule
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Link>
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Class Types Grid */}
       {isLoading ? (
