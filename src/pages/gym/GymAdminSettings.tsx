@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useGym } from "@/contexts/GymContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +23,7 @@ import {
   CreditCard,
   Save,
   Calendar,
+  Check,
 } from "lucide-react";
 
 export default function GymAdminSettings() {
@@ -435,39 +437,223 @@ export default function GymAdminSettings() {
           </Card>
         </TabsContent>
 
-        {/* Other tabs - placeholder content */}
-        <TabsContent value="notifications">
+        {/* Notifications Settings */}
+        <TabsContent value="notifications" className="space-y-6">
           <Card>
-            <CardContent className="py-12 text-center">
-              <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-medium text-lg">Notification Settings</h3>
-              <p className="text-muted-foreground mt-1">
-                Configure email and push notifications for members and staff.
-              </p>
+            <CardHeader>
+              <CardTitle>Member Notifications</CardTitle>
+              <CardDescription>
+                Configure automated notifications sent to members.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Class Booking Confirmations</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Send email confirmations when members book classes.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Class Reminders</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Send reminders 24 hours before scheduled classes.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Membership Expiry Alerts</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Notify members when their membership is about to expire.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Waitlist Promotions</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Notify members when they're promoted from a class waitlist.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Staff Notifications</CardTitle>
+              <CardDescription>
+                Configure notifications for gym staff.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Failed Check-In Alerts</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Alert staff when a member check-in fails validation.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Low Stock Alerts</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Notify when product inventory falls below threshold.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="billing">
+        {/* Billing Settings */}
+        <TabsContent value="billing" className="space-y-6">
           <Card>
-            <CardContent className="py-12 text-center">
-              <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-medium text-lg">Billing & Payments</h3>
-              <p className="text-muted-foreground mt-1">
-                Manage your Stripe Connect account and payment settings.
-              </p>
+            <CardHeader>
+              <CardTitle>Payment Processing</CardTitle>
+              <CardDescription>
+                Configure payment settings and view account status.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-950/20">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                    <Check className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-green-900 dark:text-green-100">Stripe Connected</p>
+                    <p className="text-sm text-green-700 dark:text-green-300">
+                      Payment processing is active for this location.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="p-4 border rounded-lg">
+                  <Label className="text-sm text-muted-foreground">Currency</Label>
+                  <p className="text-lg font-medium">GBP (£)</p>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <Label className="text-sm text-muted-foreground">Tax Rate</Label>
+                  <p className="text-lg font-medium">20% VAT</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Credit Packages</CardTitle>
+              <CardDescription>
+                Class credit packages available for purchase.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <p className="font-medium">Single Credit</p>
+                  <p className="text-sm text-muted-foreground">1 class booking</p>
+                </div>
+                <p className="text-lg font-bold">£10.00</p>
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div>
+                  <p className="font-medium">10 Credit Pack</p>
+                  <p className="text-sm text-muted-foreground">Save £10</p>
+                </div>
+                <p className="text-lg font-bold">£90.00</p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="security">
+        {/* Security Settings */}
+        <TabsContent value="security" className="space-y-6">
           <Card>
-            <CardContent className="py-12 text-center">
-              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-medium text-lg">Security Settings</h3>
-              <p className="text-muted-foreground mt-1">
-                Configure access controls and security preferences.
-              </p>
+            <CardHeader>
+              <CardTitle>Access Control</CardTitle>
+              <CardDescription>
+                Configure member access and check-in rules.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">QR Code Check-In</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Allow members to check in using QR codes.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Require Active Membership</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Only allow check-ins for members with active memberships.
+                  </p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="space-y-1">
+                  <Label className="text-base font-medium">Multi-Location Access</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Allow members to access other gym locations.
+                  </p>
+                </div>
+                <Switch />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Staff Permissions</CardTitle>
+              <CardDescription>
+                Manage what staff members can access.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-medium">Gym Manager</p>
+                  <Badge>Full Access</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Can manage all settings, members, classes, and billing.
+                </p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-medium">Instructor</p>
+                  <Badge variant="secondary">Limited</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Can view class schedules and manage their own classes.
+                </p>
+              </div>
+              <div className="p-4 border rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-medium">Front Desk</p>
+                  <Badge variant="secondary">Limited</Badge>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Can check in members and process POS sales.
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

@@ -36,6 +36,7 @@ import {
   Check,
 } from "lucide-react";
 import { toast } from "sonner";
+import { POSCardPayment } from "@/components/gym/pos/POSCardPayment";
 
 interface CartItem extends ProductSaleItem {
   id: string;
@@ -54,6 +55,7 @@ export default function GymAdminPOS() {
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("card");
   const [showCheckout, setShowCheckout] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showCardPayment, setShowCardPayment] = useState(false);
 
   const addToCart = (product: typeof products[0]) => {
     const existing = cart.find((item) => item.product_id === product.id);
@@ -107,6 +109,13 @@ export default function GymAdminPOS() {
       return;
     }
 
+    // For card payments, show Stripe payment dialog
+    if (paymentMethod === "card") {
+      setShowCardPayment(true);
+      return;
+    }
+
+    // For cash payments, process directly
     try {
       await createSale.mutateAsync({
         member_id: selectedMemberId || undefined,
@@ -122,6 +131,14 @@ export default function GymAdminPOS() {
     } catch (error) {
       // Error handled by mutation
     }
+  };
+
+  const handleCardPaymentSuccess = () => {
+    setShowCardPayment(false);
+    setCart([]);
+    setSelectedMemberId("");
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 2000);
   };
 
   const filteredProducts = products.filter((p) =>
@@ -292,6 +309,24 @@ export default function GymAdminPOS() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Stripe Card Payment Dialog */}
+      {gym && (
+        <POSCardPayment
+          isOpen={showCardPayment}
+          onClose={() => setShowCardPayment(false)}
+          onSuccess={handleCardPaymentSuccess}
+          gymId={gym.id}
+          items={cart.map((item) => ({
+            productId: item.product_id,
+            name: item.product_name,
+            price: item.unit_price,
+            quantity: item.quantity,
+          }))}
+          memberId={selectedMemberId || undefined}
+          total={total}
+        />
+      )}
 
       {/* Success Dialog */}
       <Dialog open={showSuccess} onOpenChange={setShowSuccess}>
