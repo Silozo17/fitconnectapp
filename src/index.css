@@ -296,8 +296,8 @@
     --accent: 280 85% 60%;
     --accent-foreground: 0 0% 100%;
     
-    --border: 240 12% 18%;
-    --input: 240 12% 18%;
+    --border: 240 12% 10%;
+    --input: 240 12% 15%;
     --ring: 75 100% 50%;
 
     --sidebar-background: 240 15% 4%;
@@ -306,7 +306,7 @@
     --sidebar-primary-foreground: 240 15% 5%;
     --sidebar-accent: 240 12% 12%;
     --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 240 12% 18%;
+    --sidebar-border: 240 12% 8%;
     --sidebar-ring: 75 100% 50%;
   }
 

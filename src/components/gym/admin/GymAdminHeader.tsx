@@ -38,7 +38,7 @@ export function GymAdminHeader({ onMenuToggle }: GymAdminHeaderProps) {
   const needsStripeSetup = !gym?.stripe_account_id || stripeStatus === "pending";
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 sm:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border/20 bg-background px-4 sm:px-6">
       {/* Mobile Menu Toggle */}
       <Button
         variant="ghost"
