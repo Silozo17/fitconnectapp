@@ -29,3 +29,4 @@ export { default as EmbedTimetable } from "./embed/EmbedTimetable";
 export { default as EmbedSignup } from "./embed/EmbedSignup";
 export { default as GymAdminAddMember } from "./GymAdminAddMember";
 export { default as GymAdminEditMember } from "./GymAdminEditMember";
+export { default as GymSignup } from "./GymSignup";
