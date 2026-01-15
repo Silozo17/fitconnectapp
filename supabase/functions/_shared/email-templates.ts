@@ -51,10 +51,11 @@ export const EMAIL_CONFIG = {
   social: {
     facebook: 'https://facebook.com/FitConnectUK',
     instagram: 'https://instagram.com/get_fit_connect',
-    x: 'https://x.com/FitConnectUK',
-    youtube: 'https://www.youtube.com/@GetFitConnect',
     tiktok: 'https://tiktok.com/@getfitconnect',
+    x: 'https://x.com/FitConnectUK',
+    threads: 'https://www.threads.net/@get_fit_connect',
     linkedin: 'https://www.linkedin.com/company/getfitconnect',
+    youtube: 'https://www.youtube.com/@GetFitConnect',
   },
 };
 
@@ -290,17 +291,19 @@ export function baseEmailTemplate(content: string, previewText?: string): string
                     <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 16px;">
                       <tr>
                         <td align="center">
-                          <a href="${social.instagram}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">Instagram</a>
-                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
                           <a href="${social.facebook}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">Facebook</a>
                           <span class="social-separator" style="color: ${colors.textDark};">•</span>
-                          <a href="${social.x}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">X</a>
-                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
-                          <a href="${social.youtube}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">YouTube</a>
+                          <a href="${social.instagram}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">Instagram</a>
                           <span class="social-separator" style="color: ${colors.textDark};">•</span>
                           <a href="${social.tiktok}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">TikTok</a>
                           <span class="social-separator" style="color: ${colors.textDark};">•</span>
+                          <a href="${social.x}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">X</a>
+                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
+                          <a href="${social.threads}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">Threads</a>
+                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
                           <a href="${social.linkedin}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">LinkedIn</a>
+                          <span class="social-separator" style="color: ${colors.textDark};">•</span>
+                          <a href="${social.youtube}" class="social-link" style="display: inline-block; margin: 0 6px; color: ${colors.textMuted}; font-size: 13px;">YouTube</a>
                         </td>
                       </tr>
                     </table>

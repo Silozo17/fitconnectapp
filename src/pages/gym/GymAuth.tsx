@@ -155,6 +155,54 @@ export default function GymAuth() {
     
     setIsLoadingGyms(true);
     try {
+      // FIRST: Check for pending invitations and accept them automatically
+      const userEmail = user.email;
+      if (userEmail) {
+        const { data: pendingInvites } = await supabase
+          .from("gym_staff_invitations")
+          .select("*, gym_profiles:gym_id(name)")
+          .eq("email", userEmail)
+          .eq("status", "pending");
+
+        // Process each pending invitation
+        if (pendingInvites && pendingInvites.length > 0) {
+          for (const invite of pendingInvites) {
+            // Create gym_staff record
+            const { error: staffCreateError } = await supabase
+              .from("gym_staff")
+              .insert([{
+                gym_id: invite.gym_id,
+                user_id: user.id,
+                email: userEmail,
+                display_name: `${invite.first_name || ""} ${invite.last_name || ""}`.trim() || userEmail,
+                role: invite.role as "area_manager" | "coach" | "manager" | "marketing" | "owner" | "staff",
+                status: "active" as const,
+                assigned_location_ids: invite.assigned_location_ids || [],
+                disciplines: invite.disciplines || [],
+                multi_location_access: !invite.assigned_location_ids || invite.assigned_location_ids.length === 0,
+              }]);
+
+            if (staffCreateError) {
+              console.error("Error creating gym_staff record:", staffCreateError);
+              // Continue even if one fails - might already exist
+            } else {
+              // Update invitation status to accepted
+              await supabase
+                .from("gym_staff_invitations")
+                .update({ 
+                  status: "accepted", 
+                  accepted_at: new Date().toISOString() 
+                })
+                .eq("id", invite.id);
+              
+              // Get gym name from the joined data
+              const gymName = (invite as any).gym_profiles?.name || "the gym";
+              toast.success(`Welcome to ${gymName}!`);
+            }
+          }
+        }
+      }
+
       // Get gyms where user is owner
       const { data: ownedGyms, error: ownedError } = await supabase
         .from("gym_profiles")
