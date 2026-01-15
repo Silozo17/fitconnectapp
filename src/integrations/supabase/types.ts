@@ -7184,6 +7184,7 @@ export type Database = {
           is_primary: boolean | null
           location_lat: number | null
           location_lng: number | null
+          member_number_prefix: string | null
           name: string
           opening_hours: Json | null
           phone: string | null
@@ -7212,6 +7213,7 @@ export type Database = {
           is_primary?: boolean | null
           location_lat?: number | null
           location_lng?: number | null
+          member_number_prefix?: string | null
           name: string
           opening_hours?: Json | null
           phone?: string | null
@@ -7240,6 +7242,7 @@ export type Database = {
           is_primary?: boolean | null
           location_lat?: number | null
           location_lng?: number | null
+          member_number_prefix?: string | null
           name?: string
           opening_hours?: Json | null
           phone?: string | null
