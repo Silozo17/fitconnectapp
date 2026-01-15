@@ -193,11 +193,16 @@ export function ClassFormDialog({
       const isRecurring = values.class_schedule_type === "recurring";
       
       // Build recurring pattern if needed
+      // For "never" end type, set a far-future date (1 year) to ensure generation works
+      const recurringEndDate = recurringConfig.endType === "never"
+        ? new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        : recurringConfig.endDate;
+
       const recurringPattern = isRecurring ? {
         frequency: recurringConfig.frequency,
         daysOfWeek: recurringConfig.daysOfWeek,
         endType: recurringConfig.endType,
-        endDate: recurringConfig.endDate,
+        endDate: recurringEndDate,
         occurrences: recurringConfig.occurrences,
       } : null;
 
@@ -269,12 +274,14 @@ export function ClassFormDialog({
           setIsGenerating(true);
           try {
             const { data: session } = await supabase.auth.getSession();
+            // Use larger window for "never" end type (52 weeks = 1 year)
+            const weeksAhead = recurringConfig.endType === "never" ? 52 : 12;
             const { data, error } = await supabase.functions.invoke(
               "gym-generate-recurring-classes",
               {
                 body: {
                   templateClassId: result.id,
-                  weeksAhead: 8,
+                  weeksAhead,
                 },
                 headers: {
                   Authorization: `Bearer ${session.session?.access_token}`,
