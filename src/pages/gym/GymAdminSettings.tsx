@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { useGym, useIsOwnerOrAreaManager } from "@/contexts/GymContext";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,10 +43,14 @@ import {
 
 export default function GymAdminSettings() {
   const { gymId } = useParams<{ gymId: string }>();
+  const [searchParams] = useSearchParams();
   const { gym, refetch, staffRecord, userRole } = useGym();
   const isOwnerOrAreaManager = useIsOwnerOrAreaManager();
   const { data: locations, isLoading: isLoadingLocations } = useGymLocations();
   const updateLocation = useUpdateGymLocation();
+  
+  // Determine initial tab from query param
+  const initialTab = searchParams.get("tab") || "general";
   
   const [isSaving, setIsSaving] = useState(false);
   const [isLocationSaving, setIsLocationSaving] = useState(false);
@@ -200,7 +204,7 @@ export default function GymAdminSettings() {
         </div>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-6">
+      <Tabs defaultValue={initialTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:w-auto lg:grid-cols-none lg:flex">
           <TabsTrigger value="general">
             <MapPin className="mr-2 h-4 w-4" />

@@ -168,7 +168,7 @@ interface ClientSidebarProps {
 }
 
 const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen, onNavigating }: ClientSidebarProps) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('client');
   const location = useLocation();
   const navigate = useNavigate();
   const { signOut } = useAuth();

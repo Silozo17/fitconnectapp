@@ -99,7 +99,7 @@ export function OwnerDashboard() {
               <p className="text-sm text-amber-700 dark:text-amber-300">Connect your Stripe account to start accepting payments.</p>
             </div>
             <Button asChild>
-              <Link to={`/gym-admin/${gymId}/billing`}>
+              <Link to={`/gym-admin/${gymId}/settings?tab=billing`}>
                 <CreditCard className="mr-2 h-4 w-4" />
                 Set Up Payments
               </Link>
