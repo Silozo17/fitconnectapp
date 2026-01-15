@@ -25,37 +25,76 @@ serve(async (req) => {
     );
 
     // Calculate total
-    const totalAmount = items.reduce((sum: number, item: { price: number; quantity: number }) => 
+    const totalAmount = items.reduce((sum: number, item: { price: number; quantity: number; name: string; productId?: string }) => 
       sum + (item.price * item.quantity), 0
     );
 
+    // Helper function to update stock
+    const updateStock = async (productItems: Array<{ productId?: string; quantity: number }>) => {
+      for (const item of productItems) {
+        if (item.productId) {
+          const { data: product } = await supabaseClient
+            .from("gym_products")
+            .select("stock_quantity")
+            .eq("id", item.productId)
+            .single();
+          
+          if (product) {
+            await supabaseClient
+              .from("gym_products")
+              .update({ 
+                stock_quantity: Math.max(0, (product.stock_quantity || 0) - item.quantity) 
+              })
+              .eq("id", item.productId);
+          }
+        }
+      }
+    };
+
+    // Helper function to insert sale items
+    const insertSaleItems = async (saleId: string, saleItems: Array<{ productId?: string; name: string; quantity: number; price: number }>) => {
+      const itemsToInsert = saleItems.map((item) => ({
+        sale_id: saleId,
+        product_id: item.productId || null,
+        product_name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        discount_percent: 0,
+        line_total: item.price * item.quantity,
+      }));
+
+      const { error } = await supabaseClient
+        .from("gym_product_sale_items")
+        .insert(itemsToInsert);
+      
+      if (error) throw error;
+    };
+
     // If cash payment, just record the sale
     if (paymentMethod === "cash") {
-      // Create sale record
+      // Create sale record with correct schema
       const { data: sale, error: saleError } = await supabaseClient
-        .from("gym_pos_sales")
+        .from("gym_product_sales")
         .insert({
           gym_id: gymId,
           member_id: memberId || null,
+          subtotal: totalAmount,
+          discount_amount: 0,
+          tax_amount: 0,
           total_amount: totalAmount,
           payment_method: "cash",
-          payment_status: "completed",
-          items: items,
+          status: "completed",
         })
         .select()
         .single();
 
       if (saleError) throw saleError;
 
-      // Decrement stock for each item
-      for (const item of items) {
-        if (item.productId) {
-          await supabaseClient.rpc("decrement_product_stock", {
-            p_product_id: item.productId,
-            p_quantity: item.quantity
-          });
-        }
-      }
+      // Insert sale items
+      await insertSaleItems(sale.id, items);
+
+      // Update stock for each item
+      await updateStock(items);
 
       return new Response(JSON.stringify({ success: true, sale }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -70,19 +109,24 @@ serve(async (req) => {
 
     // Create a pending sale record
     const { data: sale, error: saleError } = await supabaseClient
-      .from("gym_pos_sales")
+      .from("gym_product_sales")
       .insert({
         gym_id: gymId,
         member_id: memberId || null,
+        subtotal: totalAmount,
+        discount_amount: 0,
+        tax_amount: 0,
         total_amount: totalAmount,
         payment_method: "card",
-        payment_status: "pending",
-        items: items,
+        status: "pending",
       })
       .select()
       .single();
 
     if (saleError) throw saleError;
+
+    // Insert sale items immediately
+    await insertSaleItems(sale.id, items);
 
     // Create payment intent
     const paymentIntent = await stripe.paymentIntents.create({
@@ -96,10 +140,10 @@ serve(async (req) => {
       },
     });
 
-    // Update sale with payment intent ID
+    // Update sale with payment reference
     await supabaseClient
-      .from("gym_pos_sales")
-      .update({ stripe_payment_intent_id: paymentIntent.id })
+      .from("gym_product_sales")
+      .update({ payment_reference: paymentIntent.id })
       .eq("id", sale.id);
 
     return new Response(
