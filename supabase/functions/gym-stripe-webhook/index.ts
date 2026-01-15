@@ -241,6 +241,23 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     ? invoice.subscription 
     : invoice.subscription.id;
 
+  // Find membership by subscription ID
+  const { data: membership, error: membershipError } = await supabase
+    .from("gym_memberships")
+    .select(`
+      *,
+      gym_members!inner(id, first_name, email, user_id),
+      gym_profiles!inner(id, name, slug),
+      membership_plans!inner(name)
+    `)
+    .eq("stripe_subscription_id", subscriptionId)
+    .single();
+
+  if (membershipError || !membership) {
+    console.log("[GYM-STRIPE-WEBHOOK] Membership not found for subscription:", subscriptionId);
+    return;
+  }
+
   // Update membership status
   const { error } = await supabase
     .from("gym_memberships")
@@ -251,8 +268,99 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
     console.error("[GYM-STRIPE-WEBHOOK] Error updating membership status:", error);
   }
 
+  // Record failed payment
+  await supabase
+    .from("gym_payments")
+    .insert({
+      gym_id: membership.gym_id,
+      member_id: membership.member_id,
+      amount: (invoice.amount_due || 0) / 100,
+      currency: invoice.currency || "gbp",
+      payment_type: "membership_renewal",
+      payment_method: "stripe",
+      status: "failed",
+      stripe_payment_intent_id: invoice.payment_intent as string,
+      description: `Failed payment: ${(membership.membership_plans as any)?.name || "Membership"}`,
+    });
+
+  // Create staff notification
+  await supabase
+    .from("gym_staff_notifications")
+    .insert({
+      gym_id: membership.gym_id,
+      type: "payment_failed",
+      title: "Payment Failed",
+      message: `Payment failed for ${(membership.gym_members as any)?.first_name || "Member"}'s membership renewal`,
+      data: {
+        member_id: membership.member_id,
+        subscription_id: subscriptionId,
+        amount: (invoice.amount_due || 0) / 100,
+      },
+    });
+
+  // Send email notification to member
+  const member = membership.gym_members as any;
+  const gym = membership.gym_profiles as any;
+  const plan = membership.membership_plans as any;
+
+  if (member?.email) {
+    try {
+      const resendApiKey = Deno.env.get("RESEND_API_KEY");
+      const siteUrl = Deno.env.get("SITE_URL") || "https://getfitconnect.co.uk";
+
+      if (resendApiKey) {
+        const emailContent = `
+          <h2 style="color: #ffffff; text-align: center; margin-bottom: 24px;">
+            Payment Issue ⚠️
+          </h2>
+          
+          <p style="color: #a0a0a0; text-align: center; margin-bottom: 24px;">
+            Hi ${member.first_name || 'there'},<br/><br/>
+            We couldn't process your payment for your ${plan?.name || 'membership'} at ${gym?.name || 'the gym'}.
+          </p>
+          
+          <div style="background: rgba(255, 100, 100, 0.1); border-radius: 12px; padding: 24px; margin: 24px 0;">
+            <p style="color: #ff6b6b; margin: 0 0 8px 0; font-weight: 600;">What to do:</p>
+            <ul style="color: #a0a0a0; margin: 0; padding-left: 20px;">
+              <li>Check your payment card is valid and has sufficient funds</li>
+              <li>Update your payment details if needed</li>
+              <li>Your membership remains active while we retry</li>
+            </ul>
+          </div>
+          
+          <div style="text-align: center; margin: 32px 0;">
+            <a href="${siteUrl}/club/${gym?.slug}/portal" style="display: inline-block; background: linear-gradient(135deg, #BEFF00 0%, #9acc00 100%); color: #0D0D14; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600;">
+              Update Payment Method
+            </a>
+          </div>
+          
+          <p style="color: #666666; font-size: 14px; text-align: center;">
+            If you need help, please contact the gym directly.
+          </p>
+        `;
+
+        await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendApiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: `${gym?.name || 'FitConnect'} <support@getfitconnect.co.uk>`,
+            to: [member.email],
+            subject: `Payment Issue - ${gym?.name || 'Your Gym'}`,
+            html: emailContent,
+          }),
+        });
+
+        console.log(`[GYM-STRIPE-WEBHOOK] Payment failure email sent to ${member.email}`);
+      }
+    } catch (emailError) {
+      console.error("[GYM-STRIPE-WEBHOOK] Error sending payment failure email:", emailError);
+    }
+  }
+
   console.log(`[GYM-STRIPE-WEBHOOK] Payment failed for subscription: ${subscriptionId}`);
-  // TODO: Send notification to member
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
