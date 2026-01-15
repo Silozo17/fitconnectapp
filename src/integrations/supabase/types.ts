@@ -7837,6 +7837,86 @@ export type Database = {
           },
         ]
       }
+      gym_membership_transfers: {
+        Row: {
+          created_at: string | null
+          from_location_id: string
+          gym_id: string
+          id: string
+          membership_id: string
+          notes: string | null
+          rejection_reason: string | null
+          requested_at: string
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          to_location_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          from_location_id: string
+          gym_id: string
+          id?: string
+          membership_id: string
+          notes?: string | null
+          rejection_reason?: string | null
+          requested_at?: string
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          to_location_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          from_location_id?: string
+          gym_id?: string
+          id?: string
+          membership_id?: string
+          notes?: string | null
+          rejection_reason?: string | null
+          requested_at?: string
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          to_location_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_membership_transfers_from_location_id_fkey"
+            columns: ["from_location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_membership_transfers_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_membership_transfers_membership_id_fkey"
+            columns: ["membership_id"]
+            isOneToOne: false
+            referencedRelation: "gym_memberships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_membership_transfers_to_location_id_fkey"
+            columns: ["to_location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_memberships: {
         Row: {
           cancel_at_period_end: boolean | null
@@ -7854,6 +7934,7 @@ export type Database = {
           expires_at: string | null
           gym_id: string
           id: string
+          location_id: string | null
           member_id: string
           pause_reason: string | null
           pause_until: string | null
@@ -7866,6 +7947,8 @@ export type Database = {
           stripe_customer_id: string | null
           stripe_subscription_id: string | null
           total_pause_days: number | null
+          transferred_at: string | null
+          transferred_from_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -7884,6 +7967,7 @@ export type Database = {
           expires_at?: string | null
           gym_id: string
           id?: string
+          location_id?: string | null
           member_id: string
           pause_reason?: string | null
           pause_until?: string | null
@@ -7896,6 +7980,8 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           total_pause_days?: number | null
+          transferred_at?: string | null
+          transferred_from_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -7914,6 +8000,7 @@ export type Database = {
           expires_at?: string | null
           gym_id?: string
           id?: string
+          location_id?: string | null
           member_id?: string
           pause_reason?: string | null
           pause_until?: string | null
@@ -7926,6 +8013,8 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_subscription_id?: string | null
           total_pause_days?: number | null
+          transferred_at?: string | null
+          transferred_from_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -7934,6 +8023,13 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_memberships_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
             referencedColumns: ["id"]
           },
           {
@@ -7955,6 +8051,13 @@ export type Database = {
             columns: ["signed_up_by"]
             isOneToOne: false
             referencedRelation: "gym_staff"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_memberships_transferred_from_id_fkey"
+            columns: ["transferred_from_id"]
+            isOneToOne: false
+            referencedRelation: "gym_memberships"
             referencedColumns: ["id"]
           },
         ]
@@ -10216,6 +10319,7 @@ export type Database = {
           is_active: boolean | null
           is_featured: boolean | null
           is_visible: boolean | null
+          location_access_type: string | null
           locations_access: string[] | null
           max_classes_per_day: number | null
           max_classes_per_week: number | null
@@ -10250,6 +10354,7 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           is_visible?: boolean | null
+          location_access_type?: string | null
           locations_access?: string[] | null
           max_classes_per_day?: number | null
           max_classes_per_week?: number | null
@@ -10284,6 +10389,7 @@ export type Database = {
           is_active?: boolean | null
           is_featured?: boolean | null
           is_visible?: boolean | null
+          location_access_type?: string | null
           locations_access?: string[] | null
           max_classes_per_day?: number | null
           max_classes_per_week?: number | null

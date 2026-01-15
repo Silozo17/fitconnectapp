@@ -7,6 +7,9 @@ export interface SignupFormData {
   // Step 2: Plan
   planId: string | null;
   
+  // Member's chosen location for single-location plans (stored to gym_memberships.location_id)
+  memberLocationId: string | null;
+  
   // Step 3: Personal Details
   firstName: string;
   lastName: string;
@@ -51,6 +54,7 @@ interface SignupWizardContextType {
 const initialFormData: SignupFormData = {
   locationId: null,
   planId: null,
+  memberLocationId: null,
   firstName: "",
   lastName: "",
   email: "",

@@ -22,7 +22,13 @@ export function LocationStep({ locations, isLoading, onNext }: LocationStepProps
   const { formData, updateFormData } = useSignupWizard();
 
   const handleSelectLocation = (locationId: string) => {
-    updateFormData({ locationId, planId: null }); // Reset plan when location changes
+    // For single-location plans, this becomes the member's permanent location
+    // For all-location plans, this is just for filtering/context
+    updateFormData({ 
+      locationId, 
+      planId: null,
+      memberLocationId: locationId, // Store as member's chosen location
+    });
   };
 
   if (isLoading) {
@@ -47,7 +53,10 @@ export function LocationStep({ locations, isLoading, onNext }: LocationStepProps
 
   // If only one location, auto-select it
   if (locations.length === 1 && !formData.locationId) {
-    updateFormData({ locationId: locations[0].id });
+    updateFormData({ 
+      locationId: locations[0].id,
+      memberLocationId: locations[0].id,
+    });
   }
 
   return (
