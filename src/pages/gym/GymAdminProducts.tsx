@@ -79,6 +79,7 @@ export default function GymAdminProducts() {
     low_stock_threshold: "5",
     is_active: true,
     track_inventory: true,
+    vat_applicable: true,
   });
 
   const resetForm = () => {
@@ -93,6 +94,7 @@ export default function GymAdminProducts() {
       low_stock_threshold: "5",
       is_active: true,
       track_inventory: true,
+      vat_applicable: true,
     });
     setEditingProduct(null);
   };
@@ -111,6 +113,7 @@ export default function GymAdminProducts() {
         low_stock_threshold: product.low_stock_threshold.toString(),
         is_active: product.is_active,
         track_inventory: product.track_inventory,
+        vat_applicable: (product as any).vat_applicable ?? true,
       });
     } else {
       resetForm();
@@ -135,6 +138,7 @@ export default function GymAdminProducts() {
       low_stock_threshold: parseInt(form.low_stock_threshold),
       is_active: form.is_active,
       track_inventory: form.track_inventory,
+      vat_applicable: form.vat_applicable,
       image_url: null,
     };
 
@@ -282,6 +286,13 @@ export default function GymAdminProducts() {
               </div>
 
               <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={form.vat_applicable}
+                    onCheckedChange={(v) => setForm({ ...form, vat_applicable: v })}
+                  />
+                  <Label>VAT Applicable</Label>
+                </div>
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={form.track_inventory}

@@ -7060,6 +7060,7 @@ export type Database = {
       }
       gym_invoices: {
         Row: {
+          apply_vat: boolean | null
           created_at: string
           currency: string
           discount_amount: number
@@ -7077,8 +7078,10 @@ export type Database = {
           tax_amount: number
           total_amount: number
           updated_at: string
+          vat_amount: number | null
         }
         Insert: {
+          apply_vat?: boolean | null
           created_at?: string
           currency?: string
           discount_amount?: number
@@ -7096,8 +7099,10 @@ export type Database = {
           tax_amount?: number
           total_amount?: number
           updated_at?: string
+          vat_amount?: number | null
         }
         Update: {
+          apply_vat?: boolean | null
           created_at?: string
           currency?: string
           discount_amount?: number
@@ -7115,6 +7120,7 @@ export type Database = {
           tax_amount?: number
           total_amount?: number
           updated_at?: string
+          vat_amount?: number | null
         }
         Relationships: [
           {
@@ -8527,6 +8533,7 @@ export type Database = {
           stock_quantity: number | null
           track_inventory: boolean | null
           updated_at: string | null
+          vat_applicable: boolean | null
         }
         Insert: {
           category?: string | null
@@ -8544,6 +8551,7 @@ export type Database = {
           stock_quantity?: number | null
           track_inventory?: boolean | null
           updated_at?: string | null
+          vat_applicable?: boolean | null
         }
         Update: {
           category?: string | null
@@ -8561,6 +8569,7 @@ export type Database = {
           stock_quantity?: number | null
           track_inventory?: boolean | null
           updated_at?: string | null
+          vat_applicable?: boolean | null
         }
         Relationships: [
           {
@@ -9227,11 +9236,13 @@ export type Database = {
           email: string | null
           first_name: string | null
           gym_id: string
+          hierarchy_level: number | null
           id: string
           invited_at: string | null
           is_visible_to_members: boolean | null
           job_title: string | null
           last_name: string | null
+          multi_location_access: boolean | null
           permissions: Json | null
           phone: string | null
           reports_to: string | null
@@ -9254,11 +9265,13 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           gym_id: string
+          hierarchy_level?: number | null
           id?: string
           invited_at?: string | null
           is_visible_to_members?: boolean | null
           job_title?: string | null
           last_name?: string | null
+          multi_location_access?: boolean | null
           permissions?: Json | null
           phone?: string | null
           reports_to?: string | null
@@ -9281,11 +9294,13 @@ export type Database = {
           email?: string | null
           first_name?: string | null
           gym_id?: string
+          hierarchy_level?: number | null
           id?: string
           invited_at?: string | null
           is_visible_to_members?: boolean | null
           job_title?: string | null
           last_name?: string | null
+          multi_location_access?: boolean | null
           permissions?: Json | null
           phone?: string | null
           reports_to?: string | null

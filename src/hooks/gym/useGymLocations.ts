@@ -66,7 +66,7 @@ export function useGymLocations() {
         address_line2: l.address_line_2 || l.address_line2 || null,
         city: l.city,
         state: l.state || l.county || null,
-        postal_code: l.postal_code || null,
+        postal_code: l.postcode || l.postal_code || null,
         country: l.country,
         latitude: l.latitude,
         longitude: l.longitude,
@@ -105,7 +105,7 @@ export function useCreateGymLocation() {
           address_line_2: locationData.address_line2,
           city: locationData.city,
           county: locationData.state,
-          postal_code: locationData.postal_code,
+          postcode: locationData.postal_code,
           country: locationData.country,
           latitude: locationData.latitude,
           longitude: locationData.longitude,
@@ -151,7 +151,7 @@ export function useUpdateGymLocation() {
       if (updates.address_line2 !== undefined) dbUpdates.address_line_2 = updates.address_line2;
       if (updates.city !== undefined) dbUpdates.city = updates.city;
       if (updates.state !== undefined) dbUpdates.county = updates.state;
-      if (updates.postal_code !== undefined) dbUpdates.postal_code = updates.postal_code;
+      if (updates.postal_code !== undefined) dbUpdates.postcode = updates.postal_code;
       if (updates.country !== undefined) dbUpdates.country = updates.country;
       if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
       if (updates.email !== undefined) dbUpdates.email = updates.email;
