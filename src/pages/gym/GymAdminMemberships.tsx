@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MembershipPlanForm } from "@/components/gym/admin/MembershipPlanForm";
+import { ActiveSubscriptionsTable } from "@/components/gym/admin/subscriptions/ActiveSubscriptionsTable";
 
 export default function GymAdminMemberships() {
   const { gymId } = useParams<{ gymId: string }>();
@@ -323,13 +324,7 @@ export default function GymAdminMemberships() {
         </TabsContent>
 
         <TabsContent value="subscriptions">
-          <Card>
-            <CardContent className="py-8 text-center">
-              <p className="text-muted-foreground">
-                Active subscriptions will be displayed here.
-              </p>
-            </CardContent>
-          </Card>
+          <ActiveSubscriptionsTable />
         </TabsContent>
       </Tabs>
     </div>
