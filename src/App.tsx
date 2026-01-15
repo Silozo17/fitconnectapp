@@ -302,6 +302,25 @@ const DocsAppleHealth = lazy(() => import('@/pages/docs/integrations/AppleHealth
 const DocsHealthConnect = lazy(() => import('@/pages/docs/integrations/HealthConnectIntegration'));
 const DocsGarmin = lazy(() => import('@/pages/docs/integrations/GarminIntegration'));
 
+// Gym Documentation Pages
+const DocsGymOverview = lazy(() => import('@/pages/docs/gym/GymOverview'));
+const DocsGymGettingStarted = lazy(() => import('@/pages/docs/gym/GymGettingStarted'));
+const DocsGymMembers = lazy(() => import('@/pages/docs/gym/GymMembers'));
+const DocsGymMemberships = lazy(() => import('@/pages/docs/gym/GymMemberships'));
+const DocsGymClasses = lazy(() => import('@/pages/docs/gym/GymClasses'));
+const DocsGymCheckIns = lazy(() => import('@/pages/docs/gym/GymCheckIns'));
+const DocsGymStaff = lazy(() => import('@/pages/docs/gym/GymStaff'));
+const DocsGymLeads = lazy(() => import('@/pages/docs/gym/GymLeads'));
+const DocsGymMarketing = lazy(() => import('@/pages/docs/gym/GymMarketing'));
+const DocsGymPOS = lazy(() => import('@/pages/docs/gym/GymPOS'));
+const DocsGymPayments = lazy(() => import('@/pages/docs/gym/GymPayments'));
+const DocsGymContracts = lazy(() => import('@/pages/docs/gym/GymContracts'));
+const DocsGymGrading = lazy(() => import('@/pages/docs/gym/GymGrading'));
+const DocsGymReports = lazy(() => import('@/pages/docs/gym/GymReports'));
+const DocsGymLocations = lazy(() => import('@/pages/docs/gym/GymLocations'));
+const DocsGymMemberPortal = lazy(() => import('@/pages/docs/gym/GymMemberPortal'));
+const DocsGymSettings = lazy(() => import('@/pages/docs/gym/GymSettings'));
+
 // Debug pages
 const Debug = lazy(() => import('@/pages/Debug'));
 const NativeDiagnostics = lazy(() => import('@/pages/NativeDiagnostics'));
@@ -1123,6 +1142,127 @@ const App = () => (
                                 <WebsiteLocaleWrapper>
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <DocsCoachGoalAdherence />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Gym Documentation Routes */}
+                              <Route path="/docs/gym" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymOverview />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/getting-started" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymGettingStarted />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/members" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymMembers />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/memberships" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymMemberships />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/classes" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymClasses />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/checkins" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymCheckIns />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/staff" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymStaff />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/leads" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymLeads />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/marketing" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymMarketing />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/pos" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymPOS />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/payments" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymPayments />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/contracts" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymContracts />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/grading" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymGrading />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/reports" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymReports />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/locations" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymLocations />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/member-portal" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymMemberPortal />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/settings" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymSettings />
                                   </Suspense>
                                 </WebsiteLocaleWrapper>
                               } />

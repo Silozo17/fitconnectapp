@@ -41,7 +41,12 @@ import {
   AlertTriangle,
   Activity,
   LineChart,
-  UsersRound
+  UsersRound,
+  Building2,
+  QrCode,
+  Award,
+  MapPin,
+  Globe
 } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
@@ -227,6 +232,65 @@ const navItems: NavItem[] = [
           { title: "Connections", href: "/docs/coach/connections", icon: Link2 },
           { title: "Settings", href: "/docs/coach/settings", icon: Settings },
           { title: "Achievements", href: "/docs/coach/achievements", icon: Trophy },
+        ]
+      },
+    ],
+  },
+  {
+    title: "For Gyms",
+    href: "/docs/gym",
+    icon: Building2,
+    sections: [
+      {
+        sectionTitle: "Getting Started",
+        children: [
+          { title: "Overview", href: "/docs/gym", icon: Home },
+          { title: "Getting Started", href: "/docs/gym/getting-started", icon: BookOpen },
+        ]
+      },
+      {
+        sectionTitle: "Member Management",
+        children: [
+          { title: "Member Management", href: "/docs/gym/members", icon: Users },
+          { title: "Memberships & Plans", href: "/docs/gym/memberships", icon: CreditCard },
+          { title: "Lead Management", href: "/docs/gym/leads", icon: Kanban },
+        ]
+      },
+      {
+        sectionTitle: "Classes & Check-Ins",
+        children: [
+          { title: "Class Scheduling", href: "/docs/gym/classes", icon: Calendar },
+          { title: "Check-In System", href: "/docs/gym/checkins", icon: QrCode },
+          { title: "Grading System", href: "/docs/gym/grading", icon: Award },
+        ]
+      },
+      {
+        sectionTitle: "Staff & Operations",
+        children: [
+          { title: "Staff Management", href: "/docs/gym/staff", icon: Users },
+          { title: "Multi-Location", href: "/docs/gym/locations", icon: MapPin },
+        ]
+      },
+      {
+        sectionTitle: "Payments & Sales",
+        children: [
+          { title: "Payments & Billing", href: "/docs/gym/payments", icon: CreditCard },
+          { title: "Point of Sale", href: "/docs/gym/pos", icon: ShoppingCart },
+          { title: "Contracts", href: "/docs/gym/contracts", icon: FileText },
+        ]
+      },
+      {
+        sectionTitle: "Marketing & Reports",
+        children: [
+          { title: "Marketing & Automations", href: "/docs/gym/marketing", icon: Rocket },
+          { title: "Reports & Analytics", href: "/docs/gym/reports", icon: BarChart3 },
+        ]
+      },
+      {
+        sectionTitle: "Portal & Settings",
+        children: [
+          { title: "Member Portal", href: "/docs/gym/member-portal", icon: Globe },
+          { title: "Settings", href: "/docs/gym/settings", icon: Settings },
         ]
       },
     ],
