@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useGym } from "@/contexts/GymContext";
+import { useGym, GymRole } from "@/contexts/GymContext";
 import { useGymLocations } from "@/hooks/gym/useGymLocations";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -24,6 +24,12 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Mail, UserCheck, Loader2 } from "lucide-react";
+import { 
+  getAssignableRoles, 
+  ROLE_LABELS, 
+  ROLE_DESCRIPTIONS,
+  isMultiLocationRole 
+} from "@/utils/gymStaffHierarchy";
 
 interface InviteStaffDialogProps {
   open: boolean;
@@ -60,7 +66,7 @@ const DISCIPLINES = [
 ];
 
 export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaffDialogProps) {
-  const { gym } = useGym();
+  const { gym, userRole } = useGym();
   const { data: locations = [] } = useGymLocations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingUser, setExistingUser] = useState<{ id: string; name: string } | null>(null);
@@ -278,13 +284,21 @@ export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaff
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="area_manager">Area Manager</SelectItem>
-                <SelectItem value="manager">Manager</SelectItem>
-                <SelectItem value="coach">Coach / Instructor</SelectItem>
-                <SelectItem value="marketing">Marketing</SelectItem>
-                <SelectItem value="staff">Staff</SelectItem>
+                {getAssignableRoles(userRole || "staff").map((role) => (
+                  <SelectItem key={role} value={role}>
+                    <div className="flex flex-col">
+                      <span>{ROLE_LABELS[role]}</span>
+                      <span className="text-xs text-muted-foreground">{ROLE_DESCRIPTIONS[role]}</span>
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
+            {formData.role && isMultiLocationRole(formData.role as GymRole) && (
+              <p className="text-xs text-blue-600">
+                This role can access multiple locations
+              </p>
+            )}
           </div>
 
           {/* Disciplines - Only shown for Coach role */}

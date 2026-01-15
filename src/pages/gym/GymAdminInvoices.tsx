@@ -31,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,6 +59,7 @@ export default function GymAdminInvoices() {
   const [items, setItems] = useState([{ description: "", quantity: 1, unit_price: 0 }]);
   const [dueDate, setDueDate] = useState("");
   const [notes, setNotes] = useState("");
+  const [applyVat, setApplyVat] = useState(false);
 
   const { data: invoices, isLoading } = useGymInvoices({ status: statusFilter });
   const { data: membersData } = useGymMembers({ status: "active" });
@@ -92,12 +94,14 @@ export default function GymAdminInvoices() {
       items: validItems,
       due_date: dueDate || undefined,
       notes: notes || undefined,
+      tax_rate: applyVat ? 20 : 0,
     });
 
     setSelectedMember("");
     setItems([{ description: "", quantity: 1, unit_price: 0 }]);
     setDueDate("");
     setNotes("");
+    setApplyVat(false);
     setDialogOpen(false);
   };
 
@@ -118,7 +122,9 @@ export default function GymAdminInvoices() {
     }
   };
 
-  const total = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+  const subtotal = items.reduce((sum, item) => sum + (item.quantity * item.unit_price), 0);
+  const vatAmount = applyVat ? subtotal * 0.20 : 0;
+  const total = subtotal + vatAmount;
 
   return (
     <div className="space-y-6">
@@ -200,11 +206,26 @@ export default function GymAdminInvoices() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
-                ))}
-                <div className="text-right font-semibold">
-                  Total: £{total.toFixed(2)}
+                  ))}
+                  <div className="text-right space-y-1 pt-2 border-t">
+                    <p className="text-sm text-muted-foreground">Subtotal: £{subtotal.toFixed(2)}</p>
+                    {applyVat && (
+                      <p className="text-sm text-muted-foreground">VAT (20%): £{vatAmount.toFixed(2)}</p>
+                    )}
+                    <p className="font-semibold">Total: £{total.toFixed(2)}</p>
+                  </div>
                 </div>
-              </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <Switch
+                    id="apply-vat"
+                    checked={applyVat}
+                    onCheckedChange={setApplyVat}
+                  />
+                  <Label htmlFor="apply-vat" className="cursor-pointer">
+                    Apply VAT (20%)
+                  </Label>
+                </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
