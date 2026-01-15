@@ -139,6 +139,8 @@ export function useGymClasses(options: UseGymClassesOptions = {}) {
         .eq("gym_id", gym.id)
         .gte("start_time", startDate.toISOString())
         .lte("start_time", endDate.toISOString())
+        .neq("status", "cancelled")
+        .eq("is_recurring_template", false)
         .order("start_time", { ascending: true });
 
       if (classTypeId) {
