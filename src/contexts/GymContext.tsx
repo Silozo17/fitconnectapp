@@ -169,10 +169,14 @@ export function GymProvider({ children, initialGymId }: GymProviderProps) {
     enabled: !!gymId,
   });
 
+  // Track if we've already tried to accept invitations for this session
+  const [hasTriedInviteAcceptance, setHasTriedInviteAcceptance] = useState(false);
+
   // Fetch user's staff record at this gym
   const {
     data: staffRecord,
     isLoading: isLoadingStaff,
+    refetch: refetchStaffRecord,
   } = useQuery({
     queryKey: ["gym-staff-record", gym?.id, user?.id],
     queryFn: async () => {
@@ -191,6 +195,35 @@ export function GymProvider({ children, initialGymId }: GymProviderProps) {
     },
     enabled: !!gym?.id && !!user?.id,
   });
+
+  // Fallback: If user navigates directly to gym admin but isn't staff yet,
+  // try to accept pending invitations
+  useEffect(() => {
+    const tryAcceptInvitations = async () => {
+      // Only try once per session, and only if we have gym + user but no staff record
+      if (hasTriedInviteAcceptance || !gym?.id || !user?.id || isLoadingStaff) return;
+      if (staffRecord || gym.user_id === user.id) return; // Already staff or owner
+      
+      setHasTriedInviteAcceptance(true);
+      
+      try {
+        const { data, error } = await supabase.functions.invoke("gym-accept-staff-invites");
+        
+        if (!error && data?.accepted > 0) {
+          // Check if any of the accepted gyms match this one
+          const matchingGym = data.gyms?.find((g: any) => g.gymId === gym.id);
+          if (matchingGym) {
+            // Refetch the staff record
+            await refetchStaffRecord();
+          }
+        }
+      } catch (err) {
+        console.error("Failed to accept invitations:", err);
+      }
+    };
+
+    tryAcceptInvitations();
+  }, [gym?.id, user?.id, staffRecord, isLoadingStaff, hasTriedInviteAcceptance, refetchStaffRecord]);
 
   // Check if user is a member at this gym
   const { data: memberRecord } = useQuery({

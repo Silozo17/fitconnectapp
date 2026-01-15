@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useGym } from "@/contexts/GymContext";
 import { useGymStaff } from "@/hooks/gym/useGymStaff";
+import { useGymStaffInvitations, useCancelStaffInvitation, useResendStaffInvitation } from "@/hooks/gym/useGymStaffInvitations";
 import { InviteStaffDialog } from "@/components/gym/admin/dialogs/InviteStaffDialog";
 import { EditStaffDialog } from "@/components/gym/admin/dialogs/EditStaffDialog";
 import { RemoveStaffDialog } from "@/components/gym/admin/dialogs/RemoveStaffDialog";
@@ -13,6 +14,7 @@ import {
   useStaffPayRates,
   useSetPayRate,
 } from "@/hooks/gym/useGymStaffManagement";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -66,6 +68,8 @@ import {
   MoreHorizontal,
   Pencil,
   Trash2,
+  RefreshCw,
+  Send,
 } from "lucide-react";
 import { format, addDays, startOfWeek, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -73,7 +77,12 @@ import StaffPermissionEditor from "@/components/gym/admin/StaffPermissionEditor"
 
 export default function GymAdminStaff() {
   const { gym, staffRecord } = useGym();
+  const queryClient = useQueryClient();
   const { data: staffList = [], isLoading: staffLoading } = useGymStaff();
+  const { data: invitations = [], isLoading: invitationsLoading } = useGymStaffInvitations();
+  const cancelInvitation = useCancelStaffInvitation();
+  const resendInvitation = useResendStaffInvitation();
+  
   const [activeTab, setActiveTab] = useState("roster");
   const [selectedStaffId, setSelectedStaffId] = useState<string | null>(null);
   const [showAddShiftDialog, setShowAddShiftDialog] = useState(false);
@@ -178,6 +187,22 @@ export default function GymAdminStaff() {
   };
 
   const pendingTimeEntries = timeEntries.filter((e) => e.status === "pending");
+  const pendingInvitations = invitations.filter((i) => i.status === "pending");
+
+  const getInvitationStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-600">Pending</Badge>;
+      case "accepted":
+        return <Badge variant="default" className="bg-green-500/20 text-green-600">Accepted</Badge>;
+      case "cancelled":
+        return <Badge variant="destructive">Cancelled</Badge>;
+      case "expired":
+        return <Badge variant="outline" className="text-muted-foreground">Expired</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
 
   if (!gym) return null;
 
@@ -199,13 +224,15 @@ export default function GymAdminStaff() {
           open={showInviteDialog}
           onOpenChange={setShowInviteDialog}
           onSuccess={() => {
-            // Refresh staff list
+            // Refresh staff list and invitations
+            queryClient.invalidateQueries({ queryKey: ["gym-staff", gym?.id] });
+            queryClient.invalidateQueries({ queryKey: ["gym-staff-invitations", gym?.id] });
           }}
         />
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Staff</CardTitle>
@@ -213,6 +240,15 @@ export default function GymAdminStaff() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{staffList.length}</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">Pending Invites</CardTitle>
+            <Mail className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pendingInvitations.length}</div>
           </CardContent>
         </Card>
         <Card>
@@ -252,6 +288,15 @@ export default function GymAdminStaff() {
           <TabsTrigger value="roster">
             <Users className="mr-2 h-4 w-4" />
             Staff Roster
+          </TabsTrigger>
+          <TabsTrigger value="invitations">
+            <Mail className="mr-2 h-4 w-4" />
+            Invitations
+            {pendingInvitations.length > 0 && (
+              <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+                {pendingInvitations.length}
+              </Badge>
+            )}
           </TabsTrigger>
           <TabsTrigger value="permissions">
             <Shield className="mr-2 h-4 w-4" />
@@ -376,6 +421,94 @@ export default function GymAdminStaff() {
                       </TableCell>
                     </TableRow>
                   ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Invitations Tab */}
+        <TabsContent value="invitations" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Staff Invitations</CardTitle>
+              <CardDescription>
+                Manage pending and past staff invitations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Invitee</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Sent</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {invitations.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                        No invitations sent yet
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    invitations.map((invitation) => (
+                      <TableRow key={invitation.id}>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">
+                              {`${invitation.first_name || ""} ${invitation.last_name || ""}`.trim() || "—"}
+                            </p>
+                            <p className="text-sm text-muted-foreground">{invitation.email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getRoleBadgeColor(invitation.role)}>
+                            {invitation.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {getInvitationStatusBadge(invitation.status)}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {format(parseISO(invitation.created_at), "MMM d, yyyy")}
+                        </TableCell>
+                        <TableCell>
+                          {invitation.status === "pending" && (
+                            <div className="flex gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => resendInvitation.mutate(invitation.id)}
+                                disabled={resendInvitation.isPending}
+                              >
+                                <Send className="mr-1 h-3 w-3" />
+                                Resend
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive"
+                                onClick={() => cancelInvitation.mutate(invitation.id)}
+                                disabled={cancelInvitation.isPending}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          )}
+                          {invitation.status === "accepted" && (
+                            <span className="text-sm text-green-600 flex items-center gap-1">
+                              <Check className="h-4 w-4" />
+                              {invitation.accepted_at && format(parseISO(invitation.accepted_at), "MMM d")}
+                            </span>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
