@@ -3,6 +3,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGym } from "@/contexts/GymContext";
 import { toast } from "sonner";
 
+export interface OpeningHours {
+  [day: string]: {
+    open: string;
+    close: string;
+    closed?: boolean;
+  };
+}
+
 export interface GymLocation {
   id: string;
   gym_id: string;
@@ -26,6 +34,9 @@ export interface GymLocation {
   stripe_account_status: string | null;
   stripe_onboarding_complete: boolean;
   currency: string | null;
+  // New fields
+  member_number_prefix: string | null;
+  opening_hours: OpeningHours | null;
 }
 
 export function useGymLocations() {
@@ -69,6 +80,8 @@ export function useGymLocations() {
         stripe_account_status: l.stripe_account_status || null,
         stripe_onboarding_complete: l.stripe_onboarding_complete ?? false,
         currency: l.currency || null,
+        member_number_prefix: l.member_number_prefix || null,
+        opening_hours: l.opening_hours || null,
       })) as GymLocation[];
     },
     enabled: !!gym?.id,
