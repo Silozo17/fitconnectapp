@@ -1747,47 +1747,37 @@ html.native-ios .carousel-3d-item:not(.carousel-3d-item--settling) {
 
 /* Gym Admin Wrapper - Scoped theme variables */
 .gym-admin {
-  /* Sidebar - Dark Teal/Navy */
-  --gym-sidebar-bg: 197 71% 18%;
+  /* Sidebar - Ultra Dark (matches your main dark theme) */
+  --gym-sidebar-bg: 240 15% 5%;
   --gym-sidebar-fg: 0 0% 98%;
-  --gym-sidebar-muted: 197 30% 60%;
-  --gym-sidebar-accent: 158 64% 52%;
-  --gym-sidebar-active-bg: 158 64% 52%;
-  --gym-sidebar-active-fg: 197 71% 18%;
-  --gym-sidebar-hover-bg: 197 60% 22%;
-  --gym-sidebar-border: 197 50% 25%;
+  --gym-sidebar-muted: 240 5% 55%;
+  --gym-sidebar-accent: 75 100% 50%;
+  --gym-sidebar-active-bg: 75 100% 50%;
+  --gym-sidebar-active-fg: 240 15% 5%;
+  --gym-sidebar-hover-bg: 240 12% 10%;
+  --gym-sidebar-border: 240 12% 15%;
   
-  /* Content Area - Light/Neutral */
-  --gym-content-bg: 220 14% 96%;
-  --gym-content-fg: 220 20% 20%;
+  /* Content Area - Dark */
+  --gym-content-bg: 240 15% 8%;
+  --gym-content-fg: 0 0% 98%;
   
-  /* Cards - Pure White */
-  --gym-card-bg: 0 0% 100%;
-  --gym-card-fg: 220 20% 20%;
-  --gym-card-muted: 220 10% 50%;
-  --gym-card-border: 220 10% 90%;
+  /* Cards - Dark Glass Style */
+  --gym-card-bg: 240 12% 10%;
+  --gym-card-fg: 0 0% 98%;
+  --gym-card-muted: 240 5% 55%;
+  --gym-card-border: 240 12% 18%;
   
-  /* Accent Colors */
-  --gym-primary: 158 64% 45%;
-  --gym-primary-fg: 0 0% 100%;
-  --gym-secondary: 34 100% 50%;
+  /* Accent Colors - Your Brand */
+  --gym-primary: 75 100% 50%;
+  --gym-primary-fg: 240 15% 5%;
+  --gym-secondary: 280 85% 60%;
   --gym-secondary-fg: 0 0% 100%;
   
   /* Status Colors */
-  --gym-success: 158 64% 45%;
+  --gym-success: 158 64% 52%;
   --gym-warning: 38 92% 50%;
   --gym-danger: 0 84% 60%;
-  --gym-info: 197 71% 45%;
-}
-
-/* Dark mode adjustments for gym admin */
-.dark .gym-admin {
-  --gym-content-bg: 220 15% 10%;
-  --gym-content-fg: 0 0% 98%;
-  --gym-card-bg: 220 12% 14%;
-  --gym-card-fg: 0 0% 98%;
-  --gym-card-muted: 220 10% 60%;
-  --gym-card-border: 220 12% 20%;
+  --gym-info: 210 100% 60%;
 }
 
 /* Gym Sidebar Base */
