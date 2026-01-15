@@ -22,6 +22,7 @@ import {
   Briefcase,
   AlertTriangle,
   Crown,
+  Building2,
 } from "lucide-react";
 import {
   GymStaffPermissions,
@@ -31,6 +32,7 @@ import {
 
 // Staff roles that can be configured (excluding owner)
 const CONFIGURABLE_ROLES = [
+  { id: "area_manager", label: "Area Manager", icon: Building2, description: "Multi-location access" },
   { id: "manager", label: "Manager", icon: Briefcase, description: "Full operational access" },
   { id: "coach", label: "Coach/Instructor", icon: UserCheck, description: "Class management" },
   { id: "staff", label: "Front Desk", icon: Users, description: "Check-ins and sales" },
@@ -194,7 +196,7 @@ export function RolePermissionsEditor() {
 
         {/* Role Tabs */}
         <Tabs value={selectedRole} onValueChange={setSelectedRole}>
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             {CONFIGURABLE_ROLES.map(role => {
               const Icon = role.icon;
               return (

@@ -97,10 +97,10 @@ export function ScheduleTimeGrid({
   return (
     <Card className="overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full border-collapse min-w-[800px]">
+        <table className="w-full border-collapse min-w-[800px] table-fixed">
           <thead>
             <tr className="bg-muted/50">
-              <th className="p-3 text-left text-sm font-medium text-muted-foreground border-b w-20">
+              <th className="p-3 text-left text-sm font-medium text-muted-foreground border-b" style={{ width: '80px' }}>
                 Time
               </th>
               {weekDays.map((day) => {
@@ -151,7 +151,7 @@ export function ScheduleTimeGrid({
                     <td
                       key={`${dateKey}-${time}`}
                       className={cn(
-                        "p-2 border-b border-l align-top min-w-[120px]",
+                        "p-2 border-b border-l align-top",
                         isToday && "bg-primary/5"
                       )}
                     >
