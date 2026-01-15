@@ -322,7 +322,7 @@ export default function GymStaffProfile() {
                 <div>
                   <p className="font-medium">Manage Members</p>
                   <p className="text-sm text-muted-foreground">
-                    {(staffRecord as any)?.can_manage_members ? "Yes" : "No"}
+                    {isOwner ? "Yes" : (staffRecord as any)?.can_manage_members ? "Yes" : "No"}
                   </p>
                 </div>
               </div>
@@ -334,7 +334,7 @@ export default function GymStaffProfile() {
                 <div>
                   <p className="font-medium">Teach Classes</p>
                   <p className="text-sm text-muted-foreground">
-                    {(staffRecord as any)?.can_teach_classes ? "Yes" : "No"}
+                    {isOwner ? "Yes" : (staffRecord as any)?.can_teach_classes ? "Yes" : "No"}
                   </p>
                 </div>
               </div>
@@ -346,9 +346,11 @@ export default function GymStaffProfile() {
                 <div>
                   <p className="font-medium">Locations</p>
                   <p className="text-sm text-muted-foreground">
-                    {(staffRecord as any)?.assigned_location_ids?.length > 0
-                      ? `${(staffRecord as any).assigned_location_ids.length} assigned`
-                      : "All locations"}
+                    {isOwner 
+                      ? "All locations (Owner)"
+                      : (staffRecord as any)?.assigned_location_ids?.length > 0
+                        ? `${(staffRecord as any).assigned_location_ids.length} assigned`
+                        : "All locations"}
                   </p>
                 </div>
               </div>

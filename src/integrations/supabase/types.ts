@@ -6432,6 +6432,7 @@ export type Database = {
         Row: {
           created_at: string
           credit_type: string
+          credits: number | null
           credits_amount: number
           currency: string
           description: string | null
@@ -6439,14 +6440,19 @@ export type Database = {
           gym_id: string
           id: string
           is_active: boolean
+          location_id: string | null
           name: string
           price: number
+          price_amount: number | null
+          stripe_price_id: string | null
+          stripe_product_id: string | null
           updated_at: string
           validity_days: number | null
         }
         Insert: {
           created_at?: string
           credit_type?: string
+          credits?: number | null
           credits_amount: number
           currency?: string
           description?: string | null
@@ -6454,14 +6460,19 @@ export type Database = {
           gym_id: string
           id?: string
           is_active?: boolean
+          location_id?: string | null
           name: string
           price: number
+          price_amount?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
           validity_days?: number | null
         }
         Update: {
           created_at?: string
           credit_type?: string
+          credits?: number | null
           credits_amount?: number
           currency?: string
           description?: string | null
@@ -6469,8 +6480,12 @@ export type Database = {
           gym_id?: string
           id?: string
           is_active?: boolean
+          location_id?: string | null
           name?: string
           price?: number
+          price_amount?: number | null
+          stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string
           validity_days?: number | null
         }
@@ -6480,6 +6495,13 @@ export type Database = {
             columns: ["gym_id"]
             isOneToOne: false
             referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_credit_packages_location_id_fkey"
+            columns: ["location_id"]
+            isOneToOne: false
+            referencedRelation: "gym_locations"
             referencedColumns: ["id"]
           },
         ]
