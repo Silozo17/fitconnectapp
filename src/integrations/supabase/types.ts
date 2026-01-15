@@ -9430,6 +9430,71 @@ export type Database = {
           },
         ]
       }
+      gym_staff_invitations: {
+        Row: {
+          accepted_at: string | null
+          assigned_location_ids: string[] | null
+          created_at: string | null
+          disciplines: string[] | null
+          email: string
+          expires_at: string | null
+          first_name: string | null
+          gym_id: string
+          id: string
+          invite_token: string | null
+          invited_by: string | null
+          invited_by_name: string | null
+          last_name: string | null
+          phone: string | null
+          role: string
+          status: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          assigned_location_ids?: string[] | null
+          created_at?: string | null
+          disciplines?: string[] | null
+          email: string
+          expires_at?: string | null
+          first_name?: string | null
+          gym_id: string
+          id?: string
+          invite_token?: string | null
+          invited_by?: string | null
+          invited_by_name?: string | null
+          last_name?: string | null
+          phone?: string | null
+          role: string
+          status?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          assigned_location_ids?: string[] | null
+          created_at?: string | null
+          disciplines?: string[] | null
+          email?: string
+          expires_at?: string | null
+          first_name?: string | null
+          gym_id?: string
+          id?: string
+          invite_token?: string | null
+          invited_by?: string | null
+          invited_by_name?: string | null
+          last_name?: string | null
+          phone?: string | null
+          role?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_staff_invitations_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_staff_notifications: {
         Row: {
           created_at: string
