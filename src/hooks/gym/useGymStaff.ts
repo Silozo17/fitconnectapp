@@ -12,7 +12,7 @@ export interface GymStaffMember {
   role: string;
   bio: string | null;
   phone: string | null;
-  is_active: boolean;
+  status: string;
   can_manage_members: boolean;
   can_manage_classes: boolean;
   can_manage_settings: boolean;
@@ -32,7 +32,7 @@ export function useGymStaff() {
         .from("gym_staff")
         .select("*")
         .eq("gym_id", gym.id)
-        .eq("is_active", true)
+        .eq("status", "active")
         .order("display_name", { ascending: true });
 
       if (error) throw error;
@@ -48,7 +48,7 @@ export function useGymStaff() {
         role: s.role,
         bio: s.bio,
         phone: s.phone,
-        is_active: s.is_active ?? true,
+        status: s.status ?? "active",
         can_manage_members: s.can_manage_members ?? false,
         can_manage_classes: s.can_manage_classes ?? false,
         can_manage_settings: s.can_manage_settings ?? false,
@@ -72,7 +72,7 @@ export function useGymInstructors() {
         .from("gym_staff")
         .select("*")
         .eq("gym_id", gym.id)
-        .eq("is_active", true)
+        .eq("status", "active")
         .eq("can_teach_classes", true)
         .order("display_name", { ascending: true });
 
@@ -89,7 +89,7 @@ export function useGymInstructors() {
         role: s.role,
         bio: s.bio,
         phone: s.phone,
-        is_active: s.is_active ?? true,
+        status: s.status ?? "active",
         can_manage_members: s.can_manage_members ?? false,
         can_manage_classes: s.can_manage_classes ?? false,
         can_manage_settings: s.can_manage_settings ?? false,

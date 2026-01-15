@@ -137,7 +137,7 @@ export function GymUnifiedInbox() {
         .from("gym_staff")
         .select("id, display_name, role")
         .eq("gym_id", gym.id)
-        .eq("is_active", true);
+        .eq("status", "active");
 
       if (error) throw error;
       return (data || []) as Staff[];
