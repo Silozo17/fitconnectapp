@@ -51,7 +51,7 @@ export default function GymAdminPOS() {
 
   const [cart, setCart] = useState<CartItem[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedMemberId, setSelectedMemberId] = useState<string>("");
+  const [selectedMemberId, setSelectedMemberId] = useState<string>("walk-in");
   const [paymentMethod, setPaymentMethod] = useState<"cash" | "card">("card");
   const [showCheckout, setShowCheckout] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
@@ -118,13 +118,13 @@ export default function GymAdminPOS() {
     // For cash payments, process directly
     try {
       await createSale.mutateAsync({
-        member_id: selectedMemberId || undefined,
+        member_id: selectedMemberId === "walk-in" ? undefined : selectedMemberId,
         items: cart.map(({ id, ...item }) => item),
         payment_method: paymentMethod,
       });
 
       setCart([]);
-      setSelectedMemberId("");
+      setSelectedMemberId("walk-in");
       setShowCheckout(false);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2000);
@@ -136,7 +136,7 @@ export default function GymAdminPOS() {
   const handleCardPaymentSuccess = () => {
     setShowCardPayment(false);
     setCart([]);
-    setSelectedMemberId("");
+    setSelectedMemberId("walk-in");
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 2000);
   };
@@ -208,7 +208,7 @@ export default function GymAdminPOS() {
                 <SelectValue placeholder="Walk-in customer" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Walk-in customer</SelectItem>
+                <SelectItem value="walk-in">Walk-in customer</SelectItem>
                 {members.map((m) => (
                   <SelectItem key={m.id} value={m.id}>
                     {m.first_name} {m.last_name}
@@ -323,7 +323,7 @@ export default function GymAdminPOS() {
             price: item.unit_price,
             quantity: item.quantity,
           }))}
-          memberId={selectedMemberId || undefined}
+          memberId={selectedMemberId === "walk-in" ? undefined : selectedMemberId}
           total={total}
         />
       )}
