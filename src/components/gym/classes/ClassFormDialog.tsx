@@ -89,6 +89,7 @@ export function ClassFormDialog({
     endType: "occurrences",
     occurrences: 12,
     timeOfDay: format(defaultDate, "HH:mm"),
+    durationMinutes: 60,
   });
 
   const form = useForm<ClassFormValues>({
@@ -166,10 +167,38 @@ export function ClassFormDialog({
         occurrences: recurringConfig.occurrences,
       } : null;
 
+      // Calculate start and end times
+      let startTime: string;
+      let endTime: string;
+
+      if (isRecurring) {
+        // For recurring: Use the first selected day and timeOfDay from config
+        const getNextWeekday = (date: Date, targetDay: number): Date => {
+          const result = new Date(date);
+          const currentDay = result.getDay();
+          const daysUntilTarget = (targetDay - currentDay + 7) % 7 || 7;
+          result.setDate(result.getDate() + daysUntilTarget);
+          return result;
+        };
+
+        const firstDayOfWeek = recurringConfig.daysOfWeek[0] ?? 1;
+        const baseDate = getNextWeekday(new Date(), firstDayOfWeek);
+        const [hours, minutes] = recurringConfig.timeOfDay.split(":").map(Number);
+        baseDate.setHours(hours, minutes, 0, 0);
+
+        const endDate = new Date(baseDate.getTime() + (recurringConfig.durationMinutes || 60) * 60 * 1000);
+
+        startTime = baseDate.toISOString();
+        endTime = endDate.toISOString();
+      } else {
+        startTime = new Date(values.start_time).toISOString();
+        endTime = new Date(values.end_time).toISOString();
+      }
+
       const classData = {
         class_type_id: values.class_type_id,
-        start_time: new Date(values.start_time).toISOString(),
-        end_time: new Date(values.end_time).toISOString(),
+        start_time: startTime,
+        end_time: endTime,
         instructor_id: values.instructor_id === "none" ? null : values.instructor_id || null,
         location_id: values.location_id || null,
         capacity: values.capacity,
@@ -330,7 +359,7 @@ export function ClassFormDialog({
                       value={field.value}
                       className="grid grid-cols-2 gap-4"
                     >
-                      <div>
+                      <div className="relative">
                         <RadioGroupItem
                           value="one_off"
                           id="one_off"
@@ -338,7 +367,7 @@ export function ClassFormDialog({
                         />
                         <Label
                           htmlFor="one_off"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
                         >
                           <Calendar className="mb-2 h-5 w-5" />
                           <span className="font-medium text-sm">One-off Class</span>
@@ -347,7 +376,7 @@ export function ClassFormDialog({
                           </span>
                         </Label>
                       </div>
-                      <div>
+                      <div className="relative">
                         <RadioGroupItem
                           value="recurring"
                           id="recurring"
@@ -355,7 +384,7 @@ export function ClassFormDialog({
                         />
                         <Label
                           htmlFor="recurring"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
                         >
                           <Repeat className="mb-2 h-5 w-5" />
                           <span className="font-medium text-sm">Recurring Class</span>
@@ -379,38 +408,38 @@ export function ClassFormDialog({
               />
             )}
 
-            {/* Time Fields */}
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="start_time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {form.watch("class_schedule_type") === "recurring" ? "First Class Date/Time *" : "Start Time *"}
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="datetime-local" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            {/* Time Fields - Only show for one-off classes */}
+            {form.watch("class_schedule_type") === "one_off" && (
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="start_time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Time *</FormLabel>
+                      <FormControl>
+                        <Input type="datetime-local" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="end_time"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>End Time *</FormLabel>
-                    <FormControl>
-                      <Input type="datetime-local" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+                <FormField
+                  control={form.control}
+                  name="end_time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>End Time *</FormLabel>
+                      <FormControl>
+                        <Input type="datetime-local" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            )}
 
             {/* Instructor */}
             <FormField
