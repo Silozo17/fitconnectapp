@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -71,7 +71,7 @@ export function ClassFormDialog({
   open, 
   onOpenChange, 
   classToEdit,
-  defaultDate = new Date(),
+  defaultDate,
   defaultLocationId,
 }: ClassFormDialogProps) {
   const { gym } = useGym();
@@ -83,6 +83,23 @@ export function ClassFormDialog({
   const [isGenerating, setIsGenerating] = useState(false);
 
   const isEditing = !!classToEdit;
+  
+  // Capture stable date when dialog opens to prevent reset loops
+  const stableDateRef = useRef<Date>(new Date());
+  const hasInitializedRef = useRef(false);
+  
+  // Update stable date only when dialog opens fresh
+  useEffect(() => {
+    if (open && !hasInitializedRef.current) {
+      stableDateRef.current = defaultDate || new Date();
+      hasInitializedRef.current = true;
+    }
+    if (!open) {
+      hasInitializedRef.current = false;
+    }
+  }, [open, defaultDate]);
+
+  const effectiveDate = stableDateRef.current;
 
   // Recurring config state
   const [recurringConfig, setRecurringConfig] = useState<RecurringConfig>({
@@ -90,7 +107,7 @@ export function ClassFormDialog({
     daysOfWeek: [new Date().getDay()],
     endType: "occurrences",
     occurrences: 12,
-    timeOfDay: format(defaultDate, "HH:mm"),
+    timeOfDay: format(effectiveDate, "HH:mm"),
   });
 
   const form = useForm<ClassFormValues>({
@@ -99,8 +116,8 @@ export function ClassFormDialog({
       class_type_id: "",
       location_id: defaultLocationId || "",
       class_schedule_type: "one_off",
-      class_date: format(defaultDate, "yyyy-MM-dd"),
-      start_time: format(defaultDate, "HH:mm"),
+      class_date: format(effectiveDate, "yyyy-MM-dd"),
+      start_time: format(effectiveDate, "HH:mm"),
       duration_minutes: 60,
       instructor_id: "none",
       capacity: 20,
@@ -112,9 +129,15 @@ export function ClassFormDialog({
 
   const scheduleType = form.watch("class_schedule_type");
 
-  // Reset form when editing a class or when dialog opens
+  // Reset form ONLY when: dialog opens fresh OR editing a different class
+  const lastClassIdRef = useRef<string | null>(null);
+  const lastOpenRef = useRef(false);
+  
   useEffect(() => {
-    if (classToEdit) {
+    const isNewOpen = open && !lastOpenRef.current;
+    const isDifferentClass = classToEdit?.id !== lastClassIdRef.current;
+    
+    if (classToEdit && isDifferentClass) {
       const startDate = new Date(classToEdit.start_time);
       const endDate = new Date(classToEdit.end_time);
       const durationMs = endDate.getTime() - startDate.getTime();
@@ -133,13 +156,15 @@ export function ClassFormDialog({
         room: classToEdit.room || "",
         description: classToEdit.description || "",
       });
-    } else if (open) {
+      lastClassIdRef.current = classToEdit.id;
+    } else if (isNewOpen && !classToEdit) {
+      const dateToUse = stableDateRef.current;
       form.reset({
         class_type_id: "",
         location_id: defaultLocationId || "",
         class_schedule_type: "one_off",
-        class_date: format(defaultDate, "yyyy-MM-dd"),
-        start_time: format(defaultDate, "HH:mm"),
+        class_date: format(dateToUse, "yyyy-MM-dd"),
+        start_time: format(dateToUse, "HH:mm"),
         duration_minutes: 60,
         instructor_id: "none",
         capacity: 20,
@@ -147,8 +172,11 @@ export function ClassFormDialog({
         room: "",
         description: "",
       });
+      lastClassIdRef.current = null;
     }
-  }, [classToEdit, defaultDate, form, open, defaultLocationId]);
+    
+    lastOpenRef.current = open;
+  }, [open, classToEdit?.id, form, defaultLocationId]);
 
   // Auto-fill duration based on class type
   const handleClassTypeChange = (classTypeId: string) => {
@@ -297,7 +325,7 @@ export function ClassFormDialog({
                   <Select 
                     onValueChange={handleClassTypeChange} 
                     value={field.value}
-                    disabled={isLoading}
+                    disabled={classTypesLoading}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -337,7 +365,7 @@ export function ClassFormDialog({
                     <Select 
                       onValueChange={field.onChange} 
                       value={field.value}
-                      disabled={isLoading}
+                      disabled={locationsLoading}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -482,7 +510,7 @@ export function ClassFormDialog({
                   <Select 
                     onValueChange={field.onChange} 
                     value={field.value}
-                    disabled={isLoading}
+                    disabled={staffLoading}
                   >
                     <FormControl>
                       <SelectTrigger>
