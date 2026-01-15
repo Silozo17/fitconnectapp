@@ -545,5 +545,36 @@
     "completePayment": "Complete Payment",
     "paymentComplete": "Payment completed! Session confirmed.",
     "checkoutNotReady": "Payment checkout for individual sessions is being set up. Please contact your coach for payment instructions."
+  },
+  "navigation": {
+    "client": {
+      "home": "Home",
+      "findCoaches": "Find Coaches",
+      "marketplace": "Marketplace",
+      "messages": "Messages",
+      "connections": "Connections",
+      "myTraining": "My Training",
+      "myCoaches": "My Coaches",
+      "sessions": "Sessions",
+      "myPlans": "My Plans",
+      "myLibrary": "My Library",
+      "progressHabits": "Progress & Habits",
+      "progress": "Progress",
+      "habits": "Habits",
+      "foodDiary": "Food Diary",
+      "trainingLogs": "Training Logs",
+      "competition": "Competition",
+      "achievements": "Achievements",
+      "leaderboard": "Leaderboard",
+      "challenges": "Challenges",
+      "utilities": "Utilities",
+      "tools": "Tools",
+      "shopping": "Shopping",
+      "receipts": "Receipts",
+      "favourites": "Favourites",
+      "myGyms": "My Gyms",
+      "myGymsList": "My Gyms",
+      "settings": "Settings"
+    }
   }
 }

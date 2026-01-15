@@ -86,10 +86,11 @@ export function LocationSwitcher({ compact = false }: LocationSwitcherProps) {
   // Multiple locations - show dropdown
   return (
     <Select
+      key={`location-select-${currentLocationId || "all"}`}
       value={currentLocationId || "all"}
       onValueChange={handleLocationChange}
     >
-      <SelectTrigger className={compact ? "h-8 text-xs" : ""}>
+      <SelectTrigger className={compact ? "h-8 text-xs" : "w-full"}>
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <SelectValue>
@@ -97,7 +98,7 @@ export function LocationSwitcher({ compact = false }: LocationSwitcherProps) {
           </SelectValue>
         </div>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="z-50">
         {isOwner && (
           <SelectItem value="all">
             <div className="flex items-center gap-2">
