@@ -235,7 +235,12 @@ export function ClassFormDialog({
         endTime = endDate.toISOString();
       }
 
+      // Get class name from selected class type
+      const selectedClassType = classTypes?.find(ct => ct.id === values.class_type_id);
+      const className = selectedClassType?.name || "Class";
+
       const classData = {
+        name: className,
         class_type_id: values.class_type_id,
         start_time: startTime,
         end_time: endTime,
