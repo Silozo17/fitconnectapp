@@ -57,15 +57,22 @@ serve(async (req) => {
       });
     }
 
-    // Verify user is staff at this gym
+    // Verify user is staff or owner at this gym
     const { data: staffRecord } = await supabase
       .from("gym_staff")
       .select("id")
       .eq("gym_id", templateClass.gym_id)
       .eq("user_id", user.id)
-      .single();
+      .maybeSingle();
 
-    if (!staffRecord) {
+    const { data: gymProfile } = await supabase
+      .from("gym_profiles")
+      .select("id")
+      .eq("id", templateClass.gym_id)
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    if (!staffRecord && !gymProfile) {
       return new Response(JSON.stringify({ error: "Not authorized" }), {
         status: 403,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
