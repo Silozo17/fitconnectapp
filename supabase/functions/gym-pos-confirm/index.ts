@@ -25,7 +25,7 @@ serve(async (req) => {
 
     // Get the sale
     const { data: sale, error: saleError } = await supabaseClient
-      .from("gym_pos_sales")
+      .from("gym_product_sales")
       .select("*")
       .eq("id", saleId)
       .single();
@@ -34,18 +34,33 @@ serve(async (req) => {
 
     // Update sale status to completed
     await supabaseClient
-      .from("gym_pos_sales")
-      .update({ payment_status: "completed" })
+      .from("gym_product_sales")
+      .update({ status: "completed" })
       .eq("id", saleId);
 
+    // Get sale items from the items table
+    const { data: saleItems } = await supabaseClient
+      .from("gym_product_sale_items")
+      .select("product_id, quantity")
+      .eq("sale_id", saleId);
+
     // Decrement stock for each item
-    const items = sale.items as Array<{ productId?: string; quantity: number }>;
-    for (const item of items) {
-      if (item.productId) {
-        await supabaseClient.rpc("decrement_product_stock", {
-          p_product_id: item.productId,
-          p_quantity: item.quantity
-        });
+    for (const item of saleItems || []) {
+      if (item.product_id) {
+        const { data: product } = await supabaseClient
+          .from("gym_products")
+          .select("stock_quantity")
+          .eq("id", item.product_id)
+          .single();
+        
+        if (product) {
+          await supabaseClient
+            .from("gym_products")
+            .update({ 
+              stock_quantity: Math.max(0, (product.stock_quantity || 0) - item.quantity) 
+            })
+            .eq("id", item.product_id);
+        }
       }
     }
 
