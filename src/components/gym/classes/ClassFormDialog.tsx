@@ -91,7 +91,6 @@ export function ClassFormDialog({
     endType: "occurrences",
     occurrences: 12,
     timeOfDay: format(defaultDate, "HH:mm"),
-    durationMinutes: 60,
   });
 
   const form = useForm<ClassFormValues>({
@@ -193,7 +192,7 @@ export function ClassFormDialog({
         const [hours, minutes] = recurringConfig.timeOfDay.split(":").map(Number);
         baseDate.setHours(hours, minutes, 0, 0);
 
-        const endDate = new Date(baseDate.getTime() + (recurringConfig.durationMinutes || 60) * 60 * 1000);
+        const endDate = new Date(baseDate.getTime() + values.duration_minutes * 60 * 1000);
 
         startTime = baseDate.toISOString();
         endTime = endDate.toISOString();
@@ -276,7 +275,7 @@ export function ClassFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>{isEditing ? "Edit Class" : "Add New Class"}</DialogTitle>
           <DialogDescription>
@@ -456,50 +455,20 @@ export function ClassFormDialog({
                   )}
                 />
                 
-                {/* Time and Duration */}
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="start_time"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Start Time *</FormLabel>
-                        <FormControl>
-                          <Input type="time" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="duration_minutes"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Duration</FormLabel>
-                        <Select
-                          value={field.value?.toString()}
-                          onValueChange={(v) => field.onChange(parseInt(v))}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="30">30 minutes</SelectItem>
-                            <SelectItem value="45">45 minutes</SelectItem>
-                            <SelectItem value="60">1 hour</SelectItem>
-                            <SelectItem value="90">1.5 hours</SelectItem>
-                            <SelectItem value="120">2 hours</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                {/* Start Time */}
+                <FormField
+                  control={form.control}
+                  name="start_time"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Time *</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
             )}
 
