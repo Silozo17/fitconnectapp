@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useGym } from "@/contexts/GymContext";
 import { toast } from "sonner";
 
-export interface OpeningHours {
+export interface LocationOpeningHours {
   [day: string]: {
     open: string;
     close: string;
@@ -36,7 +36,7 @@ export interface GymLocation {
   currency: string | null;
   // New fields
   member_number_prefix: string | null;
-  opening_hours: OpeningHours | null;
+  opening_hours: LocationOpeningHours | null;
 }
 
 export function useGymLocations() {
