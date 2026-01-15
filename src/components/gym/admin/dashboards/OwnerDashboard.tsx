@@ -193,7 +193,9 @@ export function OwnerDashboard() {
               <CheckSquare className="h-5 w-5" />
               My Tasks
             </CardTitle>
-            <Badge variant="secondary">{tasks?.length || 0}</Badge>
+            {tasks && tasks.length > 0 && (
+              <Badge variant="secondary">{tasks.length}</Badge>
+            )}
           </CardHeader>
           <CardContent>
             {tasks && tasks.length > 0 ? (
