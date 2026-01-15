@@ -13,12 +13,14 @@ interface CheckInResult {
 
 interface UseCheckInFeedbackOptions {
   gymId: string;
+  locationId?: string;
   onCheckInSuccess?: (result: CheckInResult) => void;
   onCheckInError?: (result: CheckInResult) => void;
 }
 
 export function useCheckInFeedback({
   gymId,
+  locationId,
   onCheckInSuccess,
   onCheckInError,
 }: UseCheckInFeedbackOptions) {
@@ -143,7 +145,7 @@ export function useCheckInFeedback({
             status,
             first_name,
             last_name,
-            gym_memberships(id, status, end_date, credits_remaining, plan:membership_plans(name, unlimited_classes))
+            gym_memberships(id, status, end_date, credits_remaining, location_id, plan:membership_plans(name, unlimited_classes, locations_access))
           `)
           .eq("id", memberId)
           .eq("gym_id", gymId)
@@ -218,6 +220,26 @@ export function useCheckInFeedback({
           setLastResult(result);
           onCheckInError?.(result);
           return result;
+        }
+
+        // Check location access (null or empty means all locations allowed - Platinum)
+        const locationsAccess = activeMembership.plan?.locations_access as string[] | null;
+        if (locationsAccess && locationsAccess.length > 0 && locationId) {
+          if (!locationsAccess.includes(locationId)) {
+            const result: CheckInResult = {
+              success: false,
+              memberName,
+              reason: "Membership not valid at this location",
+              memberId: member.id,
+              membershipStatus: "location_restricted",
+            };
+            playErrorSound();
+            triggerFlash("red");
+            await createErrorNotification(result);
+            setLastResult(result);
+            onCheckInError?.(result);
+            return result;
+          }
         }
 
         // Check credits (unless unlimited)

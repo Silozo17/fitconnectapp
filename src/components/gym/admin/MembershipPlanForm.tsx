@@ -32,11 +32,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Plus, X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2, MapPin, Building2, Crown } from "lucide-react";
 import { useCreateMembershipPlan, useUpdateMembershipPlan, MembershipPlan } from "@/hooks/gym/useGymMemberships";
+import { useGymLocations } from "@/hooks/gym/useGymLocations";
 import { useGym } from "@/contexts/GymContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const planSchema = z.object({
   name: z.string().min(1, "Plan name is required"),
@@ -62,6 +65,8 @@ const planSchema = z.object({
   is_featured: z.boolean().default(false),
   badge_text: z.string().optional().nullable(),
   badge_color: z.string().optional().nullable(),
+  location_access_type: z.enum(["all", "selected", "single"]).default("all"),
+  locations_access: z.array(z.string()).optional().nullable(),
 });
 
 type PlanFormData = z.infer<typeof planSchema>;
@@ -78,10 +83,22 @@ export function MembershipPlanForm({
   editPlan,
 }: MembershipPlanFormProps) {
   const { gym } = useGym();
+  const { data: locations } = useGymLocations();
   const createPlan = useCreateMembershipPlan();
   const updatePlan = useUpdateMembershipPlan();
   const [isSyncingStripe, setIsSyncingStripe] = useState(false);
   const [newFeature, setNewFeature] = useState("");
+
+  // Determine location_access_type from existing data
+  const getLocationAccessType = (locationsAccess: string[] | null | undefined): "all" | "selected" | "single" => {
+    if (!locationsAccess || locationsAccess.length === 0 || locationsAccess.includes("*")) {
+      return "all";
+    }
+    if (locationsAccess.length === 1) {
+      return "single";
+    }
+    return "selected";
+  };
 
   const form = useForm<PlanFormData>({
     resolver: zodResolver(planSchema),
@@ -110,6 +127,8 @@ export function MembershipPlanForm({
           is_featured: editPlan.is_featured,
           badge_text: editPlan.badge_text,
           badge_color: editPlan.badge_color,
+          location_access_type: getLocationAccessType(editPlan.locations_access),
+          locations_access: editPlan.locations_access?.filter(l => l !== "*") || [],
         }
       : {
           name: "",
@@ -135,6 +154,8 @@ export function MembershipPlanForm({
           is_featured: false,
           badge_text: null,
           badge_color: null,
+          location_access_type: "all",
+          locations_access: [],
         },
   });
 
@@ -158,14 +179,42 @@ export function MembershipPlanForm({
 
   const onSubmit = async (data: PlanFormData) => {
     try {
+      // Determine locations_access based on access type
+      let locationsAccess: string[] | null = null;
+      if (data.location_access_type === "all") {
+        locationsAccess = null; // null means all locations
+      } else if (data.location_access_type === "selected" || data.location_access_type === "single") {
+        locationsAccess = data.locations_access || [];
+      }
+
       // Convert amounts to cents
       const planData = {
-        ...data,
+        name: data.name,
+        description: data.description,
+        plan_type: data.plan_type,
         price_amount: Math.round(data.price_amount * 100),
+        currency: data.currency,
+        billing_interval: data.billing_interval,
+        billing_interval_count: data.billing_interval_count,
         setup_fee: Math.round((data.setup_fee || 0) * 100),
+        class_credits: data.class_credits,
+        credits_expire_days: data.credits_expire_days,
+        unlimited_classes: data.unlimited_classes,
+        max_classes_per_week: data.max_classes_per_week,
+        max_classes_per_day: data.max_classes_per_day,
+        min_commitment_months: data.min_commitment_months,
+        notice_period_days: data.notice_period_days,
         cancellation_fee: data.cancellation_fee
           ? Math.round(data.cancellation_fee * 100)
           : null,
+        trial_days: data.trial_days,
+        features: data.features,
+        is_active: data.is_active,
+        is_visible: data.is_visible,
+        is_featured: data.is_featured,
+        badge_text: data.badge_text,
+        badge_color: data.badge_color,
+        locations_access: locationsAccess,
       };
 
       let savedPlan: MembershipPlan;
@@ -529,6 +578,132 @@ export function MembershipPlanForm({
                 )}
               </CardContent>
             </Card>
+
+            {/* Location Access */}
+            {locations && locations.length > 1 && (
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Location Access
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="location_access_type"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Which locations can members use?</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            value={field.value}
+                            className="space-y-2"
+                          >
+                            <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 cursor-pointer">
+                              <RadioGroupItem value="all" id="all_locations" />
+                              <div className="flex-1">
+                                <label htmlFor="all_locations" className="flex items-center gap-2 font-medium cursor-pointer">
+                                  <Crown className="h-4 w-4 text-amber-500" />
+                                  All Locations (Platinum)
+                                </label>
+                                <p className="text-sm text-muted-foreground">
+                                  Member can access any gym location
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 cursor-pointer">
+                              <RadioGroupItem value="selected" id="selected_locations" />
+                              <div className="flex-1">
+                                <label htmlFor="selected_locations" className="flex items-center gap-2 font-medium cursor-pointer">
+                                  <Building2 className="h-4 w-4" />
+                                  Selected Locations
+                                </label>
+                                <p className="text-sm text-muted-foreground">
+                                  Member can access specific locations only
+                                </p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 cursor-pointer">
+                              <RadioGroupItem value="single" id="single_location" />
+                              <div className="flex-1">
+                                <label htmlFor="single_location" className="flex items-center gap-2 font-medium cursor-pointer">
+                                  <MapPin className="h-4 w-4" />
+                                  Single Location
+                                </label>
+                                <p className="text-sm text-muted-foreground">
+                                  Member can only access one location
+                                </p>
+                              </div>
+                            </div>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {(form.watch("location_access_type") === "selected" || 
+                    form.watch("location_access_type") === "single") && (
+                    <FormField
+                      control={form.control}
+                      name="locations_access"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {form.watch("location_access_type") === "single" 
+                              ? "Select Location" 
+                              : "Select Locations"}
+                          </FormLabel>
+                          <div className="space-y-2">
+                            {locations?.map((location) => (
+                              <div
+                                key={location.id}
+                                className="flex items-center space-x-3 rounded-lg border p-3"
+                              >
+                                <Checkbox
+                                  id={location.id}
+                                  checked={field.value?.includes(location.id) || false}
+                                  onCheckedChange={(checked) => {
+                                    const currentValue = field.value || [];
+                                    if (form.watch("location_access_type") === "single") {
+                                      // Single selection mode
+                                      field.onChange(checked ? [location.id] : []);
+                                    } else {
+                                      // Multiple selection mode
+                                      if (checked) {
+                                        field.onChange([...currentValue, location.id]);
+                                      } else {
+                                        field.onChange(currentValue.filter(id => id !== location.id));
+                                      }
+                                    }
+                                  }}
+                                />
+                                <label
+                                  htmlFor={location.id}
+                                  className="flex-1 cursor-pointer"
+                                >
+                                  <span className="font-medium">{location.name}</span>
+                                  {location.city && (
+                                    <span className="text-sm text-muted-foreground ml-2">
+                                      {location.city}
+                                    </span>
+                                  )}
+                                </label>
+                              </div>
+                            ))}
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             {/* Cancellation */}
             {watchPlanType === "recurring" && (

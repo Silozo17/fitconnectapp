@@ -34,10 +34,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 import { RecurringClassConfig, RecurringConfig } from "./RecurringClassConfig";
-import { format, addDays, addWeeks, addMonths, setHours, setMinutes } from "date-fns";
-import { Loader2, ChevronDown } from "lucide-react";
+import { format } from "date-fns";
+import { Loader2, Calendar, Repeat } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const classFormSchema = z.object({
   class_type_id: z.string().min(1, "Class type is required"),
@@ -49,7 +52,7 @@ const classFormSchema = z.object({
   waitlist_capacity: z.coerce.number().min(0).default(0),
   room: z.string().optional(),
   description: z.string().optional(),
-  is_recurring: z.boolean().default(false),
+  class_schedule_type: z.enum(["one_off", "recurring"]).default("one_off"),
 });
 
 type ClassFormValues = z.infer<typeof classFormSchema>;
@@ -73,6 +76,7 @@ export function ClassFormDialog({
   const { data: locations, isLoading: locationsLoading } = useGymLocations();
   const createClass = useCreateGymClass();
   const updateClass = useUpdateGymClass();
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const isEditing = !!classToEdit;
 
@@ -97,7 +101,7 @@ export function ClassFormDialog({
       waitlist_capacity: 5,
       room: "",
       description: "",
-      is_recurring: false,
+      class_schedule_type: "one_off",
     },
   });
 
@@ -114,7 +118,7 @@ export function ClassFormDialog({
         waitlist_capacity: classToEdit.waitlist_capacity,
         room: classToEdit.room || "",
         description: classToEdit.description || "",
-        is_recurring: classToEdit.is_recurring,
+        class_schedule_type: classToEdit.is_recurring ? "recurring" : "one_off",
       });
     } else {
       form.reset({
@@ -127,7 +131,7 @@ export function ClassFormDialog({
         waitlist_capacity: 5,
         room: "",
         description: "",
-        is_recurring: false,
+        class_schedule_type: "one_off",
       });
     }
   }, [classToEdit, defaultDate, form]);
@@ -149,6 +153,17 @@ export function ClassFormDialog({
 
   const onSubmit = async (values: ClassFormValues) => {
     try {
+      const isRecurring = values.class_schedule_type === "recurring";
+      
+      // Build recurring pattern if needed
+      const recurringPattern = isRecurring ? {
+        frequency: recurringConfig.frequency,
+        daysOfWeek: recurringConfig.daysOfWeek,
+        endType: recurringConfig.endType,
+        endDate: recurringConfig.endDate,
+        occurrences: recurringConfig.occurrences,
+      } : null;
+
       const classData = {
         class_type_id: values.class_type_id,
         start_time: new Date(values.start_time).toISOString(),
@@ -159,7 +174,9 @@ export function ClassFormDialog({
         waitlist_capacity: values.waitlist_capacity,
         room: values.room || null,
         description: values.description || null,
-        is_recurring: values.is_recurring,
+        is_recurring: isRecurring,
+        is_recurring_template: isRecurring,
+        recurring_pattern: recurringPattern,
         status: "scheduled",
       };
 
@@ -169,7 +186,38 @@ export function ClassFormDialog({
           updates: classData,
         });
       } else {
-        await createClass.mutateAsync(classData);
+        const result = await createClass.mutateAsync(classData);
+        
+        // If recurring, generate class instances
+        if (isRecurring && result?.id) {
+          setIsGenerating(true);
+          try {
+            const { data: session } = await supabase.auth.getSession();
+            const { data, error } = await supabase.functions.invoke(
+              "gym-generate-recurring-classes",
+              {
+                body: {
+                  templateClassId: result.id,
+                  weeksAhead: 8,
+                },
+                headers: {
+                  Authorization: `Bearer ${session.session?.access_token}`,
+                },
+              }
+            );
+
+            if (error) {
+              console.error("Failed to generate recurring classes:", error);
+              toast.error("Class template created, but failed to generate instances");
+            } else {
+              toast.success(`Generated ${data?.created || 0} class instances`);
+            }
+          } catch (err) {
+            console.error("Error generating recurring classes:", err);
+          } finally {
+            setIsGenerating(false);
+          }
+        }
       }
 
       onOpenChange(false);
@@ -180,7 +228,7 @@ export function ClassFormDialog({
   };
 
   const isLoading = classTypesLoading || staffLoading || locationsLoading;
-  const isSubmitting = createClass.isPending || updateClass.isPending;
+  const isSubmitting = createClass.isPending || updateClass.isPending || isGenerating;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -389,30 +437,62 @@ export function ClassFormDialog({
               )}
             />
 
-            {/* Recurring */}
+            {/* Class Schedule Type */}
             <FormField
               control={form.control}
-              name="is_recurring"
+              name="class_schedule_type"
               render={({ field }) => (
-                <FormItem className="flex items-center justify-between rounded-lg border p-4">
-                  <div className="space-y-0.5">
-                    <FormLabel>Recurring Class</FormLabel>
-                    <FormDescription>
-                      Create this class on a weekly schedule
-                    </FormDescription>
-                  </div>
+                <FormItem className="space-y-3">
+                  <FormLabel>Class Schedule</FormLabel>
                   <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      <div>
+                        <RadioGroupItem
+                          value="one_off"
+                          id="one_off"
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor="one_off"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        >
+                          <Calendar className="mb-3 h-6 w-6" />
+                          <span className="font-medium">One-off Class</span>
+                          <span className="text-xs text-muted-foreground text-center mt-1">
+                            Single occurrence
+                          </span>
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem
+                          value="recurring"
+                          id="recurring"
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor="recurring"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        >
+                          <Repeat className="mb-3 h-6 w-6" />
+                          <span className="font-medium">Recurring Class</span>
+                          <span className="text-xs text-muted-foreground text-center mt-1">
+                            Repeats on schedule
+                          </span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />
 
             {/* Recurring Configuration */}
-            {form.watch("is_recurring") && (
+            {form.watch("class_schedule_type") === "recurring" && (
               <RecurringClassConfig
                 config={recurringConfig}
                 onChange={setRecurringConfig}
