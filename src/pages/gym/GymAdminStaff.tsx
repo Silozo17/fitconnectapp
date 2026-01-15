@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useGym } from "@/contexts/GymContext";
 import { useGymStaff } from "@/hooks/gym/useGymStaff";
 import { InviteStaffDialog } from "@/components/gym/admin/dialogs/InviteStaffDialog";
+import { EditStaffDialog } from "@/components/gym/admin/dialogs/EditStaffDialog";
+import { RemoveStaffDialog } from "@/components/gym/admin/dialogs/RemoveStaffDialog";
 import {
   useGymStaffShifts,
   useCreateStaffShift,
@@ -43,6 +45,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   Users,
   Calendar,
   Clock,
@@ -54,6 +63,9 @@ import {
   Mail,
   Shield,
   Settings,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
 } from "lucide-react";
 import { format, addDays, startOfWeek, parseISO } from "date-fns";
 import { toast } from "sonner";
@@ -68,6 +80,10 @@ export default function GymAdminStaff() {
   const [showInviteDialog, setShowInviteDialog] = useState(false);
   const [showPayRateDialog, setShowPayRateDialog] = useState(false);
   const [showPermissionsDialog, setShowPermissionsDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [staffToEdit, setStaffToEdit] = useState<any>(null);
+  const [staffToRemove, setStaffToRemove] = useState<{ id: string; name: string } | null>(null);
   const [selectedStaffForPermissions, setSelectedStaffForPermissions] = useState<any>(null);
 
   // Date range for shifts (current week)
@@ -302,29 +318,61 @@ export default function GymAdminStaff() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedStaffId(staff.id);
-                              setPayRateForm((prev) => ({ ...prev, staff_id: staff.id }));
-                              setShowPayRateDialog(true);
-                            }}
-                          >
-                            <DollarSign className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedStaffForPermissions(staff);
-                              setShowPermissionsDialog(true);
-                            }}
-                          >
-                            <Shield className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setStaffToEdit(staff);
+                                setShowEditDialog(true);
+                              }}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedStaffId(staff.id);
+                                setPayRateForm((prev) => ({ ...prev, staff_id: staff.id }));
+                                setShowPayRateDialog(true);
+                              }}
+                            >
+                              <DollarSign className="mr-2 h-4 w-4" />
+                              Set Pay Rate
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedStaffForPermissions(staff);
+                                setShowPermissionsDialog(true);
+                              }}
+                            >
+                              <Shield className="mr-2 h-4 w-4" />
+                              Permissions
+                            </DropdownMenuItem>
+                            {staff.role !== "owner" && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  onClick={() => {
+                                    setStaffToRemove({
+                                      id: staff.id,
+                                      name: staff.display_name || staff.email || "this staff member",
+                                    });
+                                    setShowRemoveDialog(true);
+                                  }}
+                                >
+                                  <Trash2 className="mr-2 h-4 w-4" />
+                                  Remove
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -797,6 +845,21 @@ export default function GymAdminStaff() {
           onOpenChange={setShowPermissionsDialog}
         />
       )}
+
+      {/* Edit Staff Dialog */}
+      <EditStaffDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        staff={staffToEdit}
+      />
+
+      {/* Remove Staff Dialog */}
+      <RemoveStaffDialog
+        open={showRemoveDialog}
+        onOpenChange={setShowRemoveDialog}
+        staffId={staffToRemove?.id || null}
+        staffName={staffToRemove?.name || ""}
+      />
     </div>
   );
 }

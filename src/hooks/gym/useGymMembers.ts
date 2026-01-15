@@ -254,6 +254,38 @@ export function useUpdateGymMember() {
   });
 }
 
+export function useDeleteGymMember() {
+  const { gym } = useGym();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ memberId, hardDelete = false }: { memberId: string; hardDelete?: boolean }) => {
+      if (hardDelete) {
+        const { error } = await supabase
+          .from("gym_members")
+          .delete()
+          .eq("id", memberId);
+        if (error) throw error;
+      } else {
+        // Soft delete - set status to 'deleted'
+        const { error } = await supabase
+          .from("gym_members")
+          .update({ status: "deleted" })
+          .eq("id", memberId);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gym-members", gym?.id] });
+      toast.success("Member deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to delete member:", error);
+      toast.error("Failed to delete member");
+    },
+  });
+}
+
 export function useGymMemberStats() {
   const { gym } = useGym();
 

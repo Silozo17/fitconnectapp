@@ -165,3 +165,35 @@ export function useUpdateGymLocation() {
     },
   });
 }
+
+export function useDeleteGymLocation() {
+  const { gym } = useGym();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ locationId, hardDelete = false }: { locationId: string; hardDelete?: boolean }) => {
+      if (hardDelete) {
+        const { error } = await (supabase as any)
+          .from("gym_locations")
+          .delete()
+          .eq("id", locationId);
+        if (error) throw error;
+      } else {
+        // Soft delete - set is_active to false
+        const { error } = await (supabase as any)
+          .from("gym_locations")
+          .update({ is_active: false })
+          .eq("id", locationId);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gym-locations", gym?.id] });
+      toast.success("Location deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Failed to delete location:", error);
+      toast.error("Failed to delete location");
+    },
+  });
+}
