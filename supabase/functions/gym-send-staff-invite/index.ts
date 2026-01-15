@@ -1,5 +1,13 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { 
+  baseEmailTemplate, 
+  freeFloatingAvatarComponent,
+  ctaButton,
+  infoCard,
+  EMAIL_CONFIG,
+  getEmailAvatarUrl
+} from "../_shared/email-templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -72,19 +80,6 @@ const ROLE_INFO: Record<string, { label: string; description: string; responsibi
   },
 };
 
-const EMAIL_CONFIG = {
-  colors: {
-    primary: "#BEFF00",
-    primaryDark: "#9acc00",
-    background: "#0D0D14",
-    cardBg: "#1a1a24",
-    text: "#ffffff",
-    textMuted: "#a0a0a0",
-    textDark: "#666666",
-    border: "rgba(190, 255, 0, 0.2)",
-  },
-};
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -144,7 +139,7 @@ serve(async (req) => {
 
     // Build responsibilities list
     const responsibilitiesHtml = roleInfo.responsibilities
-      .map((r) => `<li style="color: ${colors.textMuted}; margin-bottom: 8px;">${r}</li>`)
+      .map((r) => `<li style="color: ${colors.textMuted}; margin-bottom: 8px; font-size: 14px;">${r}</li>`)
       .join("");
 
     // Build locations display
@@ -153,7 +148,7 @@ serve(async (req) => {
       : "All locations";
 
     // Build disciplines display for coaches
-    let disciplinesHtml = "";
+    let disciplineDisplay = "";
     if (invitation.role === "coach" && invitation.disciplines && invitation.disciplines.length > 0) {
       const disciplineLabels = invitation.disciplines.map((d: string) => {
         const labels: Record<string, string> = {
@@ -175,128 +170,131 @@ serve(async (req) => {
         };
         return labels[d] || d;
       });
-      disciplinesHtml = `
-        <tr>
-          <td style="color: ${colors.textMuted}; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px;">Disciplines</td>
-          <td style="color: ${colors.text}; font-weight: 500; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: right; font-size: 14px;">${disciplineLabels.join(", ")}</td>
-        </tr>
-      `;
+      disciplineDisplay = disciplineLabels.join(", ");
     }
 
-    const emailHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>You're Invited to Join ${gymName}</title>
-</head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: ${colors.background}; color: ${colors.text}; padding: 40px 20px; margin: 0;">
-  <div style="max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, ${colors.cardBg} 0%, ${colors.background} 100%); border-radius: 16px; padding: 40px; border: 1px solid ${colors.border};">
+    // Get mascot avatar for team/staff themed email
+    const avatarUrl = getEmailAvatarUrl('new_client', supabaseUrl);
+
+    // Build info card items
+    const infoItems = [
+      { label: "Role", value: roleInfo.label },
+      { label: "Gym", value: gymName },
+      { label: "Location(s)", value: locationsDisplay },
+    ];
     
-    <!-- Header -->
-    <div style="text-align: center; margin-bottom: 32px;">
-      <h1 style="color: ${colors.primary}; margin: 0; font-size: 28px;">FitConnect</h1>
-    </div>
-    
-    <!-- Gym Logo -->
-    ${gym?.logo_url ? `
-    <div style="text-align: center; margin-bottom: 24px;">
-      <img src="${gym.logo_url}" alt="${gymName}" style="max-width: 120px; max-height: 80px; object-fit: contain;">
-    </div>
-    ` : ""}
-    
-    <!-- Main Heading -->
-    <h2 style="color: ${colors.text}; margin-bottom: 16px; text-align: center; font-size: 24px;">
-      🎉 You're Invited!
-    </h2>
-    
-    <!-- Greeting -->
-    <p style="color: ${colors.textMuted}; line-height: 1.6; margin-bottom: 24px; text-align: center; font-size: 16px;">
-      Hi ${firstName},<br/><br/>
-      <strong style="color: ${colors.primary};">${inviterName}</strong> has invited you to join 
-      <strong style="color: ${colors.text};">${gymName}</strong> as a 
-      <strong style="color: ${colors.primary};">${roleInfo.label}</strong>.
-    </p>
-    
-    <!-- Role Info Card -->
-    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(190, 255, 0, 0.08); border-radius: 12px; margin: 24px 0; border: 1px solid ${colors.border};">
-      <tr>
-        <td style="padding: 20px;">
-          <h3 style="color: ${colors.primary}; margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">Your Role Details</h3>
-          <table width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr>
-              <td style="color: ${colors.textMuted}; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px;">Role</td>
-              <td style="color: ${colors.text}; font-weight: 500; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: right; font-size: 14px;">${roleInfo.label}</td>
-            </tr>
-            <tr>
-              <td style="color: ${colors.textMuted}; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-size: 14px;">Gym</td>
-              <td style="color: ${colors.text}; font-weight: 500; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: right; font-size: 14px;">${gymName}</td>
-            </tr>
-            <tr>
-              <td style="color: ${colors.textMuted}; padding: 12px 0; ${disciplinesHtml ? 'border-bottom: 1px solid rgba(255,255,255,0.1);' : ''} font-size: 14px;">Location(s)</td>
-              <td style="color: ${colors.text}; font-weight: 500; padding: 12px 0; ${disciplinesHtml ? 'border-bottom: 1px solid rgba(255,255,255,0.1);' : ''} text-align: right; font-size: 14px;">${locationsDisplay}</td>
-            </tr>
-            ${disciplinesHtml}
-          </table>
-        </td>
-      </tr>
-    </table>
-    
-    <!-- What You'll Do Section -->
-    <div style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 24px; margin: 24px 0;">
-      <h3 style="color: ${colors.text}; margin: 0 0 16px 0; font-size: 16px;">🚀 What You'll Be Able To Do</h3>
-      <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
-        ${responsibilitiesHtml}
-      </ul>
-    </div>
-    
-    <!-- CTA Button -->
-    <div style="text-align: center; margin: 32px 0;">
-      <a href="${loginUrl}" style="display: inline-block; background: linear-gradient(135deg, ${colors.primary} 0%, ${colors.primaryDark} 100%); color: ${colors.background}; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
-        Accept Invitation & Login
-      </a>
-    </div>
-    
-    <!-- Login URL Text -->
-    <p style="color: ${colors.textMuted}; font-size: 13px; text-align: center; margin-bottom: 24px;">
-      Or visit: <a href="${loginUrl}" style="color: ${colors.primary};">${loginUrl}</a>
-    </p>
-    
-    <!-- Instructions -->
-    <div style="background: rgba(139, 92, 246, 0.1); border-radius: 12px; padding: 20px; margin: 24px 0;">
-      <h4 style="color: ${colors.text}; margin: 0 0 12px 0; font-size: 14px;">📝 How to Get Started</h4>
-      <ol style="color: ${colors.textMuted}; margin: 0; padding-left: 20px; line-height: 1.8; font-size: 14px;">
-        <li>Click the button above or visit the login page</li>
-        <li>Create an account or sign in with your existing FitConnect account</li>
-        <li>Use this email address: <strong style="color: ${colors.text};">${invitation.email}</strong></li>
-        <li>You'll be automatically connected to ${gymName}</li>
-      </ol>
-    </div>
-    
-    <!-- Footer -->
-    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 32px; padding-top: 24px;">
-      <p style="color: ${colors.textDark}; font-size: 12px; text-align: center; margin: 0 0 16px 0;">
-        This invitation expires in 7 days. If you didn't expect this invitation, you can safely ignore this email.
-      </p>
+    if (disciplineDisplay) {
+      infoItems.push({ label: "Disciplines", value: disciplineDisplay });
+    }
+
+    // Build email content using shared templates
+    const emailContent = `
+      <!-- Mascot Avatar -->
+      ${freeFloatingAvatarComponent(avatarUrl, "FitConnect Team Member", 140, 'center')}
       
-      <!-- Social Links -->
-      <div style="text-align: center; margin-bottom: 16px;">
-        <a href="https://instagram.com/get_fit_connect" style="color: ${colors.textMuted}; text-decoration: none; margin: 0 8px; font-size: 12px;">Instagram</a>
-        <span style="color: ${colors.textDark};">•</span>
-        <a href="https://facebook.com/FitConnectUK" style="color: ${colors.textMuted}; text-decoration: none; margin: 0 8px; font-size: 12px;">Facebook</a>
-        <span style="color: ${colors.textDark};">•</span>
-        <a href="https://x.com/FitConnectUK" style="color: ${colors.textMuted}; text-decoration: none; margin: 0 8px; font-size: 12px;">X</a>
-      </div>
+      <!-- Welcome Heading -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding-bottom: 16px;">
+            <h2 class="headline email-subheadline" style="color: ${colors.text}; margin: 0; font-size: 26px; font-weight: 700;">
+              🎉 You're Invited!
+            </h2>
+          </td>
+        </tr>
+      </table>
       
-      <p style="color: ${colors.textDark}; font-size: 11px; text-align: center; margin: 0;">
-        © ${new Date().getFullYear()} FitConnect. All rights reserved.
-      </p>
-    </div>
-  </div>
-</body>
-</html>
+      <!-- Greeting -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding-bottom: 24px;">
+            <p style="color: ${colors.textMuted}; line-height: 1.7; margin: 0; font-size: 16px;">
+              Hi ${firstName},<br/><br/>
+              <strong style="color: ${colors.primary};">${inviterName}</strong> has invited you to join 
+              <strong style="color: ${colors.text};">${gymName}</strong> as a 
+              <strong style="color: ${colors.primary};">${roleInfo.label}</strong>.
+            </p>
+          </td>
+        </tr>
+      </table>
+      
+      ${gym?.logo_url ? `
+      <!-- Gym Logo -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom: 24px;">
+        <tr>
+          <td align="center">
+            <img src="${gym.logo_url}" alt="${gymName}" style="max-width: 140px; max-height: 90px; object-fit: contain; border-radius: 8px;">
+          </td>
+        </tr>
+      </table>
+      ` : ""}
+      
+      <!-- Role Details Card -->
+      ${infoCard("Your Role Details", infoItems)}
+      
+      <!-- What You'll Do Section -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(255, 255, 255, 0.05); border-radius: 12px; margin: 24px 0;">
+        <tr>
+          <td style="padding: 24px;">
+            <h3 style="color: ${colors.text}; margin: 0 0 16px 0; font-size: 16px; font-weight: 600;">🚀 What You'll Be Able To Do</h3>
+            <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+              ${responsibilitiesHtml}
+            </ul>
+          </td>
+        </tr>
+      </table>
+      
+      <!-- CTA Button -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 32px 0;">
+        <tr>
+          <td>
+            ${ctaButton("Accept Invitation & Login", loginUrl)}
+          </td>
+        </tr>
+      </table>
+      
+      <!-- Login URL Text -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding-bottom: 24px;">
+            <p style="color: ${colors.textMuted}; font-size: 13px; margin: 0;">
+              Or visit: <a href="${loginUrl}" style="color: ${colors.primary};">${loginUrl}</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+      
+      <!-- Instructions -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background: rgba(139, 92, 246, 0.1); border-radius: 12px; margin: 24px 0;">
+        <tr>
+          <td style="padding: 24px;">
+            <h4 style="color: ${colors.text}; margin: 0 0 16px 0; font-size: 15px; font-weight: 600;">📝 How to Get Started</h4>
+            <ol style="color: ${colors.textMuted}; margin: 0; padding-left: 20px; line-height: 2; font-size: 14px;">
+              <li>Click the button above or visit the login page</li>
+              <li>Create an account or sign in with your existing FitConnect account</li>
+              <li>Use this email address: <strong style="color: ${colors.text};">${invitation.email}</strong></li>
+              <li>You'll be automatically connected to ${gymName}</li>
+            </ol>
+          </td>
+        </tr>
+      </table>
+      
+      <!-- Expiry Notice -->
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td align="center" style="padding-top: 16px;">
+            <p style="color: ${colors.textDark}; font-size: 12px; margin: 0;">
+              This invitation expires in 7 days. If you didn't expect this invitation, you can safely ignore this email.
+            </p>
+          </td>
+        </tr>
+      </table>
     `;
+
+    // Wrap content in the base email template
+    const emailHtml = baseEmailTemplate(
+      emailContent, 
+      `${inviterName} has invited you to join ${gymName} on FitConnect`
+    );
 
     // Send email via Resend
     if (!RESEND_API_KEY) {
@@ -313,7 +311,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: "FitConnect <noreply@getfitconnect.co.uk>",
         to: [invitation.email],
-        subject: `You're invited to join ${gymName} as ${roleInfo.label}!`,
+        subject: `🎉 You're invited to join ${gymName} as ${roleInfo.label}!`,
         html: emailHtml,
       }),
     });
