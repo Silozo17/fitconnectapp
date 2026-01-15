@@ -1,8 +1,9 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useGym } from "@/contexts/GymContext";
+import { useCheckInFeedback } from "@/hooks/gym/useCheckInFeedback";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,8 @@ import {
   XCircle,
   Loader2,
   Calendar,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import {
   Table,
@@ -38,7 +41,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Html5QrcodeScanner } from "html5-qrcode";
-import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
 
 interface CheckIn {
   id: string;
@@ -87,6 +90,20 @@ export default function GymAdminCheckIns() {
   const [manualMemberId, setManualMemberId] = useState("");
   const [searchResults, setSearchResults] = useState<MemberSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+
+  // Check-in feedback with audio/visual
+  const { validateAndCheckIn, isProcessing, lastResult, flashColor } = useCheckInFeedback({
+    gymId: gymId || "",
+    onCheckInSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gym-checkins", gymId] });
+      setSearchResults([]);
+      setSearchQuery("");
+    },
+    onCheckInError: () => {
+      // Errors are handled by the hook with notifications
+    },
+  });
   
   // Fetch today's check-ins
   const { data: checkIns = [], isLoading } = useQuery({
@@ -217,7 +234,7 @@ export default function GymAdminCheckIns() {
     }
   }, [searchQuery, gymId]);
 
-  // QR Scanner Component
+  // QR Scanner Component with feedback integration
   const QrScannerDialog = () => {
     const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
@@ -231,12 +248,12 @@ export default function GymAdminCheckIns() {
       );
 
       scannerRef.current.render(
-        (decodedText) => {
+        async (decodedText) => {
           // Expected format: gym-member:{memberId}
           const match = decodedText.match(/gym-member:([a-f0-9-]+)/);
           if (match) {
-            checkInMutation.mutate(match[1]);
             setShowQrScanner(false);
+            await validateAndCheckIn(match[1]);
           } else {
             toast.error("Invalid QR code format");
           }
@@ -255,12 +272,43 @@ export default function GymAdminCheckIns() {
       <Dialog open={showQrScanner} onOpenChange={setShowQrScanner}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Scan Member QR Code</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              Scan Member QR Code
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={() => setSoundEnabled(!soundEnabled)}
+              >
+                {soundEnabled ? (
+                  <Volume2 className="h-4 w-4" />
+                ) : (
+                  <VolumeX className="h-4 w-4" />
+                )}
+              </Button>
+            </DialogTitle>
             <DialogDescription>
               Point the camera at a member's QR code to check them in
             </DialogDescription>
           </DialogHeader>
           <div id="qr-reader" className="w-full" />
+          
+          {/* Last scan result */}
+          {lastResult && (
+            <div className={cn(
+              "p-4 rounded-lg text-center",
+              lastResult.success 
+                ? "bg-green-500/10 text-green-600 dark:text-green-400" 
+                : "bg-red-500/10 text-red-600 dark:text-red-400"
+            )}>
+              <p className="font-medium">{lastResult.memberName}</p>
+              {lastResult.success ? (
+                <p className="text-sm">✓ Checked in successfully</p>
+              ) : (
+                <p className="text-sm">✗ {lastResult.reason}</p>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     );
@@ -270,7 +318,11 @@ export default function GymAdminCheckIns() {
   const totalCheckIns = checkIns.length;
 
   return (
-    <div className="space-y-6">
+    <div className={cn(
+      "space-y-6 transition-all duration-300",
+      flashColor === "green" && "ring-4 ring-green-500 ring-opacity-50 rounded-lg",
+      flashColor === "red" && "ring-4 ring-red-500 ring-opacity-50 rounded-lg"
+    )}>
       {/* Header */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>

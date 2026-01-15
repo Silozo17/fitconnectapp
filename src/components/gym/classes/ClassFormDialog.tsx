@@ -34,8 +34,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { format } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { RecurringClassConfig, RecurringConfig } from "./RecurringClassConfig";
+import { format, addDays, addWeeks, addMonths, setHours, setMinutes } from "date-fns";
+import { Loader2, ChevronDown } from "lucide-react";
 
 const classFormSchema = z.object({
   class_type_id: z.string().min(1, "Class type is required"),
@@ -73,6 +75,15 @@ export function ClassFormDialog({
   const updateClass = useUpdateGymClass();
 
   const isEditing = !!classToEdit;
+
+  // Recurring config state
+  const [recurringConfig, setRecurringConfig] = useState<RecurringConfig>({
+    frequency: "weekly",
+    daysOfWeek: [new Date().getDay()],
+    endType: "occurrences",
+    occurrences: 12,
+    timeOfDay: format(defaultDate, "HH:mm"),
+  });
 
   const form = useForm<ClassFormValues>({
     resolver: zodResolver(classFormSchema),
@@ -399,6 +410,14 @@ export function ClassFormDialog({
                 </FormItem>
               )}
             />
+
+            {/* Recurring Configuration */}
+            {form.watch("is_recurring") && (
+              <RecurringClassConfig
+                config={recurringConfig}
+                onChange={setRecurringConfig}
+              />
+            )}
 
             <DialogFooter>
               <Button

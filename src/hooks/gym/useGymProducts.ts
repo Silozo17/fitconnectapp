@@ -234,12 +234,20 @@ export function useCreateSale() {
 
       if (itemsError) throw itemsError;
 
-      // Update inventory
+      // Update inventory - simple decrement
       for (const item of data.items) {
-        await (supabase as any)
+        const { data: product } = await (supabase as any)
           .from("gym_products")
-          .update({ stock_quantity: (supabase as any).rpc("decrement_stock", { product_id: item.product_id, qty: item.quantity }) })
-          .eq("id", item.product_id);
+          .select("stock_quantity")
+          .eq("id", item.product_id)
+          .single();
+        
+        if (product) {
+          await (supabase as any)
+            .from("gym_products")
+            .update({ stock_quantity: Math.max(0, (product.stock_quantity || 0) - item.quantity) })
+            .eq("id", item.product_id);
+        }
       }
 
       return sale;
