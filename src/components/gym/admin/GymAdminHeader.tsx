@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {
   Search,
-  Bell,
   Menu,
   User,
   LogOut,
@@ -24,6 +23,7 @@ import {
   HelpCircle,
   ExternalLink,
 } from "lucide-react";
+import { GymStaffNotificationCenter } from "./GymStaffNotificationCenter";
 
 interface GymAdminHeaderProps {
   onMenuToggle?: () => void;
@@ -72,11 +72,7 @@ export function GymAdminHeader({ onMenuToggle }: GymAdminHeaderProps) {
         )}
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-destructive" />
-          <span className="sr-only">Notifications</span>
-        </Button>
+        <GymStaffNotificationCenter />
 
         {/* User Menu */}
         <DropdownMenu>
@@ -101,7 +97,7 @@ export function GymAdminHeader({ onMenuToggle }: GymAdminHeaderProps) {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/coach/settings">
+              <Link to={`/gym-admin/${gym?.id}/my-profile`}>
                 <User className="mr-2 h-4 w-4" />
                 My Profile
               </Link>

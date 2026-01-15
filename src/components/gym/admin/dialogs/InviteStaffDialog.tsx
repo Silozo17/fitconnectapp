@@ -38,7 +38,26 @@ interface FormData {
   phone: string;
   role: string;
   locationIds: string[];
+  disciplines: string[];
 }
+
+const DISCIPLINES = [
+  { value: "personal_training", label: "Personal Training" },
+  { value: "boxing", label: "Boxing" },
+  { value: "mma", label: "MMA" },
+  { value: "bjj", label: "Brazilian Jiu-Jitsu" },
+  { value: "muay_thai", label: "Muay Thai" },
+  { value: "wrestling", label: "Wrestling" },
+  { value: "yoga", label: "Yoga" },
+  { value: "pilates", label: "Pilates" },
+  { value: "spinning", label: "Spinning / Cycling" },
+  { value: "crossfit", label: "CrossFit" },
+  { value: "strength", label: "Strength & Conditioning" },
+  { value: "nutrition", label: "Nutrition Coaching" },
+  { value: "swimming", label: "Swimming" },
+  { value: "dance", label: "Dance / Zumba" },
+  { value: "hiit", label: "HIIT" },
+];
 
 export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaffDialogProps) {
   const { gym } = useGym();
@@ -54,6 +73,7 @@ export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaff
     phone: "",
     role: "",
     locationIds: [],
+    disciplines: [],
   });
 
   const handleEmailBlur = async () => {
@@ -119,6 +139,7 @@ export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaff
           phone: formData.phone || null,
           role: formData.role,
           assigned_location_ids: formData.locationIds.length > 0 ? formData.locationIds : null,
+          disciplines: formData.role === "coach" && formData.disciplines.length > 0 ? formData.disciplines : null,
           status: "pending",
         });
 
@@ -136,7 +157,9 @@ export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaff
               phone: formData.phone || null,
               role: formData.role,
               assigned_location_ids: formData.locationIds.length > 0 ? formData.locationIds : null,
+              disciplines: formData.role === "coach" && formData.disciplines.length > 0 ? formData.disciplines : null,
               status: "pending",
+              can_teach_classes: formData.role === "coach",
             });
           
           if (staffError) throw staffError;
@@ -165,8 +188,18 @@ export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaff
       phone: "",
       role: "",
       locationIds: [],
+      disciplines: [],
     });
     setExistingUser(null);
+  };
+
+  const handleDisciplineToggle = (disciplineValue: string) => {
+    setFormData(prev => ({
+      ...prev,
+      disciplines: prev.disciplines.includes(disciplineValue)
+        ? prev.disciplines.filter(d => d !== disciplineValue)
+        : [...prev.disciplines, disciplineValue],
+    }));
   };
 
   return (
@@ -253,6 +286,33 @@ export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaff
               </SelectContent>
             </Select>
           </div>
+
+          {/* Disciplines - Only shown for Coach role */}
+          {formData.role === "coach" && (
+            <div className="space-y-2">
+              <Label>Disciplines / Specialties</Label>
+              <p className="text-xs text-muted-foreground">
+                Select the disciplines this coach can teach
+              </p>
+              <div className="space-y-2 max-h-40 overflow-y-auto border rounded-md p-2">
+                {DISCIPLINES.map((discipline) => (
+                  <div key={discipline.value} className="flex items-center gap-2">
+                    <Checkbox
+                      id={`disc-${discipline.value}`}
+                      checked={formData.disciplines.includes(discipline.value)}
+                      onCheckedChange={() => handleDisciplineToggle(discipline.value)}
+                    />
+                    <label
+                      htmlFor={`disc-${discipline.value}`}
+                      className="text-sm cursor-pointer flex-1"
+                    >
+                      {discipline.label}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Location Assignment */}
           {locations.length > 0 && (
