@@ -111,6 +111,8 @@ export function ClassFormDialog({
     },
   });
 
+  const scheduleType = form.watch("class_schedule_type");
+
   // Reset form when editing a class or when dialog opens
   useEffect(() => {
     if (classToEdit) {
@@ -372,7 +374,7 @@ export function ClassFormDialog({
                     >
                       <div 
                         className="relative cursor-pointer"
-                        onClick={() => form.setValue("class_schedule_type", "one_off")}
+                        onClick={() => field.onChange("one_off")}
                       >
                         <RadioGroupItem
                           value="one_off"
@@ -381,7 +383,7 @@ export function ClassFormDialog({
                         />
                         <div
                           className={`flex flex-col items-center justify-between rounded-md border-2 p-4 transition-all ${
-                            form.watch("class_schedule_type") === "one_off"
+                            field.value === "one_off"
                               ? "border-primary bg-primary/5"
                               : "border-muted bg-popover hover:bg-accent hover:text-accent-foreground"
                           }`}
@@ -395,7 +397,7 @@ export function ClassFormDialog({
                       </div>
                       <div 
                         className="relative cursor-pointer"
-                        onClick={() => form.setValue("class_schedule_type", "recurring")}
+                        onClick={() => field.onChange("recurring")}
                       >
                         <RadioGroupItem
                           value="recurring"
@@ -404,7 +406,7 @@ export function ClassFormDialog({
                         />
                         <div
                           className={`flex flex-col items-center justify-between rounded-md border-2 p-4 transition-all ${
-                            form.watch("class_schedule_type") === "recurring"
+                            field.value === "recurring"
                               ? "border-primary bg-primary/5"
                               : "border-muted bg-popover hover:bg-accent hover:text-accent-foreground"
                           }`}
@@ -424,7 +426,7 @@ export function ClassFormDialog({
             />
 
             {/* Recurring Configuration - Shows when recurring is selected */}
-            {form.watch("class_schedule_type") === "recurring" && (
+            {scheduleType === "recurring" && (
               <RecurringClassConfig
                 config={recurringConfig}
                 onChange={setRecurringConfig}
@@ -432,7 +434,7 @@ export function ClassFormDialog({
             )}
 
             {/* Date and Time Fields - For one-off classes */}
-            {form.watch("class_schedule_type") === "one_off" && (
+            {scheduleType === "one_off" && (
               <div className="space-y-4">
                 {/* Date Picker */}
                 <FormField
