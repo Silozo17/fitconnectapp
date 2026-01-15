@@ -347,3 +347,6 @@ verify_jwt = false
 
 [functions.gym-send-staff-invite]
 verify_jwt = true
+
+[functions.gym-accept-staff-invites]
+verify_jwt = true
