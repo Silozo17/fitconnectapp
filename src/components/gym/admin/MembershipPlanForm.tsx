@@ -65,7 +65,7 @@ const planSchema = z.object({
   is_featured: z.boolean().default(false),
   badge_text: z.string().optional().nullable(),
   badge_color: z.string().optional().nullable(),
-  location_access_type: z.enum(["all", "selected", "single"]).default("all"),
+  location_access_type: z.enum(["all", "single"]).default("all"),
   locations_access: z.array(z.string()).optional().nullable(),
 });
 
@@ -90,14 +90,12 @@ export function MembershipPlanForm({
   const [newFeature, setNewFeature] = useState("");
 
   // Determine location_access_type from existing data
-  const getLocationAccessType = (locationsAccess: string[] | null | undefined): "all" | "selected" | "single" => {
+  const getLocationAccessType = (locationsAccess: string[] | null | undefined): "all" | "single" => {
     if (!locationsAccess || locationsAccess.length === 0 || locationsAccess.includes("*")) {
       return "all";
     }
-    if (locationsAccess.length === 1) {
-      return "single";
-    }
-    return "selected";
+    // Any non-empty array means single location (member chooses at signup)
+    return "single";
   };
 
   const form = useForm<PlanFormData>({
@@ -183,8 +181,9 @@ export function MembershipPlanForm({
       let locationsAccess: string[] | null = null;
       if (data.location_access_type === "all") {
         locationsAccess = null; // null means all locations
-      } else if (data.location_access_type === "selected" || data.location_access_type === "single") {
-        locationsAccess = data.locations_access || [];
+      } else if (data.location_access_type === "single") {
+        // For single location plans, we store null - member chooses at signup
+        locationsAccess = null;
       }
 
       // Convert amounts to cents
@@ -606,23 +605,10 @@ export function MembershipPlanForm({
                               <div className="flex-1">
                                 <label htmlFor="all_locations" className="flex items-center gap-2 font-medium cursor-pointer">
                                   <Crown className="h-4 w-4 text-amber-500" />
-                                  All Locations (Platinum)
+                                  All Locations
                                 </label>
                                 <p className="text-sm text-muted-foreground">
                                   Member can access any gym location
-                                </p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center space-x-3 rounded-lg border p-4 hover:bg-accent/50 cursor-pointer">
-                              <RadioGroupItem value="selected" id="selected_locations" />
-                              <div className="flex-1">
-                                <label htmlFor="selected_locations" className="flex items-center gap-2 font-medium cursor-pointer">
-                                  <Building2 className="h-4 w-4" />
-                                  Selected Locations
-                                </label>
-                                <p className="text-sm text-muted-foreground">
-                                  Member can access specific locations only
                                 </p>
                               </div>
                             </div>
@@ -635,7 +621,7 @@ export function MembershipPlanForm({
                                   Single Location
                                 </label>
                                 <p className="text-sm text-muted-foreground">
-                                  Member can only access one location
+                                  Member chooses their home location during signup
                                 </p>
                               </div>
                             </div>
@@ -645,62 +631,6 @@ export function MembershipPlanForm({
                       </FormItem>
                     )}
                   />
-
-                  {(form.watch("location_access_type") === "selected" || 
-                    form.watch("location_access_type") === "single") && (
-                    <FormField
-                      control={form.control}
-                      name="locations_access"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>
-                            {form.watch("location_access_type") === "single" 
-                              ? "Select Location" 
-                              : "Select Locations"}
-                          </FormLabel>
-                          <div className="space-y-2">
-                            {locations?.map((location) => (
-                              <div
-                                key={location.id}
-                                className="flex items-center space-x-3 rounded-lg border p-3"
-                              >
-                                <Checkbox
-                                  id={location.id}
-                                  checked={field.value?.includes(location.id) || false}
-                                  onCheckedChange={(checked) => {
-                                    const currentValue = field.value || [];
-                                    if (form.watch("location_access_type") === "single") {
-                                      // Single selection mode
-                                      field.onChange(checked ? [location.id] : []);
-                                    } else {
-                                      // Multiple selection mode
-                                      if (checked) {
-                                        field.onChange([...currentValue, location.id]);
-                                      } else {
-                                        field.onChange(currentValue.filter(id => id !== location.id));
-                                      }
-                                    }
-                                  }}
-                                />
-                                <label
-                                  htmlFor={location.id}
-                                  className="flex-1 cursor-pointer"
-                                >
-                                  <span className="font-medium">{location.name}</span>
-                                  {location.city && (
-                                    <span className="text-sm text-muted-foreground ml-2">
-                                      {location.city}
-                                    </span>
-                                  )}
-                                </label>
-                              </div>
-                            ))}
-                          </div>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )}
                 </CardContent>
               </Card>
             )}

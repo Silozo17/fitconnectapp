@@ -19,6 +19,7 @@ interface MembershipPlan {
   unlimited_classes: boolean;
   trial_days: number | null;
   locations_access: string[] | null;
+  location_access_type: string | null;
 }
 
 interface PlanStepProps {
@@ -31,13 +32,10 @@ interface PlanStepProps {
 export function PlanStep({ plans, isLoading, onNext, onBack }: PlanStepProps) {
   const { formData, updateFormData } = useSignupWizard();
 
-  // Filter plans by selected location
-  const filteredPlans = plans.filter((plan) => {
-    if (!plan.locations_access || plan.locations_access.length === 0) {
-      return true; // No location restriction
-    }
-    return plan.locations_access.includes(formData.locationId!);
-  });
+  // For "single location" plans, show all plans (member chose location in step 1)
+  // For "all" plans, also show them (no restriction)
+  // We no longer filter by location since member picks location first, then sees all available plans
+  const filteredPlans = plans;
 
   const formatPrice = (amount: number, currency: string) => {
     return new Intl.NumberFormat("en-GB", {

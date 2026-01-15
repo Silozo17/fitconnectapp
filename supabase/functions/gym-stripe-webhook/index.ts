@@ -97,6 +97,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
   const gymId = session.metadata?.gym_id;
   const memberId = session.metadata?.member_id;
   const planId = session.metadata?.plan_id;
+  const locationId = session.metadata?.location_id; // Member's chosen location
 
   if (!gymId || !memberId || !planId) {
     console.log("[GYM-STRIPE-WEBHOOK] Missing metadata in checkout session");
@@ -135,6 +136,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       gym_id: gymId,
       member_id: memberId,
       plan_id: planId,
+      location_id: locationId || null, // Member's chosen location for single-location plans
       status: "active",
       start_date: startDate.toISOString(),
       end_date: endDate?.toISOString() || null,
