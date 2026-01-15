@@ -157,6 +157,11 @@ export function useUpdateGymLocation() {
       if (updates.email !== undefined) dbUpdates.email = updates.email;
       if (updates.is_primary !== undefined) dbUpdates.is_primary = updates.is_primary;
       if (updates.is_active !== undefined) dbUpdates.is_active = updates.is_active;
+      if (updates.timezone !== undefined) dbUpdates.timezone = updates.timezone;
+      if (updates.currency !== undefined) dbUpdates.currency = updates.currency;
+      if (updates.amenities !== undefined) dbUpdates.amenities = updates.amenities;
+      if (updates.member_number_prefix !== undefined) dbUpdates.member_number_prefix = updates.member_number_prefix;
+      if (updates.opening_hours !== undefined) dbUpdates.opening_hours = updates.opening_hours;
       
       const { data, error } = await (supabase as any)
         .from("gym_locations")
@@ -170,7 +175,6 @@ export function useUpdateGymLocation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["gym-locations", gym?.id] });
-      toast.success("Location updated successfully");
     },
     onError: (error) => {
       console.error("Failed to update location:", error);

@@ -202,7 +202,7 @@ export function GymAdminSidebar() {
       label: "General", 
       href: `${basePath}/settings`, 
       icon: Cog,
-      allowedRoles: ["owner", "area_manager"],
+      allowedRoles: ["owner", "area_manager", "manager"],
     },
   ];
 
