@@ -41,13 +41,15 @@ import { format } from "date-fns";
 import { Loader2, Calendar, Repeat, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SmartDateInput } from "@/components/ui/smart-date-input";
 
 const classFormSchema = z.object({
   class_type_id: z.string().min(1, "Class type is required"),
   location_id: z.string().optional(),
   class_schedule_type: z.enum(["one_off", "recurring"]).default("one_off"),
+  class_date: z.string().optional(),
   start_time: z.string().min(1, "Start time is required"),
-  end_time: z.string().min(1, "End time is required"),
+  duration_minutes: z.coerce.number().min(15).default(60),
   instructor_id: z.string().optional(),
   capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
   waitlist_capacity: z.coerce.number().min(0).default(0),
@@ -98,8 +100,9 @@ export function ClassFormDialog({
       class_type_id: "",
       location_id: defaultLocationId || "",
       class_schedule_type: "one_off",
-      start_time: format(defaultDate, "yyyy-MM-dd'T'HH:mm"),
-      end_time: format(new Date(defaultDate.getTime() + 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"),
+      class_date: format(defaultDate, "yyyy-MM-dd"),
+      start_time: format(defaultDate, "HH:mm"),
+      duration_minutes: 60,
       instructor_id: "none",
       capacity: 20,
       waitlist_capacity: 5,
@@ -111,12 +114,18 @@ export function ClassFormDialog({
   // Reset form when editing a class or when dialog opens
   useEffect(() => {
     if (classToEdit) {
+      const startDate = new Date(classToEdit.start_time);
+      const endDate = new Date(classToEdit.end_time);
+      const durationMs = endDate.getTime() - startDate.getTime();
+      const durationMinutes = Math.round(durationMs / 60000);
+      
       form.reset({
         class_type_id: classToEdit.class_type_id,
         location_id: classToEdit.location_id || "",
         class_schedule_type: classToEdit.is_recurring ? "recurring" : "one_off",
-        start_time: format(new Date(classToEdit.start_time), "yyyy-MM-dd'T'HH:mm"),
-        end_time: format(new Date(classToEdit.end_time), "yyyy-MM-dd'T'HH:mm"),
+        class_date: format(startDate, "yyyy-MM-dd"),
+        start_time: format(startDate, "HH:mm"),
+        duration_minutes: durationMinutes || 60,
         instructor_id: classToEdit.instructor_id || "none",
         capacity: classToEdit.capacity,
         waitlist_capacity: classToEdit.waitlist_capacity,
@@ -128,8 +137,9 @@ export function ClassFormDialog({
         class_type_id: "",
         location_id: defaultLocationId || "",
         class_schedule_type: "one_off",
-        start_time: format(defaultDate, "yyyy-MM-dd'T'HH:mm"),
-        end_time: format(new Date(defaultDate.getTime() + 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"),
+        class_date: format(defaultDate, "yyyy-MM-dd"),
+        start_time: format(defaultDate, "HH:mm"),
+        duration_minutes: 60,
         instructor_id: "none",
         capacity: 20,
         waitlist_capacity: 5,
@@ -143,13 +153,8 @@ export function ClassFormDialog({
   const handleClassTypeChange = (classTypeId: string) => {
     const classType = classTypes?.find(ct => ct.id === classTypeId);
     if (classType) {
-      const startTime = form.getValues("start_time");
-      if (startTime) {
-        const startDate = new Date(startTime);
-        const endDate = new Date(startDate.getTime() + classType.default_duration_minutes * 60 * 1000);
-        form.setValue("end_time", format(endDate, "yyyy-MM-dd'T'HH:mm"));
-        form.setValue("capacity", classType.default_capacity);
-      }
+      form.setValue("duration_minutes", classType.default_duration_minutes);
+      form.setValue("capacity", classType.default_capacity);
     }
     form.setValue("class_type_id", classTypeId);
   };
@@ -191,8 +196,14 @@ export function ClassFormDialog({
         startTime = baseDate.toISOString();
         endTime = endDate.toISOString();
       } else {
-        startTime = new Date(values.start_time).toISOString();
-        endTime = new Date(values.end_time).toISOString();
+        // For one-off: combine class_date and start_time
+        const dateStr = values.class_date || format(new Date(), "yyyy-MM-dd");
+        const timeStr = values.start_time;
+        const startDate = new Date(`${dateStr}T${timeStr}:00`);
+        const endDate = new Date(startDate.getTime() + values.duration_minutes * 60 * 1000);
+        
+        startTime = startDate.toISOString();
+        endTime = endDate.toISOString();
       }
 
       const classData = {
@@ -359,39 +370,51 @@ export function ClassFormDialog({
                       value={field.value}
                       className="grid grid-cols-2 gap-4"
                     >
-                      <div className="relative">
+                      <div 
+                        className="relative cursor-pointer"
+                        onClick={() => form.setValue("class_schedule_type", "one_off")}
+                      >
                         <RadioGroupItem
                           value="one_off"
                           id="one_off"
                           className="peer sr-only"
                         />
-                        <Label
-                          htmlFor="one_off"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
+                        <div
+                          className={`flex flex-col items-center justify-between rounded-md border-2 p-4 transition-all ${
+                            form.watch("class_schedule_type") === "one_off"
+                              ? "border-primary bg-primary/5"
+                              : "border-muted bg-popover hover:bg-accent hover:text-accent-foreground"
+                          }`}
                         >
                           <Calendar className="mb-2 h-5 w-5" />
                           <span className="font-medium text-sm">One-off Class</span>
                           <span className="text-xs text-muted-foreground text-center mt-1">
                             Single occurrence
                           </span>
-                        </Label>
+                        </div>
                       </div>
-                      <div className="relative">
+                      <div 
+                        className="relative cursor-pointer"
+                        onClick={() => form.setValue("class_schedule_type", "recurring")}
+                      >
                         <RadioGroupItem
                           value="recurring"
                           id="recurring"
                           className="peer sr-only"
                         />
-                        <Label
-                          htmlFor="recurring"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/5 cursor-pointer transition-all"
+                        <div
+                          className={`flex flex-col items-center justify-between rounded-md border-2 p-4 transition-all ${
+                            form.watch("class_schedule_type") === "recurring"
+                              ? "border-primary bg-primary/5"
+                              : "border-muted bg-popover hover:bg-accent hover:text-accent-foreground"
+                          }`}
                         >
                           <Repeat className="mb-2 h-5 w-5" />
                           <span className="font-medium text-sm">Recurring Class</span>
                           <span className="text-xs text-muted-foreground text-center mt-1">
                             Repeats on schedule
                           </span>
-                        </Label>
+                        </div>
                       </div>
                     </RadioGroup>
                   </FormControl>
@@ -408,36 +431,73 @@ export function ClassFormDialog({
               />
             )}
 
-            {/* Time Fields - Only show for one-off classes */}
+            {/* Date and Time Fields - For one-off classes */}
             {form.watch("class_schedule_type") === "one_off" && (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-4">
+                {/* Date Picker */}
                 <FormField
                   control={form.control}
-                  name="start_time"
+                  name="class_date"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Start Time *</FormLabel>
+                      <FormLabel>Date *</FormLabel>
                       <FormControl>
-                        <Input type="datetime-local" {...field} />
+                        <SmartDateInput
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          placeholder="Select date"
+                          min={format(new Date(), "yyyy-MM-dd")}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-
-                <FormField
-                  control={form.control}
-                  name="end_time"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>End Time *</FormLabel>
-                      <FormControl>
-                        <Input type="datetime-local" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                
+                {/* Time and Duration */}
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="start_time"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Start Time *</FormLabel>
+                        <FormControl>
+                          <Input type="time" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="duration_minutes"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Duration</FormLabel>
+                        <Select
+                          value={field.value?.toString()}
+                          onValueChange={(v) => field.onChange(parseInt(v))}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="30">30 minutes</SelectItem>
+                            <SelectItem value="45">45 minutes</SelectItem>
+                            <SelectItem value="60">1 hour</SelectItem>
+                            <SelectItem value="90">1.5 hours</SelectItem>
+                            <SelectItem value="120">2 hours</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
             )}
 
