@@ -201,7 +201,14 @@ export default function GymAdminAddMember() {
 
       if (error) throw error;
 
-      // TODO: Send welcome email if values.send_welcome_email is true
+      // Send welcome email if enabled
+      if (values.send_welcome_email && newMember?.id) {
+        supabase.functions.invoke("gym-send-welcome-email", {
+          body: { memberId: newMember.id, gymId: gym.id },
+        }).catch((err) => {
+          console.error("Failed to send welcome email:", err);
+        });
+      }
 
       toast.success("Member added successfully");
       navigate(`/gym-admin/${gymId}/members/${newMember.id}`);

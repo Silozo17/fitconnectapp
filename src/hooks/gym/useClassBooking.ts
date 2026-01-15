@@ -190,6 +190,11 @@ export function useClassBooking(gymId: string) {
           .from("gym_classes")
           .update({ current_bookings: classData.current_bookings + 1 })
           .eq("id", classId);
+
+        // Send booking confirmation email (fire and forget)
+        supabase.functions.invoke("gym-send-booking-confirmation", {
+          body: { bookingId: data.id },
+        }).catch(console.error);
       }
 
       return { booking: data, status, creditsUsed };
