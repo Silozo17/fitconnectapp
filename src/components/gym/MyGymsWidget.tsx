@@ -39,7 +39,7 @@ async function fetchStaffGyms(userId: string): Promise<GymAffiliation[]> {
     .from("gym_staff")
     .select("id, gym_id, role")
     .eq("user_id", userId)
-    .eq("is_active", true);
+    .eq("status", "active");
 
   if (staffError) throw staffError;
   if (!staffData || staffData.length === 0) return [];
