@@ -14,10 +14,12 @@ export const AVAILABLE_FEATURES: FeaturePermission[] = [
   { key: "view_revenue", label: "View Revenue", description: "Access revenue and earnings dashboards", category: "data" },
   { key: "view_analytics", label: "View Analytics", description: "Access platform analytics and metrics", category: "data" },
   { key: "view_audit_logs", label: "View Audit Logs", description: "Access audit trail and activity logs", category: "data" },
+  { key: "view_gym_financials", label: "Gym Financials", description: "View gym revenue and subscription data", category: "data" },
   
   // User Management
   { key: "manage_users", label: "Manage Users", description: "View and manage client accounts", category: "management" },
   { key: "manage_coaches", label: "Manage Coaches", description: "View and manage coach accounts", category: "management" },
+  { key: "manage_gyms", label: "Manage Gyms", description: "View and manage gym accounts", category: "management" },
   { key: "manage_team", label: "Manage Team", description: "View and manage team members", category: "management" },
   { key: "manage_verifications", label: "Manage Verifications", description: "Handle coach verification requests", category: "management" },
   
@@ -30,8 +32,8 @@ export const AVAILABLE_FEATURES: FeaturePermission[] = [
 // Default permissions by role
 export const DEFAULT_PERMISSIONS: Record<string, string[]> = {
   admin: AVAILABLE_FEATURES.map(f => f.key), // All features
-  manager: ["view_analytics", "manage_users", "manage_coaches", "manage_verifications", "manage_challenges"],
-  staff: ["manage_users", "manage_coaches"],
+  manager: ["view_analytics", "manage_users", "manage_coaches", "manage_gyms", "manage_verifications", "manage_challenges"],
+  staff: ["manage_users", "manage_coaches", "manage_gyms"],
 };
 
 export function useTeamPermissions(adminProfileId: string | undefined) {

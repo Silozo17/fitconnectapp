@@ -71,6 +71,7 @@ const AdminFeedback = lazy(() => import('@/pages/dashboard/admin/AdminFeedback')
 const AdminBlog = lazy(() => import('@/pages/dashboard/admin/AdminBlog'));
 const AdminBoosts = lazy(() => import('@/pages/dashboard/admin/AdminBoosts'));
 const AdminDebugConsole = lazy(() => import('@/pages/dashboard/admin/AdminDebugConsole'));
+const AdminGyms = lazy(() => import('@/pages/dashboard/admin/AdminGyms'));
 const MyProfile = lazy(() => import('@/pages/dashboard/MyProfile'));
 const DashboardRedirect = lazy(() => import('@/pages/dashboard/DashboardRedirect'));
 
@@ -1425,6 +1426,13 @@ const App = () => (
                                   <ProtectedRoute allowedRoles={["admin"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
                                       <AdminDebugConsole />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="admin/gyms" element={
+                                  <ProtectedRoute allowedRoles={["admin"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <AdminGyms />
                                     </Suspense>
                                   </ProtectedRoute>
                                 } />

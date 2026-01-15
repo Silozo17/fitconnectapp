@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
   UsersRound, DollarSign, BarChart3,
   MessageSquare, Shield, Trophy, FileText, LogOut, User, Rocket,
-  MessageSquarePlus, Plug, ClipboardList, Bug
+  MessageSquarePlus, Plug, ClipboardList, Bug, Building2
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -46,6 +46,7 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
   { title: t('sidebar.dashboard'), url: "/dashboard/admin", icon: LayoutDashboard },
   { title: t('sidebar.users'), url: "/dashboard/admin/users", icon: Users, badgeKey: "users" },
   { title: t('sidebar.coaches'), url: "/dashboard/admin/coaches", icon: Dumbbell },
+  { title: t('sidebar.gyms'), url: "/dashboard/admin/gyms", icon: Building2 },
   { title: t('sidebar.team'), url: "/dashboard/admin/team", icon: UsersRound },
   { title: t('sidebar.revenue'), url: "/dashboard/admin/revenue", icon: DollarSign },
   { title: t('sidebar.boosts'), url: "/dashboard/admin/boosts", icon: Rocket },
