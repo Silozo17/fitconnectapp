@@ -29,7 +29,6 @@ export interface RecurringConfig {
   endDate?: string;
   occurrences?: number;
   timeOfDay: string; // HH:mm format
-  durationMinutes: number; // Class duration in minutes
 }
 
 interface RecurringClassConfigProps {
@@ -105,39 +104,18 @@ export function RecurringClassConfig({ config, onChange }: RecurringClassConfigP
           </div>
         )}
 
-        {/* Time and Duration */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="time-of-day" className="flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              Start Time
-            </Label>
-            <Input
-              id="time-of-day"
-              type="time"
-              value={config.timeOfDay}
-              onChange={(e) => onChange({ ...config, timeOfDay: e.target.value })}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label>Duration</Label>
-            <Select
-              value={config.durationMinutes?.toString() || "60"}
-              onValueChange={(value) => onChange({ ...config, durationMinutes: parseInt(value) })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30">30 minutes</SelectItem>
-                <SelectItem value="45">45 minutes</SelectItem>
-                <SelectItem value="60">1 hour</SelectItem>
-                <SelectItem value="90">1.5 hours</SelectItem>
-                <SelectItem value="120">2 hours</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        {/* Start Time */}
+        <div className="space-y-2">
+          <Label htmlFor="time-of-day" className="flex items-center gap-2">
+            <Clock className="h-4 w-4" />
+            Start Time
+          </Label>
+          <Input
+            id="time-of-day"
+            type="time"
+            value={config.timeOfDay}
+            onChange={(e) => onChange({ ...config, timeOfDay: e.target.value })}
+          />
         </div>
 
         {/* End Condition */}
