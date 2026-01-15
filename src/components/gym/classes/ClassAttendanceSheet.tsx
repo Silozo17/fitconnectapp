@@ -127,19 +127,6 @@ export function ClassAttendanceSheet({ classInfo, open, onOpenChange }: ClassAtt
                 Manage Breaks
               </Button>
             )}
-            <Button 
-              variant="outline" 
-              className="flex-1"
-              onClick={() => markAllAttended.mutate()}
-              disabled={markAllAttended.isPending || confirmedCount === 0}
-            >
-              {markAllAttended.isPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Check className="mr-2 h-4 w-4" />
-              )}
-              Mark All Present
-            </Button>
           </div>
 
           {/* Attendee List */}
