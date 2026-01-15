@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { MemberFiltersPanel } from "@/components/gym/admin/members/MemberFiltersPanel";
 import { DeleteConfirmDialog } from "@/components/gym/admin/dialogs/DeleteConfirmDialog";
+import { AddMemberModal } from "@/components/gym/admin/dialogs/AddMemberModal";
 
 export default function GymAdminMembers() {
   const { gymId } = useParams<{ gymId: string }>();
@@ -48,6 +49,7 @@ export default function GymAdminMembers() {
     expiringWithinDays: undefined as number | undefined,
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [addMemberOpen, setAddMemberOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const { data, isLoading } = useGymMembers({
@@ -103,11 +105,9 @@ export default function GymAdminMembers() {
             Manage your gym members and their memberships.
           </p>
         </div>
-        <Button asChild>
-          <Link to={`/gym-admin/${gymId}/members/new`}>
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add Member
-          </Link>
+        <Button onClick={() => setAddMemberOpen(true)}>
+          <UserPlus className="mr-2 h-4 w-4" />
+          Add Member
         </Button>
       </div>
 
@@ -278,6 +278,9 @@ export default function GymAdminMembers() {
         description={`Are you sure you want to delete ${memberToDelete?.name}? This will mark their account as deleted and they won't be able to access the gym portal.`}
         onConfirm={handleDeleteConfirm}
       />
+
+      {/* Add Member Modal */}
+      <AddMemberModal open={addMemberOpen} onOpenChange={setAddMemberOpen} />
     </div>
   );
 }

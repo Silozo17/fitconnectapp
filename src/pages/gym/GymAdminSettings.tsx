@@ -225,10 +225,10 @@ export default function GymAdminSettings() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="slug">URL Slug</Label>
+                  <Label htmlFor="slug">Member Signup URL</Label>
                   <div className="flex">
-                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-sm text-muted-foreground">
-                      fitconnect.com/gym/
+                    <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-sm text-muted-foreground whitespace-nowrap">
+                      getfitconnect.co.uk/gym-signup/
                     </span>
                     <Input
                       id="slug"
@@ -237,6 +237,9 @@ export default function GymAdminSettings() {
                       className="rounded-l-none"
                     />
                   </div>
+                  <p className="text-xs text-muted-foreground">
+                    Share this link with potential members to sign up.
+                  </p>
                 </div>
               </div>
 

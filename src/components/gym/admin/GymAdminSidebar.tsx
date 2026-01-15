@@ -410,16 +410,6 @@ export function GymAdminSidebar() {
           )}
         </div>
       </ScrollArea>
-
-      {/* Footer */}
-      <div className="border-t p-4">
-        <Button variant="ghost" className="w-full justify-start" asChild>
-          <Link to="/coach/dashboard">
-            <ChevronLeft className="mr-2 h-4 w-4" />
-            Back to FitConnect
-          </Link>
-        </Button>
-      </div>
     </div>
   );
 }
