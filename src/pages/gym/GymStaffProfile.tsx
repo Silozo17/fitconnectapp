@@ -25,7 +25,7 @@ import {
 
 export default function GymStaffProfile() {
   const { gymId } = useParams<{ gymId: string }>();
-  const { gym, staffRecord, userRole } = useGym();
+  const { gym, staffRecord, userRole, isOwner, isLoading: isGymLoading } = useGym();
   const { user } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,9 +38,24 @@ export default function GymStaffProfile() {
     bio: "",
   });
 
-  // Load staff profile data
+  // Load profile data - handle both owners (from gym profile) and staff (from staff record)
   useEffect(() => {
-    if (staffRecord) {
+    if (isGymLoading) return;
+    
+    if (isOwner && gym) {
+      // Owner - use gym profile data
+      const ownerName = gym.owner_name || "";
+      const nameParts = ownerName.split(" ");
+      setFormData({
+        first_name: nameParts[0] || "",
+        last_name: nameParts.slice(1).join(" ") || "",
+        email: gym.email || user?.email || "",
+        phone: gym.owner_phone || gym.phone || "",
+        bio: "",
+      });
+      setIsLoading(false);
+    } else if (staffRecord) {
+      // Staff member - use staff record
       setFormData({
         first_name: (staffRecord as any).first_name || "",
         last_name: (staffRecord as any).last_name || "",
@@ -49,25 +64,41 @@ export default function GymStaffProfile() {
         bio: (staffRecord as any).bio || "",
       });
       setIsLoading(false);
+    } else if (!isGymLoading && !isOwner && !staffRecord) {
+      // Not an owner and no staff record found - still stop loading
+      setIsLoading(false);
     }
-  }, [staffRecord, user?.email]);
+  }, [staffRecord, user?.email, isOwner, gym, isGymLoading]);
 
   const handleSave = async () => {
-    if (!staffRecord?.id) return;
     setIsSaving(true);
 
     try {
-      const { error } = await supabase
-        .from("gym_staff")
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-          phone: formData.phone || null,
-          bio: formData.bio || null,
-        })
-        .eq("id", staffRecord.id);
+      if (isOwner && gym) {
+        // Update gym profile for owner
+        const { error } = await supabase
+          .from("gym_profiles")
+          .update({
+            owner_name: `${formData.first_name} ${formData.last_name}`.trim(),
+            owner_phone: formData.phone || null,
+          })
+          .eq("id", gym.id);
 
-      if (error) throw error;
+        if (error) throw error;
+      } else if (staffRecord?.id) {
+        // Update staff record for staff
+        const { error } = await supabase
+          .from("gym_staff")
+          .update({
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            phone: formData.phone || null,
+            bio: formData.bio || null,
+          })
+          .eq("id", staffRecord.id);
+
+        if (error) throw error;
+      }
       toast.success("Profile updated successfully");
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -170,10 +201,12 @@ export default function GymStaffProfile() {
                 <div className="flex items-center gap-2 text-sm">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span>
-                    Joined{" "}
-                    {(staffRecord as any)?.created_at
-                      ? new Date((staffRecord as any).created_at).toLocaleDateString()
-                      : "N/A"}
+                    {isOwner ? "Owner since " : "Joined "}
+                    {isOwner && gym?.created_at
+                      ? new Date(gym.created_at).toLocaleDateString()
+                      : (staffRecord as any)?.created_at
+                        ? new Date((staffRecord as any).created_at).toLocaleDateString()
+                        : "N/A"}
                   </span>
                 </div>
               </div>
