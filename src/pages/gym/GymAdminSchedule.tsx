@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { useGymClasses, useGymClassTypes } from "@/hooks/gym/useGymClasses";
 import { useClassBooking } from "@/hooks/gym/useClassBooking";
 import { useGym } from "@/contexts/GymContext";
+import { useLocationFilter } from "@/hooks/gym/useLocationFilter";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -33,12 +34,14 @@ import {
   ChevronRight,
   Plus,
   Calendar,
+  MapPin,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function GymAdminSchedule() {
   const { gymId } = useParams<{ gymId: string }>();
   const { gym, isStaff } = useGym();
+  const { locationId: currentLocationId, location: currentLocation, isAllLocations, getLocationName } = useLocationFilter();
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [selectedClassType, setSelectedClassType] = useState<string>("all");
   const [selectedClass, setSelectedClass] = useState<any>(null);
@@ -54,6 +57,7 @@ export default function GymAdminSchedule() {
     startDate: weekStart,
     endDate: weekEnd,
     classTypeId: selectedClassType !== "all" ? selectedClassType : undefined,
+    locationId: currentLocationId || undefined,
   });
 
   const { data: classTypes } = useGymClassTypes();
@@ -147,7 +151,15 @@ export default function GymAdminSchedule() {
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-4">
+              {/* Location indicator */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span className={cn(!isAllLocations && "font-medium text-foreground")}>
+                  {isAllLocations ? "All Locations" : currentLocation?.name}
+                </span>
+              </div>
+
               <Select value={selectedClassType} onValueChange={setSelectedClassType}>
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="All class types" />
@@ -277,6 +289,7 @@ export default function GymAdminSchedule() {
         open={classFormOpen}
         onOpenChange={setClassFormOpen}
         classToEdit={editingClass}
+        defaultLocationId={currentLocationId || undefined}
       />
     </div>
   );

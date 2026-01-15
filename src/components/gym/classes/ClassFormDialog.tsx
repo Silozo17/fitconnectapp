@@ -38,21 +38,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { RecurringClassConfig, RecurringConfig } from "./RecurringClassConfig";
 import { format } from "date-fns";
-import { Loader2, Calendar, Repeat } from "lucide-react";
+import { Loader2, Calendar, Repeat, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const classFormSchema = z.object({
   class_type_id: z.string().min(1, "Class type is required"),
+  location_id: z.string().optional(),
+  class_schedule_type: z.enum(["one_off", "recurring"]).default("one_off"),
   start_time: z.string().min(1, "Start time is required"),
   end_time: z.string().min(1, "End time is required"),
   instructor_id: z.string().optional(),
-  location_id: z.string().optional(),
   capacity: z.coerce.number().min(1, "Capacity must be at least 1"),
   waitlist_capacity: z.coerce.number().min(0).default(0),
   room: z.string().optional(),
   description: z.string().optional(),
-  class_schedule_type: z.enum(["one_off", "recurring"]).default("one_off"),
 });
 
 type ClassFormValues = z.infer<typeof classFormSchema>;
@@ -62,13 +62,15 @@ interface ClassFormDialogProps {
   onOpenChange: (open: boolean) => void;
   classToEdit?: GymClass | null;
   defaultDate?: Date;
+  defaultLocationId?: string;
 }
 
 export function ClassFormDialog({ 
   open, 
   onOpenChange, 
   classToEdit,
-  defaultDate = new Date()
+  defaultDate = new Date(),
+  defaultLocationId,
 }: ClassFormDialogProps) {
   const { gym } = useGym();
   const { data: classTypes, isLoading: classTypesLoading } = useGymClassTypes();
@@ -93,48 +95,48 @@ export function ClassFormDialog({
     resolver: zodResolver(classFormSchema),
     defaultValues: {
       class_type_id: "",
+      location_id: defaultLocationId || "",
+      class_schedule_type: "one_off",
       start_time: format(defaultDate, "yyyy-MM-dd'T'HH:mm"),
       end_time: format(new Date(defaultDate.getTime() + 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"),
       instructor_id: "",
-      location_id: "",
       capacity: 20,
       waitlist_capacity: 5,
       room: "",
       description: "",
-      class_schedule_type: "one_off",
     },
   });
 
-  // Reset form when editing a class
+  // Reset form when editing a class or when dialog opens
   useEffect(() => {
     if (classToEdit) {
       form.reset({
         class_type_id: classToEdit.class_type_id,
+        location_id: classToEdit.location_id || "",
+        class_schedule_type: classToEdit.is_recurring ? "recurring" : "one_off",
         start_time: format(new Date(classToEdit.start_time), "yyyy-MM-dd'T'HH:mm"),
         end_time: format(new Date(classToEdit.end_time), "yyyy-MM-dd'T'HH:mm"),
         instructor_id: classToEdit.instructor_id || "",
-        location_id: classToEdit.location_id || "",
         capacity: classToEdit.capacity,
         waitlist_capacity: classToEdit.waitlist_capacity,
         room: classToEdit.room || "",
         description: classToEdit.description || "",
-        class_schedule_type: classToEdit.is_recurring ? "recurring" : "one_off",
       });
-    } else {
+    } else if (open) {
       form.reset({
         class_type_id: "",
+        location_id: defaultLocationId || "",
+        class_schedule_type: "one_off",
         start_time: format(defaultDate, "yyyy-MM-dd'T'HH:mm"),
         end_time: format(new Date(defaultDate.getTime() + 60 * 60 * 1000), "yyyy-MM-dd'T'HH:mm"),
         instructor_id: "",
-        location_id: "",
         capacity: 20,
         waitlist_capacity: 5,
         room: "",
         description: "",
-        class_schedule_type: "one_off",
       });
     }
-  }, [classToEdit, defaultDate, form]);
+  }, [classToEdit, defaultDate, form, open, defaultLocationId]);
 
   // Auto-fill duration based on class type
   const handleClassTypeChange = (classTypeId: string) => {
@@ -280,6 +282,103 @@ export function ClassFormDialog({
               )}
             />
 
+            {/* Location - Moved up for prominence */}
+            {locations && locations.length > 0 && (
+              <FormField
+                control={form.control}
+                name="location_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4" />
+                      Location *
+                    </FormLabel>
+                    <Select 
+                      onValueChange={field.onChange} 
+                      value={field.value}
+                      disabled={isLoading}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a location" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {locations?.map((location) => (
+                          <SelectItem key={location.id} value={location.id}>
+                            {location.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+
+            {/* Class Schedule Type - Moved up for prominence */}
+            <FormField
+              control={form.control}
+              name="class_schedule_type"
+              render={({ field }) => (
+                <FormItem className="space-y-3">
+                  <FormLabel>Class Schedule *</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="grid grid-cols-2 gap-4"
+                    >
+                      <div>
+                        <RadioGroupItem
+                          value="one_off"
+                          id="one_off"
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor="one_off"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        >
+                          <Calendar className="mb-2 h-5 w-5" />
+                          <span className="font-medium text-sm">One-off Class</span>
+                          <span className="text-xs text-muted-foreground text-center mt-1">
+                            Single occurrence
+                          </span>
+                        </Label>
+                      </div>
+                      <div>
+                        <RadioGroupItem
+                          value="recurring"
+                          id="recurring"
+                          className="peer sr-only"
+                        />
+                        <Label
+                          htmlFor="recurring"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                        >
+                          <Repeat className="mb-2 h-5 w-5" />
+                          <span className="font-medium text-sm">Recurring Class</span>
+                          <span className="text-xs text-muted-foreground text-center mt-1">
+                            Repeats on schedule
+                          </span>
+                        </Label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Recurring Configuration - Shows when recurring is selected */}
+            {form.watch("class_schedule_type") === "recurring" && (
+              <RecurringClassConfig
+                config={recurringConfig}
+                onChange={setRecurringConfig}
+              />
+            )}
+
             {/* Time Fields */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -287,7 +386,9 @@ export function ClassFormDialog({
                 name="start_time"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Start Time *</FormLabel>
+                    <FormLabel>
+                      {form.watch("class_schedule_type") === "recurring" ? "First Class Date/Time *" : "Start Time *"}
+                    </FormLabel>
                     <FormControl>
                       <Input type="datetime-local" {...field} />
                     </FormControl>
@@ -333,37 +434,6 @@ export function ClassFormDialog({
                       {staff?.filter(s => s.can_teach_classes)?.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           {member.display_name || member.email}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Location */}
-            <FormField
-              control={form.control}
-              name="location_id"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Location</FormLabel>
-                  <Select 
-                    onValueChange={field.onChange} 
-                    value={field.value}
-                    disabled={isLoading}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a location" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="">No specific location</SelectItem>
-                      {locations?.map((location) => (
-                        <SelectItem key={location.id} value={location.id}>
-                          {location.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -436,68 +506,6 @@ export function ClassFormDialog({
                 </FormItem>
               )}
             />
-
-            {/* Class Schedule Type */}
-            <FormField
-              control={form.control}
-              name="class_schedule_type"
-              render={({ field }) => (
-                <FormItem className="space-y-3">
-                  <FormLabel>Class Schedule</FormLabel>
-                  <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      value={field.value}
-                      className="grid grid-cols-2 gap-4"
-                    >
-                      <div>
-                        <RadioGroupItem
-                          value="one_off"
-                          id="one_off"
-                          className="peer sr-only"
-                        />
-                        <Label
-                          htmlFor="one_off"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                        >
-                          <Calendar className="mb-3 h-6 w-6" />
-                          <span className="font-medium">One-off Class</span>
-                          <span className="text-xs text-muted-foreground text-center mt-1">
-                            Single occurrence
-                          </span>
-                        </Label>
-                      </div>
-                      <div>
-                        <RadioGroupItem
-                          value="recurring"
-                          id="recurring"
-                          className="peer sr-only"
-                        />
-                        <Label
-                          htmlFor="recurring"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
-                        >
-                          <Repeat className="mb-3 h-6 w-6" />
-                          <span className="font-medium">Recurring Class</span>
-                          <span className="text-xs text-muted-foreground text-center mt-1">
-                            Repeats on schedule
-                          </span>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Recurring Configuration */}
-            {form.watch("class_schedule_type") === "recurring" && (
-              <RecurringClassConfig
-                config={recurringConfig}
-                onChange={setRecurringConfig}
-              />
-            )}
 
             <DialogFooter>
               <Button
