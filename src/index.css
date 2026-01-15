@@ -1739,3 +1739,446 @@ html.native-ios .carousel-3d-item:not(.carousel-3d-item--settling) {
 .icon-badge-red {
   @apply bg-red-500/20;
 }
+
+/* ========================================
+   GYM ADMIN THEME SYSTEM
+   Premium dual-color layout with teal sidebar
+   ======================================== */
+
+/* Gym Admin Wrapper - Scoped theme variables */
+.gym-admin {
+  /* Sidebar - Dark Teal/Navy */
+  --gym-sidebar-bg: 197 71% 18%;
+  --gym-sidebar-fg: 0 0% 98%;
+  --gym-sidebar-muted: 197 30% 60%;
+  --gym-sidebar-accent: 158 64% 52%;
+  --gym-sidebar-active-bg: 158 64% 52%;
+  --gym-sidebar-active-fg: 197 71% 18%;
+  --gym-sidebar-hover-bg: 197 60% 22%;
+  --gym-sidebar-border: 197 50% 25%;
+  
+  /* Content Area - Light/Neutral */
+  --gym-content-bg: 220 14% 96%;
+  --gym-content-fg: 220 20% 20%;
+  
+  /* Cards - Pure White */
+  --gym-card-bg: 0 0% 100%;
+  --gym-card-fg: 220 20% 20%;
+  --gym-card-muted: 220 10% 50%;
+  --gym-card-border: 220 10% 90%;
+  
+  /* Accent Colors */
+  --gym-primary: 158 64% 45%;
+  --gym-primary-fg: 0 0% 100%;
+  --gym-secondary: 34 100% 50%;
+  --gym-secondary-fg: 0 0% 100%;
+  
+  /* Status Colors */
+  --gym-success: 158 64% 45%;
+  --gym-warning: 38 92% 50%;
+  --gym-danger: 0 84% 60%;
+  --gym-info: 197 71% 45%;
+}
+
+/* Dark mode adjustments for gym admin */
+.dark .gym-admin {
+  --gym-content-bg: 220 15% 10%;
+  --gym-content-fg: 0 0% 98%;
+  --gym-card-bg: 220 12% 14%;
+  --gym-card-fg: 0 0% 98%;
+  --gym-card-muted: 220 10% 60%;
+  --gym-card-border: 220 12% 20%;
+}
+
+/* Gym Sidebar Base */
+.gym-sidebar {
+  background: hsl(var(--gym-sidebar-bg));
+  color: hsl(var(--gym-sidebar-fg));
+}
+
+.gym-sidebar-header {
+  @apply flex items-center gap-3 px-4 py-4 border-b;
+  border-color: hsl(var(--gym-sidebar-border));
+}
+
+.gym-sidebar-logo {
+  @apply h-10 w-10 rounded-xl flex items-center justify-center;
+  background: hsl(var(--gym-sidebar-accent) / 0.15);
+  color: hsl(var(--gym-sidebar-accent));
+}
+
+.gym-sidebar-title {
+  @apply font-semibold text-base truncate;
+  color: hsl(var(--gym-sidebar-fg));
+}
+
+.gym-sidebar-subtitle {
+  @apply text-xs truncate;
+  color: hsl(var(--gym-sidebar-muted));
+}
+
+/* Gym Sidebar Navigation */
+.gym-sidebar-nav {
+  @apply flex-1 overflow-y-auto px-3 py-4;
+}
+
+.gym-sidebar-section {
+  @apply mb-4;
+}
+
+.gym-sidebar-section-title {
+  @apply px-3 py-2 text-xs font-semibold uppercase tracking-wider;
+  color: hsl(var(--gym-sidebar-muted));
+}
+
+.gym-sidebar-item {
+  @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer;
+  color: hsl(var(--gym-sidebar-muted));
+}
+
+.gym-sidebar-item:hover {
+  background: hsl(var(--gym-sidebar-hover-bg));
+  color: hsl(var(--gym-sidebar-fg));
+}
+
+.gym-sidebar-item.active {
+  background: hsl(var(--gym-sidebar-active-bg));
+  color: hsl(var(--gym-sidebar-active-fg));
+  font-weight: 600;
+}
+
+.gym-sidebar-item.active:hover {
+  background: hsl(var(--gym-sidebar-active-bg));
+}
+
+.gym-sidebar-icon {
+  @apply h-4 w-4 flex-shrink-0;
+}
+
+.gym-sidebar-badge {
+  @apply ml-auto px-2 py-0.5 rounded-full text-xs font-medium;
+  background: hsl(var(--gym-sidebar-accent) / 0.2);
+  color: hsl(var(--gym-sidebar-accent));
+}
+
+/* Gym Content Area */
+.gym-content {
+  @apply flex-1 flex flex-col min-h-screen;
+  background: hsl(var(--gym-content-bg));
+  color: hsl(var(--gym-content-fg));
+}
+
+.gym-content-header {
+  @apply sticky top-0 z-30 h-16 flex items-center justify-between px-6 border-b;
+  background: hsl(var(--gym-card-bg));
+  border-color: hsl(var(--gym-card-border));
+}
+
+.gym-content-body {
+  @apply flex-1 p-6;
+}
+
+/* Gym Premium Cards */
+.gym-card {
+  @apply rounded-2xl border transition-all duration-200;
+  background: hsl(var(--gym-card-bg));
+  border-color: hsl(var(--gym-card-border));
+  box-shadow: 0 1px 3px hsl(220 20% 20% / 0.04), 0 1px 2px hsl(220 20% 20% / 0.02);
+}
+
+.gym-card-elevated {
+  @apply rounded-2xl border transition-all duration-200;
+  background: hsl(var(--gym-card-bg));
+  border-color: hsl(var(--gym-card-border));
+  box-shadow: 
+    0 4px 6px hsl(220 20% 20% / 0.04),
+    0 10px 15px hsl(220 20% 20% / 0.06),
+    0 1px 2px hsl(220 20% 20% / 0.02);
+}
+
+.gym-card-elevated:hover {
+  box-shadow: 
+    0 6px 12px hsl(220 20% 20% / 0.06),
+    0 15px 25px hsl(220 20% 20% / 0.08),
+    0 1px 2px hsl(220 20% 20% / 0.02);
+  transform: translateY(-1px);
+}
+
+.gym-card-header {
+  @apply flex items-center justify-between p-5 border-b;
+  border-color: hsl(var(--gym-card-border));
+}
+
+.gym-card-title {
+  @apply font-semibold text-base;
+  color: hsl(var(--gym-card-fg));
+}
+
+.gym-card-subtitle {
+  @apply text-sm;
+  color: hsl(var(--gym-card-muted));
+}
+
+.gym-card-content {
+  @apply p-5;
+}
+
+.gym-card-footer {
+  @apply flex items-center justify-end gap-3 p-5 border-t;
+  border-color: hsl(var(--gym-card-border));
+}
+
+/* Gym Premium Tabs - Pill Style */
+.gym-tabs {
+  @apply flex gap-1 p-1 rounded-xl;
+  background: hsl(var(--gym-card-border) / 0.5);
+}
+
+.gym-tab {
+  @apply px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer;
+  color: hsl(var(--gym-card-muted));
+}
+
+.gym-tab:hover {
+  color: hsl(var(--gym-card-fg));
+}
+
+.gym-tab.active {
+  background: hsl(var(--gym-card-bg));
+  color: hsl(var(--gym-card-fg));
+  box-shadow: 0 1px 2px hsl(220 20% 20% / 0.05);
+}
+
+/* Gym Stats - Circular Style */
+.gym-stat-circular {
+  @apply relative flex flex-col items-center justify-center;
+}
+
+.gym-stat-ring {
+  @apply relative;
+}
+
+.gym-stat-ring svg {
+  @apply transform -rotate-90;
+}
+
+.gym-stat-ring-bg {
+  stroke: hsl(var(--gym-card-border));
+}
+
+.gym-stat-ring-progress {
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease-out;
+}
+
+.gym-stat-ring-progress.teal { stroke: hsl(var(--gym-primary)); }
+.gym-stat-ring-progress.orange { stroke: hsl(var(--gym-secondary)); }
+.gym-stat-ring-progress.green { stroke: hsl(var(--gym-success)); }
+.gym-stat-ring-progress.red { stroke: hsl(var(--gym-danger)); }
+
+.gym-stat-value {
+  @apply absolute inset-0 flex flex-col items-center justify-center;
+}
+
+.gym-stat-number {
+  @apply text-lg font-bold;
+  color: hsl(var(--gym-card-fg));
+}
+
+.gym-stat-label {
+  @apply text-xs;
+  color: hsl(var(--gym-card-muted));
+}
+
+/* Gym Slide Panel */
+.gym-slide-panel {
+  @apply fixed inset-y-0 right-0 z-50 flex flex-col;
+  background: hsl(var(--gym-card-bg));
+  box-shadow: -10px 0 40px hsl(220 20% 20% / 0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+.gym-slide-panel.open {
+  transform: translateX(0);
+}
+
+.gym-slide-panel-overlay {
+  @apply fixed inset-0 z-40;
+  background: hsl(220 20% 20% / 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.gym-slide-panel-overlay.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gym-slide-panel-header {
+  @apply flex items-center justify-between p-5 border-b;
+  border-color: hsl(var(--gym-card-border));
+}
+
+.gym-slide-panel-title {
+  @apply text-lg font-semibold;
+  color: hsl(var(--gym-card-fg));
+}
+
+.gym-slide-panel-content {
+  @apply flex-1 overflow-y-auto p-5;
+}
+
+.gym-slide-panel-footer {
+  @apply flex items-center justify-end gap-3 p-5 border-t;
+  border-color: hsl(var(--gym-card-border));
+}
+
+/* Gym Quick Actions Row */
+.gym-quick-actions {
+  @apply flex gap-2;
+}
+
+.gym-quick-action {
+  @apply flex flex-col items-center gap-1.5 px-4 py-3 rounded-xl transition-all duration-150 cursor-pointer;
+  background: hsl(var(--gym-card-border) / 0.3);
+}
+
+.gym-quick-action:hover {
+  background: hsl(var(--gym-card-border) / 0.6);
+}
+
+.gym-quick-action-icon {
+  @apply h-5 w-5;
+  color: hsl(var(--gym-primary));
+}
+
+.gym-quick-action-label {
+  @apply text-xs font-medium;
+  color: hsl(var(--gym-card-muted));
+}
+
+/* Gym Avatar with Status */
+.gym-avatar-status {
+  @apply relative;
+}
+
+.gym-avatar-status-dot {
+  @apply absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full border-2;
+  border-color: hsl(var(--gym-card-bg));
+}
+
+.gym-avatar-status-dot.active {
+  background: hsl(var(--gym-success));
+}
+
+.gym-avatar-status-dot.inactive {
+  background: hsl(var(--gym-card-muted));
+}
+
+.gym-avatar-status-dot.pending {
+  background: hsl(var(--gym-warning));
+}
+
+/* Gym Table Styles */
+.gym-table {
+  @apply w-full;
+}
+
+.gym-table th {
+  @apply px-4 py-3 text-left text-xs font-medium uppercase tracking-wider;
+  color: hsl(var(--gym-card-muted));
+  background: hsl(var(--gym-content-bg));
+}
+
+.gym-table td {
+  @apply px-4 py-4 border-b;
+  border-color: hsl(var(--gym-card-border));
+}
+
+.gym-table tr:hover td {
+  background: hsl(var(--gym-card-border) / 0.3);
+}
+
+.gym-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Gym Form Inputs - Clean Style */
+.gym-input {
+  @apply w-full px-4 py-2.5 rounded-lg border text-sm transition-all duration-150;
+  background: hsl(var(--gym-card-bg));
+  border-color: hsl(var(--gym-card-border));
+  color: hsl(var(--gym-card-fg));
+}
+
+.gym-input:focus {
+  outline: none;
+  border-color: hsl(var(--gym-primary));
+  box-shadow: 0 0 0 3px hsl(var(--gym-primary) / 0.1);
+}
+
+.gym-input::placeholder {
+  color: hsl(var(--gym-card-muted));
+}
+
+.gym-label {
+  @apply block mb-2 text-sm font-medium;
+  color: hsl(var(--gym-card-fg));
+}
+
+/* Gym Buttons */
+.gym-btn {
+  @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 cursor-pointer;
+}
+
+.gym-btn-primary {
+  background: hsl(var(--gym-primary));
+  color: hsl(var(--gym-primary-fg));
+}
+
+.gym-btn-primary:hover {
+  background: hsl(158 64% 40%);
+}
+
+.gym-btn-secondary {
+  background: hsl(var(--gym-card-border) / 0.5);
+  color: hsl(var(--gym-card-fg));
+}
+
+.gym-btn-secondary:hover {
+  background: hsl(var(--gym-card-border));
+}
+
+.gym-btn-ghost {
+  background: transparent;
+  color: hsl(var(--gym-card-fg));
+}
+
+.gym-btn-ghost:hover {
+  background: hsl(var(--gym-card-border) / 0.5);
+}
+
+/* Gym Check-in Button - Large Primary Action */
+.gym-checkin-btn {
+  @apply px-8 py-3 rounded-xl text-base font-semibold uppercase tracking-wide;
+  background: hsl(var(--gym-primary));
+  color: hsl(var(--gym-primary-fg));
+  box-shadow: 0 4px 14px hsl(var(--gym-primary) / 0.3);
+}
+
+.gym-checkin-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px hsl(var(--gym-primary) / 0.4);
+}
+
+/* Gym Attendance Chart */
+.gym-chart-bar {
+  @apply rounded-t-sm transition-all duration-300;
+  background: linear-gradient(to top, hsl(var(--gym-primary)), hsl(158 64% 60%));
+}
+
+.gym-chart-bar:hover {
+  filter: brightness(1.1);
+}
