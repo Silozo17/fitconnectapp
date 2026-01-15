@@ -103,7 +103,62 @@ export function AssignMembershipDialog({
       const startDate = new Date(values.start_date);
       const endDate = calculateEndDate(values.start_date, selectedPlan);
 
-      // Create the membership
+      // If Stripe payment, generate checkout link
+      if (values.payment_method === "stripe" && selectedPlan.price_amount > 0) {
+        // First, get member details
+        const { data: member, error: memberError } = await supabase
+          .from("gym_members")
+          .select("email, first_name, last_name, phone")
+          .eq("id", memberId)
+          .single();
+
+        if (memberError || !member) {
+          throw new Error("Could not find member details");
+        }
+
+        if (!member.email) {
+          throw new Error("Member must have an email address for card payments");
+        }
+
+        // Call the checkout edge function
+        const response = await supabase.functions.invoke("gym-create-membership-checkout", {
+          body: {
+            gymId: gym.id,
+            planId: values.plan_id,
+            memberData: {
+              firstName: member.first_name || "",
+              lastName: member.last_name || "",
+              email: member.email,
+              phone: member.phone || "",
+              emergencyContactName: "",
+              emergencyContactPhone: "",
+            },
+            contractIds: [],
+            successUrl: `${window.location.origin}/gym/${gym.slug}/member/dashboard?membership_success=true`,
+            cancelUrl: `${window.location.origin}/gym-admin/${gym.id}/members/${memberId}`,
+            emailVerified: true, // Admin is assigning, so skip OTP
+          },
+        });
+
+        if (response.error) {
+          throw new Error(response.error.message || "Failed to create checkout session");
+        }
+
+        const data = response.data;
+        if (data.url) {
+          // Copy the URL to clipboard and show it to staff
+          await navigator.clipboard.writeText(data.url);
+          toast.success("Payment link copied to clipboard! Share with member to complete payment.", {
+            duration: 5000,
+          });
+          onOpenChange(false);
+          return;
+        } else {
+          throw new Error("No checkout URL returned");
+        }
+      }
+
+      // For cash or free payments, create the membership directly
       const membershipData = {
         gym_id: gym.id,
         member_id: memberId,
@@ -112,8 +167,7 @@ export function AssignMembershipDialog({
         current_period_start: startDate.toISOString(),
         current_period_end: endDate?.toISOString() || null,
         credits_remaining: values.credits ?? selectedPlan.class_credits ?? null,
-        payment_status: values.payment_method === "free" ? "free" : 
-                       values.payment_method === "cash" ? "paid" : "pending",
+        payment_status: values.payment_method === "free" ? "free" : "paid",
       };
 
       const { error: membershipError } = await supabase
@@ -138,8 +192,6 @@ export function AssignMembershipDialog({
         await supabase.from("gym_payments").insert([paymentData]);
       }
 
-      // TODO: If Stripe, generate checkout link and return it
-
       queryClient.invalidateQueries({ queryKey: ["gym-member", memberId] });
       queryClient.invalidateQueries({ queryKey: ["gym-members"] });
       
@@ -148,7 +200,7 @@ export function AssignMembershipDialog({
       form.reset();
     } catch (error) {
       console.error("Failed to assign membership:", error);
-      toast.error("Failed to assign membership");
+      toast.error(error instanceof Error ? error.message : "Failed to assign membership");
     } finally {
       setIsSubmitting(false);
     }

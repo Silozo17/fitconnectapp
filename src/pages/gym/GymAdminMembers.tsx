@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useGymMembers } from "@/hooks/gym/useGymMembers";
+import { useGymMembers, useDeleteGymMember } from "@/hooks/gym/useGymMembers";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -22,14 +22,17 @@ import {
   Phone,
   Calendar,
   CreditCard,
+  Trash2,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { MemberFiltersPanel } from "@/components/gym/admin/members/MemberFiltersPanel";
+import { DeleteConfirmDialog } from "@/components/gym/admin/dialogs/DeleteConfirmDialog";
 
 export default function GymAdminMembers() {
   const { gymId } = useParams<{ gymId: string }>();
@@ -44,6 +47,8 @@ export default function GymAdminMembers() {
     noActiveMembership: false,
     expiringWithinDays: undefined as number | undefined,
   });
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const { data, isLoading } = useGymMembers({
     status: filters.status,
@@ -57,8 +62,23 @@ export default function GymAdminMembers() {
     expiringWithinDays: filters.expiringWithinDays,
   });
 
+  const deleteMember = useDeleteGymMember();
+
   const members = data?.members || [];
   const totalCount = data?.count || 0;
+
+  const handleDeleteClick = (member: { id: string; first_name: string | null; last_name: string | null }) => {
+    setMemberToDelete({
+      id: member.id,
+      name: `${member.first_name || ""} ${member.last_name || ""}`.trim() || "this member",
+    });
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!memberToDelete) return;
+    await deleteMember.mutateAsync({ memberId: memberToDelete.id });
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -231,6 +251,14 @@ export default function GymAdminMembers() {
                             </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem>Send Message</DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => handleDeleteClick(member)}
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete Member
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -241,6 +269,15 @@ export default function GymAdminMembers() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        title="Delete Member"
+        description={`Are you sure you want to delete ${memberToDelete?.name}? This will mark their account as deleted and they won't be able to access the gym portal.`}
+        onConfirm={handleDeleteConfirm}
+      />
     </div>
   );
 }

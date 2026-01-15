@@ -407,3 +407,61 @@ export function useSetPayRate() {
     },
   });
 }
+
+export function useUpdateGymStaff() {
+  const { gym } = useGym();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ staffId, updates }: { staffId: string; updates: Record<string, unknown> }) => {
+      const { data, error } = await (supabase as any)
+        .from("gym_staff")
+        .update(updates)
+        .eq("id", staffId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gym-staff", gym?.id] });
+      queryClient.invalidateQueries({ queryKey: ["gym-instructors", gym?.id] });
+      toast.success("Staff member updated");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to update staff: ${error.message}`);
+    },
+  });
+}
+
+export function useDeactivateGymStaff() {
+  const { gym } = useGym();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ staffId, hardDelete = false }: { staffId: string; hardDelete?: boolean }) => {
+      if (hardDelete) {
+        const { error } = await (supabase as any)
+          .from("gym_staff")
+          .delete()
+          .eq("id", staffId);
+        if (error) throw error;
+      } else {
+        // Soft delete - set status to 'inactive'
+        const { error } = await (supabase as any)
+          .from("gym_staff")
+          .update({ status: "inactive" })
+          .eq("id", staffId);
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["gym-staff", gym?.id] });
+      queryClient.invalidateQueries({ queryKey: ["gym-instructors", gym?.id] });
+      toast.success("Staff member removed");
+    },
+    onError: (error: Error) => {
+      toast.error(`Failed to remove staff: ${error.message}`);
+    },
+  });
+}
