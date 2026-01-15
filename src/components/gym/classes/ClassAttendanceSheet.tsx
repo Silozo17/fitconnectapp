@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { format } from "date-fns";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
@@ -5,8 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, Clock, Users, UserCheck, Loader2 } from "lucide-react";
+import { Check, Clock, Users, UserCheck, Loader2, XCircle, CalendarOff } from "lucide-react";
 import { useClassAttendance } from "@/hooks/gym/useClassAttendance";
+import { ClassCancelDialog } from "./ClassCancelDialog";
+import { ManageBreaksDialog } from "./ManageBreaksDialog";
 
 interface ClassInfo {
   id: string;
@@ -14,6 +17,8 @@ interface ClassInfo {
   end_time: string;
   max_capacity: number;
   current_bookings: number;
+  parent_class_id?: string | null;
+  is_recurring_template?: boolean;
   class_type?: {
     name: string;
     color: string | null;
@@ -27,6 +32,9 @@ interface ClassAttendanceSheetProps {
 }
 
 export function ClassAttendanceSheet({ classInfo, open, onOpenChange }: ClassAttendanceSheetProps) {
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
+  const [breaksDialogOpen, setBreaksDialogOpen] = useState(false);
+  
   const { 
     attendees, 
     isLoading, 
@@ -36,6 +44,8 @@ export function ClassAttendanceSheet({ classInfo, open, onOpenChange }: ClassAtt
     waitlistedCount,
     attendedCount 
   } = useClassAttendance(classInfo?.id || "");
+
+  const isRecurring = !!(classInfo?.parent_class_id || classInfo?.is_recurring_template);
 
   if (!classInfo) return null;
 
@@ -79,8 +89,44 @@ export function ClassAttendanceSheet({ classInfo, open, onOpenChange }: ClassAtt
             </div>
           </div>
 
-          {/* Quick Actions */}
+          {/* Class Actions */}
           <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => markAllAttended.mutate()}
+              disabled={markAllAttended.isPending || confirmedCount === 0}
+            >
+              {markAllAttended.isPending ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Check className="mr-2 h-4 w-4" />
+              )}
+              Mark All Present
+            </Button>
+          </div>
+          
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="flex-1 text-destructive hover:text-destructive"
+              onClick={() => setCancelDialogOpen(true)}
+            >
+              <XCircle className="mr-2 h-4 w-4" />
+              Cancel Class
+            </Button>
+            {isRecurring && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1"
+                onClick={() => setBreaksDialogOpen(true)}
+              >
+                <CalendarOff className="mr-2 h-4 w-4" />
+                Manage Breaks
+              </Button>
+            )}
             <Button 
               variant="outline" 
               className="flex-1"
@@ -189,6 +235,21 @@ export function ClassAttendanceSheet({ classInfo, open, onOpenChange }: ClassAtt
             </ScrollArea>
           </div>
         </div>
+        
+        {/* Cancel Dialog */}
+        <ClassCancelDialog
+          classInfo={classInfo}
+          open={cancelDialogOpen}
+          onOpenChange={setCancelDialogOpen}
+          onSuccess={() => onOpenChange(false)}
+        />
+        
+        {/* Breaks Dialog */}
+        <ManageBreaksDialog
+          classInfo={classInfo}
+          open={breaksDialogOpen}
+          onOpenChange={setBreaksDialogOpen}
+        />
       </SheetContent>
     </Sheet>
   );

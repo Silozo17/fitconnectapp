@@ -6004,6 +6004,51 @@ export type Database = {
           },
         ]
       }
+      gym_class_cancellation_notifications: {
+        Row: {
+          class_id: string | null
+          id: string
+          member_id: string | null
+          notification_type: string
+          read_at: string | null
+          reason: string | null
+          sent_at: string | null
+        }
+        Insert: {
+          class_id?: string | null
+          id?: string
+          member_id?: string | null
+          notification_type: string
+          read_at?: string | null
+          reason?: string | null
+          sent_at?: string | null
+        }
+        Update: {
+          class_id?: string | null
+          id?: string
+          member_id?: string | null
+          notification_type?: string
+          read_at?: string | null
+          reason?: string | null
+          sent_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gym_class_cancellation_notifications_class_id_fkey"
+            columns: ["class_id"]
+            isOneToOne: false
+            referencedRelation: "gym_classes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gym_class_cancellation_notifications_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "gym_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gym_class_schedules: {
         Row: {
           capacity: number
@@ -6233,6 +6278,7 @@ export type Database = {
           cancellation_deadline_hours: number | null
           cancellation_reason: string | null
           cancelled_at: string | null
+          cancelled_by: string | null
           capacity: number
           class_type_id: string
           created_at: string | null
@@ -6240,6 +6286,7 @@ export type Database = {
           description: string | null
           duration_minutes: number | null
           end_time: string
+          excluded_dates: Json | null
           gym_id: string
           id: string
           instructor_id: string | null
@@ -6269,6 +6316,7 @@ export type Database = {
           cancellation_deadline_hours?: number | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           capacity: number
           class_type_id: string
           created_at?: string | null
@@ -6276,6 +6324,7 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           end_time: string
+          excluded_dates?: Json | null
           gym_id: string
           id?: string
           instructor_id?: string | null
@@ -6305,6 +6354,7 @@ export type Database = {
           cancellation_deadline_hours?: number | null
           cancellation_reason?: string | null
           cancelled_at?: string | null
+          cancelled_by?: string | null
           capacity?: number
           class_type_id?: string
           created_at?: string | null
@@ -6312,6 +6362,7 @@ export type Database = {
           description?: string | null
           duration_minutes?: number | null
           end_time?: string
+          excluded_dates?: Json | null
           gym_id?: string
           id?: string
           instructor_id?: string | null
