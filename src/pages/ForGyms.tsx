@@ -16,6 +16,7 @@ import { FeatureTabs } from "@/components/gym/marketing/FeatureTabs";
 import { CompetitorComparison } from "@/components/gym/marketing/CompetitorComparison";
 import { GymTestimonials } from "@/components/gym/marketing/GymTestimonials";
 import { GymFAQ, faqSchemaData } from "@/components/gym/marketing/GymFAQ";
+import { MigrationReplacements } from "@/components/gym/marketing/MigrationReplacements";
 
 const ForGyms = () => {
   const pricingFeatures = [
@@ -30,22 +31,24 @@ const ForGyms = () => {
     "Automated communications"
   ];
 
-  const migrationSoftware = [
+const migrationSoftware = [
     "Mindbody",
     "Glofox", 
     "ClubRight",
     "TeamUp",
     "Gymcatch",
+    "Club Manager",
+    "Ashbourn",
+    "MAAT BJJ",
     "Spreadsheets",
   ];
 
-  const integrations = [
+const integrations = [
     { name: "Stripe", description: "Payment processing" },
     { name: "GoCardless", description: "Direct Debit" },
     { name: "Apple Health", description: "Wearable sync" },
     { name: "Google Fit", description: "Activity data" },
     { name: "Zoom", description: "Online classes" },
-    { name: "Xero", description: "Coming soon" },
   ];
 
   const securityFeatures = [
@@ -376,7 +379,12 @@ const ForGyms = () => {
                 ))}
               </div>
 
-              <MigrationTimeline />
+              {/* How FitConnect replaces each platform */}
+              <MigrationReplacements />
+
+              <div className="mt-12">
+                <MigrationTimeline />
+              </div>
 
               {/* Migration guarantee */}
               <div className="mt-12 p-6 rounded-2xl bg-card border border-primary/20 text-center">
