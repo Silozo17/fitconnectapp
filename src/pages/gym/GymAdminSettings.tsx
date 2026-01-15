@@ -13,6 +13,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { CreditPackageManager } from "@/components/gym/settings/CreditPackageManager";
+import { VATSettings } from "@/components/gym/settings/VATSettings";
+import { LocationStripeConnect } from "@/components/gym/settings/LocationStripeConnect";
 import {
   Building2,
   Upload,
@@ -518,65 +521,9 @@ export default function GymAdminSettings() {
 
         {/* Billing Settings */}
         <TabsContent value="billing" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Payment Processing</CardTitle>
-              <CardDescription>
-                Configure payment settings and view account status.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="p-4 border rounded-lg bg-green-50 dark:bg-green-950/20">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                    <Check className="h-5 w-5 text-green-600" />
-                  </div>
-                  <div>
-                    <p className="font-medium text-green-900 dark:text-green-100">Stripe Connected</p>
-                    <p className="text-sm text-green-700 dark:text-green-300">
-                      Payment processing is active for this location.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="p-4 border rounded-lg">
-                  <Label className="text-sm text-muted-foreground">Currency</Label>
-                  <p className="text-lg font-medium">GBP (£)</p>
-                </div>
-                <div className="p-4 border rounded-lg">
-                  <Label className="text-sm text-muted-foreground">Tax Rate</Label>
-                  <p className="text-lg font-medium">20% VAT</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Credit Packages</CardTitle>
-              <CardDescription>
-                Class credit packages available for purchase.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">Single Credit</p>
-                  <p className="text-sm text-muted-foreground">1 class booking</p>
-                </div>
-                <p className="text-lg font-bold">£10.00</p>
-              </div>
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div>
-                  <p className="font-medium">10 Credit Pack</p>
-                  <p className="text-sm text-muted-foreground">Save £10</p>
-                </div>
-                <p className="text-lg font-bold">£90.00</p>
-              </div>
-            </CardContent>
-          </Card>
+          <LocationStripeConnect />
+          <VATSettings />
+          <CreditPackageManager />
         </TabsContent>
 
         {/* Security Settings */}

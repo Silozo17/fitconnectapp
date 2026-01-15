@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import { useState, useEffect, useMemo } from "react";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Elements,
   PaymentElement,
@@ -8,11 +8,10 @@ import {
 } from "@stripe/react-stripe-js";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
+import { useStripeConfig } from "@/hooks/gym/useStripeConfig";
 
 interface POSCardPaymentProps {
   isOpen: boolean;
@@ -123,9 +122,18 @@ export function POSCardPayment({
   memberId,
   total,
 }: POSCardPaymentProps) {
+  const { publishableKey, isLoading: isLoadingConfig, error: configError } = useStripeConfig();
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [saleId, setSaleId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(null);
+
+  // Initialize Stripe when publishable key is loaded
+  useEffect(() => {
+    if (publishableKey) {
+      setStripePromise(loadStripe(publishableKey));
+    }
+  }, [publishableKey]);
 
   const initializePayment = async () => {
     setIsLoading(true);
@@ -158,11 +166,11 @@ export function POSCardPayment({
   };
 
   // Initialize when dialog opens
-  useState(() => {
-    if (isOpen && !clientSecret) {
+  useEffect(() => {
+    if (isOpen && !clientSecret && publishableKey) {
       initializePayment();
     }
-  });
+  }, [isOpen, publishableKey]);
 
   const handleSuccess = () => {
     setClientSecret(null);
@@ -183,7 +191,18 @@ export function POSCardPayment({
           <DialogTitle>Card Payment - £{total.toFixed(2)}</DialogTitle>
         </DialogHeader>
 
-        {isLoading ? (
+        {isLoadingConfig || !stripePromise ? (
+          <div className="py-12 flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="text-muted-foreground">Loading payment system...</p>
+          </div>
+        ) : configError ? (
+          <div className="py-12 flex flex-col items-center gap-4">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+            <p className="text-muted-foreground">Failed to load payment system</p>
+            <p className="text-sm text-destructive">{configError}</p>
+          </div>
+        ) : isLoading ? (
           <div className="py-12 flex flex-col items-center gap-4">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
             <p className="text-muted-foreground">Initializing payment...</p>
