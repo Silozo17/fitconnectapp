@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { CreditPackageManager } from "@/components/gym/settings/CreditPackageManager";
 import { VATSettings } from "@/components/gym/settings/VATSettings";
 import { LocationStripeConnect } from "@/components/gym/settings/LocationStripeConnect";
+import { RolePermissionsEditor } from "@/components/gym/settings/RolePermissionsEditor";
 import {
   Building2,
   Upload,
@@ -566,43 +567,7 @@ export default function GymAdminSettings() {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Staff Permissions</CardTitle>
-              <CardDescription>
-                Manage what staff members can access.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium">Gym Manager</p>
-                  <Badge>Full Access</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Can manage all settings, members, classes, and billing.
-                </p>
-              </div>
-              <div className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium">Instructor</p>
-                  <Badge variant="secondary">Limited</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Can view class schedules and manage their own classes.
-                </p>
-              </div>
-              <div className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium">Front Desk</p>
-                  <Badge variant="secondary">Limited</Badge>
-                </div>
-                <p className="text-sm text-muted-foreground">
-                  Can check in members and process POS sales.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <RolePermissionsEditor />
         </TabsContent>
       </Tabs>
     </div>
