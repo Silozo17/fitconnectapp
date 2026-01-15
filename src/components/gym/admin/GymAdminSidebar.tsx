@@ -282,9 +282,9 @@ export function GymAdminSidebar() {
   const filteredSettings = filterByRole(settingsItems);
 
   return (
-    <div className="flex h-full w-64 flex-col border-r bg-card">
+    <div className="flex h-full w-64 flex-col bg-card">
       {/* Gym Header */}
-      <div className="flex h-16 items-center gap-3 border-b px-4">
+      <div className="flex h-16 items-center gap-3 border-b border-border/20 px-4">
         <Avatar className="h-10 w-10">
           <AvatarImage src={gym?.logo_url || undefined} alt={gym?.name} />
           <AvatarFallback className="bg-primary/10 text-primary">
@@ -301,7 +301,7 @@ export function GymAdminSidebar() {
       
       {/* Location Switcher - Only for owner/area_manager */}
       {isOwnerOrAreaManager && (
-        <div className="border-b px-3 py-2">
+        <div className="border-b border-border/20 px-3 py-2">
           <LocationSwitcher />
         </div>
       )}
