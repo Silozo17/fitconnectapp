@@ -109,6 +109,53 @@ export type Database = {
           },
         ]
       }
+      admin_impersonation_sessions: {
+        Row: {
+          admin_id: string
+          ended_at: string | null
+          id: string
+          ip_address: string | null
+          reason: string | null
+          started_at: string | null
+          target_entity_id: string
+          target_type: string
+          target_user_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          admin_id: string
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          reason?: string | null
+          started_at?: string | null
+          target_entity_id: string
+          target_type: string
+          target_user_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          admin_id?: string
+          ended_at?: string | null
+          id?: string
+          ip_address?: string | null
+          reason?: string | null
+          started_at?: string | null
+          target_entity_id?: string
+          target_type?: string
+          target_user_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_impersonation_sessions_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "admin_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_profiles: {
         Row: {
           avatar_url: string | null
@@ -8541,6 +8588,8 @@ export type Database = {
           description: string | null
           email: string | null
           id: string
+          is_verified: boolean | null
+          location_count: number | null
           location_lat: number | null
           location_lng: number | null
           logo_url: string | null
@@ -8560,6 +8609,12 @@ export type Database = {
           status: string | null
           stripe_account_id: string | null
           stripe_account_status: string | null
+          stripe_subscription_id: string | null
+          subscription_started_at: string | null
+          subscription_status: string | null
+          suspended_at: string | null
+          suspended_by: string | null
+          suspension_reason: string | null
           timezone: string | null
           updated_at: string | null
           user_id: string
@@ -8583,6 +8638,8 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          is_verified?: boolean | null
+          location_count?: number | null
           location_lat?: number | null
           location_lng?: number | null
           logo_url?: string | null
@@ -8602,6 +8659,12 @@ export type Database = {
           status?: string | null
           stripe_account_id?: string | null
           stripe_account_status?: string | null
+          stripe_subscription_id?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
           timezone?: string | null
           updated_at?: string | null
           user_id: string
@@ -8625,6 +8688,8 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          is_verified?: boolean | null
+          location_count?: number | null
           location_lat?: number | null
           location_lng?: number | null
           logo_url?: string | null
@@ -8644,6 +8709,12 @@ export type Database = {
           status?: string | null
           stripe_account_id?: string | null
           stripe_account_status?: string | null
+          stripe_subscription_id?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
+          suspended_at?: string | null
+          suspended_by?: string | null
+          suspension_reason?: string | null
           timezone?: string | null
           updated_at?: string | null
           user_id?: string
@@ -11061,6 +11132,83 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      platform_gym_announcements: {
+        Row: {
+          created_at: string | null
+          delivery_method: string | null
+          id: string
+          message: string
+          read_by: Json | null
+          sent_at: string | null
+          sent_by: string
+          target_gym_ids: string[] | null
+          title: string
+        }
+        Insert: {
+          created_at?: string | null
+          delivery_method?: string | null
+          id?: string
+          message: string
+          read_by?: Json | null
+          sent_at?: string | null
+          sent_by: string
+          target_gym_ids?: string[] | null
+          title: string
+        }
+        Update: {
+          created_at?: string | null
+          delivery_method?: string | null
+          id?: string
+          message?: string
+          read_by?: Json | null
+          sent_at?: string | null
+          sent_by?: string
+          target_gym_ids?: string[] | null
+          title?: string
+        }
+        Relationships: []
+      }
+      platform_gym_feature_toggles: {
+        Row: {
+          created_at: string | null
+          disabled_at: string | null
+          disabled_by: string | null
+          feature_key: string
+          gym_id: string
+          id: string
+          is_enabled: boolean | null
+          reason: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          disabled_at?: string | null
+          disabled_by?: string | null
+          feature_key: string
+          gym_id: string
+          id?: string
+          is_enabled?: boolean | null
+          reason?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          disabled_at?: string | null
+          disabled_by?: string | null
+          feature_key?: string
+          gym_id?: string
+          id?: string
+          is_enabled?: boolean | null
+          reason?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_gym_feature_toggles_gym_id_fkey"
+            columns: ["gym_id"]
+            isOneToOne: false
+            referencedRelation: "gym_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       platform_settings: {
         Row: {
