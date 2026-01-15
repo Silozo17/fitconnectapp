@@ -26,19 +26,19 @@ import {
   Bot,
   ClipboardList,
   RefreshCcw,
+  Briefcase,
   Target,
   TrendingUp,
   UserPlus,
   Cog,
-  ChevronDown,
-  X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { LocationSwitcher } from "./LocationSwitcher";
+import { CollapsibleNavSection } from "./CollapsibleNavSection";
 import { usePendingRefundRequestsCount } from "@/hooks/gym/useGymRefundRequests";
-import { useState } from "react";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface NavItem {
   label: string;
@@ -48,18 +48,7 @@ interface NavItem {
   allowedRoles?: GymRole[];
 }
 
-interface NavSection {
-  title: string;
-  icon: React.ElementType;
-  items: NavItem[];
-  defaultOpen?: boolean;
-}
-
-interface GymAdminSidebarProps {
-  onClose?: () => void;
-}
-
-export function GymAdminSidebar({ onClose }: GymAdminSidebarProps) {
+export function GymAdminSidebar() {
   const { gymId } = useParams<{ gymId: string }>();
   const location = useLocation();
   const { gym, userRole } = useGym();
@@ -68,175 +57,158 @@ export function GymAdminSidebar({ onClose }: GymAdminSidebarProps) {
 
   const basePath = `/gym-admin/${gymId}`;
 
-  // Define all navigation sections
-  const sections: NavSection[] = [
-    {
-      title: "Operations",
-      icon: Calendar,
-      defaultOpen: true,
-      items: [
-        { label: "Schedule", href: `${basePath}/schedule`, icon: Calendar },
-        { label: "Classes", href: `${basePath}/classes`, icon: Dumbbell },
-        { label: "Check-ins", href: `${basePath}/check-ins`, icon: ScanLine },
-        { 
-          label: "POS", 
-          href: `${basePath}/pos`, 
-          icon: ShoppingCart,
-          allowedRoles: ["owner", "area_manager", "manager", "staff"],
-        },
-      ],
+  // Operations section
+  const operationsItems: NavItem[] = [
+    { label: "Schedule", href: `${basePath}/schedule`, icon: Calendar },
+    { label: "Classes", href: `${basePath}/classes`, icon: Dumbbell },
+    { label: "Check-ins", href: `${basePath}/check-ins`, icon: ScanLine },
+    { 
+      label: "POS", 
+      href: `${basePath}/pos`, 
+      icon: ShoppingCart,
+      allowedRoles: ["owner", "area_manager", "manager", "staff"],
     },
-    {
-      title: "Members",
-      icon: Users,
-      defaultOpen: true,
-      items: [
-        { label: "All Members", href: `${basePath}/members`, icon: Users },
-        { 
-          label: "Membership Plans", 
-          href: `${basePath}/memberships`, 
-          icon: CreditCard, 
-          allowedRoles: ["owner", "area_manager", "manager"],
-        },
-        { 
-          label: "Credits", 
-          href: `${basePath}/credits`, 
-          icon: Wallet,
-          allowedRoles: ["owner", "area_manager", "manager"],
-        },
-        { 
-          label: "Grading", 
-          href: `${basePath}/grading`, 
-          icon: Award,
-          allowedRoles: ["owner", "area_manager", "manager", "coach"],
-        },
-      ],
+  ];
+
+  // Members section
+  const membersItems: NavItem[] = [
+    { label: "All Members", href: `${basePath}/members`, icon: Users },
+    { 
+      label: "Membership Plans", 
+      href: `${basePath}/memberships`, 
+      icon: CreditCard, 
+      allowedRoles: ["owner", "area_manager", "manager"],
     },
-    {
-      title: "Team",
+    { 
+      label: "Credits", 
+      href: `${basePath}/credits`, 
+      icon: Wallet,
+      allowedRoles: ["owner", "area_manager", "manager"],
+    },
+    { 
+      label: "Grading", 
+      href: `${basePath}/grading`, 
+      icon: Award,
+      allowedRoles: ["owner", "area_manager", "manager", "coach"],
+    },
+  ];
+
+  // Team section
+  const teamItems: NavItem[] = [
+    { 
+      label: "Staff", 
+      href: `${basePath}/staff`, 
       icon: UserCog,
-      items: [
-        { 
-          label: "Staff", 
-          href: `${basePath}/staff`, 
-          icon: UserCog,
-          allowedRoles: ["owner", "area_manager", "manager"],
-        },
-        { 
-          label: "Announcements", 
-          href: `${basePath}/announcements`, 
-          icon: Newspaper,
-          allowedRoles: ["owner", "area_manager", "manager"],
-        },
-        { 
-          label: "Activity Log", 
-          href: `${basePath}/activity-log`, 
-          icon: ClipboardList,
-          allowedRoles: ["owner", "area_manager", "manager"],
-        },
-      ],
+      allowedRoles: ["owner", "area_manager", "manager"],
+    },
+    { 
+      label: "Announcements", 
+      href: `${basePath}/announcements`, 
+      icon: Newspaper,
+      allowedRoles: ["owner", "area_manager", "manager"],
+    },
+    { 
+      label: "Activity Log", 
+      href: `${basePath}/activity-log`, 
+      icon: ClipboardList,
+      allowedRoles: ["owner", "area_manager", "manager"],
+    },
+  ];
+
+  // Business section (owner/area_manager only)
+  const businessItems: NavItem[] = [
+    { 
+      label: "Analytics", 
+      href: `${basePath}/analytics`, 
+      icon: BarChart3,
+      allowedRoles: ["owner", "area_manager"],
+    },
+    { 
+      label: "Reports", 
+      href: `${basePath}/reports`, 
+      icon: FileBarChart,
+      allowedRoles: ["owner", "area_manager", "manager"],
+    },
+    { 
+      label: "Payments", 
+      href: `${basePath}/payments`, 
+      icon: Wallet,
+      allowedRoles: ["owner", "area_manager"],
+    },
+    { 
+      label: "Invoices", 
+      href: `${basePath}/invoices`, 
+      icon: Receipt,
+      allowedRoles: ["owner", "area_manager"],
     },
     {
-      title: "Business",
-      icon: TrendingUp,
-      items: [
-        { 
-          label: "Analytics", 
-          href: `${basePath}/analytics`, 
-          icon: BarChart3,
-          allowedRoles: ["owner", "area_manager"],
-        },
-        { 
-          label: "Reports", 
-          href: `${basePath}/reports`, 
-          icon: FileBarChart,
-          allowedRoles: ["owner", "area_manager", "manager"],
-        },
-        { 
-          label: "Payments", 
-          href: `${basePath}/payments`, 
-          icon: Wallet,
-          allowedRoles: ["owner", "area_manager"],
-        },
-        { 
-          label: "Invoices", 
-          href: `${basePath}/invoices`, 
-          icon: Receipt,
-          allowedRoles: ["owner", "area_manager"],
-        },
-        {
-          label: "Refund Requests",
-          href: `${basePath}/refund-requests`,
-          icon: RefreshCcw,
-          allowedRoles: ["owner", "area_manager", "manager"],
-          badge: isOwnerOrAreaManager ? pendingRefundsCount || undefined : undefined,
-        },
-      ],
+      label: "Refund Requests",
+      href: `${basePath}/refund-requests`,
+      icon: RefreshCcw,
+      allowedRoles: ["owner", "area_manager", "manager"],
+      badge: isOwnerOrAreaManager ? pendingRefundsCount || undefined : undefined,
     },
-    {
-      title: "Marketing",
+  ];
+
+  // Marketing section
+  const marketingItems: NavItem[] = [
+    { 
+      label: "Campaigns", 
+      href: `${basePath}/marketing`, 
       icon: Megaphone,
-      items: [
-        { 
-          label: "Campaigns", 
-          href: `${basePath}/marketing`, 
-          icon: Megaphone,
-          allowedRoles: ["owner", "area_manager", "marketing"],
-        },
-        { 
-          label: "Leads", 
-          href: `${basePath}/leads`, 
-          icon: UserPlus,
-          allowedRoles: ["owner", "area_manager", "marketing"],
-        },
-        { 
-          label: "Referrals", 
-          href: `${basePath}/referrals`, 
-          icon: Target,
-          allowedRoles: ["owner", "area_manager", "marketing"],
-        },
-      ],
+      allowedRoles: ["owner", "area_manager", "marketing"],
     },
-    {
-      title: "Settings",
-      icon: Settings,
-      items: [
-        { 
-          label: "Locations", 
-          href: `${basePath}/locations`, 
-          icon: MapPin,
-          allowedRoles: ["owner", "area_manager"],
-        },
-        { 
-          label: "Contracts", 
-          href: `${basePath}/contracts`, 
-          icon: FileText,
-          allowedRoles: ["owner", "area_manager"],
-        },
-        { 
-          label: "Products", 
-          href: `${basePath}/products`, 
-          icon: Package,
-          allowedRoles: ["owner", "area_manager", "manager"],
-        },
-        { 
-          label: "Automations", 
-          href: `${basePath}/automations`, 
-          icon: Bot,
-          allowedRoles: ["owner", "area_manager"],
-        },
-        { 
-          label: "General", 
-          href: `${basePath}/settings`, 
-          icon: Cog,
-          allowedRoles: ["owner", "area_manager"],
-        },
-      ],
+    { 
+      label: "Leads", 
+      href: `${basePath}/leads`, 
+      icon: UserPlus,
+      allowedRoles: ["owner", "area_manager", "marketing"],
+    },
+    { 
+      label: "Referrals", 
+      href: `${basePath}/referrals`, 
+      icon: Target,
+      allowedRoles: ["owner", "area_manager", "marketing"],
+    },
+  ];
+
+  // Settings section (owner/area_manager only)
+  const settingsItems: NavItem[] = [
+    { 
+      label: "Locations", 
+      href: `${basePath}/locations`, 
+      icon: MapPin,
+      allowedRoles: ["owner", "area_manager"],
+    },
+    { 
+      label: "Contracts", 
+      href: `${basePath}/contracts`, 
+      icon: FileText,
+      allowedRoles: ["owner", "area_manager"],
+    },
+    { 
+      label: "Products", 
+      href: `${basePath}/products`, 
+      icon: Package,
+      allowedRoles: ["owner", "area_manager", "manager"],
+    },
+    { 
+      label: "Automations", 
+      href: `${basePath}/automations`, 
+      icon: Bot,
+      allowedRoles: ["owner", "area_manager"],
+    },
+    { 
+      label: "General", 
+      href: `${basePath}/settings`, 
+      icon: Cog,
+      allowedRoles: ["owner", "area_manager"],
     },
   ];
 
   const filterByRole = (items: NavItem[]) => {
     if (!userRole) return [];
+    
     return items.filter((item) => {
       if (!item.allowedRoles || item.allowedRoles.length === 0) return true;
       return item.allowedRoles.includes(userRole);
@@ -247,6 +219,7 @@ export function GymAdminSidebar({ onClose }: GymAdminSidebarProps) {
     if (href === basePath) {
       return location.pathname === basePath;
     }
+    // Use exact match for conflicting routes
     if (href.endsWith('/members') || href.endsWith('/memberships')) {
       return location.pathname === href || location.pathname.startsWith(href + '/');
     }
@@ -257,152 +230,196 @@ export function GymAdminSidebar({ onClose }: GymAdminSidebarProps) {
     return items.some(item => isActive(item.href));
   };
 
-  const getRoleDisplayName = (role: GymRole | null) => {
-    const roleNames: Record<GymRole, string> = {
-      owner: "Owner",
-      area_manager: "Area Manager",
-      manager: "Manager",
-      coach: "Coach",
-      marketing: "Marketing",
-      staff: "Staff",
-    };
-    return role ? roleNames[role] : "Staff";
+  const NavLink = ({ item }: { item: NavItem }) => {
+    const Icon = item.icon;
+    const active = isActive(item.href);
+
+    return (
+      <Link
+        to={item.href}
+        className={cn(
+          "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+          active
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground hover:bg-muted hover:text-foreground"
+        )}
+      >
+        <Icon className="h-4 w-4" />
+        <span>{item.label}</span>
+        {item.badge && (
+          <Badge variant="secondary" className="ml-auto text-xs">
+            {item.badge}
+          </Badge>
+        )}
+      </Link>
+    );
   };
 
+  const getRoleDisplayName = (role: GymRole | null) => {
+    switch (role) {
+      case "owner":
+        return "Owner";
+      case "area_manager":
+        return "Area Manager";
+      case "manager":
+        return "Manager";
+      case "coach":
+        return "Coach";
+      case "marketing":
+        return "Marketing";
+      case "staff":
+        return "Staff";
+      default:
+        return "Staff";
+    }
+  };
+
+  const filteredOperations = filterByRole(operationsItems);
+  const filteredMembers = filterByRole(membersItems);
+  const filteredTeam = filterByRole(teamItems);
+  const filteredBusiness = filterByRole(businessItems);
+  const filteredMarketing = filterByRole(marketingItems);
+  const filteredSettings = filterByRole(settingsItems);
+
   return (
-    <div className="gym-sidebar flex h-full w-64 flex-col">
-      {/* Header */}
-      <div className="gym-sidebar-header">
+    <div className="flex h-full w-64 flex-col border-r bg-card">
+      {/* Gym Header */}
+      <div className="flex h-16 items-center gap-3 border-b px-4">
         <Avatar className="h-10 w-10">
           <AvatarImage src={gym?.logo_url || undefined} alt={gym?.name} />
-          <AvatarFallback className="gym-sidebar-logo">
+          <AvatarFallback className="bg-primary/10 text-primary">
             <Building2 className="h-5 w-5" />
           </AvatarFallback>
         </Avatar>
-        <div className="flex-1 min-w-0">
-          <h2 className="gym-sidebar-title">{gym?.name || "Loading..."}</h2>
-          <p className="gym-sidebar-subtitle">{getRoleDisplayName(userRole)}</p>
+        <div className="flex-1 overflow-hidden">
+          <h2 className="truncate font-semibold">{gym?.name || "Loading..."}</h2>
+          <p className="truncate text-xs text-muted-foreground">
+            {getRoleDisplayName(userRole)}
+          </p>
         </div>
-        {/* Mobile close button */}
-        <button 
-          className="md:hidden p-1.5 rounded-lg hover:bg-[hsl(var(--gym-sidebar-hover-bg))] transition-colors"
-          onClick={onClose}
-        >
-          <X className="h-5 w-5" />
-        </button>
       </div>
-
-      {/* Location Switcher */}
+      
+      {/* Location Switcher - Only for owner/area_manager */}
       {isOwnerOrAreaManager && (
-        <div className="px-3 py-2 border-b border-[hsl(var(--gym-sidebar-border))]">
+        <div className="border-b px-3 py-2">
           <LocationSwitcher />
         </div>
       )}
 
       {/* Navigation */}
-      <ScrollArea className="gym-sidebar-nav flex-1">
-        <div className="space-y-1">
-          {/* Dashboard - always at top */}
+      <ScrollArea className="flex-1 px-3 py-4">
+        <div className="space-y-2">
+          {/* Dashboard - always visible at top */}
           <Link
             to={basePath}
             className={cn(
-              "gym-sidebar-item",
-              isActive(basePath) && location.pathname === basePath && "active"
+              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              isActive(basePath) && location.pathname === basePath
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
-            onClick={onClose}
           >
-            <LayoutDashboard className="gym-sidebar-icon" />
+            <LayoutDashboard className="h-4 w-4" />
             <span>Dashboard</span>
           </Link>
 
-          {/* Navigation Sections */}
-          {sections.map((section) => {
-            const filteredItems = filterByRole(section.items);
-            if (filteredItems.length === 0) return null;
+          {/* Operations Section */}
+          {filteredOperations.length > 0 && (
+            <CollapsibleNavSection
+              title="Operations"
+              icon={Briefcase}
+              storageKey="operations"
+              hasActiveChild={hasActiveChild(filteredOperations)}
+              defaultOpen
+            >
+              {filteredOperations.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
 
-            const sectionHasActive = hasActiveChild(filteredItems);
+          {/* Members Section */}
+          {filteredMembers.length > 0 && (
+            <CollapsibleNavSection
+              title="Members"
+              icon={Users}
+              storageKey="members"
+              hasActiveChild={hasActiveChild(filteredMembers)}
+              defaultOpen
+            >
+              {filteredMembers.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
 
-            return (
-              <NavSection
-                key={section.title}
-                section={section}
-                items={filteredItems}
-                isActive={isActive}
-                hasActiveChild={sectionHasActive}
-                onItemClick={onClose}
-              />
-            );
-          })}
+          {/* Team Section */}
+          {filteredTeam.length > 0 && (
+            <CollapsibleNavSection
+              title="Team"
+              icon={UserCog}
+              storageKey="team"
+              hasActiveChild={hasActiveChild(filteredTeam)}
+            >
+              {filteredTeam.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
+
+          {/* Business Section */}
+          {filteredBusiness.length > 0 && (
+            <CollapsibleNavSection
+              title="Business"
+              icon={TrendingUp}
+              storageKey="business"
+              hasActiveChild={hasActiveChild(filteredBusiness)}
+            >
+              {filteredBusiness.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
+
+          {/* Marketing Section */}
+          {filteredMarketing.length > 0 && (
+            <CollapsibleNavSection
+              title="Marketing"
+              icon={Megaphone}
+              storageKey="marketing"
+              hasActiveChild={hasActiveChild(filteredMarketing)}
+            >
+              {filteredMarketing.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
+
+          {/* Settings Section */}
+          {filteredSettings.length > 0 && (
+            <CollapsibleNavSection
+              title="Settings"
+              icon={Settings}
+              storageKey="settings"
+              hasActiveChild={hasActiveChild(filteredSettings)}
+            >
+              {filteredSettings.map((item) => (
+                <NavLink key={item.href} item={item} />
+              ))}
+            </CollapsibleNavSection>
+          )}
         </div>
       </ScrollArea>
 
       {/* Footer */}
-      <div className="px-3 py-4 border-t border-[hsl(var(--gym-sidebar-border))]">
-        <Link
-          to="/coach/dashboard"
-          className="gym-sidebar-item"
-        >
-          <ChevronLeft className="gym-sidebar-icon" />
-          <span>Back to FitConnect</span>
-        </Link>
+      <div className="border-t p-4">
+        <Button variant="ghost" className="w-full justify-start" asChild>
+          <Link to="/coach/dashboard">
+            <ChevronLeft className="mr-2 h-4 w-4" />
+            Back to FitConnect
+          </Link>
+        </Button>
       </div>
     </div>
-  );
-}
-
-// Collapsible Nav Section Component
-function NavSection({
-  section,
-  items,
-  isActive,
-  hasActiveChild,
-  onItemClick,
-}: {
-  section: NavSection;
-  items: NavItem[];
-  isActive: (href: string) => boolean;
-  hasActiveChild: boolean;
-  onItemClick?: () => void;
-}) {
-  const [isOpen, setIsOpen] = useState(section.defaultOpen || hasActiveChild);
-
-  return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="w-full">
-        <div className="gym-sidebar-item justify-between group">
-          <div className="flex items-center gap-3">
-            <section.icon className="gym-sidebar-icon" />
-            <span>{section.title}</span>
-          </div>
-          <ChevronDown 
-            className={cn(
-              "h-4 w-4 transition-transform duration-200",
-              isOpen && "rotate-180"
-            )} 
-          />
-        </div>
-      </CollapsibleTrigger>
-      <CollapsibleContent>
-        <div className="ml-4 pl-3 border-l border-[hsl(var(--gym-sidebar-border))] space-y-0.5 mt-1">
-          {items.map((item) => (
-            <Link
-              key={item.href}
-              to={item.href}
-              className={cn(
-                "gym-sidebar-item py-2",
-                isActive(item.href) && "active"
-              )}
-              onClick={onItemClick}
-            >
-              <item.icon className="gym-sidebar-icon" />
-              <span>{item.label}</span>
-              {item.badge && (
-                <span className="gym-sidebar-badge">{item.badge}</span>
-              )}
-            </Link>
-          ))}
-        </div>
-      </CollapsibleContent>
-    </Collapsible>
   );
 }
