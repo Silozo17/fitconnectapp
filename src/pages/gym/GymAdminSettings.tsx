@@ -38,6 +38,7 @@ import {
   Calendar,
   Check,
   MapPin,
+  Copy,
 } from "lucide-react";
 
 export default function GymAdminSettings() {
@@ -49,6 +50,7 @@ export default function GymAdminSettings() {
   
   const [isSaving, setIsSaving] = useState(false);
   const [isLocationSaving, setIsLocationSaving] = useState(false);
+  const [signupUrlCopied, setSignupUrlCopied] = useState(false);
   
   // Location selection state
   const [selectedLocationId, setSelectedLocationId] = useState<string | null>(null);
@@ -441,18 +443,36 @@ export default function GymAdminSettings() {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="slug">Member Signup URL</Label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-sm text-muted-foreground whitespace-nowrap">
-                        getfitconnect.co.uk/gym-signup/
-                      </span>
+                    <Label htmlFor="signup-url">Member Signup URL</Label>
+                    <div className="flex gap-2">
                       <Input
-                        id="slug"
-                        value={gym?.slug || ""}
-                        disabled
-                        className="rounded-l-none"
+                        id="signup-url"
+                        value={`https://getfitconnect.co.uk/gym-signup/${gym?.id || ""}`}
+                        readOnly
+                        className="font-mono text-sm"
                       />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        onClick={async () => {
+                          const url = `https://getfitconnect.co.uk/gym-signup/${gym?.id}`;
+                          await navigator.clipboard.writeText(url);
+                          setSignupUrlCopied(true);
+                          toast.success("Signup URL copied to clipboard!");
+                          setTimeout(() => setSignupUrlCopied(false), 2000);
+                        }}
+                      >
+                        {signupUrlCopied ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </Button>
                     </div>
+                    <p className="text-xs text-muted-foreground">
+                      Share this link with potential members to sign up for your gym
+                    </p>
                   </div>
                 </div>
 

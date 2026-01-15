@@ -177,6 +177,7 @@ const GymStaffProfile = lazy(() => import('@/pages/gym/GymStaffProfile'));
 const GymCoachClasses = lazy(() => import('@/pages/gym/coach/CoachClasses'));
 const EmbedTimetable = lazy(() => import('@/pages/gym/embed/EmbedTimetable'));
 const EmbedSignup = lazy(() => import('@/pages/gym/embed/EmbedSignup'));
+const GymSignup = lazy(() => import('@/pages/gym/GymSignup'));
 
 // Gym Admin Layout Wrapper (provides GymProvider context)
 import { GymAdminRouteWrapper } from '@/components/gym/admin/GymAdminRouteWrapper';
@@ -2086,6 +2087,13 @@ const App = () => (
                               <Route path="/embed/:gymId/signup" element={
                                 <Suspense fallback={<PageLoadingSpinner />}>
                                   <EmbedSignup />
+                                </Suspense>
+                              } />
+                              
+                              {/* Public Gym Signup by ID */}
+                              <Route path="/gym-signup/:gymId" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <GymSignup />
                                 </Suspense>
                               } />
                               
