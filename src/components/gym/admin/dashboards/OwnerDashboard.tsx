@@ -108,7 +108,7 @@ export function OwnerDashboard() {
         </Card>
       )}
 
-      {pendingRefunds && pendingRefunds > 0 && (
+      {typeof pendingRefunds === 'number' && pendingRefunds > 0 && (
         <Card className="border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30">
           <CardContent className="flex items-center gap-4 p-4">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
