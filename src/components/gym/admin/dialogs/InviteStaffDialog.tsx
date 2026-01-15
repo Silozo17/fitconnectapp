@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useGym, GymRole } from "@/contexts/GymContext";
 import { useGymLocations } from "@/hooks/gym/useGymLocations";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -67,6 +68,7 @@ const DISCIPLINES = [
 
 export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaffDialogProps) {
   const { gym, userRole } = useGym();
+  const { user } = useAuth();
   const { data: locations = [] } = useGymLocations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [existingUser, setExistingUser] = useState<{ id: string; name: string } | null>(null);
@@ -132,10 +134,31 @@ export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaff
       return;
     }
 
+    if (!formData.firstName || !formData.lastName) {
+      toast.error("Please enter the staff member's name");
+      return;
+    }
+
     setIsSubmitting(true);
     try {
+      // Get inviter name from gym_staff
+      let currentInviterName = "A team member";
+      if (user?.id && gym?.id) {
+        const { data: staffData } = await supabase
+          .from("gym_staff")
+          .select("display_name, first_name, last_name")
+          .eq("gym_id", gym.id)
+          .eq("user_id", user.id)
+          .single();
+        if (staffData) {
+          currentInviterName = staffData.display_name 
+            || `${staffData.first_name || ""} ${staffData.last_name || ""}`.trim() 
+            || "A team member";
+        }
+      }
+
       // Create staff invitation record
-      const { error } = await (supabase as any)
+      const { data: invitation, error } = await supabase
         .from("gym_staff_invitations")
         .insert({
           gym_id: gym.id,
@@ -144,43 +167,44 @@ export function InviteStaffDialog({ open, onOpenChange, onSuccess }: InviteStaff
           last_name: formData.lastName,
           phone: formData.phone || null,
           role: formData.role,
-          assigned_location_ids: formData.locationIds.length > 0 ? formData.locationIds : null,
-          disciplines: formData.role === "coach" && formData.disciplines.length > 0 ? formData.disciplines : null,
+          assigned_location_ids: formData.locationIds.length > 0 ? formData.locationIds : [],
+          disciplines: formData.role === "coach" && formData.disciplines.length > 0 ? formData.disciplines : [],
+          invited_by: user?.id,
+          invited_by_name: currentInviterName,
           status: "pending",
-        });
+        })
+        .select()
+        .single();
 
       if (error) {
-        // If table doesn't exist, fall back to creating staff directly
-        if (error.code === "42P01") {
-          const { error: staffError } = await (supabase as any)
-            .from("gym_staff")
-            .insert({
-              gym_id: gym.id,
-              user_id: existingUser?.id || crypto.randomUUID(),
-              email: formData.email.toLowerCase(),
-              first_name: formData.firstName,
-              last_name: formData.lastName,
-              phone: formData.phone || null,
-              role: formData.role,
-              assigned_location_ids: formData.locationIds.length > 0 ? formData.locationIds : null,
-              disciplines: formData.role === "coach" && formData.disciplines.length > 0 ? formData.disciplines : null,
-              status: "pending",
-              can_teach_classes: formData.role === "coach",
-            });
-          
-          if (staffError) throw staffError;
+        console.error("Insert error:", error);
+        if (error.code === "23505") {
+          toast.error("An invitation has already been sent to this email address");
         } else {
           throw error;
         }
+        return;
       }
 
-      toast.success("Invitation sent successfully!");
+      // Send the invitation email
+      const { error: emailError } = await supabase.functions.invoke("gym-send-staff-invite", {
+        body: { invitationId: invitation.id },
+      });
+
+      if (emailError) {
+        console.error("Email error:", emailError);
+        // Still show success since the invitation was created
+        toast.success("Invitation created, but email failed to send. Please try resending.");
+      } else {
+        toast.success("Invitation sent successfully!");
+      }
+
       onSuccess?.();
       onOpenChange(false);
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to send invitation:", error);
-      toast.error("Failed to send invitation");
+      toast.error(error.message || "Failed to send invitation");
     } finally {
       setIsSubmitting(false);
     }

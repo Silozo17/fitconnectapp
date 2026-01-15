@@ -344,3 +344,6 @@ verify_jwt = true
 
 [functions.gym-stripe-webhook]
 verify_jwt = false
+
+[functions.gym-send-staff-invite]
+verify_jwt = true
