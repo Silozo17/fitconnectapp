@@ -13269,6 +13269,7 @@ export type Database = {
           verified_qualification_count: number
         }[]
       }
+      get_staff_gym_id: { Args: never; Returns: string }
       has_role:
         | {
             Args: { _role: Database["public"]["Enums"]["app_role"] }
@@ -13289,22 +13290,22 @@ export type Database = {
         Args: { p_country?: string; p_external_id: string }
         Returns: undefined
       }
-      is_gym_member: {
-        Args: { p_gym_id: string; p_user_id: string }
-        Returns: boolean
-      }
-      is_gym_owner: {
-        Args: { p_gym_id: string; p_user_id: string }
-        Returns: boolean
-      }
-      is_gym_staff: {
-        Args: {
-          p_gym_id: string
-          p_roles?: Database["public"]["Enums"]["gym_role"][]
-          p_user_id: string
-        }
-        Returns: boolean
-      }
+      is_gym_member:
+        | { Args: { check_gym_id: string }; Returns: boolean }
+        | { Args: { p_gym_id: string; p_user_id: string }; Returns: boolean }
+      is_gym_owner:
+        | { Args: { check_gym_id: string }; Returns: boolean }
+        | { Args: { p_gym_id: string; p_user_id: string }; Returns: boolean }
+      is_gym_staff:
+        | { Args: { check_gym_id: string }; Returns: boolean }
+        | {
+            Args: {
+              p_gym_id: string
+              p_roles?: Database["public"]["Enums"]["gym_role"][]
+              p_user_id: string
+            }
+            Returns: boolean
+          }
       is_username_available: {
         Args: { check_username: string }
         Returns: boolean
