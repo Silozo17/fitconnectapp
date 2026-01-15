@@ -1768,5 +1768,36 @@
     "promptRate": "Prompt conversion rate",
     "submitResponse": "Submit Response",
     "responseSubmitted": "Response submitted successfully"
+  },
+  "navigation": {
+    "coach": {
+      "overview": "Overview",
+      "pipeline": "Pipeline",
+      "messages": "Messages",
+      "connections": "Connections",
+      "automations": "Automations",
+      "clientManagement": "Client Management",
+      "clients": "Clients",
+      "schedule": "Schedule",
+      "trainingPlans": "Training Plans",
+      "wearableInsights": "Wearable Insights",
+      "clientComparison": "Client Comparison",
+      "aiRecommendations": "AI Recommendations",
+      "productsPricing": "Products & Pricing",
+      "packages": "Packages",
+      "digitalProducts": "Digital Products",
+      "business": "Business",
+      "boost": "Boost",
+      "financial": "Financial",
+      "reviews": "Reviews",
+      "transformations": "Transformations",
+      "caseStudies": "Case Studies",
+      "analytics": "Analytics",
+      "packageAnalytics": "Package Analytics",
+      "earnings": "Earnings",
+      "gamification": "Gamification",
+      "achievements": "Achievements",
+      "settings": "Settings"
+    }
   }
 }

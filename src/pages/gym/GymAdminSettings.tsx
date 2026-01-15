@@ -250,13 +250,14 @@ export default function GymAdminSettings() {
                     </p>
                   </div>
                   <Select 
+                    key={`settings-location-${selectedLocationId || "none"}`}
                     value={selectedLocationId || ""} 
                     onValueChange={handleLocationChange}
                   >
                     <SelectTrigger className="w-full sm:w-72">
                       <SelectValue placeholder="Select location" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="z-50">
                       {availableLocations.map(loc => (
                         <SelectItem key={loc.id} value={loc.id}>
                           <div className="flex items-center gap-2">
