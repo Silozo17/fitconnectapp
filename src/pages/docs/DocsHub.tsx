@@ -19,7 +19,8 @@ import {
   ShoppingCart,
   Target,
   Package,
-  Rocket
+  Rocket,
+  Building2
 } from "lucide-react";
 import { DocSearch } from "@/components/docs/DocSearch";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -68,6 +69,13 @@ export default function DocsHub() {
       href: "/docs/coach",
       icon: Dumbbell,
       color: "text-amber-500",
+    },
+    {
+      title: "For Gym Owners",
+      description: "Manage members, staff, classes, and grow your fitness business.",
+      href: "/docs/gym",
+      icon: Building2,
+      color: "text-emerald-500",
     },
     ...(isAdmin ? [{
       title: "For Administrators",
@@ -141,7 +149,7 @@ export default function DocsHub() {
         {/* Main Categories */}
         <section className="py-12">
           <div className="container">
-            <div className={`grid md:grid-cols-2 ${isAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-6`}>
+            <div className={`grid md:grid-cols-2 ${isAdmin ? 'lg:grid-cols-5' : 'lg:grid-cols-4'} gap-6`}>
               {quickLinks.map((link) => (
                 <Link key={link.href} to={link.href} className="no-underline">
                   <Card className="h-full hover:border-primary/50 transition-colors bg-card">

@@ -82,6 +82,25 @@ export const docsNavigationOrder: DocPage[] = [
   { href: "/docs/coach/settings", title: "Settings" },
   { href: "/docs/coach/achievements", title: "Achievements" },
   
+  // Gym Section
+  { href: "/docs/gym", title: "Gym Overview" },
+  { href: "/docs/gym/getting-started", title: "Getting Started" },
+  { href: "/docs/gym/members", title: "Member Management" },
+  { href: "/docs/gym/memberships", title: "Memberships & Plans" },
+  { href: "/docs/gym/classes", title: "Class Scheduling" },
+  { href: "/docs/gym/checkins", title: "Check-In System" },
+  { href: "/docs/gym/staff", title: "Staff Management" },
+  { href: "/docs/gym/leads", title: "Lead Management" },
+  { href: "/docs/gym/marketing", title: "Marketing & Automations" },
+  { href: "/docs/gym/pos", title: "Point of Sale" },
+  { href: "/docs/gym/payments", title: "Payments & Billing" },
+  { href: "/docs/gym/contracts", title: "Contracts" },
+  { href: "/docs/gym/grading", title: "Grading System" },
+  { href: "/docs/gym/reports", title: "Reports & Analytics" },
+  { href: "/docs/gym/locations", title: "Multi-Location" },
+  { href: "/docs/gym/member-portal", title: "Member Portal" },
+  { href: "/docs/gym/settings", title: "Settings" },
+
   // Integrations Section
   { href: "/docs/integrations/wearables", title: "Wearables Overview" },
   { href: "/docs/integrations/apple-health", title: "Apple Health" },
