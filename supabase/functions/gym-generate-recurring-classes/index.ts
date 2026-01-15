@@ -9,6 +9,7 @@ const corsHeaders = {
 interface RecurringPattern {
   frequency: "daily" | "weekly" | "biweekly" | "monthly";
   daysOfWeek?: number[]; // 0 = Sunday, 1 = Monday, etc.
+  endType?: "never" | "date" | "occurrences";
   endDate?: string;
   occurrences?: number;
 }
@@ -40,7 +41,9 @@ serve(async (req) => {
       });
     }
 
-    const { templateClassId, weeksAhead = 4 } = await req.json();
+    const { templateClassId, weeksAhead = 12 } = await req.json();
+
+    console.log("Generating recurring classes for template:", templateClassId, "weeksAhead:", weeksAhead);
 
     // Get the template class
     const { data: templateClass, error: templateError } = await supabase
@@ -51,6 +54,7 @@ serve(async (req) => {
       .single();
 
     if (templateError || !templateClass) {
+      console.error("Template not found:", templateError);
       return new Response(JSON.stringify({ error: "Template class not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -87,15 +91,31 @@ serve(async (req) => {
       });
     }
 
-    // Calculate dates to generate
+    console.log("Pattern:", JSON.stringify(pattern));
+
+    // Get excluded dates from template
+    const excludedDates = new Set<string>(
+      (templateClass.excluded_dates as string[] || [])
+    );
+
+    // Calculate dates to generate - use weeksAhead parameter
     const startDate = new Date();
+    startDate.setHours(0, 0, 0, 0);
+    
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + (weeksAhead * 7));
+    endDate.setHours(23, 59, 59, 999);
 
-    // Check pattern end date
-    const patternEndDate = pattern.endDate ? new Date(pattern.endDate) : null;
-    if (patternEndDate && patternEndDate < endDate) {
-      endDate.setTime(patternEndDate.getTime());
+    console.log("Generation window:", startDate.toISOString(), "to", endDate.toISOString());
+
+    // Check pattern end date - only apply if it's before our generation window
+    if (pattern.endDate) {
+      const patternEndDate = new Date(pattern.endDate);
+      patternEndDate.setHours(23, 59, 59, 999);
+      if (patternEndDate < endDate) {
+        endDate.setTime(patternEndDate.getTime());
+        console.log("Using pattern end date:", endDate.toISOString());
+      }
     }
 
     // Get existing generated classes to avoid duplicates
@@ -110,6 +130,8 @@ serve(async (req) => {
       existingClasses?.map((c) => c.start_time.split("T")[0]) || []
     );
 
+    console.log("Existing classes on dates:", Array.from(existingDates));
+
     // Generate new class instances
     const classesToCreate: any[] = [];
     const templateStartTime = new Date(templateClass.start_time);
@@ -118,6 +140,9 @@ serve(async (req) => {
 
     const currentDate = new Date(startDate);
     let occurrenceCount = 0;
+    const maxOccurrences = pattern.occurrences || 999; // Default high limit
+
+    console.log("Days of week:", pattern.daysOfWeek);
 
     while (currentDate <= endDate) {
       const dayOfWeek = currentDate.getDay();
@@ -144,10 +169,18 @@ serve(async (req) => {
       if (shouldCreate) {
         const dateKey = currentDate.toISOString().split("T")[0];
         
+        // Skip if date is excluded (holiday/break)
+        if (excludedDates.has(dateKey)) {
+          console.log("Skipping excluded date:", dateKey);
+          currentDate.setDate(currentDate.getDate() + 1);
+          continue;
+        }
+        
         // Skip if we already have a class on this date
         if (!existingDates.has(dateKey)) {
-          // Check occurrence limit
-          if (pattern.occurrences && occurrenceCount >= pattern.occurrences) {
+          // Check occurrence limit (only for "occurrences" end type)
+          if (pattern.endType === "occurrences" && occurrenceCount >= maxOccurrences) {
+            console.log("Reached occurrence limit:", maxOccurrences);
             break;
           }
 
@@ -161,8 +194,10 @@ serve(async (req) => {
 
           const classEndTime = new Date(classStartTime.getTime() + durationMs);
 
-          // Only create future classes
-          if (classStartTime > new Date()) {
+          // Only create future classes (or today's if not passed)
+          const now = new Date();
+          if (classStartTime >= now || 
+              (classStartTime.toDateString() === now.toDateString() && classStartTime > now)) {
             classesToCreate.push({
               gym_id: templateClass.gym_id,
               class_type_id: templateClass.class_type_id,
@@ -171,19 +206,21 @@ serve(async (req) => {
               start_time: classStartTime.toISOString(),
               end_time: classEndTime.toISOString(),
               max_capacity: templateClass.max_capacity,
-              current_bookings: 0,
               status: "scheduled",
               notes: templateClass.notes,
               parent_class_id: templateClassId,
               is_recurring_template: false,
             });
             occurrenceCount++;
+            console.log("Will create class on:", dateKey, "at", classStartTime.toISOString());
           }
         }
       }
 
       currentDate.setDate(currentDate.getDate() + 1);
     }
+
+    console.log("Classes to create:", classesToCreate.length);
 
     // Insert new classes
     if (classesToCreate.length > 0) {
@@ -192,6 +229,7 @@ serve(async (req) => {
         .insert(classesToCreate);
 
       if (insertError) {
+        console.error("Insert error:", insertError);
         throw insertError;
       }
     }
