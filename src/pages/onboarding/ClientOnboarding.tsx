@@ -400,6 +400,20 @@ const ClientOnboarding = () => {
           });
       }
 
+      // Also insert discipline into client_disciplines table for dashboard widgets
+      if (formData.selectedDiscipline && upsertResult?.[0]?.id) {
+        const clientProfileId = upsertResult[0].id;
+        await supabase
+          .from("client_disciplines")
+          .upsert({
+            client_id: clientProfileId,
+            discipline_id: formData.selectedDiscipline,
+            is_primary: true,
+          }, {
+            onConflict: "client_id,discipline_id"
+          });
+      }
+
       // Set flag so ClientDashboardLayout doesn't redirect back during cache update
       sessionStorage.setItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED, 'client');
       
