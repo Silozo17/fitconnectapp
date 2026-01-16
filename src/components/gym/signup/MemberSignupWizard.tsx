@@ -24,7 +24,7 @@ function WizardContent({ gymId, gymSlug }: MemberSignupWizardProps) {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("gym_locations")
-        .select("id, name, address_line_1, city, postal_code")
+        .select("id, name, address_line_1, city, postcode")
         .eq("gym_id", gymId)
         .eq("is_active", true)
         .order("is_primary", { ascending: false });
@@ -35,7 +35,7 @@ function WizardContent({ gymId, gymSlug }: MemberSignupWizardProps) {
         name: l.name,
         address: l.address_line_1 || "",
         city: l.city || "",
-        postcode: l.postal_code || "",
+        postcode: l.postcode || "",
       }));
     },
     enabled: !!gymId,
