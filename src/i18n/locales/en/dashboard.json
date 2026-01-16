@@ -159,7 +159,18 @@
       "recentTransactions": "Recent Transactions",
       "recentReviews": "Recent Reviews",
       "topCoaches": "Top Coaches",
-      "flaggedDocuments": "Flagged Documents"
+      "flaggedDocuments": "Flagged Documents",
+      "totalGyms": "Total Gyms",
+      "activeGyms": "Active Gyms",
+      "totalLocations": "Total Locations",
+      "gymMRR": "Gym Subscription MRR",
+      "gymMembershipFees": "Membership Fees",
+      "totalPlatformIncome": "Total Platform Income",
+      "coachSubscriptions": "Coach Subscriptions",
+      "gymSubscriptions": "Gym Subscriptions",
+      "membershipFees": "Membership Fees (£1/payment)",
+      "transactionCommissions": "Transaction Commissions",
+      "incomeBreakdown": "Income Breakdown"
     },
     "actions": {
       "viewAll": "View All",

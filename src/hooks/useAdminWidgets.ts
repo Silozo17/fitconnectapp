@@ -27,11 +27,19 @@ export const WIDGET_TYPES = {
   stats_messages: { label: "Total Messages", category: "stats", icon: "MessageSquare" },
   stats_reviews: { label: "Total Reviews", category: "stats", icon: "Star" },
   
+  // Gym Stats Category
+  stats_gyms: { label: "Total Gyms", category: "gyms", icon: "Building2" },
+  stats_active_gyms: { label: "Active Gyms", category: "gyms", icon: "Building2" },
+  stats_gym_locations: { label: "Total Locations", category: "gyms", icon: "MapPin" },
+  
   // Revenue Category
   revenue_mrr: { label: "MRR (Monthly Recurring)", category: "revenue", icon: "TrendingUp" },
   revenue_commissions: { label: "Platform Commissions", category: "revenue", icon: "Percent" },
   revenue_active_subs: { label: "Active Subscriptions", category: "revenue", icon: "CreditCard" },
   revenue_tier_distribution: { label: "Tier Distribution", category: "revenue", icon: "PieChart" },
+  revenue_total_income: { label: "Total Platform Income", category: "revenue", icon: "Wallet" },
+  revenue_gym_mrr: { label: "Gym Subscription MRR", category: "revenue", icon: "Building2" },
+  revenue_gym_fees: { label: "Membership Fees", category: "revenue", icon: "Receipt" },
   
   // Analytics Category
   analytics_growth_rate: { label: "User Growth Rate", category: "analytics", icon: "TrendingUp" },
@@ -66,6 +74,7 @@ export const WIDGET_TYPES = {
 
 export const WIDGET_CATEGORIES = [
   { key: "stats", label: "Statistics", icon: "BarChart3" },
+  { key: "gyms", label: "Gym Management", icon: "Building2" },
   { key: "revenue", label: "Revenue & Finance", icon: "DollarSign" },
   { key: "analytics", label: "Analytics & Metrics", icon: "TrendingUp" },
   { key: "charts", label: "Charts & Graphs", icon: "LineChart" },
@@ -322,6 +331,11 @@ export function useDashboardStats() {
         recentReviewsRes,
         last30DaysUsersRes,
         prev30DaysUsersRes,
+        // Gym stats
+        gymsRes,
+        activeGymsRes,
+        gymLocationsRes,
+        gymPaymentsRes,
       ] = await Promise.all([
         // Core counts
         supabase.from("client_profiles").select("id", { count: "exact", head: true }),
@@ -376,12 +390,21 @@ export function useDashboardStats() {
           .select("id", { count: "exact", head: true })
           .gte("created_at", sixtyDaysAgo.toISOString())
           .lt("created_at", thirtyDaysAgo.toISOString()),
+          
+        // Gym stats
+        supabase.from("gym_profiles").select("id", { count: "exact", head: true }),
+        supabase.from("gym_profiles").select("id", { count: "exact", head: true }).eq("status", "active"),
+        supabase.from("gym_locations").select("id", { count: "exact", head: true }),
+        supabase.from("gym_payments")
+          .select("id", { count: "exact", head: true })
+          .eq("status", "completed")
+          .gte("created_at", thirtyDaysAgo.toISOString()),
       ]);
 
-      // Calculate MRR from subscriptions
+      // Calculate MRR from coach subscriptions
       const tierPrices: Record<string, number> = { starter: 19, pro: 49, enterprise: 99 };
       const activeSubscriptions = subscriptionsRes.data || [];
-      const mrr = activeSubscriptions.reduce((sum, sub: any) => sum + (tierPrices[sub.tier] || 0), 0);
+      const coachMRR = activeSubscriptions.reduce((sum, sub: any) => sum + (tierPrices[sub.tier] || 0), 0);
       
       // Tier distribution
       const tierDistribution = activeSubscriptions.reduce((acc: Record<string, number>, sub: any) => {
@@ -406,6 +429,25 @@ export function useDashboardStats() {
       const coachCount = coachesRes.count || 1;
       const clientCount = usersRes.count || 0;
       const coachClientRatio = (clientCount / coachCount).toFixed(1);
+      
+      // Gym stats
+      const totalGyms = gymsRes.count || 0;
+      const activeGyms = activeGymsRes.count || 0;
+      const totalLocations = gymLocationsRes.count || 0;
+      
+      // Gym MRR: £99 base + £25 per additional location (simplified calculation)
+      // Each gym pays £99 base, plus £25 for each location beyond the first
+      const additionalLocations = Math.max(0, totalLocations - totalGyms);
+      const gymMRR = (totalGyms * 99) + (additionalLocations * 25);
+      
+      // Gym membership fees: £1 per completed payment this month
+      const gymMembershipFees = gymPaymentsRes.count || 0;
+      
+      // Commission earnings (15% of coaching session GMV - approximated)
+      const commissionEarnings = Math.round(coachMRR * 0.15);
+      
+      // Total platform income
+      const totalPlatformIncome = coachMRR + gymMRR + gymMembershipFees + commissionEarnings;
 
       // Integration stats
       const integrationStats = {
@@ -448,10 +490,19 @@ export function useDashboardStats() {
         totalMessages: messagesRes.count || 0,
         totalReviews: reviewsRes.count || 0,
         
+        // Gym Stats
+        totalGyms,
+        activeGyms,
+        totalLocations,
+        
         // Revenue
-        monthlyRevenue: mrr,
-        mrr,
-        commissionEarnings: Math.round(mrr * 0.15),
+        monthlyRevenue: coachMRR,
+        mrr: coachMRR,
+        coachMRR,
+        gymMRR,
+        gymMembershipFees,
+        commissionEarnings,
+        totalPlatformIncome,
         activeSubscriptions: activeSubscriptions.length,
         tierDistribution,
         

@@ -12,6 +12,7 @@ import { QuickActionsWidget } from "@/components/admin/widgets/QuickActionsWidge
 import { ListWidget } from "@/components/admin/widgets/ListWidget";
 import { ChartWidget } from "@/components/admin/widgets/ChartWidget";
 import { RevenueWidget } from "@/components/admin/widgets/RevenueWidget";
+import { TotalIncomeWidget } from "@/components/admin/widgets/TotalIncomeWidget";
 import { AnalyticsWidget } from "@/components/admin/widgets/AnalyticsWidget";
 import { IntegrationHealthWidget } from "@/components/admin/widgets/IntegrationHealthWidget";
 import { IntegrationStatWidget } from "@/components/admin/widgets/IntegrationStatWidget";
@@ -85,6 +86,14 @@ const AdminDashboard = () => {
       case "stats_reviews":
         return <StatWidget type="stats_reviews" title={t('admin.widgets.totalReviews')} value={stats?.totalReviews || 0} size={widget.size} displayFormat={displayFormat} />;
 
+      // Gym stats widgets
+      case "stats_gyms":
+        return <StatWidget type="stats_gyms" title={t('admin.widgets.totalGyms')} value={stats?.totalGyms || 0} size={widget.size} displayFormat={displayFormat} />;
+      case "stats_active_gyms":
+        return <StatWidget type="stats_active_gyms" title={t('admin.widgets.activeGyms')} value={stats?.activeGyms || 0} size={widget.size} displayFormat={displayFormat} />;
+      case "stats_gym_locations":
+        return <StatWidget type="stats_gym_locations" title={t('admin.widgets.totalLocations')} value={stats?.totalLocations || 0} size={widget.size} displayFormat={displayFormat} />;
+
       // Revenue widgets
       case "revenue_mrr":
         return <RevenueWidget type="revenue_mrr" stats={stats || {}} />;
@@ -94,6 +103,12 @@ const AdminDashboard = () => {
         return <RevenueWidget type="revenue_active_subs" stats={stats || {}} />;
       case "revenue_tier_distribution":
         return <RevenueWidget type="revenue_tier_distribution" stats={stats || {}} />;
+      case "revenue_total_income":
+        return <TotalIncomeWidget stats={stats || {}} />;
+      case "revenue_gym_mrr":
+        return <RevenueWidget type="revenue_gym_mrr" stats={stats || {}} />;
+      case "revenue_gym_fees":
+        return <RevenueWidget type="revenue_gym_fees" stats={stats || {}} />;
 
       // Analytics widgets
       case "analytics_growth_rate":
@@ -166,19 +181,25 @@ const AdminDashboard = () => {
   }));
 
   // Categorize widgets for grouped rendering
-  const { combinedStatWidgets, otherWidgets } = useMemo(() => {
-    // Combined stats + revenue + user growth = 8 cards in 2x4 grid
+  const { totalIncomeWidget, combinedStatWidgets, otherWidgets } = useMemo(() => {
+    // Total income widget (full width at top)
+    const totalIncomeTypes = ["revenue_total_income"];
+    
+    // Combined stats + revenue + user growth = cards in grid
     const combinedTypes = [
       "stats_users", "stats_coaches", "stats_sessions", "stats_revenue",
+      "stats_gyms", "stats_active_gyms", "stats_gym_locations",
       "revenue_mrr", "revenue_commissions", "revenue_active_subs", 
+      "revenue_gym_mrr", "revenue_gym_fees",
       "analytics_growth_rate"
     ];
     
     const sorted = [...widgetItems].sort((a, b) => a.position - b.position);
     
     return {
+      totalIncomeWidget: sorted.find(w => totalIncomeTypes.includes(w.widget_type)),
       combinedStatWidgets: sorted.filter(w => combinedTypes.includes(w.widget_type)),
-      otherWidgets: sorted.filter(w => !combinedTypes.includes(w.widget_type)),
+      otherWidgets: sorted.filter(w => !combinedTypes.includes(w.widget_type) && !totalIncomeTypes.includes(w.widget_type)),
     };
   }, [widgetItems]);
 
@@ -256,7 +277,12 @@ const AdminDashboard = () => {
               />
             ) : (
               <div className="space-y-6">
-                {/* Combined Stats + Revenue + User Growth - 2 column grid (8 cards) */}
+                {/* Total Income Widget - Full width at top */}
+                {totalIncomeWidget && (
+                  <div>{renderWidget(totalIncomeWidget)}</div>
+                )}
+                
+                {/* Combined Stats + Revenue + User Growth - 2 column grid */}
                 {combinedStatWidgets.length > 0 && (
                   <StatsGrid columns={2}>
                     {combinedStatWidgets.map(widget => (

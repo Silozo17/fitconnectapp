@@ -1,12 +1,15 @@
 import { memo } from "react";
-import { TrendingUp, Percent, CreditCard, PieChart } from "lucide-react";
+import { TrendingUp, Percent, CreditCard, PieChart, Building2, Receipt } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from "recharts";
 
 interface RevenueWidgetProps {
-  type: "revenue_mrr" | "revenue_commissions" | "revenue_active_subs" | "revenue_tier_distribution";
+  type: "revenue_mrr" | "revenue_commissions" | "revenue_active_subs" | "revenue_tier_distribution" | "revenue_gym_mrr" | "revenue_gym_fees";
   stats: {
     mrr?: number;
+    coachMRR?: number;
+    gymMRR?: number;
+    gymMembershipFees?: number;
     commissionEarnings?: number;
     activeSubscriptions?: number;
     tierDistribution?: Record<string, number>;
@@ -49,6 +52,20 @@ const widgetStyles = {
     iconBg: "bg-primary/20",
     iconColor: "text-primary",
   },
+  revenue_gym_mrr: {
+    bg: "from-cyan-500/10 via-background to-cyan-600/5",
+    border: "border-cyan-500/20",
+    accent: "from-cyan-400/60 via-cyan-500/40",
+    iconBg: "bg-cyan-500/20",
+    iconColor: "text-cyan-400",
+  },
+  revenue_gym_fees: {
+    bg: "from-amber-500/10 via-background to-amber-600/5",
+    border: "border-amber-500/20",
+    accent: "from-amber-400/60 via-amber-500/40",
+    iconBg: "bg-amber-500/20",
+    iconColor: "text-amber-400",
+  },
 };
 
 export const RevenueWidget = memo(function RevenueWidget({ type, stats }: RevenueWidgetProps) {
@@ -63,8 +80,8 @@ export const RevenueWidget = memo(function RevenueWidget({ type, stats }: Revenu
               <TrendingUp className={cn("w-5 h-5", styles.iconColor)} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-2xl font-bold text-foreground tracking-tight">£{(stats.mrr || 0).toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">Monthly Recurring Revenue</p>
+              <p className="text-2xl font-bold text-foreground tracking-tight">£{(stats.coachMRR || stats.mrr || 0).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Coach Subscription MRR</p>
             </div>
           </div>
         );
@@ -77,7 +94,7 @@ export const RevenueWidget = memo(function RevenueWidget({ type, stats }: Revenu
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-2xl font-bold text-foreground tracking-tight">£{(stats.commissionEarnings || 0).toLocaleString()}</p>
-              <p className="text-xs text-muted-foreground">Platform Commissions (1-4%)</p>
+              <p className="text-xs text-muted-foreground">Platform Commissions (~15%)</p>
             </div>
           </div>
         );
@@ -91,6 +108,32 @@ export const RevenueWidget = memo(function RevenueWidget({ type, stats }: Revenu
             <div className="flex-1 min-w-0">
               <p className="text-2xl font-bold text-foreground tracking-tight">{stats.activeSubscriptions || 0}</p>
               <p className="text-xs text-muted-foreground">Active Subscriptions</p>
+            </div>
+          </div>
+        );
+
+      case "revenue_gym_mrr":
+        return (
+          <div className="flex items-center gap-3">
+            <div className={cn("p-2 rounded-xl", styles.iconBg)}>
+              <Building2 className={cn("w-5 h-5", styles.iconColor)} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-2xl font-bold text-foreground tracking-tight">£{(stats.gymMRR || 0).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Gym Subscription MRR</p>
+            </div>
+          </div>
+        );
+
+      case "revenue_gym_fees":
+        return (
+          <div className="flex items-center gap-3">
+            <div className={cn("p-2 rounded-xl", styles.iconBg)}>
+              <Receipt className={cn("w-5 h-5", styles.iconColor)} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-2xl font-bold text-foreground tracking-tight">£{(stats.gymMembershipFees || 0).toLocaleString()}</p>
+              <p className="text-xs text-muted-foreground">Membership Fees (£1/payment)</p>
             </div>
           </div>
         );
