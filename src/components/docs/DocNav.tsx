@@ -143,6 +143,15 @@ const navItems: NavItem[] = [
           { title: "Wearables", href: "/docs/client/wearables", icon: Settings },
           { title: "Settings", href: "/docs/client/settings", icon: Settings },
           { title: "Receipts", href: "/docs/client/receipts", icon: CreditCard },
+          { title: "Notifications", href: "/docs/client/notifications", icon: Settings },
+        ]
+      },
+      {
+        sectionTitle: "Additional Features",
+        children: [
+          { title: "My Gyms", href: "/docs/client/my-gyms", icon: Building2 },
+          { title: "Health History", href: "/docs/client/health-history", icon: Activity },
+          { title: "Discipline Setup", href: "/docs/client/discipline-setup", icon: Target },
         ]
       },
     ],
@@ -254,13 +263,16 @@ const navItems: NavItem[] = [
           { title: "Member Management", href: "/docs/gym/members", icon: Users },
           { title: "Memberships & Plans", href: "/docs/gym/memberships", icon: CreditCard },
           { title: "Lead Management", href: "/docs/gym/leads", icon: Kanban },
+          { title: "Family Accounts", href: "/docs/gym/family-accounts", icon: Users },
         ]
       },
       {
         sectionTitle: "Classes & Check-Ins",
         children: [
           { title: "Class Scheduling", href: "/docs/gym/classes", icon: Calendar },
+          { title: "Recurring Schedules", href: "/docs/gym/recurring-schedules", icon: Calendar },
           { title: "Check-In System", href: "/docs/gym/checkins", icon: QrCode },
+          { title: "Check-In Management", href: "/docs/gym/check-in-management", icon: QrCode },
           { title: "Grading System", href: "/docs/gym/grading", icon: Award },
         ]
       },
@@ -269,6 +281,8 @@ const navItems: NavItem[] = [
         children: [
           { title: "Staff Management", href: "/docs/gym/staff", icon: Users },
           { title: "Multi-Location", href: "/docs/gym/locations", icon: MapPin },
+          { title: "Advanced Multi-Location", href: "/docs/gym/multi-location-advanced", icon: MapPin },
+          { title: "Activity Log", href: "/docs/gym/activity-log", icon: FileText },
         ]
       },
       {
@@ -276,20 +290,37 @@ const navItems: NavItem[] = [
         children: [
           { title: "Payments & Billing", href: "/docs/gym/payments", icon: CreditCard },
           { title: "Point of Sale", href: "/docs/gym/pos", icon: ShoppingCart },
+          { title: "Products & Inventory", href: "/docs/gym/products", icon: Package },
           { title: "Contracts", href: "/docs/gym/contracts", icon: FileText },
+          { title: "Refunds", href: "/docs/gym/refunds", icon: CreditCard },
+          { title: "Invoicing", href: "/docs/gym/invoicing", icon: FileText },
+          { title: "Credits System", href: "/docs/gym/credits-advanced", icon: CreditCard },
         ]
       },
       {
-        sectionTitle: "Marketing & Reports",
+        sectionTitle: "Marketing & Communications",
         children: [
           { title: "Marketing & Automations", href: "/docs/gym/marketing", icon: Rocket },
+          { title: "Advanced Automations", href: "/docs/gym/automations-advanced", icon: Settings },
+          { title: "Messaging", href: "/docs/gym/messaging", icon: MessageSquare },
+          { title: "Promotions & Discounts", href: "/docs/gym/promotions", icon: Rocket },
+          { title: "Referral Programs", href: "/docs/gym/referrals", icon: Link2 },
+        ]
+      },
+      {
+        sectionTitle: "Reports & Analytics",
+        children: [
           { title: "Reports & Analytics", href: "/docs/gym/reports", icon: BarChart3 },
+          { title: "Analytics Dashboard", href: "/docs/gym/analytics-dashboard", icon: LayoutDashboard },
+          { title: "Advanced Reporting", href: "/docs/gym/reporting-advanced", icon: BarChart3 },
         ]
       },
       {
         sectionTitle: "Portal & Settings",
         children: [
           { title: "Member Portal", href: "/docs/gym/member-portal", icon: Globe },
+          { title: "Website Builder", href: "/docs/gym/website-builder", icon: Globe },
+          { title: "Embed Widgets", href: "/docs/gym/embed-widgets", icon: Plug },
           { title: "Settings", href: "/docs/gym/settings", icon: Settings },
         ]
       },
@@ -321,14 +352,18 @@ const navItems: NavItem[] = [
       { title: "Dashboard", href: "/docs/admin/dashboard", icon: LayoutDashboard },
       { title: "User Management", href: "/docs/admin/users", icon: Users },
       { title: "Coach Management", href: "/docs/admin/coaches", icon: Dumbbell },
+      { title: "Gym Management", href: "/docs/admin/gyms", icon: Building2 },
       { title: "Team Management", href: "/docs/admin/team", icon: Shield },
       { title: "Revenue", href: "/docs/admin/revenue", icon: CreditCard },
       { title: "Analytics", href: "/docs/admin/analytics", icon: BarChart3 },
       { title: "Challenges", href: "/docs/admin/challenges", icon: Trophy },
       { title: "Blog", href: "/docs/admin/blog", icon: FileText },
       { title: "Boosts", href: "/docs/admin/boosts", icon: Rocket },
+      { title: "Review Moderation", href: "/docs/admin/reviews", icon: Star },
+      { title: "User Feedback", href: "/docs/admin/feedback", icon: MessageSquare },
       { title: "Integrations", href: "/docs/admin/integrations", icon: Plug },
       { title: "Audit Log", href: "/docs/admin/audit", icon: FileCheck },
+      { title: "Debug Console", href: "/docs/admin/debug", icon: Settings },
     ],
   },
 ];
