@@ -143,6 +143,16 @@ export default function GymAuth() {
     setForgotPasswordEmail("");
   }, [authState, resetBreachCheck]);
 
+  // Handle already authenticated users visiting /gym-login
+  // This ensures staff invitations are accepted and user is redirected properly
+  useEffect(() => {
+    if (user && (authState === "login" || authState === "register")) {
+      // User is already authenticated - skip to gym selection
+      // This will trigger invitation acceptance via loadUserGyms
+      setAuthState("gym-select");
+    }
+  }, [user, authState]);
+
   // Check if user is logged in and OTP verified (for gym selection)
   useEffect(() => {
     if (user && authState === "gym-select") {
