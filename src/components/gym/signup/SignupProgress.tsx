@@ -10,6 +10,7 @@ const STEP_LABELS = [
   "Location",
   "Plan",
   "Details",
+  "Verification",
   "Marketing",
   "Agreements",
   "Payment",
