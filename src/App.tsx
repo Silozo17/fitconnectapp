@@ -309,6 +309,7 @@ const DocsGymMembers = lazy(() => import('@/pages/docs/gym/GymMembers'));
 const DocsGymMemberships = lazy(() => import('@/pages/docs/gym/GymMemberships'));
 const DocsGymClasses = lazy(() => import('@/pages/docs/gym/GymClasses'));
 const DocsGymCheckIns = lazy(() => import('@/pages/docs/gym/GymCheckIns'));
+const DocsGymCheckInManagement = lazy(() => import('@/pages/docs/gym/GymCheckInManagement'));
 const DocsGymStaff = lazy(() => import('@/pages/docs/gym/GymStaff'));
 const DocsGymLeads = lazy(() => import('@/pages/docs/gym/GymLeads'));
 const DocsGymMarketing = lazy(() => import('@/pages/docs/gym/GymMarketing'));
@@ -320,6 +321,35 @@ const DocsGymReports = lazy(() => import('@/pages/docs/gym/GymReports'));
 const DocsGymLocations = lazy(() => import('@/pages/docs/gym/GymLocations'));
 const DocsGymMemberPortal = lazy(() => import('@/pages/docs/gym/GymMemberPortal'));
 const DocsGymSettings = lazy(() => import('@/pages/docs/gym/GymSettings'));
+const DocsGymActivityLog = lazy(() => import('@/pages/docs/gym/GymActivityLog'));
+const DocsGymAnalyticsDashboard = lazy(() => import('@/pages/docs/gym/GymAnalyticsDashboard'));
+const DocsGymRefunds = lazy(() => import('@/pages/docs/gym/GymRefunds'));
+const DocsGymRecurringSchedules = lazy(() => import('@/pages/docs/gym/GymRecurringSchedules'));
+const DocsGymWebsiteBuilder = lazy(() => import('@/pages/docs/gym/GymWebsiteBuilder'));
+const DocsGymMessaging = lazy(() => import('@/pages/docs/gym/GymMessaging'));
+const DocsGymProducts = lazy(() => import('@/pages/docs/gym/GymProducts'));
+const DocsGymPromotions = lazy(() => import('@/pages/docs/gym/GymPromotions'));
+const DocsGymReferrals = lazy(() => import('@/pages/docs/gym/GymReferrals'));
+const DocsGymFamilyAccounts = lazy(() => import('@/pages/docs/gym/GymFamilyAccounts'));
+const DocsGymEmbedWidgets = lazy(() => import('@/pages/docs/gym/GymEmbedWidgets'));
+const DocsGymAutomationsAdvanced = lazy(() => import('@/pages/docs/gym/GymAutomationsAdvanced'));
+const DocsGymCreditsAdvanced = lazy(() => import('@/pages/docs/gym/GymCreditsAdvanced'));
+const DocsGymInvoicing = lazy(() => import('@/pages/docs/gym/GymInvoicing'));
+const DocsGymReportingAdvanced = lazy(() => import('@/pages/docs/gym/GymReportingAdvanced'));
+const DocsGymMultiLocationAdvanced = lazy(() => import('@/pages/docs/gym/GymMultiLocationAdvanced'));
+
+// Client Additional Documentation (new)
+const DocsClientMyGyms = lazy(() => import('@/pages/docs/client/ClientMyGyms'));
+const DocsClientHealthHistory = lazy(() => import('@/pages/docs/client/ClientHealthHistoryDocs'));
+const DocsClientDisciplineSetup = lazy(() => import('@/pages/docs/client/ClientDisciplineSetupDocs'));
+const DocsClientNotifications = lazy(() => import('@/pages/docs/client/ClientNotificationsDocs'));
+
+// Admin Additional Documentation (new)
+const DocsAdminGyms = lazy(() => import('@/pages/docs/admin/AdminGymsDocs'));
+const DocsAdminReviews = lazy(() => import('@/pages/docs/admin/AdminReviewsDocs'));
+const DocsAdminFeedback = lazy(() => import('@/pages/docs/admin/AdminFeedbackDocs'));
+const DocsAdminDebug = lazy(() => import('@/pages/docs/admin/AdminDebugDocs'));
+
 
 // Debug pages
 const Debug = lazy(() => import('@/pages/Debug'));
@@ -783,6 +813,34 @@ const App = () => (
                                 <WebsiteLocaleWrapper>
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <DocsClientTrends />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/my-gyms" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientMyGyms />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/health-history" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientHealthHistory />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/discipline-setup" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientDisciplineSetup />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/client/notifications" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsClientNotifications />
                                   </Suspense>
                                 </WebsiteLocaleWrapper>
                               } />
@@ -1266,6 +1324,125 @@ const App = () => (
                                   </Suspense>
                                 </WebsiteLocaleWrapper>
                               } />
+                              <Route path="/docs/gym/activity-log" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymActivityLog />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/analytics-dashboard" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymAnalyticsDashboard />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/check-in-management" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymCheckInManagement />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/refunds" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymRefunds />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/recurring-schedules" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymRecurringSchedules />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/website-builder" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymWebsiteBuilder />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/messaging" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymMessaging />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/products" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymProducts />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/promotions" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymPromotions />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/referrals" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymReferrals />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/family-accounts" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymFamilyAccounts />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/embed-widgets" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymEmbedWidgets />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/automations-advanced" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymAutomationsAdvanced />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/credits-advanced" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymCreditsAdvanced />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/invoicing" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymInvoicing />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/reporting-advanced" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymReportingAdvanced />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/gym/multi-location-advanced" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsGymMultiLocationAdvanced />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
 
                               {/* Admin Documentation Routes */}
                               <Route path="/docs/admin" element={
@@ -1349,6 +1526,34 @@ const App = () => (
                                 <WebsiteLocaleWrapper>
                                   <Suspense fallback={<PageLoadingSpinner />}>
                                     <DocsAdminAudit />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/gyms" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminGyms />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/reviews" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminReviews />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/feedback" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminFeedback />
+                                  </Suspense>
+                                </WebsiteLocaleWrapper>
+                              } />
+                              <Route path="/docs/admin/debug" element={
+                                <WebsiteLocaleWrapper>
+                                  <Suspense fallback={<PageLoadingSpinner />}>
+                                    <DocsAdminDebug />
                                   </Suspense>
                                 </WebsiteLocaleWrapper>
                               } />
