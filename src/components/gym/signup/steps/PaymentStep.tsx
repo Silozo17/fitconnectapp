@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, CreditCard, Loader2, CheckCircle, Calendar, MapPin } from "lucide-react";
+import { ArrowLeft, CreditCard, Loader2, CheckCircle, Calendar, MapPin, AlertCircle } from "lucide-react";
 import { useSignupWizard } from "../SignupWizardContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { loadStripe } from "@stripe/stripe-js";
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 
 interface MembershipPlan {
   id: string;
@@ -33,7 +35,9 @@ interface PaymentStepProps {
 
 export function PaymentStep({ plan, location, gymId, gymSlug, onBack }: PaymentStepProps) {
   const { formData } = useSignupWizard();
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [stripePromise, setStripePromise] = useState<ReturnType<typeof loadStripe> | null>(null);
+  const [isLoadingStripe, setIsLoadingStripe] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const formatPrice = (amount: number, currency: string) => {
     return new Intl.NumberFormat("en-GB", {
@@ -48,13 +52,37 @@ export function PaymentStep({ plan, location, gymId, gymSlug, onBack }: PaymentS
     return `every ${count} ${interval}s`;
   };
 
-  const handleCheckout = async () => {
-    if (!plan || !gymId) return;
+  // Initialize Stripe
+  useEffect(() => {
+    async function initStripe() {
+      try {
+        setIsLoadingStripe(true);
+        const { data, error: configError } = await supabase.functions.invoke("get-stripe-config");
+        
+        if (configError) throw configError;
+        if (!data?.publishableKey) throw new Error("Failed to get Stripe configuration");
 
-    setIsProcessing(true);
+        const stripe = await loadStripe(data.publishableKey);
+        setStripePromise(Promise.resolve(stripe));
+      } catch (err) {
+        console.error("Failed to initialize Stripe:", err);
+        setError("Failed to initialize payment system. Please try again.");
+      } finally {
+        setIsLoadingStripe(false);
+      }
+    }
+
+    initStripe();
+  }, []);
+
+  // Create checkout session and get client secret
+  const fetchClientSecret = useCallback(async () => {
+    if (!plan || !gymId) {
+      throw new Error("Missing plan or gym information");
+    }
 
     try {
-      const { data, error } = await supabase.functions.invoke(
+      const { data, error: checkoutError } = await supabase.functions.invoke(
         "gym-create-membership-checkout",
         {
           body: {
@@ -78,43 +106,78 @@ export function PaymentStep({ plan, location, gymId, gymSlug, onBack }: PaymentS
               marketingSourceOther: formData.marketingSourceOther || null,
             },
             contractIds: formData.signedContractIds,
-            emailVerified: formData.emailVerified, // Pass email verification status
+            signatureData: {
+              name: formData.signatureName,
+              date: formData.signatureDate,
+              signature: formData.signatureData,
+              type: formData.signatureType,
+            },
+            emailVerified: formData.emailVerified,
+            embedded: true,
             successUrl: `${window.location.origin}/club/${gymSlug}/signup?success=true`,
             cancelUrl: `${window.location.origin}/club/${gymSlug}/signup?cancelled=true`,
           },
         }
       );
 
-      if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error("No checkout URL returned");
+      if (checkoutError) throw checkoutError;
+      
+      if (data?.requiresOtp) {
+        throw new Error("Email verification required. Please go back and verify your email.");
       }
-    } catch (error) {
-      console.error("Checkout error:", error);
-      toast.error("Failed to start checkout. Please try again.");
-    } finally {
-      setIsProcessing(false);
+
+      if (!data?.clientSecret) {
+        throw new Error("Failed to create checkout session");
+      }
+
+      return data.clientSecret;
+    } catch (err) {
+      console.error("Checkout error:", err);
+      const message = err instanceof Error ? err.message : "Failed to start checkout";
+      toast.error(message);
+      throw err;
     }
-  };
+  }, [plan, gymId, gymSlug, formData]);
 
   if (!plan) {
     return <Skeleton className="h-64 w-full" />;
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-destructive/50">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              <p>{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <div className="flex justify-between">
+          <Button variant="outline" onClick={onBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
+          </Button>
+          <Button onClick={() => window.location.reload()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold mb-2">Complete Your Membership</h2>
-        <p className="text-muted-foreground">Review your details and proceed to payment</p>
+        <p className="text-muted-foreground">Review your details and complete payment</p>
       </div>
 
       {/* Order Summary */}
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <CreditCard className="h-5 w-5" />
             Order Summary
           </CardTitle>
@@ -158,7 +221,7 @@ export function PaymentStep({ plan, location, gymId, gymSlug, onBack }: PaymentS
           </div>
 
           {/* Member Info Summary */}
-          <div className="space-y-2 text-sm">
+          <div className="space-y-2 text-sm border-t pt-4">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Member:</span>
               <span>{formData.firstName} {formData.lastName}</span>
@@ -175,7 +238,7 @@ export function PaymentStep({ plan, location, gymId, gymSlug, onBack }: PaymentS
 
           {/* Contracts Signed */}
           {formData.signedContractIds.length > 0 && (
-            <div className="flex items-center gap-2 text-sm text-green-600">
+            <div className="flex items-center gap-2 text-sm text-green-600 border-t pt-4">
               <CheckCircle className="h-4 w-4" />
               <span>{formData.signedContractIds.length} agreement(s) accepted</span>
             </div>
@@ -183,43 +246,36 @@ export function PaymentStep({ plan, location, gymId, gymSlug, onBack }: PaymentS
         </CardContent>
       </Card>
 
-      {/* Payment Info */}
-      <Card className="border-primary/20 bg-primary/5">
+      {/* Embedded Checkout */}
+      <Card>
         <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-full bg-primary/10">
-              <CreditCard className="h-5 w-5 text-primary" />
+          {isLoadingStripe ? (
+            <div className="flex flex-col items-center justify-center py-12 space-y-4">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <p className="text-muted-foreground">Loading payment form...</p>
             </div>
-            <div>
-              <p className="font-medium">Secure Payment via Stripe</p>
-              <p className="text-sm text-muted-foreground">
-                You'll be redirected to our secure payment page to complete your membership.
-                Your payment details are handled securely by Stripe.
-              </p>
+          ) : stripePromise ? (
+            <div className="min-h-[400px]">
+              <EmbeddedCheckoutProvider
+                stripe={stripePromise}
+                options={{ fetchClientSecret }}
+              >
+                <EmbeddedCheckout />
+              </EmbeddedCheckoutProvider>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center gap-3 text-destructive">
+              <AlertCircle className="h-5 w-5" />
+              <p>Failed to load payment form. Please refresh and try again.</p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onBack} disabled={isProcessing}>
+      <div className="flex justify-start">
+        <Button variant="outline" onClick={onBack}>
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
-        </Button>
-        <Button size="lg" onClick={handleCheckout} disabled={isProcessing}>
-          {isProcessing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            <>
-              <CreditCard className="mr-2 h-4 w-4" />
-              {plan.trial_days && plan.trial_days > 0
-                ? "Start Free Trial"
-                : "Complete Payment"}
-            </>
-          )}
         </Button>
       </div>
     </div>
