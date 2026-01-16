@@ -159,7 +159,18 @@
       "recentTransactions": "Ostatnie Transakcje",
       "recentReviews": "Ostatnie Opinie",
       "topCoaches": "Najlepsi Trenerzy",
-      "flaggedDocuments": "Oznaczone Dokumenty"
+      "flaggedDocuments": "Oznaczone Dokumenty",
+      "totalGyms": "Łączna Liczba Siłowni",
+      "activeGyms": "Aktywne Siłownie",
+      "totalLocations": "Łączna Liczba Lokalizacji",
+      "gymMRR": "MRR Subskrypcji Siłowni",
+      "gymMembershipFees": "Opłaty Członkowskie",
+      "totalPlatformIncome": "Całkowity Przychód Platformy",
+      "coachSubscriptions": "Subskrypcje Trenerów",
+      "gymSubscriptions": "Subskrypcje Siłowni",
+      "membershipFees": "Opłaty Członkowskie (£1/płatność)",
+      "transactionCommissions": "Prowizje od Transakcji",
+      "incomeBreakdown": "Podział Przychodów"
     },
     "actions": {
       "viewAll": "Zobacz Wszystko",

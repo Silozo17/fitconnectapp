@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { Users, Dumbbell, Calendar, DollarSign, TrendingUp, TrendingDown, MessageSquare, Star } from "lucide-react";
+import { Users, Dumbbell, Calendar, DollarSign, TrendingUp, TrendingDown, MessageSquare, Star, Building2, MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { WidgetDisplayFormat } from "@/lib/widget-formats";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, AreaChart, Area, ResponsiveContainer, Tooltip } from "recharts";
@@ -27,6 +27,9 @@ const iconMap: Record<string, React.ComponentType<any>> = {
   business_earnings: DollarSign,
   business_packages: Calendar,
   business_subscriptions: DollarSign,
+  stats_gyms: Building2,
+  stats_active_gyms: Building2,
+  stats_gym_locations: MapPin,
 };
 
 // Map widget types to ContentSection color themes
@@ -42,6 +45,9 @@ const colorThemeMap: Record<string, ContentSectionColor> = {
   business_earnings: "primary",
   business_packages: "green",
   business_subscriptions: "purple",
+  stats_gyms: "cyan",
+  stats_active_gyms: "cyan",
+  stats_gym_locations: "green",
 };
 
 // Color styles matching MetricCard pattern
