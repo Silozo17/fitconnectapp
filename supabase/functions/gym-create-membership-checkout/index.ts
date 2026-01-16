@@ -29,15 +29,24 @@ interface MemberData {
   marketingSourceOther?: string | null;
 }
 
+interface SignatureData {
+  name: string;
+  date: string;
+  signature: string;
+  type: 'drawn' | 'typed';
+}
+
 interface RequestBody {
   gymId: string;
   planId: string;
   locationId?: string;
   memberData: MemberData;
   contractIds: string[];
+  signatureData?: SignatureData;
   successUrl: string;
   cancelUrl: string;
   emailVerified?: boolean; // Flag indicating email has been verified via OTP
+  embedded?: boolean; // Flag to return clientSecret for embedded checkout
 }
 
 serve(async (req) => {
@@ -59,7 +68,7 @@ serve(async (req) => {
 
     // Parse request body
     const body: RequestBody = await req.json();
-    const { gymId, planId, locationId, memberData, contractIds, successUrl, cancelUrl, emailVerified } = body;
+    const { gymId, planId, locationId, memberData, contractIds, signatureData, successUrl, cancelUrl, emailVerified, embedded } = body;
     
     if (!gymId || !planId || !memberData || !successUrl || !cancelUrl) {
       throw new Error("Missing required parameters");
@@ -312,7 +321,9 @@ serve(async (req) => {
           gym_id: gymId,
           member_id: member!.id,
           template_id: template.id,
-          signature_type: "checkbox", // Signed via wizard checkbox
+          signature_type: signatureData?.type === 'drawn' ? 'drawn' : 'typed',
+          signature_data: signatureData?.signature || null,
+          signer_name: signatureData?.name || `${memberData.firstName} ${memberData.lastName}`,
           signed_at: new Date().toISOString(),
           template_version: template.version || 1,
           template_content_snapshot: template.content || "",
@@ -465,16 +476,30 @@ serve(async (req) => {
       };
     }
 
-    const session = await stripe.checkout.sessions.create(sessionParams, {
+    // For embedded checkout, use ui_mode: embedded
+    const sessionCreateParams = {
+      ...sessionParams,
+      ...(embedded ? { ui_mode: 'embedded' as const, return_url: `${successUrl}?session_id={CHECKOUT_SESSION_ID}` } : {}),
+    };
+
+    // Remove success_url and cancel_url for embedded mode (use return_url instead)
+    if (embedded) {
+      delete (sessionCreateParams as any).success_url;
+      delete (sessionCreateParams as any).cancel_url;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionCreateParams, {
       stripeAccount: isSubscription ? stripeAccountId : undefined,
     });
 
-    logStep("Checkout session created", { sessionId: session.id, mode, isNewUser });
+    logStep("Checkout session created", { sessionId: session.id, mode, isNewUser, embedded });
 
+    // Return clientSecret for embedded mode, URL for redirect mode
     return new Response(
       JSON.stringify({
         sessionId: session.id,
-        url: session.url,
+        url: embedded ? undefined : session.url,
+        clientSecret: embedded ? session.client_secret : undefined,
         memberId: member.id,
         isNewUser,
       }),

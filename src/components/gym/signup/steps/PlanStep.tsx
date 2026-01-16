@@ -90,7 +90,7 @@ export function PlanStep({ plans, isLoading, onNext, onBack }: PlanStepProps) {
         {filteredPlans.map((plan) => (
           <Card
             key={plan.id}
-            className={`cursor-pointer transition-all ${
+            className={`cursor-pointer transition-all flex flex-col h-full ${
               formData.planId === plan.id
                 ? "ring-2 ring-primary border-primary"
                 : "hover:border-primary/50"
@@ -108,7 +108,7 @@ export function PlanStep({ plans, isLoading, onNext, onBack }: PlanStepProps) {
                 <CardDescription>{plan.description}</CardDescription>
               )}
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="flex-1 space-y-4">
               <div>
                 <span className="text-3xl font-bold">
                   {formatPrice(plan.price_amount, plan.currency)}
@@ -139,7 +139,7 @@ export function PlanStep({ plans, isLoading, onNext, onBack }: PlanStepProps) {
                 ))}
               </div>
             </CardContent>
-            <CardFooter>
+            <CardFooter className="mt-auto">
               <Button
                 variant={formData.planId === plan.id ? "default" : "outline"}
                 className="w-full"

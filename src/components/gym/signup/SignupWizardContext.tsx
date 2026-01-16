@@ -40,6 +40,13 @@ export interface SignupFormData {
   
   // Step 6: Contracts
   signedContractIds: string[];
+  
+  // Signature data for contracts
+  signatureName: string;
+  signatureDate: string;
+  signatureData: string; // base64 image or typed text
+  signatureType: 'drawn' | 'typed';
+  agreementScrolledToBottom: Record<string, boolean>; // Track which agreements have been fully read
 }
 
 interface SignupWizardContextType {
@@ -74,6 +81,11 @@ const initialFormData: SignupFormData = {
   marketingSource: "",
   marketingSourceOther: "",
   signedContractIds: [],
+  signatureName: "",
+  signatureDate: "",
+  signatureData: "",
+  signatureType: "typed",
+  agreementScrolledToBottom: {},
 };
 
 const SignupWizardContext = createContext<SignupWizardContextType | undefined>(undefined);
