@@ -464,7 +464,7 @@ export function DocNav({ onNavigate }: DocNavProps) {
                           ? "text-primary" 
                           : "text-muted-foreground hover:text-foreground"
                       )}>
-                        <span>{section.sectionTitle}</span>
+                        <span className="text-left">{section.sectionTitle}</span>
                         {isSectionExpanded ? (
                           <ChevronDown className="h-3 w-3" />
                         ) : (
