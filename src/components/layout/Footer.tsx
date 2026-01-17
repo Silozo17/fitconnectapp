@@ -148,7 +148,7 @@ const Footer = () => {
 
       <div className="container mx-auto px-4 py-8 md:py-16">
         {/* Brand Section - Always visible */}
-        <div className="mb-8 lg:hidden">
+        <div className="mb-8 xl:hidden">
           <Link to="/" className="flex items-center gap-2 mb-4 group">
             <img 
               src="/pwa-192x192.png" 
@@ -171,7 +171,7 @@ const Footer = () => {
         </div>
 
         {/* Mobile/Tablet: Accordion Footer */}
-        <div className="lg:hidden">
+        <div className="xl:hidden">
           <Accordion type="multiple" className="w-full">
             {Object.entries(footerLinks).map(([title, links]) => {
               const isLegalSection = title === t("website.footer.sections.legal");
@@ -200,7 +200,7 @@ const Footer = () => {
         </div>
 
         {/* Desktop: Full Grid Layout */}
-        <div className="hidden lg:grid grid-cols-6 gap-10">
+        <div className="hidden xl:grid grid-cols-6 gap-10">
           {/* Brand */}
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4 group">
@@ -249,12 +249,12 @@ const Footer = () => {
         </div>
 
         {/* Locale Selector */}
-        <div className="mt-8 lg:mt-12 pt-8 border-t border-border">
+        <div className="mt-8 xl:mt-12 pt-8 border-t border-border">
           <FooterLocaleSelector />
         </div>
 
         {/* Bottom */}
-        <div className="mt-6 lg:mt-8 pt-6 lg:pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-6 xl:mt-8 pt-6 xl:pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
             {t("website.footer.copyright", { year: new Date().getFullYear() })}
           </p>
