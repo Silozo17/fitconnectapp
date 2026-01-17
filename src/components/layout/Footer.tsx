@@ -9,6 +9,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { SocialLinks } from "@/components/shared/SocialLinks";
 import { FooterLocaleSelector } from "@/components/shared/FooterLocaleSelector";
 import { openExternalUrl, shouldOpenExternally } from "@/lib/external-links";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const Footer = () => {
   const { t } = useTranslation("common");
@@ -82,11 +88,35 @@ const Footer = () => {
     ],
   };
 
+  const renderLink = (link: { name: string; href: string }, isLegalLink: boolean) => {
+    const isNative = shouldOpenExternally();
+    
+    if (isNative && isLegalLink) {
+      return (
+        <button
+          onClick={() => openExternalUrl(`${window.location.origin}${link.href}`)}
+          className="text-muted-foreground hover:text-primary transition-colors text-sm text-left"
+        >
+          {link.name}
+        </button>
+      );
+    }
+    
+    return (
+      <Link
+        to={link.href}
+        className="text-muted-foreground hover:text-primary transition-colors text-sm"
+      >
+        {link.name}
+      </Link>
+    );
+  };
+
   return (
     <footer className="bg-card/50 border-t border-border">
       {/* Newsletter Section */}
       <div className="border-b border-border">
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-8 md:py-12">
           <div className="max-w-2xl mx-auto text-center">
             <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-4">
               <Mail className="w-6 h-6 text-primary" />
@@ -116,8 +146,61 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-10 md:py-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-8 lg:gap-10">
+      <div className="container mx-auto px-4 py-8 md:py-16">
+        {/* Brand Section - Always visible */}
+        <div className="mb-8 lg:hidden">
+          <Link to="/" className="flex items-center gap-2 mb-4 group">
+            <img 
+              src="/pwa-192x192.png" 
+              alt="FitConnect Logo" 
+              width={40}
+              height={40}
+              className="w-10 h-10 rounded-xl group-hover:shadow-glow-sm transition-all duration-300"
+            />
+            <span className="font-display font-bold text-xl text-foreground">
+              FitConnect
+            </span>
+          </Link>
+          <p className="text-muted-foreground mb-4 text-sm">
+            {t("website.footer.brandDescription")}
+          </p>
+          <SocialLinks 
+            iconSize="w-5 h-5"
+            className="gap-3"
+          />
+        </div>
+
+        {/* Mobile/Tablet: Accordion Footer */}
+        <div className="lg:hidden">
+          <Accordion type="multiple" className="w-full">
+            {Object.entries(footerLinks).map(([title, links]) => {
+              const isLegalSection = title === t("website.footer.sections.legal");
+              
+              return (
+                <AccordionItem key={title} value={title} className="border-b border-border">
+                  <AccordionTrigger className="text-sm font-semibold py-3 hover:no-underline">
+                    {title}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <ul className="space-y-2 pb-2">
+                      {links.map((link) => {
+                        const isLegalLink = isLegalSection && (link.href === '/privacy' || link.href === '/terms' || link.href === '/eula');
+                        return (
+                          <li key={link.href}>
+                            {renderLink(link, isLegalLink)}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
+        </div>
+
+        {/* Desktop: Full Grid Layout */}
+        <div className="hidden lg:grid grid-cols-6 gap-10">
           {/* Brand */}
           <div className="col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4 group">
@@ -144,7 +227,6 @@ const Footer = () => {
           {/* Links */}
           {Object.entries(footerLinks).map(([title, links]) => {
             const isLegalSection = title === t("website.footer.sections.legal");
-            const isNative = shouldOpenExternally();
             
             return (
               <div key={title}>
@@ -153,30 +235,10 @@ const Footer = () => {
                 </h4>
                 <ul className="space-y-3">
                   {links.map((link) => {
-                    // Legal links on native should open externally
                     const isLegalLink = isLegalSection && (link.href === '/privacy' || link.href === '/terms' || link.href === '/eula');
-                    
-                    if (isNative && isLegalLink) {
-                      return (
-                        <li key={link.href}>
-                          <button
-                            onClick={() => openExternalUrl(`${window.location.origin}${link.href}`)}
-                            className="text-muted-foreground hover:text-primary transition-colors text-sm text-left"
-                          >
-                            {link.name}
-                          </button>
-                        </li>
-                      );
-                    }
-                    
                     return (
                       <li key={link.href}>
-                        <Link
-                          to={link.href}
-                          className="text-muted-foreground hover:text-primary transition-colors text-sm"
-                        >
-                          {link.name}
-                        </Link>
+                        {renderLink(link, isLegalLink)}
                       </li>
                     );
                   })}
@@ -187,12 +249,12 @@ const Footer = () => {
         </div>
 
         {/* Locale Selector */}
-        <div className="mt-12 pt-8 border-t border-border">
+        <div className="mt-8 lg:mt-12 pt-8 border-t border-border">
           <FooterLocaleSelector />
         </div>
 
         {/* Bottom */}
-        <div className="mt-8 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="mt-6 lg:mt-8 pt-6 lg:pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-muted-foreground text-sm">
             {t("website.footer.copyright", { year: new Date().getFullYear() })}
           </p>
