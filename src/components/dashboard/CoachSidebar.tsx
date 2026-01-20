@@ -462,7 +462,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
           </div>
           {!isCollapsed && (
             <span className="font-display font-bold text-xl text-sidebar-foreground">
-              {t("app.name")}
+              FitConnect
             </span>
           )}
         </div>
@@ -521,7 +521,7 @@ const CoachSidebar = memo(({ collapsed, onToggle, mobileOpen, setMobileOpen }: C
                 <Dumbbell className="w-6 h-6 text-primary-foreground" />
               </div>
               <span className="font-display font-bold text-xl text-sidebar-foreground">
-                {t("app.name")}
+                FitConnect
               </span>
             </div>
           </div>
