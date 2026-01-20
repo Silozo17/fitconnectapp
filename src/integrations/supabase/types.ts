@@ -14,6 +14,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_automation_logs: {
+        Row: {
+          created_at: string
+          error_message: string | null
+          id: string
+          message_content: string | null
+          message_type: string
+          metadata: Json | null
+          rule_id: string | null
+          status: string
+          trigger_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_content?: string | null
+          message_type: string
+          metadata?: Json | null
+          rule_id?: string | null
+          status?: string
+          trigger_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message_content?: string | null
+          message_type?: string
+          metadata?: Json | null
+          rule_id?: string | null
+          status?: string
+          trigger_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_automation_logs_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "admin_automation_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_automation_rules: {
+        Row: {
+          audience_filters: Json | null
+          cooldown_days: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean
+          max_sends_per_user: number | null
+          message_subject: string | null
+          message_template: string
+          message_type: string
+          name: string
+          priority: number
+          target_audience: string
+          trigger_config: Json
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          audience_filters?: Json | null
+          cooldown_days?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          max_sends_per_user?: number | null
+          message_subject?: string | null
+          message_template: string
+          message_type?: string
+          name: string
+          priority?: number
+          target_audience?: string
+          trigger_config?: Json
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          audience_filters?: Json | null
+          cooldown_days?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean
+          max_sends_per_user?: number | null
+          message_subject?: string | null
+          message_template?: string
+          message_type?: string
+          name?: string
+          priority?: number
+          target_audience?: string
+          trigger_config?: Json
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_dashboard_widgets: {
         Row: {
           admin_id: string | null

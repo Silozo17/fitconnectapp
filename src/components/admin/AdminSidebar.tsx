@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Users, Dumbbell, Settings, ChevronLeft, ChevronRight, 
   UsersRound, DollarSign, BarChart3,
   MessageSquare, Shield, Trophy, FileText, LogOut, User, Rocket,
-  MessageSquarePlus, Plug, ClipboardList, Bug, Building2
+  MessageSquarePlus, Plug, ClipboardList, Bug, Building2, Zap
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -55,6 +55,7 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
 ];
 
 const getPlatformNavItems = (t: (key: string) => string): NavItem[] => [
+  { title: "Automations", url: "/dashboard/admin/automations", icon: Zap },
   { title: t('sidebar.challenges'), url: "/dashboard/admin/challenges", icon: Trophy },
   { title: t('sidebar.blog'), url: "/dashboard/admin/blog", icon: FileText },
   { title: t('sidebar.verification'), url: "/dashboard/admin/verification", icon: Shield, badgeKey: "verification", badgeVariant: "warning" },
