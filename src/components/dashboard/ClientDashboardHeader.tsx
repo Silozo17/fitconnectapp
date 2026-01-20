@@ -11,6 +11,7 @@ import ViewSwitcher from "@/components/admin/ViewSwitcher";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
+import { SupportChatButton } from "@/components/support/SupportChatButton";
 import {
   Tooltip,
   TooltipContent,
@@ -71,6 +72,9 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
           </div>
           <div className="hidden xl:block">
             <NotificationCenter />
+          </div>
+          <div className="hidden xl:block">
+            <SupportChatButton />
           </div>
           <TooltipProvider>
             <div className="hidden xl:flex items-center gap-1">

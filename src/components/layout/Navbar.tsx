@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { HeaderLocaleSelector } from "@/components/shared/HeaderLocaleSelector";
 import { usePlatformRestrictions } from "@/hooks/usePlatformRestrictions";
+import { SupportChatButton } from "@/components/support/SupportChatButton";
 
 const Navbar = () => {
   const { t } = useTranslation("common");
@@ -219,6 +220,7 @@ const Navbar = () => {
             <HeaderLocaleSelector />
             {user ? (
               <>
+                <SupportChatButton variant="navbar" />
                 <Button asChild variant="ghost"><Link to={dashboardLink}>{t("website.nav.dashboard")}</Link></Button>
                 <Button onClick={() => signOut()} variant="outline">{t("website.nav.signOut")}</Button>
               </>

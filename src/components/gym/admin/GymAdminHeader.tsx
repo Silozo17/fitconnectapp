@@ -23,6 +23,7 @@ import {
   HelpCircle,
 } from "lucide-react";
 import { GymStaffNotificationCenter } from "./GymStaffNotificationCenter";
+import { SupportChatButton } from "@/components/support/SupportChatButton";
 
 interface GymAdminHeaderProps {
   onMenuToggle?: () => void;
@@ -76,6 +77,8 @@ export function GymAdminHeader({ onMenuToggle }: GymAdminHeaderProps) {
         )}
 
         <GymStaffNotificationCenter />
+
+        <SupportChatButton />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

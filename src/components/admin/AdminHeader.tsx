@@ -11,6 +11,7 @@ import ViewSwitcher from "./ViewSwitcher";
 import { NotificationCenter } from "@/components/notifications/NotificationCenter";
 import { UserAvatar } from "@/components/shared/UserAvatar";
 import { FeedbackModal } from "@/components/feedback/FeedbackModal";
+import { SupportChatButton } from "@/components/support/SupportChatButton";
 import {
   Tooltip,
   TooltipContent,
@@ -68,6 +69,11 @@ const AdminHeader = ({ onMenuToggle }: AdminHeaderProps) => {
         {/* Notifications - Desktop only */}
         <div className="hidden xl:block">
           <NotificationCenter />
+        </div>
+
+        {/* Support Chat - Desktop only */}
+        <div className="hidden xl:block">
+          <SupportChatButton />
         </div>
 
         {/* Profile Section - Desktop only */}

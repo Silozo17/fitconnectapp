@@ -88,6 +88,8 @@ export const STORAGE_KEYS = {
   // =====================
   /** Page help dismissed prefix (append page id) */
   PAGE_HELP_PREFIX: 'fc_page_help_',
+  /** Support chat tooltip has been seen */
+  SUPPORT_TOOLTIP_SEEN: 'fc_support_tooltip_seen',
   /** Dismissed goal suggestions */
   DISMISSED_GOAL_SUGGESTIONS: 'fc_dismissed_goal_suggestions',
   
