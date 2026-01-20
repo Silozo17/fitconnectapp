@@ -474,7 +474,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen, onNavig
             <Dumbbell className="w-5 h-5 text-primary-foreground" />
           </div>
           {!isCollapsed && (
-            <span className="font-display font-bold text-lg text-foreground">{t("app.name")}</span>
+            <span className="font-display font-bold text-lg text-foreground">FitConnect</span>
           )}
         </div>
         {/* Collapse Toggle - Desktop only */}
@@ -531,7 +531,7 @@ const ClientSidebar = ({ collapsed, onToggle, mobileOpen, setMobileOpen, onNavig
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <Dumbbell className="w-5 h-5 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg text-foreground">{t("app.name")}</span>
+              <span className="font-bold text-lg text-foreground">FitConnect</span>
             </div>
           </div>
 
