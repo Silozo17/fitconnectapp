@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Input } from "@/components/ui/input";
@@ -7,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { 
   Search, MoreHorizontal, Pencil, Trash2, KeyRound, Loader2, Eye, Pause, Ban, CheckCircle, 
-  UserPlus, Users, UserCheck, UsersRound, Calendar, Download
+  UserPlus, Users, UserCheck, UsersRound, Calendar, Download, MessageSquare
 } from "lucide-react";
 import {
   Table,
@@ -39,6 +40,7 @@ import { AdminUserCard } from "@/components/admin/AdminUserCard";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { AccountStatusModal } from "@/components/admin/AccountStatusModal";
+import { BroadcastMessageModal } from "@/components/admin/BroadcastMessageModal";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { useAdminBadges } from "@/hooks/useSidebarBadges";
@@ -92,7 +94,8 @@ const AdminUsers = () => {
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [userEmails, setUserEmails] = useState<Record<string, string>>({});
   const [userLastLogins, setUserLastLogins] = useState<Record<string, string | null>>({});
-  
+  const [broadcastOpen, setBroadcastOpen] = useState(false);
+  const navigate = useNavigate();
   const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserAuthInfo } = useAdminUserManagement("client");
   const logAction = useLogAdminAction();
   const { markUsersViewed } = useAdminBadges();
@@ -410,6 +413,7 @@ const AdminUsers = () => {
             onBan={() => handleBulkAction("banned")}
             onDelete={handleBulkDelete}
             onClear={() => setSelectedUsers(new Set())}
+            onMessage={() => setBroadcastOpen(true)}
             loading={actionLoading}
           />
         )}
@@ -574,6 +578,13 @@ const AdminUsers = () => {
                                   <Pencil className="h-4 w-4 mr-2" />
                                   Edit Details
                                 </DropdownMenuItem>
+                                <DropdownMenuItem onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/dashboard/admin/messages/${user.id}`);
+                                }}>
+                                  <MessageSquare className="h-4 w-4 mr-2" />
+                                  Send Message
+                                </DropdownMenuItem>
                                 <DropdownMenuItem 
                                   onClick={(e) => {
                                     e.stopPropagation();
@@ -680,6 +691,14 @@ const AdminUsers = () => {
         onResetPassword={() => viewingUser && handleResetPassword(viewingUser)}
         onChangeStatus={() => viewingUser && setStatusUser(viewingUser)}
         onDelete={() => viewingUser && handleDeleteUser(viewingUser)}
+      />
+
+      <BroadcastMessageModal
+        open={broadcastOpen}
+        onOpenChange={setBroadcastOpen}
+        recipientIds={selectedUsersList.map(u => u.id)}
+        recipientType="client"
+        onSuccess={() => setSelectedUsers(new Set())}
       />
     </AdminLayout>
   );

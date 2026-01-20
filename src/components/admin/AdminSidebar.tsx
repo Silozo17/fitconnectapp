@@ -47,6 +47,7 @@ const getMainNavItems = (t: (key: string) => string): NavItem[] => [
   { title: t('sidebar.users'), url: "/dashboard/admin/users", icon: Users, badgeKey: "users" },
   { title: t('sidebar.coaches'), url: "/dashboard/admin/coaches", icon: Dumbbell },
   { title: t('sidebar.gyms'), url: "/dashboard/admin/gyms", icon: Building2 },
+  { title: "Support Inbox", url: "/dashboard/admin/messages", icon: MessageSquare },
   { title: t('sidebar.team'), url: "/dashboard/admin/team", icon: UsersRound },
   { title: t('sidebar.revenue'), url: "/dashboard/admin/revenue", icon: DollarSign },
   { title: t('sidebar.boosts'), url: "/dashboard/admin/boosts", icon: Rocket },
