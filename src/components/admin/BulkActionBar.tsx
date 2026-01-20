@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Pause, Ban, Trash2, X } from "lucide-react";
+import { CheckCircle, Pause, Ban, Trash2, X, MessageSquare } from "lucide-react";
 
 interface BulkActionBarProps {
   count: number;
@@ -8,6 +8,7 @@ interface BulkActionBarProps {
   onBan: () => void;
   onDelete: () => void;
   onClear: () => void;
+  onMessage?: () => void;
   loading?: boolean;
 }
 
@@ -18,6 +19,7 @@ export const BulkActionBar = ({
   onBan,
   onDelete,
   onClear,
+  onMessage,
   loading,
 }: BulkActionBarProps) => {
   if (count === 0) return null;
@@ -31,6 +33,18 @@ export const BulkActionBar = ({
       <div className="hidden sm:block flex-1" />
       
       <div className="flex flex-wrap items-center gap-2">
+        {onMessage && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={onMessage}
+            disabled={loading}
+            className="gap-1.5"
+          >
+            <MessageSquare className="h-4 w-4 text-primary" />
+            <span className="hidden xs:inline">Message</span>
+          </Button>
+        )}
         <Button
           size="sm"
           variant="outline"

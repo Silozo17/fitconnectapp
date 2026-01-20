@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
-import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download, MapPin } from "lucide-react";
+import { Search, MoreHorizontal, Pencil, Trash2, KeyRound, Eye, Gift, Users, DollarSign, Loader2, Pause, Ban, CheckCircle, Download, MapPin, MessageSquare } from "lucide-react";
 import {
   Table,
   TableBody,
