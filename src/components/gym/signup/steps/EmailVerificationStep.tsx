@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -19,15 +19,18 @@ export function EmailVerificationStep({ onNext, onBack }: EmailVerificationStepP
   const [isResending, setIsResending] = useState(false);
   const [countdown, setCountdown] = useState(60);
   const [isSending, setIsSending] = useState(false);
-  const [hasSentInitial, setHasSentInitial] = useState(false);
+  
+  // Use ref instead of state to prevent race condition in React Strict Mode
+  // The ref updates synchronously, preventing double OTP sends
+  const hasSentInitialRef = useRef(false);
 
-  // Send OTP on mount
+  // Send OTP on mount - with ref guard to prevent duplicates
   useEffect(() => {
-    if (!hasSentInitial && formData.email) {
+    if (!hasSentInitialRef.current && formData.email) {
+      hasSentInitialRef.current = true; // Set BEFORE async call to prevent race condition
       sendOtp();
-      setHasSentInitial(true);
     }
-  }, [formData.email, hasSentInitial]);
+  }, [formData.email]);
 
   // Countdown timer
   useEffect(() => {

@@ -145,13 +145,18 @@ export default function GymAuth() {
 
   // Handle already authenticated users visiting /gym-login
   // This ensures staff invitations are accepted and user is redirected properly
+  // IMPORTANT: Only redirect if NOT in the middle of a login/register flow (no pendingEmail)
   useEffect(() => {
     if (user && (authState === "login" || authState === "register")) {
-      // User is already authenticated - skip to gym selection
-      // This will trigger invitation acceptance via loadUserGyms
-      setAuthState("gym-select");
+      // Check if there's a pending email waiting for OTP verification
+      // If pendingEmail is set, we're in the middle of login flow - don't redirect
+      if (!pendingEmail) {
+        // User was already logged in before visiting this page - skip to gym selection
+        // This will trigger invitation acceptance via loadUserGyms
+        setAuthState("gym-select");
+      }
     }
-  }, [user, authState]);
+  }, [user, authState, pendingEmail]);
 
   // Check if user is logged in and OTP verified (for gym selection)
   useEffect(() => {
@@ -279,9 +284,15 @@ export default function GymAuth() {
   // Handle login submit
   const handleLoginSubmit = async (data: LoginFormData) => {
     setIsSubmitting(true);
+    
+    // Set pending email BEFORE signIn to prevent race condition with the redirect useEffect
+    // This ensures the useEffect knows we're in the middle of a login flow
+    setPendingEmail(data.email);
+    
     try {
       const { error } = await signIn(data.email, data.password);
       if (error) {
+        setPendingEmail(null); // Clear on error
         if (error.message.includes("Invalid email or password")) {
           toast.error(t("auth.invalidCredentials", "Invalid email or password"));
         } else {
@@ -296,15 +307,16 @@ export default function GymAuth() {
       });
 
       if (otpError) {
+        setPendingEmail(null); // Clear on error
         console.error("Failed to send OTP:", otpError);
         toast.error(t("otp.failedSendCode", "Failed to send verification code"));
         return;
       }
 
-      setPendingEmail(data.email);
       setAuthState("otp-login");
       toast.success(t("otp.verificationSent", "Verification code sent to your email"));
     } catch (error) {
+      setPendingEmail(null); // Clear on error
       logError("GymAuth.login", error);
       toast.error(t("auth.unexpectedError", "An unexpected error occurred"));
     } finally {
