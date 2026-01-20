@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,7 @@ import { StatusBadge } from "@/components/admin/StatusBadge";
 import { BulkActionBar } from "@/components/admin/BulkActionBar";
 import { AccountStatusModal } from "@/components/admin/AccountStatusModal";
 import { AdminCoachCard } from "@/components/admin/AdminCoachCard";
+import { BroadcastMessageModal } from "@/components/admin/BroadcastMessageModal";
 import { useAdminUserManagement } from "@/hooks/useAdminUserManagement";
 import { useLogAdminAction } from "@/hooks/useAuditLog";
 import { arrayToCSV, downloadCSV, formatDateForCSV, formatArrayForCSV, generateExportFilename } from "@/lib/csv-export";
@@ -62,6 +64,7 @@ interface CoachUser {
 
 const AdminCoaches = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [coaches, setCoaches] = useState<CoachUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -75,6 +78,7 @@ const AdminCoaches = () => {
   const [coachEmails, setCoachEmails] = useState<Record<string, string | null>>({});
   const [togglingVisibility, setTogglingVisibility] = useState<string | null>(null);
   const [normalizingLocations, setNormalizingLocations] = useState(false);
+  const [showBroadcastModal, setShowBroadcastModal] = useState(false);
   
   const { loading: actionLoading, bulkUpdateStatus, bulkDelete, getUserAuthInfo } = useAdminUserManagement("coach");
   const logAction = useLogAdminAction();
@@ -406,6 +410,7 @@ const AdminCoaches = () => {
             onBan={() => handleBulkAction("banned")}
             onDelete={handleBulkDelete}
             onClear={() => setSelectedCoaches(new Set())}
+            onMessage={() => setShowBroadcastModal(true)}
             loading={actionLoading}
           />
         )}
@@ -534,6 +539,10 @@ const AdminCoaches = () => {
                                   <Pencil className="h-4 w-4 mr-2" />
                                   Edit Details
                                 </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => navigate(`/dashboard/admin/messages/${coach.id}`)}>
+                                  <MessageSquare className="h-4 w-4 mr-2" />
+                                  Send Message
+                                </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => setAssignPlanCoach(coach)}>
                                   <Gift className="h-4 w-4 mr-2" />
                                   Assign Free Plan
@@ -641,6 +650,15 @@ const AdminCoaches = () => {
         } : null}
         open={!!assignPlanCoach}
         onOpenChange={(open) => !open && setAssignPlanCoach(null)}
+      />
+
+      {/* Broadcast Message Modal */}
+      <BroadcastMessageModal
+        open={showBroadcastModal}
+        onOpenChange={setShowBroadcastModal}
+        recipientIds={Array.from(selectedCoaches)}
+        recipientType="coach"
+        onSuccess={() => setSelectedCoaches(new Set())}
       />
     </AdminLayout>
   );
