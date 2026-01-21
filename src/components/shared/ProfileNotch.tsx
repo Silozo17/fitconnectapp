@@ -30,8 +30,8 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
         "transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
         "hover:scale-105 active:scale-95",
         "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
-        // Shadow for depth + brand green ring
-        "shadow-[0_4px_20px_hsl(0_0%_0%/0.4),0_0_0_1px_hsl(var(--border)/0.3),0_0_0_3px_hsl(75_100%_50%/0.5)]",
+        // Shadow for depth + green ring
+        "shadow-[0_4px_20px_hsl(0_0%_0%/0.4),0_0_0_1px_hsl(var(--border)/0.3),0_0_0_3px_rgba(34,197,94,0.5)]",
         // When open, add glow
         isOpen && "ring-2 ring-primary/30",
         className
@@ -45,13 +45,11 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
       aria-label={isOpen ? "Close profile" : "Open profile"}
       aria-expanded={isOpen}
     >
-      {/* Animated shine effect overlay */}
+      {/* Shine effect overlay */}
       <div 
-        className="absolute inset-0 rounded-full overflow-hidden pointer-events-none"
+        className="absolute inset-0 rounded-full bg-gradient-to-br from-white/25 via-white/5 to-transparent pointer-events-none"
         aria-hidden="true"
-      >
-        <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/30 to-transparent animate-[shine_4s_ease-in-out_infinite]" />
-      </div>
+      />
       <User 
         className={cn(
           "w-5 h-5 text-foreground transition-transform duration-300 relative z-10",
