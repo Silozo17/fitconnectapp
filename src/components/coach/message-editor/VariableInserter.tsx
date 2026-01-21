@@ -76,7 +76,7 @@ export function VariableInserter({
           Insert Variable
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="center" collisionPadding={16} disablePortal>
+      <PopoverContent className="w-80 p-0" align="end" sideOffset={8} collisionPadding={16}>
         <div className="p-3 border-b">
           <div className="relative">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
