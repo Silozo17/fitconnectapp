@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { CoachGallerySection } from "@/components/coach/CoachGallerySection";
 import { CoachGroupClassesSection } from "@/components/coach/CoachGroupClassesSection";
 import { CoachHeroSection } from "@/components/coach/CoachHeroSection";
+import { MobileBookingCard } from "@/components/coach/MobileBookingBar";
 import { CoachQuickStats } from "@/components/coach/CoachQuickStats";
 import { CoachAboutSection } from "@/components/coach/CoachAboutSection";
 import { CoachSocialLinksDisplay } from "@/components/coach/CoachSocialLinksDisplay";
@@ -187,16 +188,7 @@ const CoachDetail = () => {
                 averageRating={averageRating}
               />
 
-              {/* 3. About Section (Combined) */}
-              <CoachAboutSection 
-                bio={coach.bio}
-                whoIWorkWith={coach.who_i_work_with}
-              />
-
-              {/* 4. Qualifications & Certifications */}
-              <CoachQualificationsSection coachId={coach.id} />
-
-              {/* 5. Social Media Links */}
+              {/* 3. Social Media Links */}
               <CoachSocialLinksDisplay 
                 socialLinks={{
                   facebook_url: coach.facebook_url,
@@ -208,6 +200,15 @@ const CoachDetail = () => {
                   youtube_url: coach.youtube_url,
                 }}
               />
+
+              {/* 4. About Section (Combined) */}
+              <CoachAboutSection 
+                bio={coach.bio}
+                whoIWorkWith={coach.who_i_work_with}
+              />
+
+              {/* 5. Qualifications & Certifications */}
+              <CoachQualificationsSection coachId={coach.id} />
 
               {/* 6. Gallery Section */}
               <CoachGallerySection coachId={coach.id} />
@@ -229,10 +230,21 @@ const CoachDetail = () => {
 
               {/* 12. Reviews Section */}
               <CoachReviewsSection coachId={coach.id} />
+
+              {/* 13. Mobile Booking Card - at bottom for mobile */}
+              <MobileBookingCard
+                hourlyRate={convertedRate?.amount || null}
+                currency={convertedRate?.currency || coachCurrency}
+                onMessage={handleMessageCoach}
+                onBook={() => setShowBookingModal(true)}
+                onRequestConnection={() => setShowRequestModal(true)}
+                isMessageLoading={startingConversation}
+                isClient={!!user && (activeProfileType === "client" || activeProfileType === "admin" || allRoles.includes("client"))}
+              />
             </div>
 
-            {/* Sidebar - Booking Card */}
-            <div className="lg:col-span-1 order-first lg:order-last">
+            {/* Sidebar - Booking Card (Desktop only) */}
+            <div className="hidden lg:block lg:col-span-1">
               <Card className="lg:sticky lg:top-24 shadow-lg border-border/50">
                 <CardContent className="p-6">
                   {/* Price Display */}

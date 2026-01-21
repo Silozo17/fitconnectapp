@@ -19,6 +19,7 @@ export interface SimplifiedCoach {
   username: string | null;
   display_name: string | null;
   profile_image_url: string | null;
+  card_image_url: string | null;
   location_country: string | null;
   location_country_code: string | null;
   created_at: string;
