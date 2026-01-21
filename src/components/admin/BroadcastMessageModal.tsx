@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,6 +14,7 @@ import { Loader2, Send, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { SUPPORT_PROFILE_ID } from "@/lib/support-config";
 import { toast } from "sonner";
+import { VariableInserter } from "@/components/coach/message-editor/VariableInserter";
 
 interface BroadcastMessageModalProps {
   open: boolean;
@@ -32,6 +33,27 @@ export const BroadcastMessageModal = ({
 }: BroadcastMessageModalProps) => {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleInsertVariable = (variable: string) => {
+    const textarea = textareaRef.current;
+    if (!textarea) {
+      setMessage((prev) => prev + variable);
+      return;
+    }
+    
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const newMessage = message.slice(0, start) + variable + message.slice(end);
+    setMessage(newMessage);
+    
+    // Restore focus and cursor position after insert
+    setTimeout(() => {
+      textarea.focus();
+      const newPos = start + variable.length;
+      textarea.setSelectionRange(newPos, newPos);
+    }, 0);
+  };
 
   const getRecipientLabel = () => {
     switch (recipientType) {
@@ -91,8 +113,12 @@ export const BroadcastMessageModal = ({
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="message">Message</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="message">Message</Label>
+              <VariableInserter onInsert={handleInsertVariable} />
+            </div>
             <Textarea
+              ref={textareaRef}
               id="message"
               placeholder="Type your message here..."
               value={message}
