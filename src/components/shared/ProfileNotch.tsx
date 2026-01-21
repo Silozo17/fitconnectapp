@@ -1,8 +1,8 @@
+import { useState, useEffect, useCallback } from "react";
 import { User } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useProfilePanel } from "@/contexts/ProfilePanelContext";
 import { useHeaderHeight } from "@/hooks/useHeaderHeight";
-import { FirstTimeTooltip } from "./FirstTimeTooltip";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 interface ProfileNotchProps {
@@ -12,19 +12,66 @@ interface ProfileNotchProps {
 
 const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
   const { toggle, isOpen } = useProfilePanel();
-  
-  // Use the shared hook that reads Despia's --safe-area-top CSS variable
   const actualHeaderHeight = useHeaderHeight(headerHeight);
+  
+  // Inline tooltip state for fixed positioning compatibility
+  const [showTooltip, setShowTooltip] = useState(false);
+  const [isTooltipVisible, setIsTooltipVisible] = useState(false);
+
+  // Check if tooltip was already seen
+  useEffect(() => {
+    try {
+      const seen = localStorage.getItem(STORAGE_KEYS.PROFILE_NOTCH_TOOLTIP_SEEN);
+      if (seen === "true") return;
+
+      const showTimer = setTimeout(() => {
+        setShowTooltip(true);
+        requestAnimationFrame(() => setIsTooltipVisible(true));
+      }, 500);
+
+      return () => clearTimeout(showTimer);
+    } catch {
+      // localStorage not available
+    }
+  }, []);
+
+  // Auto-dismiss after 3.5 seconds
+  useEffect(() => {
+    if (!showTooltip) return;
+
+    const dismissTimer = setTimeout(() => {
+      dismissTooltip();
+    }, 3500);
+
+    return () => clearTimeout(dismissTimer);
+  }, [showTooltip]);
+
+  const dismissTooltip = useCallback(() => {
+    setIsTooltipVisible(false);
+    setTimeout(() => {
+      setShowTooltip(false);
+      try {
+        localStorage.setItem(STORAGE_KEYS.PROFILE_NOTCH_TOOLTIP_SEEN, "true");
+      } catch {
+        // localStorage not available
+      }
+    }, 200);
+  }, []);
+
+  const handleClick = () => {
+    toggle();
+    if (showTooltip) {
+      dismissTooltip();
+    }
+  };
+
+  // Calculate tooltip position - below the notch when closed
+  const tooltipTop = actualHeaderHeight + 32; // header + notch visible part + small gap
 
   return (
-    <FirstTimeTooltip
-      storageKey={STORAGE_KEYS.PROFILE_NOTCH_TOOLTIP_SEEN}
-      message="Tap to see your profile! 👤"
-      position="bottom"
-      showDelay={500}
-    >
+    <>
       <button
-        onClick={toggle}
+        onClick={handleClick}
         className={cn(
           // Fixed positioning - always on top
           "fixed left-1/2 -translate-x-1/2 z-50",
@@ -66,7 +113,28 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
           strokeWidth={1.5} 
         />
       </button>
-    </FirstTimeTooltip>
+
+      {/* Tooltip rendered separately with fixed positioning */}
+      {showTooltip && !isOpen && (
+        <div
+          className={cn(
+            "fixed left-1/2 -translate-x-1/2 z-[60]",
+            "w-max max-w-[min(280px,calc(100vw-32px))]",
+            "transition-all duration-200 ease-out",
+            isTooltipVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
+          )}
+          style={{ top: `${tooltipTop}px` }}
+        >
+          <div className="bg-primary text-primary-foreground text-sm font-medium px-3 py-2 rounded-lg shadow-lg text-center">
+            Tap to see your profile! 👤
+          </div>
+          {/* Arrow pointing up */}
+          <div
+            className="absolute bottom-full left-1/2 -translate-x-1/2 w-0 h-0 border-[6px] border-b-primary border-x-transparent border-t-transparent"
+          />
+        </div>
+      )}
+    </>
   );
 };
 

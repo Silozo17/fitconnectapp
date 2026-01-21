@@ -88,16 +88,16 @@ export const STORAGE_KEYS = {
   // =====================
   /** Page help dismissed prefix (append page id) */
   PAGE_HELP_PREFIX: 'fc_page_help_',
-  /** Support chat tooltip has been seen */
-  SUPPORT_TOOLTIP_SEEN: 'fc_support_tooltip_seen',
+  /** Support chat tooltip has been seen (versioned so existing users see new tooltips) */
+  SUPPORT_TOOLTIP_SEEN: 'fc_support_tooltip_seen_v1',
   /** Feedback button tooltip has been seen */
-  FEEDBACK_TOOLTIP_SEEN: 'fc_feedback_tooltip_seen',
+  FEEDBACK_TOOLTIP_SEEN: 'fc_feedback_tooltip_seen_v1',
   /** Profile notch tooltip has been seen */
-  PROFILE_NOTCH_TOOLTIP_SEEN: 'fc_profile_notch_tooltip_seen',
+  PROFILE_NOTCH_TOOLTIP_SEEN: 'fc_profile_notch_tooltip_seen_v1',
   /** Notifications tooltip has been seen */
-  NOTIFICATIONS_TOOLTIP_SEEN: 'fc_notifications_tooltip_seen',
+  NOTIFICATIONS_TOOLTIP_SEEN: 'fc_notifications_tooltip_seen_v1',
   /** View switcher tooltip has been seen */
-  VIEW_SWITCHER_TOOLTIP_SEEN: 'fc_view_switcher_tooltip_seen',
+  VIEW_SWITCHER_TOOLTIP_SEEN: 'fc_view_switcher_tooltip_seen_v1',
   /** Dismissed goal suggestions */
   DISMISSED_GOAL_SUGGESTIONS: 'fc_dismissed_goal_suggestions',
   
