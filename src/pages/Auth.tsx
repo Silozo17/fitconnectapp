@@ -12,7 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PasswordInput } from "@/components/ui/password-input";
 import { TermsCheckbox } from "@/components/auth/TermsCheckbox";
-import { Dumbbell, Loader2, User, Briefcase, ArrowLeft, Mail } from "lucide-react";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dumbbell, Loader2, User, Briefcase, Building2, ArrowLeft, Mail } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import BlobShape from "@/components/ui/blob-shape";
@@ -23,7 +24,7 @@ import { usePasswordBreachCheck } from "@/hooks/usePasswordBreachCheck";
 import { useDebouncedCallback } from "@/hooks/useDebouncedCallback";
 import { supabase } from "@/integrations/supabase/client";
 import { logError } from "@/lib/error-utils";
-import { getEnvironment } from "@/hooks/useEnvironment";
+import { useEnvironment } from "@/hooks/useEnvironment";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 // Base schema for login
@@ -43,23 +44,34 @@ const signupSchema = z.object({
 });
 
 type AuthFormData = z.infer<typeof signupSchema>;
+type SignupRole = "client" | "coach" | "gym";
+type LoginAccountType = "personal" | "gym";
 
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { t } = useTranslation();
+  const { isDespia, isNativeApp } = useEnvironment();
+  
+  // Check if running in native environment (hide gym options)
+  const isNativeEnvironment = isDespia || isNativeApp;
   
   // Get mode from query params (login or signup)
   const modeParam = searchParams.get("mode");
+  const roleParam = searchParams.get("role") as SignupRole | null;
   const [isLogin, setIsLogin] = useState(modeParam !== "signup");
-  const [selectedRole, setSelectedRole] = useState<"client" | "coach">("client");
+  const [selectedRole, setSelectedRole] = useState<SignupRole>(
+    roleParam && ["client", "coach", "gym"].includes(roleParam) ? roleParam : "client"
+  );
+  const [loginAccountType, setLoginAccountType] = useState<LoginAccountType>("personal");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [alsoFindCoach, setAlsoFindCoach] = useState(false);
   const [passwordValue, setPasswordValue] = useState("");
   const [showOTPVerification, setShowOTPVerification] = useState(false);
   const [pendingSignupData, setPendingSignupData] = useState<{ email: string; password: string; firstName: string; lastName: string } | null>(null);
   const [pendingLogin2FA, setPendingLogin2FA] = useState<{ email: string } | null>(null);
+  const [pendingGymLogin, setPendingGymLogin] = useState<{ email: string } | null>(null);
   const [hasNavigated, setHasNavigated] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
@@ -288,7 +300,25 @@ const Auth = () => {
           toast.error(t("auth.unexpectedError"));
         }
       } else {
-        // Login successful - check if user needs 2FA
+        // Gym login flow - always require OTP for gym access
+        if (loginAccountType === "gym") {
+          // Send OTP for mandatory 2FA
+          const { error: otpError } = await supabase.functions.invoke("send-otp-email", {
+            body: { email: data.email, purpose: "2fa" },
+          });
+
+          if (otpError) {
+            console.error("Failed to send OTP:", otpError);
+            toast.error(t("otp.failedSendCode"));
+            return;
+          }
+
+          setPendingGymLogin({ email: data.email });
+          toast.success(t("otp.verificationSent"));
+          return;
+        }
+
+        // Personal login - check if user needs 2FA
         // Get user's 2FA settings from database
         const { data: settings } = await supabase
           .from("user_security_settings")
@@ -350,10 +380,13 @@ const Auth = () => {
     setIsSubmitting(true);
     
     try {
+      // For gym signup, use "client" as the auth role - gym profile created in onboarding
+      const authRole = selectedRole === "gym" ? "client" : selectedRole;
+      
       const { error } = await signUp(
         pendingSignupData.email, 
         pendingSignupData.password, 
-        selectedRole,
+        authRole,
         pendingSignupData.firstName,
         pendingSignupData.lastName
       );
@@ -384,9 +417,14 @@ const Auth = () => {
         setHasNavigated(true);
         
         // Explicit navigation based on selected role - BEFORE auth state change can trigger GuestOnlyRoute
-        const targetRoute = selectedRole === "coach" 
-          ? "/onboarding/coach" 
-          : "/onboarding/client";
+        let targetRoute: string;
+        if (selectedRole === "gym") {
+          targetRoute = "/onboarding/gym";
+        } else if (selectedRole === "coach") {
+          targetRoute = "/onboarding/coach";
+        } else {
+          targetRoute = "/onboarding/client";
+        }
         navigate(targetRoute, { replace: true });
         
         // Clear flag after navigation (slight delay to ensure navigation starts)
@@ -435,13 +473,126 @@ const Auth = () => {
   // Handle going back from login 2FA screen (sign out and return to login)
   const handleLogin2FABack = async () => {
     // User wants to cancel - sign them out
-    const { signOut } = await import("@/contexts/AuthContext").then(() => ({ signOut: async () => {
-      await supabase.auth.signOut();
-    }}));
     await supabase.auth.signOut();
     setPending2FA(false);
     setPendingLogin2FA(null);
   };
+
+  // Handle gym login OTP verified - redirect to gym dashboard
+  const handleGymLoginOTPVerified = async () => {
+    if (!user) return;
+    
+    try {
+      // Accept any pending gym invitations
+      await supabase.functions.invoke("gym-accept-staff-invites");
+      
+      // Get gyms where user is owner
+      const { data: ownedGyms } = await supabase
+        .from("gym_profiles")
+        .select("id, name")
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      // Get gyms where user is staff
+      const { data: staffGyms } = await supabase
+        .from("gym_staff")
+        .select("gym_id, gym_profiles!inner(id, name)")
+        .eq("user_id", user.id)
+        .eq("status", "active");
+
+      // Combine gyms
+      const gymsMap = new Map<string, { id: string; name: string }>();
+      ownedGyms?.forEach(gym => gymsMap.set(gym.id, gym));
+      staffGyms?.forEach((record: any) => {
+        const gym = record.gym_profiles;
+        if (gym && !gymsMap.has(gym.id)) {
+          gymsMap.set(gym.id, gym);
+        }
+      });
+
+      const gyms = Array.from(gymsMap.values());
+      
+      if (gyms.length === 0) {
+        toast.error(t("gymAuth.noGymAccess", "No gym access found. Please sign up as a gym owner."));
+        await supabase.auth.signOut();
+        setPendingGymLogin(null);
+        return;
+      }
+
+      if (gyms.length === 1) {
+        localStorage.setItem("selectedGymId", gyms[0].id);
+        navigate(`/gym-admin/${gyms[0].id}`, { replace: true });
+      } else {
+        // Multiple gyms - redirect to gym selection
+        navigate("/gym-login", { replace: true });
+      }
+      
+      setPendingGymLogin(null);
+      toast.success(t("auth.welcomeBack") + "!");
+    } catch (error) {
+      logError("Auth.gymLoginOTP", error);
+      toast.error(t("auth.unexpectedError"));
+    }
+  };
+
+  // Handle going back from gym login OTP screen
+  const handleGymLoginOTPBack = async () => {
+    await supabase.auth.signOut();
+    setPendingGymLogin(null);
+  };
+
+  // Show gym login OTP verification screen
+  if (pendingGymLogin) {
+    return (
+      <>
+        <Helmet>
+          <title>{t("gymAuth.verifyIdentity", "Verify Your Identity")} | FitConnect</title>
+        </Helmet>
+
+        <div className="min-h-screen bg-background flex">
+          {/* Left side - OTP Form */}
+          <div className="flex-1 flex items-center justify-center p-8">
+            <div className="w-full max-w-md">
+              {/* Logo */}
+              <Link to="/" className="flex items-center gap-2 mb-8">
+                <div className="w-10 h-10 rounded-xl gradient-bg-primary flex items-center justify-center">
+                  <Building2 className="w-5 h-5 text-white" />
+                </div>
+                <span className="font-display font-bold text-xl text-foreground">
+                  FitConnect
+                </span>
+              </Link>
+
+              <OTPVerification
+                email={pendingGymLogin.email}
+                purpose="2fa"
+                onVerified={handleGymLoginOTPVerified}
+                onBack={handleGymLoginOTPBack}
+              />
+            </div>
+          </div>
+
+          {/* Right side - Visual */}
+          <div className="hidden lg:flex flex-1 gradient-bg-primary items-center justify-center p-12 relative overflow-hidden">
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+
+            <div className="text-center max-w-lg relative z-10">
+              <div className="w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-xl flex items-center justify-center mx-auto mb-8">
+                <Building2 className="w-12 h-12 text-white" />
+              </div>
+              <h2 className="font-display text-4xl font-bold text-white mb-4">
+                {t("gymAuth.securityFirst", "Security First")}
+              </h2>
+              <p className="text-white/80 text-lg">
+                {t("gymAuth.additionalProtection", "An additional layer of protection for your gym data")}
+              </p>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   // Show login 2FA OTP verification screen
   if (pendingLogin2FA && pending2FA) {
@@ -653,63 +804,116 @@ const Auth = () => {
               )
             ) : (
               <>
-                {/* Role Selection (Sign Up only) */}
+                {/* Login Account Type Tabs (Login only) */}
+                {isLogin && !isNativeEnvironment && (
+                  <Tabs 
+                    value={loginAccountType} 
+                    onValueChange={(v) => setLoginAccountType(v as LoginAccountType)}
+                    className="mb-4 sm:mb-6"
+                  >
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="personal" className="gap-2">
+                        <User className="w-4 h-4" />
+                        {t("auth.personalAccount", "Personal")}
+                      </TabsTrigger>
+                      <TabsTrigger value="gym" className="gap-2">
+                        <Building2 className="w-4 h-4" />
+                        {t("auth.gymAccount", "Gym")}
+                      </TabsTrigger>
+                    </TabsList>
+                  </Tabs>
+                )}
+
+                {/* Role Selection (Sign Up only) - 3 cards side by side */}
                 {!isLogin && (
                   <div className="mb-4 sm:mb-6">
                     <Label className="text-foreground mb-2 sm:mb-3 block text-sm sm:text-base">{t("auth.iWantTo")}</Label>
-                    <div className="grid grid-cols-2 gap-2 sm:gap-3">
+                    <div className={`grid gap-2 ${isNativeEnvironment ? 'grid-cols-2' : 'grid-cols-3'}`}>
+                      {/* Client Card */}
                       <button
                         type="button"
                         onClick={() => setSelectedRole("client")}
-                        className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 sm:gap-2 ${
+                        className={`p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 ${
                           selectedRole === "client"
                             ? "border-primary bg-primary/10"
                             : "border-border hover:border-muted-foreground"
                         }`}
                       >
                         <User
-                          className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                          className={`w-5 h-5 ${
                             selectedRole === "client"
                               ? "text-primary"
                               : "text-muted-foreground"
                           }`}
                         />
                         <span
-                          className={`font-medium text-sm sm:text-base ${
+                          className={`font-medium text-xs sm:text-sm text-center leading-tight ${
                             selectedRole === "client"
                               ? "text-foreground"
                               : "text-muted-foreground"
                           }`}
                         >
-                          {t("auth.findCoach")}
+                          {t("auth.findTraining", "Find Training")}
                         </span>
                       </button>
+
+                      {/* Coach Card */}
                       <button
                         type="button"
                         onClick={() => setSelectedRole("coach")}
-                        className={`p-3 sm:p-4 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 sm:gap-2 ${
+                        className={`p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 ${
                           selectedRole === "coach"
                             ? "border-primary bg-primary/10"
                             : "border-border hover:border-muted-foreground"
                         }`}
                       >
                         <Briefcase
-                          className={`w-5 h-5 sm:w-6 sm:h-6 ${
+                          className={`w-5 h-5 ${
                             selectedRole === "coach"
                               ? "text-primary"
                               : "text-muted-foreground"
                           }`}
                         />
                         <span
-                          className={`font-medium text-sm sm:text-base ${
+                          className={`font-medium text-xs sm:text-sm text-center leading-tight ${
                             selectedRole === "coach"
                               ? "text-foreground"
                               : "text-muted-foreground"
                           }`}
                         >
-                          {t("auth.becomeCoach")}
+                          {t("auth.offerTraining", "Offer Training")}
                         </span>
                       </button>
+
+                      {/* Gym Card - hidden on native */}
+                      {!isNativeEnvironment && (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedRole("gym")}
+                          className={`p-2 sm:p-3 rounded-xl border-2 transition-all duration-200 flex flex-col items-center gap-1 ${
+                            selectedRole === "gym"
+                              ? "border-primary bg-primary/10"
+                              : "border-border hover:border-muted-foreground"
+                          }`}
+                        >
+                          <Building2
+                            className={`w-5 h-5 ${
+                              selectedRole === "gym"
+                                ? "text-primary"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                          <span
+                            className={`font-medium text-xs sm:text-sm text-center leading-tight ${
+                              selectedRole === "gym"
+                                ? "text-foreground"
+                                : "text-muted-foreground"
+                            }`}
+                          >
+                            {t("auth.manageGym", "Manage Gym")}
+                          </span>
+                        </button>
+                      )}
                     </div>
                   </div>
                 )}
@@ -852,18 +1056,32 @@ const Auth = () => {
 
           <div className="text-center max-w-lg relative z-10">
             <div className="w-24 h-24 rounded-3xl bg-white/20 backdrop-blur-xl flex items-center justify-center mx-auto mb-8">
-              <Dumbbell className="w-12 h-12 text-white" />
+              {isLogin && loginAccountType === "gym" ? (
+                <Building2 className="w-12 h-12 text-white" />
+              ) : selectedRole === "gym" ? (
+                <Building2 className="w-12 h-12 text-white" />
+              ) : (
+                <Dumbbell className="w-12 h-12 text-white" />
+              )}
             </div>
             <h2 className="font-display text-4xl font-bold text-white mb-4">
               {isLogin
-                ? t("auth.readyToGoals")
+                ? loginAccountType === "gym"
+                  ? t("gymAuth.manageYourGym", "Manage Your Gym")
+                  : t("auth.readyToGoals")
+                : selectedRole === "gym"
+                ? t("gymAuth.joinFitConnect", "Join FitConnect Pro")
                 : selectedRole === "client"
                 ? t("auth.findPerfectCoach")
                 : t("auth.growBusiness")}
             </h2>
             <p className="text-white/80 text-lg">
               {isLogin
-                ? t("auth.journeyAwaits")
+                ? loginAccountType === "gym"
+                  ? t("gymAuth.streamlinedTools", "Streamlined tools to run your fitness business")
+                  : t("auth.journeyAwaits")
+                : selectedRole === "gym"
+                ? t("gymAuth.everythingYouNeed", "Everything you need to manage members, classes, and payments")
                 : selectedRole === "client"
                 ? t("auth.connectWithTrainers")
                 : t("auth.reachMoreClients")}
