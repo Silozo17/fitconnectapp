@@ -53,6 +53,7 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
         <div className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
       </div>
       
+
       <User 
         className={cn(
           "w-6 h-6 text-primary transition-all duration-300 relative z-10",
