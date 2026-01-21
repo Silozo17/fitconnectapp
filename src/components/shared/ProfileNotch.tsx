@@ -28,8 +28,8 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
         "shadow-[0_0_12px_2px_hsl(var(--primary)/0.3)]",
         // Icon centering
         "flex items-center justify-center",
-        // Keep overflow hidden for shine effect
-        "overflow-hidden relative",
+        // Positioning context for shine overlay (avoid overflow clipping artifacts)
+        "relative",
         // Interactive states - synced with panel animation
         "transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
         "hover:scale-110 hover:border-primary/60 hover:shadow-[0_0_16px_3px_hsl(var(--primary)/0.4)]",
