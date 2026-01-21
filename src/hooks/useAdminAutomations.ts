@@ -201,6 +201,11 @@ export const MESSAGE_VARIABLES = [
   { name: "review_count", description: "Total number of reviews" },
   { name: "session_date", description: "Scheduled session date" },
   { name: "client_name", description: "Client's name (for coach notifications)" },
+  { name: "badge_name", description: "Name of badge earned" },
+  { name: "goal_title", description: "Title of completed goal" },
+  { name: "streak_count", description: "Current streak count" },
+  { name: "booking_count", description: "Total booking count" },
+  { name: "average_rating", description: "Coach's average rating" },
 ];
 
 export function useAdminAutomations() {
