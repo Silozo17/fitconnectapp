@@ -35,7 +35,10 @@ export const DashboardSectionHeader = memo(({
   }, [title]);
 
   return (
-    <div className={cn("mb-4 flex items-start justify-between gap-4", className)}>
+    <div className={cn(
+      "mb-4 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4",
+      className
+    )}>
       <div className="min-w-0">
         <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
           {prefix}<span className="gradient-text">{lastWord}</span>
@@ -46,7 +49,7 @@ export const DashboardSectionHeader = memo(({
           </p>
         )}
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {action && <div className="shrink-0 w-full sm:w-auto">{action}</div>}
     </div>
   );
 });
