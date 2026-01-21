@@ -61,12 +61,16 @@ const REQUIRES_DAYS_CONFIG: TriggerType[] = [
   "inactive_days",
   "no_bookings_days",
   "subscription_expiring",
+  "coach_boost_expiring",
+  "coach_profile_incomplete",
+  "no_availability_set",
 ];
 
 const REQUIRES_THRESHOLD_CONFIG: TriggerType[] = [
   "booking_milestone",
   "streak_milestone",
   "coach_low_rating",
+  "review_milestone",
 ];
 
 export function AutomationRuleModal({
@@ -457,7 +461,13 @@ export function AutomationRuleModal({
                       .replace("{days_inactive}", "7")
                       .replace("{total_bookings}", "5")
                       .replace("{streak_days}", "14")
-                      .replace("{coach_name}", "Sarah")}
+                      .replace("{coach_name}", "Sarah")
+                      .replace("{old_tier}", "Free")
+                      .replace("{new_tier}", "Pro")
+                      .replace("{boost_end_date}", "Jan 28, 2026")
+                      .replace("{review_count}", "10")
+                      .replace("{session_date}", "Jan 25, 2026")
+                      .replace("{client_name}", "Alex")}
                   </p>
                 </Card>
               )}
