@@ -21,16 +21,10 @@ import { useCoachWidgets, useUpdateCoachWidget, useReorderCoachWidgets } from "@
 import { useCoachClients } from "@/hooks/useCoachClients";
 import { PageHelpBanner } from "@/components/discover/PageHelpBanner";
 
-// Widget section definitions for grouping
-const WIDGET_SECTIONS = {
-  clients: { key: "clients", title: "Client Quickview", description: "Quick access to client stats" },
-  stats: { key: "stats", title: "Dashboard Overview", description: "Your key metrics at a glance" },
-  activity: { key: "activity", title: "Client Activity", description: "Client activity and sessions" },
-  actions: { key: "actions", title: "Quick Actions", description: "Common tasks" },
-  engagement: { key: "engagement", title: "Client Engagement", description: "Reviews and connections" },
-  intelligence: { key: "intelligence", title: "Smart Insights", description: "AI-powered insights" },
-  business: { key: "business", title: "Business Analytics", description: "Revenue and analytics" },
-} as const;
+// Widget section keys for translation lookup
+const WIDGET_SECTION_KEYS = ["clients", "stats", "activity", "actions", "engagement", "intelligence", "business"] as const;
+
+type WidgetSectionKey = typeof WIDGET_SECTION_KEYS[number];
 
 // Map widget types to sections
 const getWidgetSection = (widgetType: string): string => {
@@ -218,14 +212,14 @@ const CoachOverview = () => {
       {groupedWidgets.length > 0 || activeClients.length > 0 ? (
         <div className="space-y-11">
           {/* Render sections in order from sectionOrder */}
-          {["stats", "clients", "activity", "actions", "engagement", "intelligence", "business"].map((sectionKey) => {
+          {WIDGET_SECTION_KEYS.map((sectionKey) => {
             // Special handling for clients section - render carousel
             if (sectionKey === "clients" && activeClients.length > 0) {
               return (
                 <div key={sectionKey}>
                   <DashboardSectionHeader
-                    title={WIDGET_SECTIONS.clients.title}
-                    description={WIDGET_SECTIONS.clients.description}
+                    title={t(`widgets.sections.${sectionKey}.title`)}
+                    description={t(`widgets.sections.${sectionKey}.description`)}
                   />
                   <ClientQuickViewCarousel
                     clients={activeClients}
@@ -242,8 +236,8 @@ const CoachOverview = () => {
             return (
               <div key={sectionKey}>
                 <DashboardSectionHeader
-                  title={WIDGET_SECTIONS[sectionKey as keyof typeof WIDGET_SECTIONS]?.title || sectionKey}
-                  description={WIDGET_SECTIONS[sectionKey as keyof typeof WIDGET_SECTIONS]?.description}
+                  title={t(`widgets.sections.${sectionKey}.title`)}
+                  description={t(`widgets.sections.${sectionKey}.description`)}
                 />
                 <DraggableWidgetGrid
                   widgets={sectionWidgets}

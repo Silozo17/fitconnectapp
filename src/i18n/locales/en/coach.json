@@ -1799,5 +1799,41 @@
       "achievements": "Achievements",
       "settings": "Settings"
     }
+  },
+  "widgets": {
+    "sections": {
+      "clients": {
+        "title": "Client Quickview",
+        "description": "Quick access to client stats"
+      },
+      "stats": {
+        "title": "Dashboard Overview",
+        "description": "Your key metrics at a glance"
+      },
+      "activity": {
+        "title": "Client Activity",
+        "description": "Client activity and sessions"
+      },
+      "actions": {
+        "title": "Quick Actions",
+        "description": "Common tasks"
+      },
+      "engagement": {
+        "title": "Client Engagement",
+        "description": "Reviews and connections"
+      },
+      "intelligence": {
+        "title": "Smart Insights",
+        "description": "AI-powered insights"
+      },
+      "business": {
+        "title": "Business Analytics",
+        "description": "Revenue and analytics"
+      }
+    }
+  },
+  "profileCompletion": {
+    "title": "Profile Completion",
+    "complete": "Complete!"
   }
 }
