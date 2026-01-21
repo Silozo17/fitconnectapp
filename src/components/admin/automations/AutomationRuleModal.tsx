@@ -42,7 +42,7 @@ import {
   AdminAutomationRule,
   TriggerType,
   TargetAudience,
-  MessageType,
+  MessageChannel,
   TriggerConfig,
   TRIGGER_CATEGORIES,
   MESSAGE_VARIABLES,
@@ -80,7 +80,7 @@ export function AutomationRuleModal({
   const [triggerType, setTriggerType] = useState<TriggerType>("user_signup_client");
   const [triggerConfig, setTriggerConfig] = useState<TriggerConfig>({});
   const [targetAudience, setTargetAudience] = useState<TargetAudience>("all");
-  const [messageType, setMessageType] = useState<MessageType>("in_app");
+  const [messageChannels, setMessageChannels] = useState<MessageChannel[]>(["in_app"]);
   const [messageTemplate, setMessageTemplate] = useState("");
   const [messageSubject, setMessageSubject] = useState("");
   const [cooldownDays, setCooldownDays] = useState<number>(7);
@@ -100,7 +100,25 @@ export function AutomationRuleModal({
       setTriggerType(automation.trigger_type);
       setTriggerConfig(automation.trigger_config);
       setTargetAudience(automation.target_audience);
-      setMessageType(automation.message_type);
+      // Parse message_type - handle both array and legacy string formats
+      const mt = automation.message_type;
+      if (Array.isArray(mt)) {
+        setMessageChannels(mt);
+      } else if (typeof mt === "string") {
+        try {
+          const parsed = JSON.parse(mt);
+          setMessageChannels(Array.isArray(parsed) ? parsed : ["in_app"]);
+        } catch {
+          // Legacy single value - convert to array
+          if (mt === "all") {
+            setMessageChannels(["in_app", "email", "push"]);
+          } else {
+            setMessageChannels([mt as MessageChannel]);
+          }
+        }
+      } else {
+        setMessageChannels(["in_app"]);
+      }
       setMessageTemplate(automation.message_template);
       setMessageSubject(automation.message_subject || "");
       setCooldownDays(automation.cooldown_days || 7);
@@ -117,13 +135,24 @@ export function AutomationRuleModal({
     setTriggerType("user_signup_client");
     setTriggerConfig({});
     setTargetAudience("all");
-    setMessageType("in_app");
+    setMessageChannels(["in_app"]);
     setMessageTemplate("");
     setMessageSubject("");
     setCooldownDays(7);
     setMaxSendsPerUser(null);
     setPriority(0);
     setActiveTab("trigger");
+  };
+
+  const toggleChannel = (channel: MessageChannel) => {
+    setMessageChannels((prev) => {
+      if (prev.includes(channel)) {
+        // Don't allow removing the last channel
+        if (prev.length === 1) return prev;
+        return prev.filter((c) => c !== channel);
+      }
+      return [...prev, channel];
+    });
   };
 
   const handleSubmit = () => {
@@ -134,7 +163,7 @@ export function AutomationRuleModal({
       trigger_config: triggerConfig,
       target_audience: targetAudience,
       audience_filters: {},
-      message_type: messageType,
+      message_type: messageChannels as any, // Store as array
       message_template: messageTemplate,
       message_subject: messageSubject || null,
       is_enabled: automation?.is_enabled ?? false,
@@ -160,8 +189,9 @@ export function AutomationRuleModal({
 
   const needsDaysConfig = REQUIRES_DAYS_CONFIG.includes(triggerType);
   const needsThresholdConfig = REQUIRES_THRESHOLD_CONFIG.includes(triggerType);
+  const showEmailSubject = messageChannels.includes("email");
 
-  const isValid = name && triggerType && messageTemplate;
+  const isValid = name && triggerType && messageTemplate && messageChannels.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -319,31 +349,41 @@ export function AutomationRuleModal({
 
             <TabsContent value="message" className="space-y-4 mt-0">
               <div className="space-y-2">
-                <Label>Message Channel</Label>
-                <div className="grid grid-cols-4 gap-2">
+                <Label>Message Channels (select one or more)</Label>
+                <div className="grid grid-cols-3 gap-2">
                   {[
-                    { value: "in_app", label: "In-App", icon: MessageSquare },
-                    { value: "email", label: "Email", icon: Mail },
-                    { value: "push", label: "Push", icon: Bell },
-                    { value: "all", label: "All", icon: Bell },
-                  ].map((option) => (
-                    <Card
-                      key={option.value}
-                      className={`p-3 cursor-pointer transition-colors text-center ${
-                        messageType === option.value
-                          ? "border-primary bg-primary/5"
-                          : "hover:border-muted-foreground/50"
-                      }`}
-                      onClick={() => setMessageType(option.value as MessageType)}
-                    >
-                      <option.icon className="h-5 w-5 mx-auto mb-1.5 text-muted-foreground" />
-                      <p className="font-medium text-xs">{option.label}</p>
-                    </Card>
-                  ))}
+                    { value: "in_app" as MessageChannel, label: "In-App", icon: MessageSquare },
+                    { value: "email" as MessageChannel, label: "Email", icon: Mail },
+                    { value: "push" as MessageChannel, label: "Push", icon: Bell },
+                  ].map((option) => {
+                    const isSelected = messageChannels.includes(option.value);
+                    return (
+                      <Card
+                        key={option.value}
+                        className={`p-3 cursor-pointer transition-colors text-center relative ${
+                          isSelected
+                            ? "border-primary bg-primary/5"
+                            : "hover:border-muted-foreground/50"
+                        }`}
+                        onClick={() => toggleChannel(option.value)}
+                      >
+                        {isSelected && (
+                          <div className="absolute top-1 right-1 w-4 h-4 bg-primary rounded-full flex items-center justify-center">
+                            <span className="text-[10px] text-primary-foreground">✓</span>
+                          </div>
+                        )}
+                        <option.icon className="h-5 w-5 mx-auto mb-1.5 text-muted-foreground" />
+                        <p className="font-medium text-xs">{option.label}</p>
+                      </Card>
+                    );
+                  })}
                 </div>
+                <p className="text-xs text-muted-foreground">
+                  Selected: {messageChannels.map(c => c.replace("_", " ")).join(", ") || "None"}
+                </p>
               </div>
 
-              {(messageType === "email" || messageType === "all") && (
+              {showEmailSubject && (
                 <div className="space-y-2">
                   <Label htmlFor="subject">Email Subject</Label>
                   <Input

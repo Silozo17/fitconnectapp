@@ -41,10 +41,31 @@ import {
 } from "lucide-react";
 import {
   AdminAutomationRule,
+  MessageChannel,
   TRIGGER_CATEGORIES,
   useToggleAdminAutomation,
   useDeleteAdminAutomation,
 } from "@/hooks/useAdminAutomations";
+
+// Helper to parse message_type which can be array or legacy string
+const parseMessageChannels = (messageType: any): MessageChannel[] => {
+  if (Array.isArray(messageType)) {
+    return messageType;
+  }
+  if (typeof messageType === "string") {
+    try {
+      const parsed = JSON.parse(messageType);
+      if (Array.isArray(parsed)) return parsed;
+    } catch {
+      // Legacy single value
+      if (messageType === "all") {
+        return ["in_app", "email", "push"];
+      }
+      return [messageType as MessageChannel];
+    }
+  }
+  return ["in_app"];
+};
 
 interface AutomationListProps {
   automations: AdminAutomationRule[];
@@ -71,18 +92,29 @@ const getAudienceIcon = (audience: string) => {
   }
 };
 
-const getMessageTypeIcon = (type: string) => {
-  switch (type) {
+const getChannelIcon = (channel: MessageChannel) => {
+  switch (channel) {
     case "email":
       return <Mail className="h-3 w-3" />;
     case "push":
       return <Bell className="h-3 w-3" />;
     case "in_app":
       return <MessageSquare className="h-3 w-3" />;
-    case "all":
-      return <Bell className="h-3 w-3" />;
     default:
       return <MessageSquare className="h-3 w-3" />;
+  }
+};
+
+const getChannelLabel = (channel: MessageChannel) => {
+  switch (channel) {
+    case "email":
+      return "Email";
+    case "push":
+      return "Push";
+    case "in_app":
+      return "In-App";
+    default:
+      return channel;
   }
 };
 
@@ -159,9 +191,13 @@ export function AutomationList({ automations, onEdit, onViewLogs }: AutomationLi
                   </div>
                 </TableCell>
                 <TableCell>
-                  <div className="flex items-center gap-1.5">
-                    {getMessageTypeIcon(automation.message_type)}
-                    <span className="capitalize text-sm">{automation.message_type.replace("_", " ")}</span>
+                  <div className="flex flex-wrap items-center gap-1">
+                    {parseMessageChannels(automation.message_type).map((channel) => (
+                      <Badge key={channel} variant="outline" className="flex items-center gap-1 text-xs">
+                        {getChannelIcon(channel)}
+                        {getChannelLabel(channel)}
+                      </Badge>
+                    ))}
                   </div>
                 </TableCell>
                 <TableCell>
