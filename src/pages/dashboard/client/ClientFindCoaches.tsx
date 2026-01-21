@@ -153,7 +153,7 @@ const ClientFindCoaches = () => {
         <div className="flex items-start justify-between gap-4 mb-6">
           <div className="min-w-0">
             <h2 className="font-display text-xl md:text-2xl font-bold text-foreground tracking-tight">
-              Find <span className="gradient-text">Coaches</span>
+              {t('header.title', { ns: 'coaches' })} <span className="gradient-text">{t('header.titleHighlight', { ns: 'coaches' })}</span>
             </h2>
             <p className="text-muted-foreground text-sm mt-1">
               {t('findCoaches.description')}

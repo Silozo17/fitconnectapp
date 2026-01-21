@@ -1761,5 +1761,72 @@
     "promptRate": "Współczynnik konwersji",
     "submitResponse": "Wyślij odpowiedź",
     "responseSubmitted": "Odpowiedź wysłana"
+  },
+  "navigation": {
+    "coach": {
+      "overview": "Przegląd",
+      "pipeline": "Lejek sprzedażowy",
+      "messages": "Wiadomości",
+      "connections": "Połączenia",
+      "automations": "Automatyzacje",
+      "clientManagement": "Zarządzanie klientami",
+      "clients": "Klienci",
+      "schedule": "Harmonogram",
+      "trainingPlans": "Plany treningowe",
+      "wearableInsights": "Dane z urządzeń",
+      "clientComparison": "Porównanie klientów",
+      "aiRecommendations": "Rekomendacje AI",
+      "productsPricing": "Produkty i ceny",
+      "packages": "Pakiety",
+      "digitalProducts": "Produkty cyfrowe",
+      "business": "Biznes",
+      "boost": "Promowanie",
+      "financial": "Finanse",
+      "reviews": "Recenzje",
+      "transformations": "Transformacje",
+      "caseStudies": "Studia przypadków",
+      "analytics": "Analityka",
+      "packageAnalytics": "Analityka pakietów",
+      "earnings": "Zarobki",
+      "gamification": "Grywalizacja",
+      "achievements": "Osiągnięcia",
+      "settings": "Ustawienia"
+    }
+  },
+  "widgets": {
+    "sections": {
+      "clients": {
+        "title": "Podgląd klientów",
+        "description": "Szybki dostęp do statystyk klientów"
+      },
+      "stats": {
+        "title": "Przegląd panelu",
+        "description": "Twoje kluczowe wskaźniki w skrócie"
+      },
+      "activity": {
+        "title": "Aktywność klientów",
+        "description": "Aktywność klientów i sesje"
+      },
+      "actions": {
+        "title": "Szybkie akcje",
+        "description": "Typowe zadania"
+      },
+      "engagement": {
+        "title": "Zaangażowanie klientów",
+        "description": "Recenzje i połączenia"
+      },
+      "intelligence": {
+        "title": "Inteligentne spostrzeżenia",
+        "description": "Spostrzeżenia oparte na AI"
+      },
+      "business": {
+        "title": "Analityka biznesowa",
+        "description": "Przychody i analityka"
+      }
+    }
+  },
+  "profileCompletion": {
+    "title": "Ukończenie profilu",
+    "complete": "Ukończono!"
   }
 }

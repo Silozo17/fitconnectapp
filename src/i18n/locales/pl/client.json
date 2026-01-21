@@ -545,5 +545,36 @@
     "completePayment": "Dokończ płatność",
     "paymentComplete": "Płatność zakończona! Sesja potwierdzona.",
     "checkoutNotReady": "Płatność za pojedyncze sesje jest w trakcie konfiguracji. Skontaktuj się z trenerem w sprawie instrukcji płatności."
+  },
+  "navigation": {
+    "client": {
+      "home": "Strona główna",
+      "findCoaches": "Znajdź trenerów",
+      "marketplace": "Marketplace",
+      "messages": "Wiadomości",
+      "connections": "Połączenia",
+      "myTraining": "Mój trening",
+      "myCoaches": "Moi trenerzy",
+      "sessions": "Sesje",
+      "myPlans": "Moje plany",
+      "myLibrary": "Moja biblioteka",
+      "progressHabits": "Postępy i nawyki",
+      "progress": "Postępy",
+      "habits": "Nawyki",
+      "foodDiary": "Dziennik żywienia",
+      "trainingLogs": "Dziennik treningów",
+      "competition": "Rywalizacja",
+      "achievements": "Osiągnięcia",
+      "leaderboard": "Ranking",
+      "challenges": "Wyzwania",
+      "utilities": "Narzędzia",
+      "tools": "Narzędzia",
+      "shopping": "Zakupy",
+      "receipts": "Paragony",
+      "favourites": "Ulubione",
+      "myGyms": "Moje siłownie",
+      "myGymsList": "Moje siłownie",
+      "settings": "Ustawienia"
+    }
   }
 }

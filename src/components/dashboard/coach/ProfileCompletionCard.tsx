@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { Check, Circle, Trophy, ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
@@ -9,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 export const ProfileCompletionCard = () => {
+  const { t } = useTranslation("coach");
   const { data, isLoading } = useCoachProfileCompletion();
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -41,10 +43,10 @@ export const ProfileCompletionCard = () => {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-foreground">Profile Completion</span>
+          <span className="text-sm font-medium text-foreground">{t('profileCompletion.title')}</span>
           {isFullyComplete && (
             <span className="px-2 py-0.5 text-xs font-medium bg-success/20 text-success rounded-full">
-              Complete!
+              {t('profileCompletion.complete')}
             </span>
           )}
         </div>
