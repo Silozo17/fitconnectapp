@@ -12333,6 +12333,48 @@ export type Database = {
           },
         ]
       }
+      subscription_tier_history: {
+        Row: {
+          change_type: string
+          changed_at: string
+          coach_id: string
+          id: string
+          new_tier: string
+          old_tier: string | null
+        }
+        Insert: {
+          change_type: string
+          changed_at?: string
+          coach_id: string
+          id?: string
+          new_tier: string
+          old_tier?: string | null
+        }
+        Update: {
+          change_type?: string
+          changed_at?: string
+          coach_id?: string
+          id?: string
+          new_tier?: string
+          old_tier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_tier_history_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscription_tier_history_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           amount: number
