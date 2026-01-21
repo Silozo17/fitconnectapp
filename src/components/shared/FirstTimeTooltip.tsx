@@ -6,6 +6,7 @@ interface FirstTimeTooltipProps {
   storageKey: string;
   message: string;
   position?: "top" | "bottom" | "left" | "right";
+  align?: "start" | "center" | "end";
   showDelay?: number;
   duration?: number;
   className?: string;
@@ -16,6 +17,7 @@ export const FirstTimeTooltip = ({
   storageKey,
   message,
   position = "bottom",
+  align = "center",
   showDelay = 500,
   duration = 3500,
   className,
@@ -72,12 +74,19 @@ export const FirstTimeTooltip = ({
     }
   }, [showTooltip, dismissTooltip]);
 
-  // Position classes for the tooltip
-  const positionClasses = {
-    top: "bottom-full left-1/2 -translate-x-1/2 mb-2",
-    bottom: "top-full left-1/2 -translate-x-1/2 mt-2",
-    left: "right-full top-1/2 -translate-y-1/2 mr-2",
-    right: "left-full top-1/2 -translate-y-1/2 ml-2",
+  // Position classes for the tooltip - vertical positioning
+  const verticalPositionClasses = {
+    top: "bottom-full mb-2",
+    bottom: "top-full mt-2",
+    left: "right-full mr-2 top-1/2 -translate-y-1/2",
+    right: "left-full ml-2 top-1/2 -translate-y-1/2",
+  };
+
+  // Horizontal alignment classes (only for top/bottom positions)
+  const alignmentClasses = {
+    start: "left-0",
+    center: "left-1/2 -translate-x-1/2",
+    end: "right-0",
   };
 
   // Arrow classes for each position
@@ -88,6 +97,13 @@ export const FirstTimeTooltip = ({
     right: "right-full top-1/2 -translate-y-1/2 border-r-primary border-y-transparent border-l-transparent",
   };
 
+  // Adjust arrow position based on alignment
+  const arrowAlignmentClasses = {
+    start: position === "top" || position === "bottom" ? "left-4 -translate-x-0" : "",
+    center: "",
+    end: position === "top" || position === "bottom" ? "right-4 left-auto -translate-x-0" : "",
+  };
+
   return (
     <div className={cn("relative inline-flex", className)} onClick={handleChildClick}>
       {children}
@@ -95,20 +111,23 @@ export const FirstTimeTooltip = ({
       {showTooltip && (
         <div
           className={cn(
-            "absolute z-[60] whitespace-nowrap",
-            positionClasses[position],
+            "absolute z-[60]",
+            "w-max max-w-[min(280px,calc(100vw-32px))]",
+            verticalPositionClasses[position],
+            (position === "top" || position === "bottom") && alignmentClasses[align],
             "transition-all duration-200 ease-out",
             isVisible ? "opacity-100 scale-100" : "opacity-0 scale-95"
           )}
         >
-          <div className="bg-primary text-primary-foreground text-sm font-medium px-3 py-2 rounded-lg shadow-lg">
+          <div className="bg-primary text-primary-foreground text-sm font-medium px-3 py-2 rounded-lg shadow-lg text-center">
             {message}
           </div>
           {/* Arrow */}
           <div
             className={cn(
               "absolute w-0 h-0 border-[6px]",
-              arrowClasses[position]
+              arrowClasses[position],
+              arrowAlignmentClasses[align]
             )}
           />
         </div>
