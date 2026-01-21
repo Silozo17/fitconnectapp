@@ -29,6 +29,14 @@ interface UserData {
   role: "client" | "coach";
   created_at: string;
   updated_at: string;
+  metadata?: {
+    old_tier?: string;
+    new_tier?: string;
+    boost_end_date?: string;
+    review_count?: number;
+    session_date?: string;
+    client_name?: string;
+  };
 }
 
 Deno.serve(async (req) => {
@@ -293,7 +301,350 @@ async function getUsersForTrigger(supabase: any, rule: AutomationRule): Promise<
       break;
     }
 
-    // Add more trigger types as needed
+    case "coach_subscription_upgraded": {
+      // Coaches whose tier changed to a higher tier in last 30 minutes
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data } = await supabase
+        .from("platform_subscriptions")
+        .select(`
+          coach_id,
+          tier,
+          coach_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .eq("status", "active")
+        .gte("updated_at", thirtyMinAgo.toISOString())
+        .in("tier", ["starter", "pro", "enterprise", "founder"]);
+      
+      users = (data || []).map((s: any) => ({
+        id: s.coach_profiles.id,
+        user_id: s.coach_profiles.user_id,
+        first_name: s.coach_profiles.first_name,
+        last_name: s.coach_profiles.last_name,
+        role: "coach" as const,
+        created_at: s.coach_profiles.created_at,
+        updated_at: s.coach_profiles.updated_at,
+        metadata: { new_tier: s.tier }
+      }));
+      break;
+    }
+
+    case "coach_subscription_downgraded": {
+      // Coaches with a pending downgrade
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data } = await supabase
+        .from("platform_subscriptions")
+        .select(`
+          coach_id,
+          tier,
+          pending_tier,
+          coach_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .not("pending_tier", "is", null)
+        .gte("updated_at", thirtyMinAgo.toISOString());
+      
+      users = (data || []).map((s: any) => ({
+        id: s.coach_profiles.id,
+        user_id: s.coach_profiles.user_id,
+        first_name: s.coach_profiles.first_name,
+        last_name: s.coach_profiles.last_name,
+        role: "coach" as const,
+        created_at: s.coach_profiles.created_at,
+        updated_at: s.coach_profiles.updated_at,
+        metadata: { old_tier: s.tier, new_tier: s.pending_tier }
+      }));
+      break;
+    }
+
+    case "coach_boost_activated": {
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data } = await supabase
+        .from("coach_boosts")
+        .select(`
+          coach_id,
+          boost_end_date,
+          coach_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .eq("is_active", true)
+        .eq("payment_status", "succeeded")
+        .gte("created_at", thirtyMinAgo.toISOString());
+      
+      users = (data || []).map((b: any) => ({
+        id: b.coach_profiles.id,
+        user_id: b.coach_profiles.user_id,
+        first_name: b.coach_profiles.first_name,
+        last_name: b.coach_profiles.last_name,
+        role: "coach" as const,
+        created_at: b.coach_profiles.created_at,
+        updated_at: b.coach_profiles.updated_at,
+        metadata: { boost_end_date: b.boost_end_date }
+      }));
+      break;
+    }
+
+    case "coach_boost_expiring": {
+      const days = trigger_config.days || 3;
+      const targetDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      const rangeStart = new Date(targetDate.getTime() - 30 * 60 * 1000);
+      const rangeEnd = new Date(targetDate.getTime() + 30 * 60 * 1000);
+      
+      const { data } = await supabase
+        .from("coach_boosts")
+        .select(`
+          coach_id,
+          boost_end_date,
+          coach_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .eq("is_active", true)
+        .gte("boost_end_date", rangeStart.toISOString())
+        .lte("boost_end_date", rangeEnd.toISOString());
+      
+      users = (data || []).map((b: any) => ({
+        id: b.coach_profiles.id,
+        user_id: b.coach_profiles.user_id,
+        first_name: b.coach_profiles.first_name,
+        last_name: b.coach_profiles.last_name,
+        role: "coach" as const,
+        created_at: b.coach_profiles.created_at,
+        updated_at: b.coach_profiles.updated_at,
+        metadata: { boost_end_date: b.boost_end_date }
+      }));
+      break;
+    }
+
+    case "first_review_received": {
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data: reviews } = await supabase
+        .from("coach_reviews")
+        .select(`
+          coach_id,
+          coach_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .gte("created_at", thirtyMinAgo.toISOString());
+      
+      for (const review of reviews || []) {
+        const { count } = await supabase
+          .from("coach_reviews")
+          .select("id", { count: "exact", head: true })
+          .eq("coach_id", review.coach_id);
+        
+        if (count === 1) {
+          users.push({
+            id: review.coach_profiles.id,
+            user_id: review.coach_profiles.user_id,
+            first_name: review.coach_profiles.first_name,
+            last_name: review.coach_profiles.last_name,
+            role: "coach" as const,
+            created_at: review.coach_profiles.created_at,
+            updated_at: review.coach_profiles.updated_at,
+            metadata: { review_count: 1 }
+          });
+        }
+      }
+      break;
+    }
+
+    case "review_milestone": {
+      const threshold = trigger_config.threshold || 10;
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      
+      const { data: reviews } = await supabase
+        .from("coach_reviews")
+        .select(`
+          coach_id,
+          coach_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .gte("created_at", thirtyMinAgo.toISOString());
+      
+      for (const review of reviews || []) {
+        const { count } = await supabase
+          .from("coach_reviews")
+          .select("id", { count: "exact", head: true })
+          .eq("coach_id", review.coach_id);
+        
+        if (count === threshold) {
+          users.push({
+            id: review.coach_profiles.id,
+            user_id: review.coach_profiles.user_id,
+            first_name: review.coach_profiles.first_name,
+            last_name: review.coach_profiles.last_name,
+            role: "coach" as const,
+            created_at: review.coach_profiles.created_at,
+            updated_at: review.coach_profiles.updated_at,
+            metadata: { review_count: count }
+          });
+        }
+      }
+      break;
+    }
+
+    case "session_completed": {
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data } = await supabase
+        .from("coaching_sessions")
+        .select(`
+          client_id,
+          scheduled_at,
+          client_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .eq("status", "completed")
+        .gte("updated_at", thirtyMinAgo.toISOString());
+      
+      users = (data || []).map((s: any) => ({
+        id: s.client_profiles.id,
+        user_id: s.client_profiles.user_id,
+        first_name: s.client_profiles.first_name,
+        last_name: s.client_profiles.last_name,
+        role: "client" as const,
+        created_at: s.client_profiles.created_at,
+        updated_at: s.client_profiles.updated_at,
+        metadata: { session_date: s.scheduled_at }
+      }));
+      break;
+    }
+
+    case "session_cancelled": {
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data } = await supabase
+        .from("coaching_sessions")
+        .select(`
+          client_id,
+          scheduled_at,
+          client_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .eq("status", "cancelled")
+        .gte("updated_at", thirtyMinAgo.toISOString());
+      
+      users = (data || []).map((s: any) => ({
+        id: s.client_profiles.id,
+        user_id: s.client_profiles.user_id,
+        first_name: s.client_profiles.first_name,
+        last_name: s.client_profiles.last_name,
+        role: "client" as const,
+        created_at: s.client_profiles.created_at,
+        updated_at: s.client_profiles.updated_at,
+        metadata: { session_date: s.scheduled_at }
+      }));
+      break;
+    }
+
+    case "client_subscribed_to_coach": {
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data } = await supabase
+        .from("client_subscriptions")
+        .select(`
+          client_id,
+          client_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .eq("status", "active")
+        .gte("created_at", thirtyMinAgo.toISOString());
+      
+      users = (data || []).map((s: any) => ({
+        id: s.client_profiles.id,
+        user_id: s.client_profiles.user_id,
+        first_name: s.client_profiles.first_name,
+        last_name: s.client_profiles.last_name,
+        role: "client" as const,
+        created_at: s.client_profiles.created_at,
+        updated_at: s.client_profiles.updated_at,
+      }));
+      break;
+    }
+
+    case "client_cancelled_coach_sub": {
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data } = await supabase
+        .from("client_subscriptions")
+        .select(`
+          client_id,
+          client_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .eq("status", "cancelled")
+        .gte("updated_at", thirtyMinAgo.toISOString());
+      
+      users = (data || []).map((s: any) => ({
+        id: s.client_profiles.id,
+        user_id: s.client_profiles.user_id,
+        first_name: s.client_profiles.first_name,
+        last_name: s.client_profiles.last_name,
+        role: "client" as const,
+        created_at: s.client_profiles.created_at,
+        updated_at: s.client_profiles.updated_at,
+      }));
+      break;
+    }
+
+    case "first_service_created": {
+      const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      const { data: services } = await supabase
+        .from("session_types")
+        .select(`
+          coach_id,
+          coach_profiles!inner(id, user_id, first_name, last_name, created_at, updated_at)
+        `)
+        .gte("created_at", thirtyMinAgo.toISOString());
+      
+      for (const service of services || []) {
+        const { count } = await supabase
+          .from("session_types")
+          .select("id", { count: "exact", head: true })
+          .eq("coach_id", service.coach_id);
+        
+        if (count === 1) {
+          users.push({
+            id: service.coach_profiles.id,
+            user_id: service.coach_profiles.user_id,
+            first_name: service.coach_profiles.first_name,
+            last_name: service.coach_profiles.last_name,
+            role: "coach" as const,
+            created_at: service.coach_profiles.created_at,
+            updated_at: service.coach_profiles.updated_at,
+          });
+        }
+      }
+      break;
+    }
+
+    case "coach_profile_incomplete": {
+      const days = trigger_config.days || 3;
+      const targetDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      const rangeEnd = new Date(targetDate.getTime() + 30 * 60 * 1000);
+      
+      const { data } = await supabase
+        .from("coach_profiles")
+        .select("id, user_id, first_name, last_name, created_at, updated_at, bio, profile_photo_url")
+        .lte("created_at", rangeEnd.toISOString())
+        .gte("created_at", targetDate.toISOString());
+      
+      users = (data || [])
+        .filter((c: any) => !c.bio || !c.profile_photo_url)
+        .map((u: any) => ({ ...u, role: "coach" as const }));
+      break;
+    }
+
+    case "no_availability_set": {
+      const days = trigger_config.days || 3;
+      const targetDate = new Date(now.getTime() - days * 24 * 60 * 60 * 1000);
+      const rangeEnd = new Date(targetDate.getTime() + 30 * 60 * 1000);
+      
+      const { data: coaches } = await supabase
+        .from("coach_profiles")
+        .select("id, user_id, first_name, last_name, created_at, updated_at")
+        .lte("created_at", rangeEnd.toISOString())
+        .gte("created_at", targetDate.toISOString());
+      
+      for (const coach of coaches || []) {
+        const { count } = await supabase
+          .from("coach_availability")
+          .select("id", { count: "exact", head: true })
+          .eq("coach_id", coach.id);
+        
+        if (!count || count === 0) {
+          users.push({ ...coach, role: "coach" as const });
+        }
+      }
+      break;
+    }
+
     default:
       console.log(`Trigger type "${trigger_type}" not implemented yet`);
   }
@@ -308,12 +659,38 @@ function processTemplate(template: string, user: UserData): string {
   const updatedAt = new Date(user.updated_at);
   const inactiveDays = Math.floor((now.getTime() - updatedAt.getTime()) / (24 * 60 * 60 * 1000));
 
+  // Format boost end date if present
+  let boostEndDateFormatted = "";
+  if (user.metadata?.boost_end_date) {
+    boostEndDateFormatted = new Date(user.metadata.boost_end_date).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  }
+
+  // Format session date if present
+  let sessionDateFormatted = "";
+  if (user.metadata?.session_date) {
+    sessionDateFormatted = new Date(user.metadata.session_date).toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric"
+    });
+  }
+
   return template
     .replace(/{first_name}/g, user.first_name || "there")
     .replace(/{last_name}/g, user.last_name || "")
     .replace(/{role}/g, user.role)
     .replace(/{account_age_days}/g, String(accountAgeDays))
-    .replace(/{days_inactive}/g, String(inactiveDays));
+    .replace(/{days_inactive}/g, String(inactiveDays))
+    .replace(/{old_tier}/g, user.metadata?.old_tier || "")
+    .replace(/{new_tier}/g, user.metadata?.new_tier || "")
+    .replace(/{boost_end_date}/g, boostEndDateFormatted)
+    .replace(/{review_count}/g, String(user.metadata?.review_count || 0))
+    .replace(/{session_date}/g, sessionDateFormatted)
+    .replace(/{client_name}/g, user.metadata?.client_name || "");
 }
 
 async function sendInAppMessage(
