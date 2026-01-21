@@ -577,21 +577,24 @@ async function getUsersForTrigger(supabase: any, rule: AutomationRule): Promise<
 
     case "coach_first_client": {
       const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
-      const { data: connections } = await supabase
-        .from("coach_client_connections")
+      // Use connection_requests table (correct table name)
+      const { data: connections, error } = await supabase
+        .from("connection_requests")
         .select(`
           coach_id,
           coach_profiles!inner(id, user_id, display_name, created_at, updated_at)
         `)
-        .eq("status", "active")
-        .gte("created_at", thirtyMinAgo.toISOString());
+        .eq("status", "accepted")
+        .gte("updated_at", thirtyMinAgo.toISOString());
+      
+      if (error) console.error(`[coach_first_client] Query error:`, error);
       
       for (const conn of connections || []) {
         const { count } = await supabase
-          .from("coach_client_connections")
+          .from("connection_requests")
           .select("id", { count: "exact", head: true })
           .eq("coach_id", conn.coach_id)
-          .eq("status", "active");
+          .eq("status", "accepted");
         
         if (count === 1) {
           users.push(mapCoachToUser(conn.coach_profiles));
@@ -654,40 +657,45 @@ async function getUsersForTrigger(supabase: any, rule: AutomationRule): Promise<
     // ===== SUBSCRIPTION TRIGGERS =====
     case "coach_subscription_upgraded": {
       const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      // Use subscription_tier_history for accurate upgrade detection
       const { data, error } = await supabase
-        .from("platform_subscriptions")
+        .from("subscription_tier_history")
         .select(`
           coach_id,
-          tier,
+          old_tier,
+          new_tier,
           coach_profiles!inner(id, user_id, display_name, created_at, updated_at)
         `)
-        .eq("status", "active")
-        .gte("updated_at", thirtyMinAgo.toISOString())
-        .in("tier", ["starter", "pro", "enterprise", "founder"]);
+        .eq("change_type", "upgrade")
+        .gte("changed_at", thirtyMinAgo.toISOString());
       
       if (error) console.error(`[coach_subscription_upgraded] Query error:`, error);
-      users = (data || []).map((s: any) => mapCoachToUser(s.coach_profiles, { new_tier: s.tier }));
+      users = (data || []).map((h: any) => mapCoachToUser(h.coach_profiles, { 
+        old_tier: h.old_tier, 
+        new_tier: h.new_tier 
+      }));
       console.log(`[coach_subscription_upgraded] Found ${users.length} coaches who upgraded`);
       break;
     }
 
     case "coach_subscription_downgraded": {
       const thirtyMinAgo = new Date(now.getTime() - 30 * 60 * 1000);
+      // Use subscription_tier_history for accurate downgrade detection
       const { data, error } = await supabase
-        .from("platform_subscriptions")
+        .from("subscription_tier_history")
         .select(`
           coach_id,
-          tier,
-          pending_tier,
+          old_tier,
+          new_tier,
           coach_profiles!inner(id, user_id, display_name, created_at, updated_at)
         `)
-        .not("pending_tier", "is", null)
-        .gte("updated_at", thirtyMinAgo.toISOString());
+        .eq("change_type", "downgrade")
+        .gte("changed_at", thirtyMinAgo.toISOString());
       
       if (error) console.error(`[coach_subscription_downgraded] Query error:`, error);
-      users = (data || []).map((s: any) => mapCoachToUser(s.coach_profiles, { 
-        old_tier: s.tier, 
-        new_tier: s.pending_tier 
+      users = (data || []).map((h: any) => mapCoachToUser(h.coach_profiles, { 
+        old_tier: h.old_tier, 
+        new_tier: h.new_tier 
       }));
       console.log(`[coach_subscription_downgraded] Found ${users.length} coaches who downgraded`);
       break;
