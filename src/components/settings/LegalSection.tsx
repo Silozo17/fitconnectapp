@@ -19,20 +19,26 @@ export const LegalSection = () => {
   const legalItems = [
     {
       icon: FileText,
-      title: t('legal.termsOfUse', 'Terms of Use'),
-      description: t('legal.termsDesc', 'Our terms and conditions for using FitConnect'),
+      titleKey: 'legal.termsOfUse',
+      titleFallback: 'Terms of Use',
+      descKey: 'legal.termsDesc',
+      descFallback: 'Our terms and conditions for using FitConnect',
       href: '/terms',
     },
     {
       icon: Shield,
-      title: t('legal.privacyPolicy', 'Privacy Policy'),
-      description: t('legal.privacyDesc', 'How we collect, use, and protect your data'),
+      titleKey: 'legal.privacyPolicy',
+      titleFallback: 'Privacy Policy',
+      descKey: 'legal.privacyDesc',
+      descFallback: 'How we collect, use, and protect your data',
       href: '/privacy',
     },
     {
       icon: ScrollText,
-      title: t('legal.eula', 'End User License Agreement'),
-      description: t('legal.eulaDesc', 'License terms for using the FitConnect mobile app'),
+      titleKey: 'legal.eula',
+      titleFallback: 'End User License Agreement',
+      descKey: 'legal.eulaDesc',
+      descFallback: 'License terms for using the FitConnect mobile app',
       href: '/eula',
     },
   ];
@@ -48,10 +54,10 @@ export const LegalSection = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-primary" />
-            {t('legal.title', 'Legal')}
+            {t('legal.title')}
           </CardTitle>
           <CardDescription>
-            {t('legal.description', 'Review our terms, privacy policy, and license agreements')}
+            {t('legal.description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
@@ -68,8 +74,8 @@ export const LegalSection = () => {
                     <item.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                    <p className="font-medium text-sm">{t(item.titleKey, item.titleFallback)}</p>
+                    <p className="text-xs text-muted-foreground">{t(item.descKey, item.descFallback)}</p>
                   </div>
                 </div>
                 <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />
@@ -88,8 +94,8 @@ export const LegalSection = () => {
                     <item.icon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <p className="font-medium text-sm">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.description}</p>
+                    <p className="font-medium text-sm">{t(item.titleKey, item.titleFallback)}</p>
+                    <p className="text-xs text-muted-foreground">{t(item.descKey, item.descFallback)}</p>
                   </div>
                 </div>
                 <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-foreground transition-colors" />

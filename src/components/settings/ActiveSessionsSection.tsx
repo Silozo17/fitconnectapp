@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNow } from "date-fns";
+import { pl } from "date-fns/locale";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -43,7 +44,8 @@ interface UserSession {
 
 export const ActiveSessionsSection = () => {
   const { user } = useAuth();
-  const { t } = useTranslation('settings');
+  const { t, i18n } = useTranslation('settings');
+  const dateLocale = i18n.language === 'pl' ? pl : undefined;
   const [sessions, setSessions] = useState<UserSession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRevoking, setIsRevoking] = useState<string | null>(null);
@@ -192,8 +194,8 @@ export const ActiveSessionsSection = () => {
                         </span>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
-                          {t("sessions.lastActive", "Active")}{" "}
-                          {formatDistanceToNow(new Date(session.last_seen_at), { addSuffix: true })}
+                          {t("sessions.lastActive", "Active")}{": "}
+                          {formatDistanceToNow(new Date(session.last_seen_at), { addSuffix: true, locale: dateLocale })}
                         </span>
                       </div>
                     </div>

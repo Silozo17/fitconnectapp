@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -119,11 +120,12 @@ interface DataTypeSwitchProps {
   isAllowed: boolean;
   onToggle: (isAllowed: boolean) => void;
   isPending: boolean;
+  getLabel: (dataType: DataType) => string;
+  getDescription: (dataType: DataType) => string;
 }
 
-const DataTypeSwitch = ({ dataType, isAllowed, onToggle, isPending }: DataTypeSwitchProps) => {
+const DataTypeSwitch = ({ dataType, isAllowed, onToggle, isPending, getLabel, getDescription }: DataTypeSwitchProps) => {
   const Icon = DATA_TYPE_ICONS[dataType];
-  const info = DATA_TYPE_INFO[dataType];
 
   return (
     <div className="flex items-center justify-between py-2">
@@ -132,8 +134,8 @@ const DataTypeSwitch = ({ dataType, isAllowed, onToggle, isPending }: DataTypeSw
           <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
         <div>
-          <p className="text-sm font-medium">{info.label}</p>
-          <p className="text-xs text-muted-foreground">{info.description}</p>
+          <p className="text-sm font-medium">{getLabel(dataType)}</p>
+          <p className="text-xs text-muted-foreground">{getDescription(dataType)}</p>
         </div>
       </div>
       <Switch
@@ -152,6 +154,19 @@ interface CoachPrivacyCardProps {
   onUpdatePreference: (coachId: string, dataType: DataType, isAllowed: boolean) => void;
   onSetAll: (coachId: string, isAllowed: boolean) => void;
   isPending: boolean;
+  getLabel: (dataType: DataType) => string;
+  getDescription: (dataType: DataType) => string;
+  translations: {
+    fullAccess: string;
+    noAccess: string;
+    limitedAccess: string;
+    shareAll: string;
+    revokeAll: string;
+    showSettings: string;
+    hideSettings: string;
+    clientData: string;
+    healthData: string;
+  };
 }
 
 const CoachPrivacyCard = ({
@@ -161,14 +176,17 @@ const CoachPrivacyCard = ({
   onUpdatePreference,
   onSetAll,
   isPending,
+  getLabel,
+  getDescription,
+  translations,
 }: CoachPrivacyCardProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const accessStatus = getAccessStatus(coach.coach_id);
 
   const accessBadge = {
-    full: { label: "Full Access", variant: "default" as const, className: "bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30" },
-    none: { label: "No Access", variant: "secondary" as const, className: "bg-destructive/20 text-destructive border-destructive/30" },
-    limited: { label: "Limited Access", variant: "outline" as const, className: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30" },
+    full: { label: translations.fullAccess, variant: "default" as const, className: "bg-green-500/20 text-green-700 dark:text-green-400 border-green-500/30" },
+    none: { label: translations.noAccess, variant: "secondary" as const, className: "bg-destructive/20 text-destructive border-destructive/30" },
+    limited: { label: translations.limitedAccess, variant: "outline" as const, className: "bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 border-yellow-500/30" },
   };
 
   const badge = accessBadge[accessStatus];
@@ -199,7 +217,7 @@ const CoachPrivacyCard = ({
                 className="text-xs flex-1 sm:flex-initial"
               >
                 <Share2 className="h-3 w-3 mr-1" />
-                Share All
+                {translations.shareAll}
               </Button>
               <Button
                 variant="outline"
@@ -209,7 +227,7 @@ const CoachPrivacyCard = ({
                 className="text-xs text-destructive hover:text-destructive flex-1 sm:flex-initial"
               >
                 <ShieldOff className="h-3 w-3 mr-1" />
-                Revoke All
+                {translations.revokeAll}
               </Button>
             </div>
           </div>
@@ -220,12 +238,12 @@ const CoachPrivacyCard = ({
             {isOpen ? (
               <>
                 <ChevronUp className="h-4 w-4 mr-1" />
-                Hide settings
+                {translations.hideSettings}
               </>
             ) : (
               <>
                 <ChevronDown className="h-4 w-4 mr-1" />
-                Show settings
+                {translations.showSettings}
               </>
             )}
           </Button>
@@ -236,7 +254,7 @@ const CoachPrivacyCard = ({
             {/* Client Data Section */}
             <div>
               <h4 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
-                Client Data
+                {translations.clientData}
               </h4>
               <div className="space-y-1">
                 {CLIENT_DATA_TYPES.map((dataType) => (
@@ -246,6 +264,8 @@ const CoachPrivacyCard = ({
                     isAllowed={isDataTypeAllowed(coach.coach_id, dataType)}
                     onToggle={(allowed) => onUpdatePreference(coach.coach_id, dataType, allowed)}
                     isPending={isPending}
+                    getLabel={getLabel}
+                    getDescription={getDescription}
                   />
                 ))}
               </div>
@@ -256,7 +276,7 @@ const CoachPrivacyCard = ({
             {/* Health Data Section */}
             <div>
               <h4 className="text-sm font-semibold text-muted-foreground mb-2 uppercase tracking-wide">
-                Health Data (from wearables)
+                {translations.healthData}
               </h4>
               <div className="space-y-1">
                 {HEALTH_DATA_TYPES.map((dataType) => (
@@ -266,6 +286,8 @@ const CoachPrivacyCard = ({
                     isAllowed={isDataTypeAllowed(coach.coach_id, dataType)}
                     onToggle={(allowed) => onUpdatePreference(coach.coach_id, dataType, allowed)}
                     isPending={isPending}
+                    getLabel={getLabel}
+                    getDescription={getDescription}
                   />
                 ))}
               </div>
@@ -278,6 +300,7 @@ const CoachPrivacyCard = ({
 };
 
 export const UnifiedDataPrivacySettings = () => {
+  const { t } = useTranslation('settings');
   const {
     coachesWithPreferences,
     isLoading,
@@ -297,6 +320,27 @@ export const UnifiedDataPrivacySettings = () => {
     setAllPreferences.mutate({ coachId, isAllowed });
   };
 
+  // Helper functions for translations
+  const getDataTypeLabel = (dataType: DataType): string => {
+    return t(`dataPrivacy.dataTypes.${dataType}.label`, DATA_TYPE_INFO[dataType].label);
+  };
+
+  const getDataTypeDescription = (dataType: DataType): string => {
+    return t(`dataPrivacy.dataTypes.${dataType}.description`, DATA_TYPE_INFO[dataType].description);
+  };
+
+  const translations = {
+    fullAccess: t('dataPrivacy.fullAccess', 'Full Access'),
+    noAccess: t('dataPrivacy.noAccess', 'No Access'),
+    limitedAccess: t('dataPrivacy.limitedAccess', 'Limited Access'),
+    shareAll: t('dataPrivacy.shareAll', 'Share All'),
+    revokeAll: t('dataPrivacy.revokeAll', 'Revoke All'),
+    showSettings: t('dataPrivacy.showSettings', 'Show settings'),
+    hideSettings: t('dataPrivacy.hideSettings', 'Hide settings'),
+    clientData: t('dataPrivacy.clientData', 'Client Data'),
+    healthData: t('dataPrivacy.healthData', 'Health Data (from wearables)'),
+  };
+
   if (isLoading) {
     return (
       <Card>
@@ -313,15 +357,15 @@ export const UnifiedDataPrivacySettings = () => {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            <CardTitle>Data Privacy</CardTitle>
+            <CardTitle>{t('dataPrivacy.title', 'Data Privacy')}</CardTitle>
           </div>
           <CardDescription>
-            Control what data your coaches can see.
+            {t('dataPrivacy.description', 'Control what data your coaches can see.')}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            You don't have any active coaches yet. Once you connect with a coach, you can manage your data sharing preferences here.
+            {t('dataPrivacy.noCoaches', "You don't have any active coaches yet.")} {t('dataPrivacy.noCoachesHint', 'Once you connect with a coach, you can manage your data sharing preferences here.')}
           </p>
         </CardContent>
       </Card>
@@ -334,10 +378,10 @@ export const UnifiedDataPrivacySettings = () => {
         <CardHeader>
           <div className="flex items-center gap-2">
             <Shield className="h-5 w-5 text-primary" />
-            <CardTitle>Data Privacy</CardTitle>
+            <CardTitle>{t('dataPrivacy.title', 'Data Privacy')}</CardTitle>
           </div>
           <CardDescription>
-            Control what data your coaches can see. Changes take effect immediately.
+            {t('dataPrivacy.descriptionWithChanges', 'Control what data your coaches can see. Changes take effect immediately.')}
           </CardDescription>
         </CardHeader>
       </Card>
@@ -351,6 +395,9 @@ export const UnifiedDataPrivacySettings = () => {
           onUpdatePreference={handleUpdatePreference}
           onSetAll={handleSetAll}
           isPending={isPending}
+          getLabel={getDataTypeLabel}
+          getDescription={getDataTypeDescription}
+          translations={translations}
         />
       ))}
     </div>

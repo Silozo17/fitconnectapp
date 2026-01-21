@@ -25,7 +25,9 @@
     "general": "General",
     "branding": "Branding",
     "plans": "Plans",
-    "features": "Features"
+    "features": "Features",
+    "privacy": "Privacy",
+    "legal": "Legal"
   },
 
   "profile": {
@@ -398,7 +400,118 @@
     "current": "Current",
     "manageSubscription": "Manage Subscription",
     "perMonth": "/month",
-    "free": "Free"
+    "free": "Free",
+    "clientInfo": {
+      "title": "Subscriptions are for Coach accounts",
+      "description": "Client accounts are always free. Premium subscriptions unlock advanced features for coaches to grow their business.",
+      "becomeCoach": "Switch to Coach Account"
+    },
+    "availablePlans": "Available Plans",
+    "availablePlansDesc": "Premium features available when you become a coach",
+    "forCoaches": "For Coach Accounts"
+  },
+
+  "allergens": {
+    "title": "Food Allergens",
+    "description": "Select allergens you need to avoid. We'll warn you when foods contain these ingredients.",
+    "footerWarning": "These preferences are used to highlight potential allergens in food searches and grocery lists. Always check product labels as information may change.",
+    "items": {
+      "gluten": "Gluten",
+      "dairy": "Dairy",
+      "eggs": "Eggs",
+      "nuts": "Tree Nuts",
+      "peanuts": "Peanuts",
+      "soy": "Soy",
+      "shellfish": "Shellfish",
+      "fish": "Fish",
+      "sesame": "Sesame",
+      "sulfites": "Sulfites",
+      "mustard": "Mustard",
+      "celery": "Celery",
+      "lupin": "Lupin",
+      "molluscs": "Molluscs"
+    }
+  },
+
+  "dataPrivacy": {
+    "title": "Data Privacy",
+    "description": "Control what data your coaches can see.",
+    "descriptionWithChanges": "Control what data your coaches can see. Changes take effect immediately.",
+    "noCoaches": "You don't have any active coaches yet.",
+    "noCoachesHint": "Once you connect with a coach, you can manage your data sharing preferences here.",
+    "fullAccess": "Full Access",
+    "noAccess": "No Access",
+    "limitedAccess": "Limited Access",
+    "shareAll": "Share All",
+    "revokeAll": "Revoke All",
+    "showSettings": "Show settings",
+    "hideSettings": "Hide settings",
+    "clientData": "Client Data",
+    "healthData": "Health Data (from wearables)",
+    "dataTypes": {
+      "progress_photos": { "label": "Progress Photos", "description": "Photos tracking your physical progress" },
+      "meal_logs": { "label": "Meal Logs", "description": "Your food diary and meal entries" },
+      "training_logs": { "label": "Training Logs", "description": "Your workout sessions and exercise data" },
+      "steps": { "label": "Steps", "description": "Daily step count from wearables" },
+      "heart_rate": { "label": "Heart Rate", "description": "Heart rate measurements" },
+      "sleep": { "label": "Sleep", "description": "Sleep duration and quality data" },
+      "calories": { "label": "Calories Burned", "description": "Active calories burned" },
+      "distance": { "label": "Distance", "description": "Total distance traveled" },
+      "distance_walking": { "label": "Walking Distance", "description": "Distance from walking/running" },
+      "distance_cycling": { "label": "Cycling Distance", "description": "Distance from cycling" },
+      "distance_swimming": { "label": "Swimming Distance", "description": "Distance from swimming" },
+      "active_minutes": { "label": "Active Minutes", "description": "Minutes of activity" },
+      "weight": { "label": "Weight", "description": "Body weight measurements" }
+    }
+  },
+
+  "twoFactor": {
+    "title": "Two-Factor Authentication",
+    "description": "Add an extra layer of security to your account",
+    "emailVerification": "Email Verification",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "enable": "Enable",
+    "disable": "Disable",
+    "enabledDesc": "You'll receive a verification code via email when signing in",
+    "disabledDesc": "Enable to receive a verification code when signing in",
+    "recommendation": "FitConnect recommends keeping two-factor authentication enabled for enhanced account security.",
+    "disableTitle": "Disable Two-Factor Authentication?",
+    "disableWarning": "Disabling two-factor authentication will make your account less secure. We strongly recommend keeping it enabled.",
+    "confirmPassword": "Enter your password to confirm",
+    "disableConfirm": "Disable 2FA",
+    "enableError": "Failed to enable two-factor authentication",
+    "disableError": "Failed to disable two-factor authentication"
+  },
+
+  "sessions": {
+    "activeSessions": "Active Sessions",
+    "description": "Manage your active sessions across devices",
+    "noActiveSessions": "No active sessions found",
+    "unknownLocation": "Unknown location",
+    "unknownDevice": "Unknown device",
+    "currentSession": "Current",
+    "lastActive": "Active",
+    "revoke": "Revoke",
+    "sessionRevoked": "Session revoked successfully",
+    "revokeError": "Failed to revoke session",
+    "logOutAllDevices": "Log out of all devices",
+    "confirmLogOutAll": "Log out of all devices?",
+    "confirmLogOutAllDesc": "This will log you out of all devices including this one. You will need to sign in again.",
+    "allSessionsRevoked": "All sessions have been revoked. Please sign in again.",
+    "revokeAllError": "Failed to revoke all sessions",
+    "logOutAll": "Log out all"
+  },
+
+  "legal": {
+    "title": "Legal",
+    "description": "Review our terms, privacy policy, and license agreements",
+    "termsOfUse": "Terms of Use",
+    "termsDesc": "Our terms and conditions for using FitConnect",
+    "privacyPolicy": "Privacy Policy",
+    "privacyDesc": "How we collect, use, and protect your data",
+    "eula": "End User License Agreement",
+    "eulaDesc": "License terms for using the FitConnect mobile app"
   },
 
   "stripeConnect": {

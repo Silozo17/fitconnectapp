@@ -400,7 +400,143 @@
     "current": "Obecny",
     "manageSubscription": "Zarządzaj subskrypcją",
     "perMonth": "/miesiąc",
-    "free": "Bezpłatny"
+    "free": "Bezpłatny",
+    "clientInfo": {
+      "title": "Subskrypcje są dla kont trenerów",
+      "description": "Konta klientów są zawsze bezpłatne. Subskrypcje premium odblokowują zaawansowane funkcje dla trenerów, aby rozwijali swoją działalność.",
+      "becomeCoach": "Przełącz na konto trenera"
+    },
+    "availablePlans": "Dostępne plany",
+    "availablePlansDesc": "Funkcje premium dostępne po zostaniu trenerem",
+    "forCoaches": "Dla kont trenerów",
+    "tiers": {
+      "starter": {
+        "name": "Starter",
+        "description": "Idealny dla początkujących trenerów"
+      },
+      "pro": {
+        "name": "Pro",
+        "description": "Dla doświadczonych trenerów gotowych do rozwoju"
+      },
+      "enterprise": {
+        "name": "Enterprise",
+        "description": "Dla elitarnych trenerów i firm fitness"
+      }
+    },
+    "features": {
+      "upToClients": "Do {{count}} klientów",
+      "unlimitedClients": "Nieograniczona liczba klientów",
+      "basicAnalytics": "Podstawowy panel analityczny",
+      "advancedAnalytics": "Zaawansowana analityka",
+      "emailSupport": "Wsparcie e-mail",
+      "prioritySupport": "Priorytetowe wsparcie",
+      "workoutPlanBuilder": "Kreator planów treningowych",
+      "clientMessaging": "Wiadomości z klientami",
+      "sessionScheduling": "Planowanie sesji"
+    }
+  },
+
+  "allergens": {
+    "title": "Alergeny pokarmowe",
+    "description": "Wybierz alergeny, których chcesz unikać. Ostrzeżemy Cię, gdy produkty będą zawierać te składniki.",
+    "footerWarning": "Te preferencje są używane do oznaczania potencjalnych alergenów w wyszukiwaniu żywności i listach zakupów. Zawsze sprawdzaj etykiety produktów, ponieważ informacje mogą się zmienić.",
+    "items": {
+      "gluten": "Gluten",
+      "dairy": "Nabiał",
+      "eggs": "Jajka",
+      "nuts": "Orzechy",
+      "peanuts": "Orzeszki ziemne",
+      "soy": "Soja",
+      "shellfish": "Skorupiaki",
+      "fish": "Ryby",
+      "sesame": "Sezam",
+      "sulfites": "Siarczyny",
+      "mustard": "Musztarda",
+      "celery": "Seler",
+      "lupin": "Łubin",
+      "molluscs": "Małże"
+    }
+  },
+
+  "dataPrivacy": {
+    "title": "Prywatność danych",
+    "description": "Kontroluj, jakie dane mogą widzieć Twoi trenerzy.",
+    "descriptionWithChanges": "Kontroluj, jakie dane mogą widzieć Twoi trenerzy. Zmiany wchodzą w życie natychmiast.",
+    "noCoaches": "Nie masz jeszcze żadnych aktywnych trenerów.",
+    "noCoachesHint": "Gdy połączysz się z trenerem, będziesz mógł zarządzać preferencjami udostępniania danych tutaj.",
+    "fullAccess": "Pełny dostęp",
+    "noAccess": "Brak dostępu",
+    "limitedAccess": "Ograniczony dostęp",
+    "shareAll": "Udostępnij wszystko",
+    "revokeAll": "Odbierz wszystko",
+    "showSettings": "Pokaż ustawienia",
+    "hideSettings": "Ukryj ustawienia",
+    "clientData": "Dane klienta",
+    "healthData": "Dane zdrowotne (z urządzeń)",
+    "dataTypes": {
+      "progress_photos": { "label": "Zdjęcia postępów", "description": "Zdjęcia dokumentujące Twój postęp fizyczny" },
+      "meal_logs": { "label": "Dziennik posiłków", "description": "Twój dziennik żywieniowy i wpisy posiłków" },
+      "training_logs": { "label": "Dziennik treningów", "description": "Twoje sesje treningowe i dane ćwiczeń" },
+      "steps": { "label": "Kroki", "description": "Dzienna liczba kroków z urządzeń" },
+      "heart_rate": { "label": "Tętno", "description": "Pomiary tętna" },
+      "sleep": { "label": "Sen", "description": "Czas i jakość snu" },
+      "calories": { "label": "Spalone kalorie", "description": "Aktywne spalone kalorie" },
+      "distance": { "label": "Dystans", "description": "Całkowity przebyty dystans" },
+      "distance_walking": { "label": "Dystans marszu", "description": "Dystans z chodzenia/biegania" },
+      "distance_cycling": { "label": "Dystans na rowerze", "description": "Dystans z jazdy na rowerze" },
+      "distance_swimming": { "label": "Dystans pływania", "description": "Dystans z pływania" },
+      "active_minutes": { "label": "Aktywne minuty", "description": "Minuty aktywności" },
+      "weight": { "label": "Waga", "description": "Pomiary masy ciała" }
+    }
+  },
+
+  "twoFactor": {
+    "title": "Uwierzytelnianie dwuskładnikowe",
+    "description": "Dodaj dodatkową warstwę bezpieczeństwa do swojego konta",
+    "emailVerification": "Weryfikacja e-mail",
+    "enabled": "Włączone",
+    "disabled": "Wyłączone",
+    "enable": "Włącz",
+    "disable": "Wyłącz",
+    "enabledDesc": "Otrzymasz kod weryfikacyjny e-mailem podczas logowania",
+    "disabledDesc": "Włącz, aby otrzymywać kod weryfikacyjny podczas logowania",
+    "recommendation": "FitConnect zaleca włączenie uwierzytelniania dwuskładnikowego dla zwiększonego bezpieczeństwa konta.",
+    "disableTitle": "Wyłączyć uwierzytelnianie dwuskładnikowe?",
+    "disableWarning": "Wyłączenie uwierzytelniania dwuskładnikowego sprawi, że Twoje konto będzie mniej bezpieczne. Zdecydowanie zalecamy pozostawienie go włączonego.",
+    "confirmPassword": "Wprowadź hasło, aby potwierdzić",
+    "disableConfirm": "Wyłącz 2FA",
+    "enableError": "Nie udało się włączyć uwierzytelniania dwuskładnikowego",
+    "disableError": "Nie udało się wyłączyć uwierzytelniania dwuskładnikowego"
+  },
+
+  "sessions": {
+    "activeSessions": "Aktywne sesje",
+    "description": "Zarządzaj aktywnymi sesjami na różnych urządzeniach",
+    "noActiveSessions": "Nie znaleziono aktywnych sesji",
+    "unknownLocation": "Nieznana lokalizacja",
+    "unknownDevice": "Nieznane urządzenie",
+    "currentSession": "Bieżąca",
+    "lastActive": "Aktywna",
+    "revoke": "Unieważnij",
+    "sessionRevoked": "Sesja została unieważniona",
+    "revokeError": "Nie udało się unieważnić sesji",
+    "logOutAllDevices": "Wyloguj ze wszystkich urządzeń",
+    "confirmLogOutAll": "Wylogować ze wszystkich urządzeń?",
+    "confirmLogOutAllDesc": "Spowoduje to wylogowanie ze wszystkich urządzeń, w tym z tego. Będziesz musiał zalogować się ponownie.",
+    "allSessionsRevoked": "Wszystkie sesje zostały unieważnione. Zaloguj się ponownie.",
+    "revokeAllError": "Nie udało się unieważnić wszystkich sesji",
+    "logOutAll": "Wyloguj wszystkie"
+  },
+
+  "legal": {
+    "title": "Dokumenty prawne",
+    "description": "Przejrzyj nasze regulaminy, politykę prywatności i umowy licencyjne",
+    "termsOfUse": "Regulamin",
+    "termsDesc": "Nasze warunki korzystania z FitConnect",
+    "privacyPolicy": "Polityka prywatności",
+    "privacyDesc": "Jak zbieramy, wykorzystujemy i chronimy Twoje dane",
+    "eula": "Umowa licencyjna użytkownika końcowego",
+    "eulaDesc": "Warunki licencji na korzystanie z aplikacji mobilnej FitConnect"
   },
 
   "stripeConnect": {

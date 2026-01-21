@@ -3,6 +3,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useClientAllergens } from "@/hooks/useClientAllergens";
+import { useTranslation } from "react-i18next";
 
 const ALLERGEN_EMOJIS: Record<string, string> = {
   gluten: '🌾',
@@ -22,6 +23,7 @@ const ALLERGEN_EMOJIS: Record<string, string> = {
 };
 
 export const AllergenPreferencesCard = () => {
+  const { t } = useTranslation('settings');
   const { allergenPreferences, isLoading, toggleAllergen } = useClientAllergens();
 
   if (isLoading) {
@@ -39,10 +41,10 @@ export const AllergenPreferencesCard = () => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="w-5 h-5 text-warning" />
-          Food Allergens
+          {t('allergens.title', 'Food Allergens')}
         </CardTitle>
         <CardDescription>
-          Select allergens you need to avoid. We'll warn you when foods contain these ingredients.
+          {t('allergens.description', "Select allergens you need to avoid. We'll warn you when foods contain these ingredients.")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -61,7 +63,9 @@ export const AllergenPreferencesCard = () => {
                 className="flex items-center gap-2 cursor-pointer"
               >
                 <span className="text-lg">{ALLERGEN_EMOJIS[allergen.id] || '⚠️'}</span>
-                <span className="font-medium">{allergen.name}</span>
+                <span className="font-medium">
+                  {t(`allergens.items.${allergen.id}`, allergen.name)}
+                </span>
               </Label>
               <Switch
                 id={`allergen-${allergen.id}`}
@@ -72,8 +76,7 @@ export const AllergenPreferencesCard = () => {
           ))}
         </div>
         <p className="text-xs text-muted-foreground mt-4">
-          These preferences are used to highlight potential allergens in food searches and grocery lists.
-          Always check product labels as information may change.
+          {t('allergens.footerWarning', 'These preferences are used to highlight potential allergens in food searches and grocery lists. Always check product labels as information may change.')}
         </p>
       </CardContent>
     </Card>
