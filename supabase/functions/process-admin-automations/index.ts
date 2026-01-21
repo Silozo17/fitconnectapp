@@ -175,7 +175,8 @@ Deno.serve(async (req) => {
           // Send message to each selected channel
           try {
             if (channels.includes("in_app")) {
-              await sendInAppMessage(supabase, user.user_id, message, rule.name);
+              // Pass profile ID (user.id) for messages table, and user_id for notifications
+              await sendInAppMessage(supabase, user.user_id, user.id, message, rule.name);
             }
 
             if (channels.includes("push")) {
@@ -1133,6 +1134,9 @@ async function getUsersForTrigger(supabase: any, rule: AutomationRule): Promise<
   return users;
 }
 
+// Support profile ID for admin messaging (FitConnect Support)
+const SUPPORT_PROFILE_ID = '339d86c4-e2cc-4f15-98a0-1f6dc50ed15c';
+
 function processTemplate(template: string, user: UserData): string {
   const now = new Date();
   const createdAt = new Date(user.created_at);
@@ -1160,10 +1164,22 @@ function processTemplate(template: string, user: UserData): string {
     });
   }
 
+  // Get coach-specific names (display_name is available for coaches)
+  const coachFirstName = user.display_name ? user.display_name.split(' ')[0] : user.first_name || "there";
+  const coachFullName = user.display_name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || "there";
+
   return template
+    // Standard user variables
     .replace(/{first_name}/g, user.first_name || "there")
     .replace(/{last_name}/g, user.last_name || "")
     .replace(/{role}/g, user.role)
+    // Coach-specific variables - CRITICAL FIX
+    .replace(/{coach_first_name}/g, coachFirstName)
+    .replace(/{coach_name}/g, coachFullName)
+    // Client-specific variables (aliases)
+    .replace(/{client_first_name}/g, user.first_name || "there")
+    .replace(/{client_name}/g, `${user.first_name || ''} ${user.last_name || ''}`.trim() || "there")
+    // Context variables
     .replace(/{account_age_days}/g, String(accountAgeDays))
     .replace(/{days_inactive}/g, String(inactiveDays))
     .replace(/{old_tier}/g, user.metadata?.old_tier || "")
@@ -1182,14 +1198,29 @@ function processTemplate(template: string, user: UserData): string {
 async function sendInAppMessage(
   supabase: any,
   userId: string,
+  profileId: string,
   message: string,
   automationName: string
 ) {
+  // 1. Insert into messages table so it appears in admin support inbox
+  // This allows admins to see the conversation context when users reply
+  const { error: msgError } = await supabase.from("messages").insert({
+    sender_id: SUPPORT_PROFILE_ID,
+    receiver_id: profileId,
+    content: message,
+    metadata: { automation_name: automationName, automated: true }
+  });
+  
+  if (msgError) {
+    console.error(`Failed to insert message for profile ${profileId}:`, msgError);
+  }
+
+  // 2. Also insert into notifications for the bell icon alert
   await supabase.from("notifications").insert({
     user_id: userId,
     type: "automation",
-    title: "FitConnect",
-    message: message,
+    title: "FitConnect Support",
+    message: message.substring(0, 200) + (message.length > 200 ? '...' : ''),
     metadata: { automation_name: automationName },
   });
 }
