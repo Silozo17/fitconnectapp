@@ -129,7 +129,7 @@ const FeaturedCoaches = () => {
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden">
                   <img
-                    src={coach.profile_image_url || fallbackCoachImage}
+                    src={coach.card_image_url || coach.profile_image_url || fallbackCoachImage}
                     alt={coach.display_name || "Coach"}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
