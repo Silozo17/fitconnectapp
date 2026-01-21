@@ -25,7 +25,7 @@ const LanguageSelector = () => {
   const { user } = useAuth();
   const userLocale = useUserLocalePreference();
 
-  const handleLanguageChange = (languageCode: string) => {
+  const handleLanguageChange = async (languageCode: string) => {
     // Validate against supported languages
     const validCodes = SUPPORTED_LANGUAGES.map(l => l.code) as string[];
     if (!validCodes.includes(languageCode)) {
@@ -33,14 +33,20 @@ const LanguageSelector = () => {
       languageCode = DEFAULT_LANGUAGE;
     }
     
-    // Persist to localStorage
+    // Persist to localStorage FIRST (before async operations)
     try {
       localStorage.setItem(LANGUAGE_STORAGE_KEY, languageCode);
     } catch {
       // Ignore storage errors (private browsing, etc.)
     }
     
-    // Change i18n language
+    // Load Polish translations on-demand if switching to Polish
+    if (languageCode === 'pl') {
+      const { loadPolishTranslations } = await import('@/i18n');
+      await loadPolishTranslations();
+    }
+    
+    // Now change the language (translations are loaded)
     changeLanguage(languageCode as LanguageCode);
 
     // If user is authenticated, also update DB preference
