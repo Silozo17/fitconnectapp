@@ -22,20 +22,21 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
         "fixed left-1/2 -translate-x-1/2 z-50",
         // Circle styling - slightly larger for prominence
         "w-14 h-14 rounded-full",
-        // Glass effect with green accent border
-        "glass-nav border-2 border-primary/60",
-        // Green glow ring
-        "ring-2 ring-primary/70",
+        // Glass effect with subtle green border
+        "glass-nav border-2 border-primary/40",
+        // Subtle static glow (not pulsing)
+        "shadow-[0_0_12px_2px_hsl(var(--primary)/0.3)]",
         // Icon centering
         "flex items-center justify-center",
-        // Animated glow effect
-        "notch-glow-pulse",
+        // Keep overflow hidden for shine effect
+        "overflow-hidden relative",
         // Interactive states - synced with panel animation
         "transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
-        "hover:scale-110 hover:ring-primary active:scale-95",
-        "focus:outline-none focus:ring-4 focus:ring-primary/80",
-        // When open, intensify the glow
-        isOpen && "ring-4 ring-primary border-primary",
+        "hover:scale-110 hover:border-primary/60 hover:shadow-[0_0_16px_3px_hsl(var(--primary)/0.4)]",
+        "active:scale-95",
+        "focus:outline-none focus:ring-2 focus:ring-primary/60",
+        // When open, slightly more prominent
+        isOpen && "border-primary/70 shadow-[0_0_20px_4px_hsl(var(--primary)/0.4)]",
         className
       )}
       style={{
@@ -47,11 +48,16 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
       aria-label={isOpen ? "Close profile" : "Open profile"}
       aria-expanded={isOpen}
     >
+      {/* Shine sweep overlay */}
+      <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+      </div>
+      
       <User 
         className={cn(
-          "w-6 h-6 text-primary transition-all duration-300",
-          "drop-shadow-[0_0_8px_hsl(var(--primary)/0.8)]",
-          isOpen && "rotate-180 text-primary"
+          "w-6 h-6 text-primary transition-all duration-300 relative z-10",
+          "drop-shadow-[0_0_4px_hsl(var(--primary)/0.5)]",
+          isOpen && "rotate-180"
         )} 
         strokeWidth={2} 
       />
