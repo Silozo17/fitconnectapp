@@ -15,6 +15,8 @@ import { NotificationItem } from "./NotificationItem";
 import { AllNotificationsModal } from "./AllNotificationsModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useAdminView } from "@/contexts/AdminContext";
+import { FirstTimeTooltip } from "@/components/shared/FirstTimeTooltip";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 export const NotificationCenter = () => {
   const { role } = useAuth();
@@ -60,16 +62,23 @@ export const NotificationCenter = () => {
   return (
     <>
       <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative">
-            <Bell className="w-5 h-5 text-muted-foreground" />
-            {unreadCount > 0 && (
-              <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            )}
-          </Button>
-        </PopoverTrigger>
+        <FirstTimeTooltip
+          storageKey={STORAGE_KEYS.NOTIFICATIONS_TOOLTIP_SEEN}
+          message="Never miss an update! 🔔"
+          position="bottom"
+          showDelay={6500}
+        >
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="relative">
+              <Bell className="w-5 h-5 text-muted-foreground" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                  {unreadCount > 99 ? "99+" : unreadCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+        </FirstTimeTooltip>
         <PopoverContent className="w-80 p-0" align="end" collisionPadding={16} disablePortal>
           <div className="flex items-center justify-between p-4 pb-2">
             <h4 className="font-semibold">Notifications</h4>

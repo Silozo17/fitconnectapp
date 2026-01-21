@@ -32,6 +32,8 @@ import {
 import { Shield, User, Briefcase, Check, Plus, Loader2 } from "lucide-react";
 import BecomeClientModal from "@/components/shared/BecomeClientModal";
 import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
+import { FirstTimeTooltip } from "@/components/shared/FirstTimeTooltip";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 const ViewSwitcher = () => {
   const { t } = useTranslation("admin");
@@ -58,6 +60,13 @@ const ViewSwitcher = () => {
 
   // Determine if user is admin (can see admin view option)
   const isAdminUser = role === "admin" || role === "manager" || role === "staff";
+
+  // Check if user has multiple profiles (show tooltip only for them)
+  const profileCount = 
+    (availableProfiles.client ? 1 : 0) + 
+    (availableProfiles.coach ? 1 : 0) + 
+    (availableProfiles.admin ? 1 : 0);
+  const hasMultipleProfiles = profileCount > 1;
 
   const [, startTransition] = useTransition();
 
@@ -103,65 +112,80 @@ const ViewSwitcher = () => {
     );
   }
 
+  const selectContent = (
+    <Select value={activeProfileType} onValueChange={handleViewChange}>
+      <SelectTrigger className="w-[180px] bg-card border-border">
+        <SelectValue placeholder={t('viewSwitcher.selectView')} />
+      </SelectTrigger>
+      <SelectContent>
+        {/* Admin View - Only for admin users */}
+        {isAdminUser && (
+          <SelectItem value="admin">
+            <div className="flex items-center gap-2">
+              <Shield className="w-4 h-4 text-primary" />
+              <span>{t('viewSwitcher.adminView')}</span>
+              {availableProfiles.admin && (
+                <Check className="w-3 h-3 text-green-500 ml-auto" />
+              )}
+            </div>
+          </SelectItem>
+        )}
+
+        {/* Coach View */}
+        {availableProfiles.coach ? (
+          <SelectItem value="coach">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-orange-500" />
+              <span>{t('viewSwitcher.coachView')}</span>
+              <Check className="w-3 h-3 text-green-500 ml-auto" />
+            </div>
+          </SelectItem>
+        ) : (
+          <SelectItem value="create-coach">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-orange-500/50" />
+              <span className="text-muted-foreground">{t('viewSwitcher.coachView')}</span>
+              <Plus className="w-3 h-3 text-muted-foreground ml-auto" />
+            </div>
+          </SelectItem>
+        )}
+
+        {/* Client View */}
+        {availableProfiles.client ? (
+          <SelectItem value="client">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-blue-500" />
+              <span>{t('viewSwitcher.clientView')}</span>
+              <Check className="w-3 h-3 text-green-500 ml-auto" />
+            </div>
+          </SelectItem>
+        ) : (
+          <SelectItem value="create-client">
+            <div className="flex items-center gap-2">
+              <User className="w-4 h-4 text-blue-500/50" />
+              <span className="text-muted-foreground">{t('viewSwitcher.clientView')}</span>
+              <Plus className="w-3 h-3 text-muted-foreground ml-auto" />
+            </div>
+          </SelectItem>
+        )}
+      </SelectContent>
+    </Select>
+  );
+
   return (
     <>
-      <Select value={activeProfileType} onValueChange={handleViewChange}>
-        <SelectTrigger className="w-[180px] bg-card border-border">
-          <SelectValue placeholder={t('viewSwitcher.selectView')} />
-        </SelectTrigger>
-        <SelectContent>
-          {/* Admin View - Only for admin users */}
-          {isAdminUser && (
-            <SelectItem value="admin">
-              <div className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-primary" />
-                <span>{t('viewSwitcher.adminView')}</span>
-                {availableProfiles.admin && (
-                  <Check className="w-3 h-3 text-green-500 ml-auto" />
-                )}
-              </div>
-            </SelectItem>
-          )}
-
-          {/* Coach View */}
-          {availableProfiles.coach ? (
-            <SelectItem value="coach">
-              <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-orange-500" />
-                <span>{t('viewSwitcher.coachView')}</span>
-                <Check className="w-3 h-3 text-green-500 ml-auto" />
-              </div>
-            </SelectItem>
-          ) : (
-            <SelectItem value="create-coach">
-              <div className="flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-orange-500/50" />
-                <span className="text-muted-foreground">{t('viewSwitcher.coachView')}</span>
-                <Plus className="w-3 h-3 text-muted-foreground ml-auto" />
-              </div>
-            </SelectItem>
-          )}
-
-          {/* Client View */}
-          {availableProfiles.client ? (
-            <SelectItem value="client">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-500" />
-                <span>{t('viewSwitcher.clientView')}</span>
-                <Check className="w-3 h-3 text-green-500 ml-auto" />
-              </div>
-            </SelectItem>
-          ) : (
-            <SelectItem value="create-client">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-blue-500/50" />
-                <span className="text-muted-foreground">{t('viewSwitcher.clientView')}</span>
-                <Plus className="w-3 h-3 text-muted-foreground ml-auto" />
-              </div>
-            </SelectItem>
-          )}
-        </SelectContent>
-      </Select>
+      {hasMultipleProfiles ? (
+        <FirstTimeTooltip
+          storageKey={STORAGE_KEYS.VIEW_SWITCHER_TOOLTIP_SEEN}
+          message="Switch between profiles! ⚡"
+          position="bottom"
+          showDelay={8500}
+        >
+          {selectContent}
+        </FirstTimeTooltip>
+      ) : (
+        selectContent
+      )}
 
       <BecomeClientModal
         open={becomeClientModalOpen}
