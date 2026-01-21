@@ -178,7 +178,7 @@ const AIAnalysisCard = ({
             </div>
 
             {/* Flags */}
-            {analysis.flagReasons.length > 0 && (
+            {analysis.flagReasons?.length > 0 && (
               <div className="p-2 rounded bg-amber-500/10 border border-amber-500/30">
                 <p className="text-xs font-medium text-amber-500 mb-1 flex items-center gap-1">
                   <AlertTriangle className="w-3 h-3" />
@@ -193,26 +193,28 @@ const AIAnalysisCard = ({
             )}
 
             {/* Quality Assessment */}
-            <div className="grid grid-cols-3 gap-2 text-xs">
-              <div className={`p-2 rounded ${analysis.qualityAssessment.isReadable ? 'bg-primary/10' : 'bg-destructive/10'}`}>
-                <span className={analysis.qualityAssessment.isReadable ? 'text-primary' : 'text-destructive'}>
-                  {analysis.qualityAssessment.isReadable ? '✓' : '✗'} Readable
-                </span>
+            {analysis.qualityAssessment && (
+              <div className="grid grid-cols-3 gap-2 text-xs">
+                <div className={`p-2 rounded ${analysis.qualityAssessment.isReadable ? 'bg-primary/10' : 'bg-destructive/10'}`}>
+                  <span className={analysis.qualityAssessment.isReadable ? 'text-primary' : 'text-destructive'}>
+                    {analysis.qualityAssessment.isReadable ? '✓' : '✗'} Readable
+                  </span>
+                </div>
+                <div className={`p-2 rounded ${analysis.qualityAssessment.isComplete ? 'bg-primary/10' : 'bg-destructive/10'}`}>
+                  <span className={analysis.qualityAssessment.isComplete ? 'text-primary' : 'text-destructive'}>
+                    {analysis.qualityAssessment.isComplete ? '✓' : '✗'} Complete
+                  </span>
+                </div>
+                <div className={`p-2 rounded ${analysis.documentTypeMatch ? 'bg-primary/10' : 'bg-amber-500/10'}`}>
+                  <span className={analysis.documentTypeMatch ? 'text-primary' : 'text-amber-500'}>
+                    {analysis.documentTypeMatch ? '✓' : '?'} Type Match
+                  </span>
+                </div>
               </div>
-              <div className={`p-2 rounded ${analysis.qualityAssessment.isComplete ? 'bg-primary/10' : 'bg-destructive/10'}`}>
-                <span className={analysis.qualityAssessment.isComplete ? 'text-primary' : 'text-destructive'}>
-                  {analysis.qualityAssessment.isComplete ? '✓' : '✗'} Complete
-                </span>
-              </div>
-              <div className={`p-2 rounded ${analysis.documentTypeMatch ? 'bg-primary/10' : 'bg-amber-500/10'}`}>
-                <span className={analysis.documentTypeMatch ? 'text-primary' : 'text-amber-500'}>
-                  {analysis.documentTypeMatch ? '✓' : '?'} Type Match
-                </span>
-              </div>
-            </div>
+            )}
 
             {/* Extracted Info */}
-            {Object.values(analysis.extractedInfo).some(v => v) && (
+            {analysis.extractedInfo && Object.values(analysis.extractedInfo).some(v => v) && (
               <div className="text-xs space-y-1">
                 <p className="text-muted-foreground font-medium">Extracted Info:</p>
                 {analysis.extractedInfo.holderName && (
@@ -228,7 +230,7 @@ const AIAnalysisCard = ({
             )}
 
             {/* Issues */}
-            {analysis.issues.length > 0 && (
+            {analysis.issues?.length > 0 && (
               <div className="text-xs">
                 <p className="text-muted-foreground font-medium mb-1">Issues Found:</p>
                 <ul className="text-destructive/80 space-y-0.5">
