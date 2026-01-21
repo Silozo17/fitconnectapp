@@ -37,6 +37,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { FirstTimeTooltip } from "@/components/shared/FirstTimeTooltip";
+import { STORAGE_KEYS } from "@/lib/storage-keys";
 
 const feedbackSchema = z.object({
   category: z.enum(["bug", "feature", "improvement", "general"]),
@@ -97,18 +99,25 @@ export const FeedbackModal = () => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative rounded-xl">
-              <MessageSquarePlus className="h-5 w-5" />
-            </Button>
-          </DialogTrigger>
-        </TooltipTrigger>
-        <TooltipContent>
-          <p>{t("feedback.sendFeedback")}</p>
-        </TooltipContent>
-      </Tooltip>
+      <FirstTimeTooltip
+        storageKey={STORAGE_KEYS.FEEDBACK_TOOLTIP_SEEN}
+        message="Got ideas? Share feedback! 💡"
+        position="bottom"
+        showDelay={4500}
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon" className="relative rounded-xl">
+                <MessageSquarePlus className="h-5 w-5" />
+              </Button>
+            </DialogTrigger>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{t("feedback.sendFeedback")}</p>
+          </TooltipContent>
+        </Tooltip>
+      </FirstTimeTooltip>
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto overflow-hidden">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-3">
