@@ -881,7 +881,7 @@ const Auth = () => {
                               : "text-muted-foreground"
                           }`}
                         >
-                          {t("auth.offerTraining", "Offer Training")}
+                          {t("auth.coaches", "Coaches")}
                         </span>
                       </button>
 
