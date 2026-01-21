@@ -64,7 +64,7 @@ export function VariableInserter({
     .filter(([, variables]) => variables.length > 0);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={setOpen} modal={false}>
       <PopoverTrigger asChild>
         <Button
           type="button"
@@ -92,6 +92,8 @@ export function VariableInserter({
         <div
           className="max-h-[320px] overflow-y-auto overscroll-contain"
           style={{ WebkitOverflowScrolling: "touch" }}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
         >
           {isLoading ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
