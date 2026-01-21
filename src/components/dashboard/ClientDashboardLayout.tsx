@@ -141,7 +141,7 @@ const ClientDashboardLayoutInner = memo(({
 
           <main
             id="main-content" 
-            className={`flex-1 p-4 pt-5 lg:p-6 lg:pt-7 overflow-y-auto overflow-x-hidden pb-mobile-nav mt-header-safe xl:mt-0 ${profilePanelOpen ? 'pointer-events-none' : ''}`}
+            className={`flex-1 p-4 pt-5 lg:p-6 lg:pt-7 overflow-y-auto overflow-x-hidden pb-mobile-nav ${profilePanelOpen ? 'pointer-events-none' : ''}`}
             role="main"
             aria-label={title}
             tabIndex={-1}
