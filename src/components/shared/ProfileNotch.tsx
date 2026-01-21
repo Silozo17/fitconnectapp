@@ -20,47 +20,37 @@ const ProfileNotch = ({ className, headerHeight = 64 }: ProfileNotchProps) => {
       className={cn(
         // Fixed positioning - always on top
         "fixed left-1/2 -translate-x-1/2 z-50",
-        // Circle styling - slightly larger for prominence
-        "w-14 h-14 rounded-full",
-        // Glass effect with subtle green border
-        "glass-nav border-2 border-primary/40",
-        // Subtle static glow (not pulsing)
-        "shadow-[0_0_12px_2px_hsl(var(--primary)/0.3)]",
+        // Circle styling
+        "w-12 h-12 rounded-full",
+        // Glass effect matching nav
+        "glass-nav border border-border/40",
         // Icon centering
         "flex items-center justify-center",
-        // Positioning context for shine overlay (avoid overflow clipping artifacts)
-        "relative",
         // Interactive states - synced with panel animation
         "transition-all duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]",
-        "hover:scale-110 hover:border-primary/60 hover:shadow-[0_0_16px_3px_hsl(var(--primary)/0.4)]",
-        "active:scale-95",
-        "focus:outline-none focus:ring-2 focus:ring-primary/60",
-        // When open, slightly more prominent
-        isOpen && "border-primary/70 shadow-[0_0_20px_4px_hsl(var(--primary)/0.4)]",
+        "hover:scale-105 active:scale-95",
+        "focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background",
+        // Shadow for depth
+        "shadow-[0_4px_20px_hsl(0_0%_0%/0.4),0_0_0_1px_hsl(var(--border)/0.3)]",
+        // When open, add glow
+        isOpen && "ring-2 ring-primary/30",
         className
       )}
       style={{
-        // Notch is 56px tall, so -28px makes it straddle the header's bottom edge
+        // Notch is 48px tall, so -24px makes it straddle the header's bottom edge
         top: isOpen 
-          ? `calc(${actualHeaderHeight}px + 65vh - 28px)` 
-          : `${actualHeaderHeight - 28}px`,
+          ? `calc(${actualHeaderHeight}px + 65vh - 24px)` 
+          : `${actualHeaderHeight - 24}px`,
       }}
       aria-label={isOpen ? "Close profile" : "Open profile"}
       aria-expanded={isOpen}
     >
-      {/* Shine sweep overlay */}
-      <div className="absolute inset-0 rounded-full overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-      </div>
-      
-
       <User 
         className={cn(
-          "w-6 h-6 text-primary transition-all duration-300 relative z-10",
-          "drop-shadow-[0_0_4px_hsl(var(--primary)/0.5)]",
+          "w-5 h-5 text-foreground transition-transform duration-300",
           isOpen && "rotate-180"
         )} 
-        strokeWidth={2} 
+        strokeWidth={1.5} 
       />
     </button>
   );
