@@ -26,7 +26,8 @@ export type TriggerType =
   | "monthly_summary";
 
 export type TargetAudience = "all" | "clients" | "coaches";
-export type MessageType = "in_app" | "email" | "push" | "all";
+export type MessageChannel = "in_app" | "email" | "push";
+export type MessageType = MessageChannel[]; // Array for multi-select
 
 export interface TriggerConfig {
   days?: number;

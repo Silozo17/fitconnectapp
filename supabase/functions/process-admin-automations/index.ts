@@ -113,17 +113,38 @@ Deno.serve(async (req) => {
           // Process message template
           const message = processTemplate(rule.message_template, user);
 
-          // Send message based on type
+          // Parse message channels - handle both array and legacy string formats
+          let channels: string[] = [];
+          if (Array.isArray(rule.message_type)) {
+            channels = rule.message_type;
+          } else if (typeof rule.message_type === "string") {
+            try {
+              const parsed = JSON.parse(rule.message_type);
+              channels = Array.isArray(parsed) ? parsed : [rule.message_type];
+            } catch {
+              // Legacy single value
+              if (rule.message_type === "all") {
+                channels = ["in_app", "email", "push"];
+              } else {
+                channels = [rule.message_type];
+              }
+            }
+          }
+
+          // Send message to each selected channel
           try {
-            if (rule.message_type === "in_app" || rule.message_type === "all") {
+            if (channels.includes("in_app")) {
               await sendInAppMessage(supabase, user.user_id, message, rule.name);
             }
 
-            if (rule.message_type === "push" || rule.message_type === "all") {
+            if (channels.includes("push")) {
               await sendPushNotification(supabaseUrl, supabaseServiceKey, user.user_id, rule.name, message);
             }
 
-            // Email would go here if implemented
+            if (channels.includes("email")) {
+              // Email would go here if implemented
+              console.log(`Email sending not yet implemented for user ${user.user_id}`);
+            }
 
             await logAutomation(supabase, rule, user.user_id, "sent", message);
             results.sent++;
