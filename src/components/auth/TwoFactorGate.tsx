@@ -8,13 +8,27 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { STORAGE_KEYS } from "@/lib/storage-keys";
 import { isUserPrivileged } from "@/lib/role-utils";
+import { isDespia } from "@/lib/despia";
 
 interface TwoFactorGateProps {
   children: React.ReactNode;
 }
 
-const SESSION_STORAGE_KEY = STORAGE_KEYS.TWO_FACTOR_VERIFIED;
-const VERIFICATION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+// Web: 7 days, Native: permanent (never expires)
+const WEB_VERIFICATION_DURATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+
+// Environment-aware storage helpers
+const getStorageKey = () => 
+  isDespia() ? STORAGE_KEYS.TWO_FACTOR_VERIFIED_PERSISTENT : STORAGE_KEYS.TWO_FACTOR_VERIFIED;
+
+const getStorage = () => 
+  isDespia() ? localStorage : sessionStorage;
+
+// Native apps never expire, web expires after 7 days
+const isVerificationExpired = (timestamp: number): boolean => {
+  if (isDespia()) return false; // Native: NEVER expires
+  return Date.now() - timestamp >= WEB_VERIFICATION_DURATION_MS;
+};
 
 export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
   const { user, allRoles } = useAuth();
@@ -35,19 +49,18 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
         return;
       }
 
-      // Check session storage for recent verification
-      const storedVerification = sessionStorage.getItem(SESSION_STORAGE_KEY);
+      // Check storage for recent verification (localStorage for native, sessionStorage for web)
+      const storedVerification = getStorage().getItem(getStorageKey());
       if (storedVerification) {
         try {
           const { timestamp, userId } = JSON.parse(storedVerification);
-          const now = Date.now();
-          if (userId === user.id && now - timestamp < VERIFICATION_DURATION_MS) {
+          if (userId === user.id && !isVerificationExpired(timestamp)) {
             setIsVerified(true);
             setIsChecking(false);
             return;
           }
         } catch {
-          sessionStorage.removeItem(SESSION_STORAGE_KEY);
+          getStorage().removeItem(getStorageKey());
         }
       }
 
@@ -78,7 +91,7 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
         
         if (isRecentSignup) {
           // Auto-verify for fresh signups
-          sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+          getStorage().setItem(getStorageKey(), JSON.stringify({
             timestamp: Date.now(),
             userId: user.id,
           }));
@@ -90,11 +103,10 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
         // Check if recently verified in database
         if (settings.two_factor_verified_at) {
           const verifiedAt = new Date(settings.two_factor_verified_at).getTime();
-          const now = Date.now();
-          if (now - verifiedAt < VERIFICATION_DURATION_MS) {
+          if (!isVerificationExpired(verifiedAt)) {
             setIsVerified(true);
-            // Store in session for faster checks
-            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+            // Store for faster checks
+            getStorage().setItem(getStorageKey(), JSON.stringify({
               timestamp: verifiedAt,
               userId: user.id,
             }));
@@ -105,7 +117,7 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
               .from("user_security_settings")
               .update({ two_factor_verified_at: new Date().toISOString() })
               .eq("user_id", user.id);
-            sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+            getStorage().setItem(getStorageKey(), JSON.stringify({
               timestamp: Date.now(),
               userId: user.id,
             }));
@@ -119,7 +131,7 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
             .from("user_security_settings")
             .update({ two_factor_verified_at: new Date().toISOString() })
             .eq("user_id", user.id);
-          sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+          getStorage().setItem(getStorageKey(), JSON.stringify({
             timestamp: Date.now(),
             userId: user.id,
           }));
@@ -163,8 +175,8 @@ export const TwoFactorGate = ({ children }: TwoFactorGateProps) => {
       .update({ two_factor_verified_at: new Date().toISOString() })
       .eq("user_id", user.id);
 
-    // Store in session
-    sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({
+    // Store verification (localStorage for native persistence, sessionStorage for web)
+    getStorage().setItem(getStorageKey(), JSON.stringify({
       timestamp: Date.now(),
       userId: user.id,
     }));
