@@ -104,8 +104,10 @@ export const STORAGE_KEYS = {
   // =====================
   // 2FA
   // =====================
-  /** 2FA verification state (session storage) */
+  /** 2FA verification state (session storage for web) */
   TWO_FACTOR_VERIFIED: 'fc_2fa_verified',
+  /** 2FA verification state (localStorage for native - permanent) */
+  TWO_FACTOR_VERIFIED_PERSISTENT: 'fc_2fa_verified_persistent',
 } as const;
 
 export type StorageKey = typeof STORAGE_KEYS[keyof typeof STORAGE_KEYS];
@@ -198,6 +200,8 @@ export function clearSessionStorage(): void {
     sessionStorage.removeItem(STORAGE_KEYS.TWO_FACTOR_VERIFIED);
     sessionStorage.removeItem(STORAGE_KEYS.ONBOARDING_JUST_COMPLETED);
     sessionStorage.removeItem(STORAGE_KEYS.SIGNUP_IN_PROGRESS);
+    // Clear persistent 2FA for native apps on logout
+    localStorage.removeItem(STORAGE_KEYS.TWO_FACTOR_VERIFIED_PERSISTENT);
   } catch {
     // Storage error
   }
