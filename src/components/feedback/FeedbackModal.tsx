@@ -103,6 +103,7 @@ export const FeedbackModal = () => {
         storageKey={STORAGE_KEYS.FEEDBACK_TOOLTIP_SEEN}
         message="Got ideas? Share feedback! 💡"
         position="bottom"
+        align="start"
         showDelay={4500}
       >
         <Tooltip>
