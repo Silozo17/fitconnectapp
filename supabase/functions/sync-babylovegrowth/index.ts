@@ -3,6 +3,9 @@ import { corsHeaders, handleCors, jsonResponse, errorResponse } from "../_shared
 
 const BABYLOVEGROWTH_API_BASE = "https://api.babylovegrowth.ai/api/integrations/v1/articles";
 
+// Only import 1 article per sync for daily drip-feed
+const ARTICLES_PER_SYNC = 1;
+
 interface BabyLoveGrowthListItem {
   id: number;
   title: string;
@@ -159,19 +162,28 @@ Deno.serve(async (req) => {
 
     console.log(`Fetched ${allListItems.length} total articles from list`);
 
-    // Filter to only new articles (created after last sync)
-    const newItems = allListItems.filter((item) => {
-      const articleDate = new Date(item.created_at || item.createdAt || 0);
-      return articleDate > lastSyncAt;
-    });
+    // Get existing external_ids to filter out already imported
+    const { data: existingPosts } = await supabase
+      .from("blog_posts")
+      .select("external_id")
+      .eq("external_source", "babylovegrowth");
 
-    console.log(`Found ${newItems.length} new articles since last sync`);
+    const existingIds = new Set((existingPosts || []).map(p => p.external_id));
+
+    // Filter to only new articles (not already imported)
+    const newItems = allListItems.filter((item) => !existingIds.has(String(item.id)));
+
+    console.log(`Found ${newItems.length} new articles available to import`);
+
+    // Only import up to ARTICLES_PER_SYNC (1 per day for drip-feed)
+    const itemsToImport = newItems.slice(0, ARTICLES_PER_SYNC);
+    console.log(`Will import ${itemsToImport.length} article(s) this sync`);
 
     let importedCount = 0;
     const errors: string[] = [];
 
-    // Fetch full details for each new article and import
-    for (const item of newItems) {
+    // Fetch full details for each article to import
+    for (const item of itemsToImport) {
       try {
         // Check if already imported
         const { data: existing } = await supabase
