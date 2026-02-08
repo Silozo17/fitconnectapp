@@ -1,25 +1,31 @@
 import { createClient } from "@supabase/supabase-js";
 import { corsHeaders, handleCors, jsonResponse, errorResponse } from "../_shared/cors.ts";
 
-const BABYLOVEGROWTH_API_URL = "https://api.babylovegrowth.ai/api/integrations/v1/articles";
+const BABYLOVEGROWTH_API_BASE = "https://api.babylovegrowth.ai/api/integrations/v1/articles";
+
+interface BabyLoveGrowthListItem {
+  id: number;
+  title: string;
+  metaDescription?: string;
+  content_html?: string;
+  languageCode?: string;
+  publicUrl?: string;
+  createdAt?: string;
+  created_at?: string;
+}
 
 interface BabyLoveGrowthArticle {
   id: number;
   title: string;
   slug?: string;
-  content_html: string;
+  content_html?: string;
   content_markdown?: string;
   meta_description?: string;
-  metaDescription?: string;
   hero_image_url?: string;
   keywords?: string[];
   seedKeyword?: string;
   created_at?: string;
-  createdAt?: string;
-  languageCode?: string;
-  publicUrl?: string;
   orgWebsite?: string;
-  excerpt?: string;
 }
 
 function generateSlug(title: string): string {
@@ -32,15 +38,38 @@ function generateSlug(title: string): string {
 }
 
 function calculateReadingTime(html: string): number {
+  if (!html) return 1;
   const text = html.replace(/<[^>]*>/g, "");
   const words = text.split(/\s+/).filter(Boolean).length;
   return Math.max(1, Math.ceil(words / 200));
 }
 
 function extractExcerpt(content: string, maxLength = 160): string {
+  if (!content) return "";
   const text = content.replace(/<[^>]*>/g, "");
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength).trim() + "...";
+}
+
+async function fetchArticleById(id: number, apiKey: string): Promise<BabyLoveGrowthArticle | null> {
+  try {
+    const response = await fetch(`${BABYLOVEGROWTH_API_BASE}/${id}`, {
+      headers: {
+        "X-API-Key": apiKey,
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      console.error(`Failed to fetch article ${id}: ${response.status}`);
+      return null;
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`Error fetching article ${id}:`, error);
+    return null;
+  }
 }
 
 Deno.serve(async (req) => {
@@ -76,14 +105,14 @@ Deno.serve(async (req) => {
 
     console.log(`Last sync: ${lastSyncAt.toISOString()}`);
 
-    // Fetch articles from BabyLoveGrowth API with pagination
-    let allArticles: BabyLoveGrowthArticle[] = [];
+    // Fetch article list from BabyLoveGrowth API with pagination
+    let allListItems: BabyLoveGrowthListItem[] = [];
     let page = 1;
     const limit = 50;
     let hasMore = true;
 
     while (hasMore) {
-      const url = `${BABYLOVEGROWTH_API_URL}?limit=${limit}&page=${page}`;
+      const url = `${BABYLOVEGROWTH_API_BASE}?limit=${limit}&page=${page}`;
       console.log(`Fetching page ${page}: ${url}`);
 
       const response = await fetch(url, {
@@ -97,7 +126,6 @@ Deno.serve(async (req) => {
         const errorText = await response.text();
         console.error(`BabyLoveGrowth API error: ${response.status} - ${errorText}`);
         
-        // Log failed sync
         await supabase.from("integration_sync_log").insert({
           integration_name: "babylovegrowth",
           articles_imported: 0,
@@ -108,64 +136,93 @@ Deno.serve(async (req) => {
         return errorResponse(`BabyLoveGrowth API error: ${response.status}`, 502);
       }
 
-      const articles: BabyLoveGrowthArticle[] = await response.json();
+      const items: BabyLoveGrowthListItem[] = await response.json();
       
-      if (articles.length === 0) {
+      if (items.length === 0) {
         hasMore = false;
       } else {
-        allArticles = [...allArticles, ...articles];
+        allListItems = [...allListItems, ...items];
         
-        // If we got fewer than limit, we've reached the end
-        if (articles.length < limit) {
+        if (items.length < limit) {
           hasMore = false;
         } else {
           page++;
         }
       }
 
-      // Safety limit to prevent infinite loops
+      // Safety limit
       if (page > 100) {
         console.warn("Reached max pagination limit (100 pages)");
         hasMore = false;
       }
     }
 
-    console.log(`Fetched ${allArticles.length} total articles from BabyLoveGrowth`);
+    console.log(`Fetched ${allListItems.length} total articles from list`);
 
     // Filter to only new articles (created after last sync)
-    const newArticles = allArticles.filter((article) => {
-      const articleDate = new Date(article.created_at || article.createdAt || 0);
+    const newItems = allListItems.filter((item) => {
+      const articleDate = new Date(item.created_at || item.createdAt || 0);
       return articleDate > lastSyncAt;
     });
 
-    console.log(`Found ${newArticles.length} new articles since last sync`);
+    console.log(`Found ${newItems.length} new articles since last sync`);
 
     let importedCount = 0;
     const errors: string[] = [];
 
-    // Import each new article
-    for (const article of newArticles) {
+    // Fetch full details for each new article and import
+    for (const item of newItems) {
       try {
-        const metaDesc = article.meta_description || article.metaDescription || "";
-        const excerpt = article.excerpt || metaDesc || extractExcerpt(article.content_html);
-        const slug = article.slug || generateSlug(article.title);
+        // Check if already imported
+        const { data: existing } = await supabase
+          .from("blog_posts")
+          .select("id")
+          .eq("external_id", String(item.id))
+          .maybeSingle();
+
+        if (existing) {
+          console.log(`Article ${item.id} already exists, skipping`);
+          continue;
+        }
+
+        // Fetch full article details by ID
+        console.log(`Fetching full details for article ${item.id}`);
+        const fullArticle = await fetchArticleById(item.id, apiKey);
+
+        if (!fullArticle) {
+          errors.push(`Article ${item.id}: Failed to fetch full details`);
+          continue;
+        }
+
+        // Get content - try multiple field names
+        const contentHtml = fullArticle.content_html || "";
+        
+        if (!contentHtml) {
+          console.warn(`Article ${item.id} has no content_html`);
+          errors.push(`Article ${item.id}: No content available`);
+          continue;
+        }
+
+        const metaDesc = fullArticle.meta_description || item.metaDescription || "";
+        const excerpt = metaDesc || extractExcerpt(contentHtml);
+        const slug = fullArticle.slug || generateSlug(fullArticle.title || item.title);
 
         const blogPost = {
-          external_id: String(article.id),
+          external_id: String(item.id),
           external_source: "babylovegrowth",
-          title: article.title,
+          title: fullArticle.title || item.title,
           slug: slug,
-          content: article.content_html,
+          content: contentHtml,
           excerpt: excerpt,
-          meta_title: article.title,
+          meta_title: fullArticle.title || item.title,
           meta_description: metaDesc,
-          featured_image: article.hero_image_url || null,
-          keywords: article.keywords || [],
-          category: article.seedKeyword || "Health & Wellness",
+          featured_image: fullArticle.hero_image_url || null,
+          keywords: fullArticle.keywords || [],
+          category: fullArticle.seedKeyword || "Health & Wellness",
           author: "BabyLoveGrowth AI",
           is_published: true,
           published_at: new Date().toISOString(),
-          reading_time_minutes: calculateReadingTime(article.content_html),
+          reading_time_minutes: calculateReadingTime(contentHtml),
         };
 
         const { error } = await supabase
@@ -176,23 +233,23 @@ Deno.serve(async (req) => {
           });
 
         if (error) {
-          console.error(`Error importing article ${article.id}:`, error);
-          errors.push(`Article ${article.id}: ${error.message}`);
+          console.error(`Error importing article ${item.id}:`, error);
+          errors.push(`Article ${item.id}: ${error.message}`);
         } else {
           importedCount++;
-          console.log(`Imported article: ${article.title}`);
+          console.log(`Imported article: ${blogPost.title}`);
         }
       } catch (err) {
-        console.error(`Exception importing article ${article.id}:`, err);
-        errors.push(`Article ${article.id}: ${err.message}`);
+        console.error(`Exception importing article ${item.id}:`, err);
+        errors.push(`Article ${item.id}: ${err.message}`);
       }
     }
 
-    // Log successful sync
+    // Log sync result
     await supabase.from("integration_sync_log").insert({
       integration_name: "babylovegrowth",
       articles_imported: importedCount,
-      status: errors.length > 0 ? "partial" : "success",
+      status: errors.length > 0 && importedCount === 0 ? "error" : errors.length > 0 ? "partial" : "success",
       error_message: errors.length > 0 ? errors.join("; ") : null,
     });
 
@@ -201,15 +258,14 @@ Deno.serve(async (req) => {
     return jsonResponse({
       success: true,
       imported: importedCount,
-      total_fetched: allArticles.length,
-      new_articles: newArticles.length,
+      total_fetched: allListItems.length,
+      new_articles: newItems.length,
       errors: errors.length > 0 ? errors : undefined,
     });
 
   } catch (error) {
     console.error("Sync error:", error);
 
-    // Try to log the error
     try {
       const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
       const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
