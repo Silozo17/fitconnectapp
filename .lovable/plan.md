@@ -1,184 +1,119 @@
 
 
-# BabyLoveGrowth.ai Integration Implementation Plan
+# Fix BabyLoveGrowth Integration Responsiveness
 
-## Overview
+## Problem Analysis
 
-Implement a fully automated content sync from BabyLoveGrowth.ai API to auto-publish blog articles. The system will fetch new articles every 15 minutes and publish them directly to your blog.
+Based on the screenshot, the BabyLoveGrowth integration card has these mobile issues:
+
+1. **Header row is too cramped** - The title, "Connected" badge, and "Sync Now" button are squeezed horizontally, with the button getting cut off
+2. **Stats grid is too tight** - Using `grid-cols-3` forces three columns on mobile, making text overflow
+3. **Incorrect schedule text** - Shows "Every 15 min" but the sync is now configured for "Daily 10am UK"
 
 ---
 
-## Step 1: Database Schema Updates
+## Solution
 
-Add columns and table to track imported articles and sync history.
+### File to Modify
+`src/pages/dashboard/admin/AdminIntegrations.tsx`
 
-**Migration SQL:**
-```sql
--- Add external tracking columns to blog_posts
-ALTER TABLE blog_posts 
-ADD COLUMN IF NOT EXISTS external_id TEXT UNIQUE,
-ADD COLUMN IF NOT EXISTS external_source TEXT;
+### Changes
 
--- Create index for faster lookups
-CREATE INDEX IF NOT EXISTS idx_blog_posts_external_id ON blog_posts(external_id);
-CREATE INDEX IF NOT EXISTS idx_blog_posts_external_source ON blog_posts(external_source);
+**1. Make Header Responsive (lines 269-300)**
 
--- Create sync log table to track import history
-CREATE TABLE IF NOT EXISTS integration_sync_log (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  integration_name TEXT NOT NULL,
-  last_sync_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-  articles_imported INTEGER DEFAULT 0,
-  status TEXT DEFAULT 'success',
-  error_message TEXT,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
+Current structure:
+```tsx
+<div className="flex items-center justify-between mb-4">
+  {/* Title + description */}
+  {/* Badge + Button */}
+</div>
+```
 
--- RLS policies for sync log (admin only)
-ALTER TABLE integration_sync_log ENABLE ROW LEVEL SECURITY;
+Fix: Stack vertically on mobile, row on larger screens:
+```tsx
+<div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+  <div className="flex items-center gap-2">
+    {/* Bot icon + Title + Description */}
+  </div>
+  <div className="flex items-center gap-2 w-full sm:w-auto">
+    {/* Badge */}
+    <Button className="flex-1 sm:flex-none">Sync Now</Button>
+  </div>
+</div>
+```
 
-CREATE POLICY "Admins can view sync logs"
-  ON integration_sync_log FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM profiles 
-      WHERE profiles.id = auth.uid() 
-      AND profiles.role = 'admin'
-    )
-  );
+**2. Make Stats Grid Responsive (line 303)**
 
-CREATE POLICY "Service role can insert sync logs"
-  ON integration_sync_log FOR INSERT
-  WITH CHECK (true);
+Current:
+```tsx
+<div className="grid grid-cols-3 gap-4 mb-4">
+```
+
+Fix: Stack on mobile, 3 columns on larger screens:
+```tsx
+<div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
+```
+
+**3. Update Schedule Text (line 325)**
+
+Current:
+```tsx
+<p className="text-lg font-medium">Every 15 min</p>
+```
+
+Fix: Update to reflect new daily schedule:
+```tsx
+<p className="text-lg font-medium">Daily 10am</p>
 ```
 
 ---
 
-## Step 2: Create Edge Function
+## Visual Result
 
-**File:** `supabase/functions/sync-babylovegrowth/index.ts`
+**Mobile (stacked layout):**
+```
+┌─────────────────────────────────────┐
+│ 🤖 BabyLoveGrowth AI Content       │
+│    Automated blog article publishing│
+│                                     │
+│ [● Connected]  [    Sync Now    ]  │
+│                                     │
+│ ┌─────────────────────────────────┐│
+│ │ 📄 Articles Imported            ││
+│ │    2                            ││
+│ └─────────────────────────────────┘│
+│ ┌─────────────────────────────────┐│
+│ │ 🕐 Last Sync                    ││
+│ │    21 minutes ago               ││
+│ └─────────────────────────────────┘│
+│ ┌─────────────────────────────────┐│
+│ │ 🔄 Schedule                     ││
+│ │    Daily 10am                   ││
+│ └─────────────────────────────────┘│
+└─────────────────────────────────────┘
+```
 
-The function will:
-1. Fetch articles from BabyLoveGrowth API using `X-API-Key` header
-2. Filter to only new articles (created after last sync)
-3. Upsert each article into `blog_posts` with `is_published = true`
-4. Log the sync result to `integration_sync_log`
-5. Handle pagination for large article sets
-
-**Key features:**
-- Duplicate prevention via `external_id` unique constraint
-- Reading time calculation from content length
-- Slug generation from title if not provided
-- Excerpt extraction from meta_description or content
-
-**Config update** (`supabase/config.toml`):
-```toml
-[functions.sync-babylovegrowth]
-verify_jwt = false
+**Desktop (side-by-side):**
+```
+┌──────────────────────────────────────────────────────────────┐
+│ 🤖 BabyLoveGrowth AI Content          [Connected] [Sync Now] │
+│    Automated blog article publishing                         │
+│                                                              │
+│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐          │
+│ │ Articles     │ │ Last Sync    │ │ Schedule     │          │
+│ │ 2            │ │ 21 min ago   │ │ Daily 10am   │          │
+│ └──────────────┘ └──────────────┘ └──────────────┘          │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Step 3: Create React Hook
+## Summary of Changes
 
-**File:** `src/hooks/useBabyLoveGrowthSync.ts`
-
-Hook providing:
-- `syncHistory` - Last 10 sync attempts with status
-- `lastSync` - Most recent successful sync timestamp
-- `importedCount` - Total articles imported
-- `triggerSync` - Mutation to manually trigger sync
-- `isConnected` - Whether API key is configured
-
----
-
-## Step 4: Update Admin Integrations Page
-
-**File:** `src/pages/dashboard/admin/AdminIntegrations.tsx`
-
-Add BabyLoveGrowth section with:
-- Connection status indicator
-- Last sync timestamp
-- Total articles imported count
-- "Sync Now" button for manual trigger
-- Recent sync history table
-- Link to configure API key
-
----
-
-## Step 5: Set Up Automated Sync (pg_cron)
-
-After implementation, run this SQL to enable 15-minute auto-sync:
-
-```sql
--- Enable extensions
-CREATE EXTENSION IF NOT EXISTS pg_cron;
-CREATE EXTENSION IF NOT EXISTS pg_net;
-
--- Schedule sync every 15 minutes
-SELECT cron.schedule(
-  'babylovegrowth-sync',
-  '*/15 * * * *',
-  $$
-  SELECT net.http_post(
-    url := 'https://ntgfihgneyoxxbwmtceq.supabase.co/functions/v1/sync-babylovegrowth',
-    headers := '{"Content-Type": "application/json"}'::jsonb,
-    body := '{}'::jsonb
-  );
-  $$
-);
-```
-
----
-
-## Field Mapping
-
-| BabyLoveGrowth | blog_posts | Notes |
-|----------------|------------|-------|
-| `id` | `external_id` | String, unique |
-| `title` | `title` | Direct |
-| `slug` | `slug` | Generate if missing |
-| `content_html` | `content` | Primary content |
-| `meta_description` | `meta_description`, `excerpt` | SEO + excerpt |
-| `hero_image_url` | `featured_image` | Image URL |
-| `keywords` | `keywords` | Array |
-| `seedKeyword` | `category` | Category fallback |
-| — | `author` | "BabyLoveGrowth AI" |
-| — | `is_published` | `true` (auto-publish) |
-| — | `external_source` | "babylovegrowth" |
-
----
-
-## Files to Create/Modify
-
-| File | Action |
-|------|--------|
-| `supabase/functions/sync-babylovegrowth/index.ts` | Create |
-| `supabase/config.toml` | Modify (add function config) |
-| `src/hooks/useBabyLoveGrowthSync.ts` | Create |
-| `src/pages/dashboard/admin/AdminIntegrations.tsx` | Modify |
-| Database migration | Create |
-
----
-
-## Required Secret
-
-You will need to provide your BabyLoveGrowth API key:
-
-**Secret Name:** `BABYLOVEGROWTH_API_KEY`
-
-**Where to get it:** BabyLoveGrowth Dashboard → Settings → Integrations → API → Generate API key
-
-I will prompt you to enter this after creating the edge function.
-
----
-
-## Result
-
-Once complete:
-- Every 15 minutes, new BabyLoveGrowth articles are automatically fetched and published
-- Admin dashboard shows sync status and history
-- Manual "Sync Now" button for immediate imports
-- No duplicates thanks to external_id tracking
-- Full autopilot - BabyLoveGrowth decides content, your platform publishes
+| Line(s) | Change |
+|---------|--------|
+| 269 | Add `flex-col sm:flex-row sm:items-center sm:justify-between gap-3` |
+| 279 | Add `w-full sm:w-auto` wrapper, button gets `flex-1 sm:flex-none` |
+| 303 | Change `grid-cols-3` to `grid-cols-1 sm:grid-cols-3` |
+| 325 | Update text from "Every 15 min" to "Daily 10am" |
 
