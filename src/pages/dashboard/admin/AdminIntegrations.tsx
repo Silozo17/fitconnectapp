@@ -3,6 +3,7 @@ import { Helmet } from "react-helmet-async";
 import AdminLayout from "@/components/admin/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Video,
@@ -12,11 +13,18 @@ import {
   TrendingUp,
   Activity,
   AlertCircle,
+  Bot,
+  RefreshCw,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  FileText,
 } from "lucide-react";
 import { DateRangeFilter } from "@/components/shared/DateRangeFilter";
 import { useDateRangeAnalytics } from "@/hooks/useDateRangeAnalytics";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { DashboardSectionHeader, MetricCard, ContentSection, StatsGrid } from "@/components/shared";
+import { useBabyLoveGrowthSync } from "@/hooks/useBabyLoveGrowthSync";
 
 interface IntegrationStats {
   video: { total: number; active: number };
@@ -52,6 +60,16 @@ const AdminIntegrations = () => {
   const [loading, setLoading] = useState(true);
 
   const dateRange = useDateRangeAnalytics('30d', 'none');
+  
+  // BabyLoveGrowth sync hook
+  const { 
+    syncHistory, 
+    lastSync, 
+    importedCount, 
+    isConnected: blgConnected, 
+    triggerSync, 
+    isSyncing 
+  } = useBabyLoveGrowthSync();
 
   useEffect(() => {
     fetchStats();
@@ -245,6 +263,107 @@ const AdminIntegrations = () => {
                   } : undefined}
                 />
               </StatsGrid>
+
+              {/* BabyLoveGrowth AI Content Integration */}
+              <ContentSection colorTheme="primary" withAccent>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="p-2 rounded-xl bg-primary/15">
+                      <Bot className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-foreground">BabyLoveGrowth AI Content</h3>
+                      <p className="text-sm text-muted-foreground">Automated blog article publishing</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {blgConnected ? (
+                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Connected
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">
+                        <XCircle className="w-3 h-3 mr-1" />
+                        Not Connected
+                      </Badge>
+                    )}
+                    <Button
+                      size="sm"
+                      onClick={() => triggerSync.mutate()}
+                      disabled={isSyncing}
+                    >
+                      <RefreshCw className={`w-4 h-4 mr-2 ${isSyncing ? "animate-spin" : ""}`} />
+                      {isSyncing ? "Syncing..." : "Sync Now"}
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Stats Row */}
+                <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="p-3 rounded-xl bg-background/50 border border-border/50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <FileText className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Articles Imported</span>
+                    </div>
+                    <p className="text-2xl font-bold">{importedCount}</p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-background/50 border border-border/50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Clock className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Last Sync</span>
+                    </div>
+                    <p className="text-lg font-medium">
+                      {lastSync ? formatDistanceToNow(new Date(lastSync), { addSuffix: true }) : "Never"}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-xl bg-background/50 border border-border/50">
+                    <div className="flex items-center gap-2 mb-1">
+                      <RefreshCw className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">Schedule</span>
+                    </div>
+                    <p className="text-lg font-medium">Every 15 min</p>
+                  </div>
+                </div>
+
+                {/* Recent Sync History */}
+                {syncHistory.length > 0 && (
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Recent Syncs</p>
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {syncHistory.slice(0, 5).map((entry) => (
+                        <div
+                          key={entry.id}
+                          className="flex items-center justify-between p-2 rounded-lg bg-background/50"
+                        >
+                          <div className="flex items-center gap-2">
+                            {entry.status === "success" ? (
+                              <CheckCircle2 className="w-4 h-4 text-green-500" />
+                            ) : entry.status === "partial" ? (
+                              <AlertCircle className="w-4 h-4 text-yellow-500" />
+                            ) : (
+                              <XCircle className="w-4 h-4 text-destructive" />
+                            )}
+                            <span className="text-sm">
+                              {entry.articles_imported} article{entry.articles_imported !== 1 ? "s" : ""} imported
+                            </span>
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {format(new Date(entry.created_at), "MMM d, HH:mm")}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {syncHistory.length === 0 && !blgConnected && (
+                  <div className="text-center py-4 text-muted-foreground">
+                    <Bot className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">Configure your BabyLoveGrowth API key to enable auto-publishing</p>
+                  </div>
+                )}
+              </ContentSection>
 
               {/* Usage Overview */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
