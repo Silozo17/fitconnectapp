@@ -266,7 +266,7 @@ const AdminIntegrations = () => {
 
               {/* BabyLoveGrowth AI Content Integration */}
               <ContentSection colorTheme="primary" withAccent>
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
                   <div className="flex items-center gap-2">
                     <div className="p-2 rounded-xl bg-primary/15">
                       <Bot className="w-4 h-4 text-primary" />
@@ -276,7 +276,7 @@ const AdminIntegrations = () => {
                       <p className="text-sm text-muted-foreground">Automated blog article publishing</p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
                     {blgConnected ? (
                       <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
                         <CheckCircle2 className="w-3 h-3 mr-1" />
@@ -290,6 +290,7 @@ const AdminIntegrations = () => {
                     )}
                     <Button
                       size="sm"
+                      className="flex-1 sm:flex-none"
                       onClick={() => triggerSync.mutate()}
                       disabled={isSyncing}
                     >
@@ -300,7 +301,7 @@ const AdminIntegrations = () => {
                 </div>
 
                 {/* Stats Row */}
-                <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4">
                   <div className="p-3 rounded-xl bg-background/50 border border-border/50">
                     <div className="flex items-center gap-2 mb-1">
                       <FileText className="w-4 h-4 text-muted-foreground" />
@@ -322,7 +323,7 @@ const AdminIntegrations = () => {
                       <RefreshCw className="w-4 h-4 text-muted-foreground" />
                       <span className="text-sm text-muted-foreground">Schedule</span>
                     </div>
-                    <p className="text-lg font-medium">Every 15 min</p>
+                    <p className="text-lg font-medium">Daily 10am</p>
                   </div>
                 </div>
 
