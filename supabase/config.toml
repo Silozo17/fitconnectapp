@@ -350,3 +350,6 @@ verify_jwt = true
 
 [functions.gym-accept-staff-invites]
 verify_jwt = true
+
+[functions.sync-babylovegrowth]
+verify_jwt = false

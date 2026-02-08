@@ -753,6 +753,8 @@ export type Database = {
           content: string
           created_at: string | null
           excerpt: string
+          external_id: string | null
+          external_source: string | null
           featured_image: string | null
           id: string
           is_published: boolean | null
@@ -771,6 +773,8 @@ export type Database = {
           content: string
           created_at?: string | null
           excerpt: string
+          external_id?: string | null
+          external_source?: string | null
           featured_image?: string | null
           id?: string
           is_published?: boolean | null
@@ -789,6 +793,8 @@ export type Database = {
           content?: string
           created_at?: string | null
           excerpt?: string
+          external_id?: string | null
+          external_source?: string | null
           featured_image?: string | null
           id?: string
           is_published?: boolean | null
@@ -10504,6 +10510,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      integration_sync_log: {
+        Row: {
+          articles_imported: number | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+          integration_name: string
+          last_sync_at: string
+          status: string | null
+        }
+        Insert: {
+          articles_imported?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          integration_name: string
+          last_sync_at?: string
+          status?: string | null
+        }
+        Update: {
+          articles_imported?: number | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+          integration_name?: string
+          last_sync_at?: string
+          status?: string | null
+        }
+        Relationships: []
       }
       integration_usage: {
         Row: {
