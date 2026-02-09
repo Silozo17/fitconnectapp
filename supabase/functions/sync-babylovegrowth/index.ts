@@ -13,6 +13,13 @@ function removeAttributionFooter(html: string): string {
   );
 }
 
+function removeLeadingTitleAndImage(html: string): string {
+  let cleaned = html.trim();
+  cleaned = cleaned.replace(/^\s*<h1[^>]*>[\s\S]*?<\/h1>\s*/i, "");
+  cleaned = cleaned.replace(/^\s*<p>\s*<img[^>]*>\s*<\/p>\s*/i, "");
+  return cleaned.trim();
+}
+
 interface BabyLoveGrowthListItem {
   id: number;
   title: string;
@@ -231,7 +238,7 @@ Deno.serve(async (req) => {
           external_source: "babylovegrowth",
           title: fullArticle.title || item.title,
           slug: slug,
-          content: removeAttributionFooter(contentHtml),
+          content: removeLeadingTitleAndImage(removeAttributionFooter(contentHtml)),
           excerpt: excerpt,
           meta_title: fullArticle.title || item.title,
           meta_description: metaDesc,
