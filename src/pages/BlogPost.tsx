@@ -194,6 +194,9 @@ export default function BlogPost() {
                 <img
                   src={post.featured_image}
                   alt={post.title}
+                  width={1200}
+                  height={675}
+                  loading="eager"
                   className="w-full h-auto rounded-2xl object-cover aspect-video"
                 />
               </div>

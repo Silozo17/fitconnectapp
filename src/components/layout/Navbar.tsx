@@ -106,7 +106,7 @@ const Navbar = () => {
                 onMouseEnter={() => handleDropdownEnter("coaches")}
                 onMouseLeave={handleDropdownLeave}
               >
-                <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
+                <button aria-label={t("website.nav.findCoaches")} className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
                   {t("website.nav.findCoaches")}
                   <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "coaches" && "rotate-180")} />
                 </button>
@@ -140,7 +140,7 @@ const Navbar = () => {
               onMouseEnter={() => handleDropdownEnter("resources")}
               onMouseLeave={handleDropdownLeave}
             >
-              <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
+              <button aria-label={t("website.nav.resources")} className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
                 {t("website.nav.resources")}
                 <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "resources" && "rotate-180")} />
               </button>
@@ -173,7 +173,7 @@ const Navbar = () => {
               onMouseEnter={() => handleDropdownEnter("forcoaches")}
               onMouseLeave={handleDropdownLeave}
             >
-              <button className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
+              <button aria-label={t("website.nav.forCoaches")} className="px-4 py-2 text-muted-foreground hover:text-foreground font-medium transition-colors rounded-lg hover:bg-secondary/50 flex items-center gap-1">
                 {t("website.nav.forCoaches")}
                 <ChevronDown className={cn("w-4 h-4 transition-transform", activeDropdown === "forcoaches" && "rotate-180")} />
               </button>

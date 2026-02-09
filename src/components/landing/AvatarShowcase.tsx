@@ -65,6 +65,9 @@ export function AvatarShowcase() {
                 <img
                   src={featuredAvatars[activeIndex].image_url || getAvatarImageUrl(featuredAvatars[activeIndex].slug)}
                   alt="Avatar character"
+                  width={288}
+                  height={384}
+                  loading="lazy"
                   className="relative w-72 h-96 object-contain animate-float drop-shadow-2xl"
                 />
               </div>
@@ -88,6 +91,9 @@ export function AvatarShowcase() {
                   <img
                     src={avatar.image_url || getAvatarImageUrl(avatar.slug)}
                     alt={avatar.name}
+                    width={80}
+                    height={107}
+                    loading="lazy"
                     className="w-full h-full object-contain bg-muted/30"
                   />
                   {avatar.category !== 'free' && (
@@ -140,6 +146,9 @@ export function AvatarShowcase() {
             <img 
               src={apeHandImage} 
               alt="Ape hand holding phone" 
+              width={1024}
+              height={600}
+              loading="lazy"
               className="w-full max-w-md lg:max-w-4xl xl:max-w-5xl object-contain"
             />
             {/* Bottom fade overlay to hide cut-off */}

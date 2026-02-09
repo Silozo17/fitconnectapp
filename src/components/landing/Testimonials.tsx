@@ -76,6 +76,9 @@ const Testimonials = forwardRef<HTMLElement>((props, ref) => {
                 <img
                   src={testimonial.image}
                   alt={t(`testimonials.items.${testimonial.key}.name`)}
+                  width={48}
+                  height={48}
+                  loading="lazy"
                   className="w-12 h-12 rounded-xl object-cover ring-2 ring-primary/20"
                 />
                 <div>

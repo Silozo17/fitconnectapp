@@ -75,6 +75,8 @@ const Hero = () => {
                 <img 
                   src={appStoreBadges} 
                   alt={t('hero.appBadgesAlt', 'Download on App Store and Google Play')}
+                  width={280}
+                  height={40}
                   className="h-10 md:h-12 w-auto"
                   loading="eager"
                 />
@@ -139,6 +141,9 @@ const Hero = () => {
               <img 
                 src={heroPhones} 
                 alt={t('hero.phonesAlt', 'FitConnect app on mobile devices')}
+                width={500}
+                height={600}
+                fetchPriority="high"
                 className="w-full max-w-md lg:max-w-lg xl:max-w-xl h-auto drop-shadow-2xl"
                 loading="eager"
               />
