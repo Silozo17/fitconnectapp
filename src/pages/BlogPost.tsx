@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import DOMPurify from "dompurify";
@@ -49,6 +50,22 @@ export default function BlogPost() {
     },
     enabled: !!post?.category,
   });
+
+  // Sanitize blog content and add dimensions + lazy loading to images
+  const sanitizedContent = useMemo(() => {
+    if (!post?.content) return "";
+    const clean = DOMPurify.sanitize(post.content, {
+      ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'br', 'span', 'div'],
+      ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'target', 'rel', 'width', 'height', 'loading']
+    });
+    return clean.replace(/<img\b([^>]*)>/gi, (match, attrs) => {
+      let updated = attrs;
+      if (!/\bwidth\s*=/i.test(updated)) updated += ' width="800"';
+      if (!/\bheight\s*=/i.test(updated)) updated += ' height="450"';
+      if (!/\bloading\s*=/i.test(updated)) updated += ' loading="lazy"';
+      return `<img${updated}>`;
+    });
+  }, [post?.content]);
 
   if (isLoading) {
     return (
@@ -205,10 +222,7 @@ export default function BlogPost() {
             {/* Content */}
             <div 
               className="max-w-3xl mx-auto prose-blog"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content, { 
-                ALLOWED_TAGS: ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'strong', 'em', 'ul', 'ol', 'li', 'a', 'img', 'blockquote', 'br', 'span', 'div'],
-                ALLOWED_ATTR: ['href', 'src', 'alt', 'class', 'target', 'rel']
-              }) }}
+              dangerouslySetInnerHTML={{ __html: sanitizedContent }}
             />
 
             {/* CTA */}
