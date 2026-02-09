@@ -131,6 +131,9 @@ const FeaturedCoaches = () => {
                   <img
                     src={coach.card_image_url || coach.profile_image_url || fallbackCoachImage}
                     alt={coach.display_name || "Coach"}
+                    width={400}
+                    height={400}
+                    loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 </div>
