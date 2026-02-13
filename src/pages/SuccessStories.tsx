@@ -202,7 +202,10 @@ const SuccessStories = () => {
                   <div className="aspect-video relative overflow-hidden">
                     <img 
                       src={story.image} 
-                      alt={story.name}
+                      alt={`${story.name} - fitness transformation result`}
+                      width={400}
+                      height={225}
+                      loading="lazy"
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent" />
