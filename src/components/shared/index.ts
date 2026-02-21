@@ -64,3 +64,6 @@ export { SEOHead } from "./SEOHead";
 export { ShareButton } from "./ShareButton";
 export { SocialLinks } from "./SocialLinks";
 export { ComparisonStatCard } from "./ComparisonStatCard";
+
+// Media
+export { VideoEmbed } from "./VideoEmbed";
