@@ -70,6 +70,36 @@
       "emptyTitle": "Brak oczekujących próśb",
       "emptyDescription": "Nowe prośby od potencjalnych klientów pojawią się tutaj natychmiast",
       "clients": "klientów"
+    },
+    "sections": {
+      "stats": {
+        "title": "Szybkie statystyki",
+        "description": "Twoje kluczowe wskaźniki"
+      },
+      "clients": {
+        "title": "Twoi klienci",
+        "description": "Przegląd aktywnych klientów"
+      },
+      "activity": {
+        "title": "Aktywność klientów",
+        "description": "Aktywność i sesje klientów"
+      },
+      "actions": {
+        "title": "Szybkie akcje",
+        "description": "Częste zadania"
+      },
+      "engagement": {
+        "title": "Zaangażowanie",
+        "description": "Zaangażowanie klientów i recenzje"
+      },
+      "intelligence": {
+        "title": "Wnioski AI",
+        "description": "Inteligentne rekomendacje dla Twojego biznesu"
+      },
+      "business": {
+        "title": "Biznes",
+        "description": "Przychody, pakiety i subskrypcje"
+      }
     }
   },
   "stats": {

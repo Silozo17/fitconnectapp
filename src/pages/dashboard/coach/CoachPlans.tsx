@@ -89,9 +89,9 @@ const CoachPlans = () => {
   const handleDuplicatePlan = (plan: TrainingPlan) => {
     // Navigate to create page with plan data as query params (simplified for now)
     if (plan.plan_type === "nutrition") {
-      navigate(`/dashboard/coach/plans/nutrition/new?duplicate=${plan.id}`);
+      navigate(`/dashboard/coach/nutrition?duplicate=${plan.id}`);
     } else {
-      navigate(`/dashboard/coach/plans/new?duplicate=${plan.id}`);
+      navigate(`/dashboard/coach/plans/builder?duplicate=${plan.id}`);
     }
   };
 
@@ -122,14 +122,14 @@ const CoachPlans = () => {
           <p className="text-muted-foreground">{t("plansPage.subtitle")}</p>
         </div>
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
-            <Link to="/dashboard/coach/plans/nutrition/new" className="w-full sm:w-auto">
+            <Link to="/dashboard/coach/nutrition" className="w-full sm:w-auto">
               <Button className="bg-emerald-600 text-white hover:bg-emerald-700 w-full sm:w-auto">
                 <Apple className="w-4 h-4 mr-2" />
                 <span className="sm:hidden">Meal Plan</span>
                 <span className="hidden sm:inline">Create Meal Plan</span>
               </Button>
             </Link>
-            <Link to="/dashboard/coach/plans/new" className="w-full sm:w-auto">
+            <Link to="/dashboard/coach/plans/builder" className="w-full sm:w-auto">
               <Button variant="destructive" className="w-full sm:w-auto">
                 <Dumbbell className="w-4 h-4 mr-2" />
                 <span className="sm:hidden">Training Plan</span>
@@ -243,7 +243,7 @@ const CoachPlans = () => {
             ))}
 
             {/* Create New Card */}
-            <Link to="/dashboard/coach/plans/new">
+            <Link to="/dashboard/coach/plans/builder">
               <Card variant="glass" className="p-6 border-2 border-dashed border-border hover:border-primary/50 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer">
                 <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
                   <Plus className="w-6 h-6 text-primary" />
@@ -320,7 +320,7 @@ const CoachPlans = () => {
             })}
 
             {/* Create New Card */}
-            <Link to="/dashboard/coach/plans/nutrition/new">
+            <Link to="/dashboard/coach/nutrition">
               <Card variant="glass" className="p-6 border-2 border-dashed border-border hover:border-success/50 transition-colors flex flex-col items-center justify-center min-h-[200px] cursor-pointer">
                 <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-3">
                   <Plus className="w-6 h-6 text-success" />

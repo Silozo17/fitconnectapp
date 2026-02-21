@@ -70,6 +70,36 @@
       "emptyTitle": "No pending client requests",
       "emptyDescription": "New requests from prospective clients will appear here instantly",
       "clients": "clients"
+    },
+    "sections": {
+      "stats": {
+        "title": "Quick Stats",
+        "description": "Your key performance metrics"
+      },
+      "clients": {
+        "title": "Your Clients",
+        "description": "Active client overview"
+      },
+      "activity": {
+        "title": "Client Activity",
+        "description": "Client activity and sessions"
+      },
+      "actions": {
+        "title": "Quick Actions",
+        "description": "Common tasks"
+      },
+      "engagement": {
+        "title": "Engagement",
+        "description": "Client engagement and reviews"
+      },
+      "intelligence": {
+        "title": "AI Insights",
+        "description": "Smart recommendations for your business"
+      },
+      "business": {
+        "title": "Business",
+        "description": "Revenue, packages and subscriptions"
+      }
     }
   },
   "stats": {
