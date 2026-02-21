@@ -422,7 +422,8 @@ const LinkedContentSection = ({ communityId }: { communityId: string }) => {
   const { data: coachProducts = [] } = useQuery({
     queryKey: ["coach-products-for-link", coachProfileId],
     queryFn: async () => {
-      const { data, error } = await supabase.from("digital_products").select("id, title, price, currency").eq("coach_id", coachProfileId!).eq("status", "published").returns<{ id: string; title: string; price: number; currency: string }[]>();
+      const query = supabase.from("digital_products" as any).select("id, title, price, currency").eq("coach_id", coachProfileId!).eq("status", "published");
+      const { data, error } = await query as unknown as { data: { id: string; title: string; price: number; currency: string }[] | null; error: any };
       if (error) throw error;
       return data;
     },
