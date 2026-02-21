@@ -50,7 +50,7 @@ export function AssignPlanModal({ open, onOpenChange, clientName, clientId }: As
 
   const handleCreatePlan = () => {
     onOpenChange(false);
-    navigate("/dashboard/coach/plans/new");
+    navigate("/dashboard/coach/plans/builder");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
