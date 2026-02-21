@@ -1,119 +1,117 @@
 
-# Fix All SEO Technical Audit Issues
 
-Based on the BabyLoveGrowth technical audit (Health Score 81/100, PageSpeed 71), here are the exact issues and fixes needed across the site.
+# Fix Coach Dashboard Translation Keys + Broken Plan Creation Route
 
-## Issues Identified (from audit screenshots)
+## Problem Summary
 
-### Homepage (https://getfitconnect.co.uk) - 79/100, 5 issues
-1. **HIGH: Duplicate Meta Description Tags** - `index.html` line 11 has a static `<meta name="description">` AND `SEOHead` injects another via react-helmet-async, creating duplicates
-2. **MEDIUM: Meta Description Length** - The static description in `index.html` is 156 chars but the `SEOHead` one on the homepage is also rendered, causing confusion for crawlers
-3. **LOW: Large Image** (x2) - Images not optimised or too large in file size
-4. **LOW: Missing Alt Text** - Some images missing descriptive alt attributes
+Two distinct bugs reported by coaches:
 
-### docs/coach/upsell-insights - 81/100, 4 issues
-5. **HIGH: Missing H1 Tag** - The crawler sees the static HTML before React hydrates; the H1 only exists after JavaScript runs
-6. **MEDIUM: Meta Title Length Issue** - Generated title may exceed 60 characters
-7. **MEDIUM: Meta Description Length** - Auto-generated description may exceed 160 characters
-8. **MEDIUM: Missing Canonical URL** - Canonical only injected by JavaScript (SEOHead/Helmet), not in initial HTML
-
-### All other pages (marketplace, blog, coaches, pricing, about, etc.) - 81/100, 4 issues each
-- Same pattern: duplicate meta tags from `index.html` static tags conflicting with dynamic SEOHead tags
+1. **Raw translation keys visible on dashboard** - Section headers and widget labels showing raw i18n key strings like `widgets.pipeline.title`, `widgets.emptyStates.recentClients.title`, `widgets.connectionRequests.title`
+2. **"Create Plan" navigates to non-existent `/new` page** - Coaches land on `https://getfitconnect.co.uk/new` (404) when trying to create a training plan
 
 ---
 
 ## Root Cause Analysis
 
-The **single root cause** for most issues across ALL pages is: **`index.html` still contains static meta tags** (lines 8-14) that duplicate what `SEOHead` dynamically injects on every page:
+### Issue 1: Missing Translation Keys
 
-- Line 9: `<title>FitConnect - Find Your Perfect...</title>` (conflicts with Helmet title)
-- Line 10: `<meta name="title" ...>` (conflicts with Helmet)
-- Line 11: `<meta name="description" ...>` (conflicts with Helmet -- **this is the "Duplicate Meta Description" HIGH issue**)
-- Line 12: `<meta name="keywords" ...>` (conflicts with Helmet)
-- Line 14: `<meta name="robots" ...>` (conflicts with Helmet)
+The coach dashboard (`CoachOverview.tsx`) renders section headers using:
+```
+t('widgets.sections.activity.title')
+t('widgets.sections.activity.description')
+```
 
-Since `react-helmet-async` manages all of these dynamically per page, the static versions in `index.html` cause duplicates that crawlers flag.
+These keys reference a `widgets.sections` object in `coach.json` that **does not exist**. The section keys needed are: `stats`, `clients`, `activity`, `actions`, `engagement`, `intelligence`, `business`.
+
+The individual widget keys (pipeline, connection requests, recent clients) DO exist in `coach.json` and work correctly. The raw strings visible in the screenshot are specifically the **section headers** wrapping those widgets.
+
+### Issue 2: Broken Route for Plan Creation
+
+`CoachPlans.tsx` has links pointing to:
+- `/dashboard/coach/plans/new` (workout)
+- `/dashboard/coach/plans/nutrition/new` (nutrition)
+
+But `App.tsx` only registers these routes:
+- `/dashboard/coach/plans/builder` (workout builder)
+- `/dashboard/coach/plans/builder/:planId` (edit workout)
+- `/dashboard/coach/nutrition` (nutrition builder)
+- `/dashboard/coach/nutrition/:planId` (edit nutrition)
+
+The `/new` routes were never registered, causing coaches to land on a 404/blank page.
 
 ---
 
 ## Fix Plan
 
-### Step 1: Remove duplicate static meta tags from `index.html`
+### Step 1: Add missing `widgets.sections` translation keys
 
-**File:** `index.html`
+**File:** `src/i18n/locales/en/coach.json`
 
-Remove or replace the following static tags (lines 8-14) since they are all managed by `SEOHead`:
+Add a `sections` object inside the existing `widgets` key with titles and descriptions for all 7 section keys:
 
-- Remove: `<title>FitConnect - Find Your Perfect...</title>` (line 9) -- replace with a minimal fallback: `<title>FitConnect</title>`
-- Remove: `<meta name="title" content="...">` (line 10)
-- Remove: `<meta name="description" content="...">` (line 11)
-- Remove: `<meta name="keywords" content="...">` (line 12)
-- Remove: `<meta name="author" content="FitConnect">` (line 13)
-- Remove: `<meta name="robots" content="index, follow">` (line 14)
+```json
+"sections": {
+  "stats": {
+    "title": "Quick Stats",
+    "description": "Your key performance metrics"
+  },
+  "clients": {
+    "title": "Your Clients",
+    "description": "Active client overview"
+  },
+  "activity": {
+    "title": "Client Activity",
+    "description": "Client activity and sessions"
+  },
+  "actions": {
+    "title": "Quick Actions",
+    "description": "Common tasks"
+  },
+  "engagement": {
+    "title": "Engagement",
+    "description": "Client engagement and reviews"
+  },
+  "intelligence": {
+    "title": "AI Insights",
+    "description": "Smart recommendations for your business"
+  },
+  "business": {
+    "title": "Business",
+    "description": "Revenue, packages and subscriptions"
+  }
+}
+```
 
-Keep only a minimal fallback `<title>FitConnect</title>` for the brief moment before React hydrates. All other tags are injected by `SEOHead` per page.
+**File:** `src/i18n/locales/pl/coach.json`
 
-Also remove the static `og:url` (line 20) and `twitter:url` (line 31) since these are page-specific and managed by SEOHead.
+Add the same structure with Polish translations.
 
-### Step 2: Verify meta description lengths across all pages
+### Step 2: Fix plan creation routes
 
-Audit and ensure every page's description passed to `SEOHead`/`PageLayout` is under 160 characters. Pages to check:
+**Option chosen:** Update the links in `CoachPlans.tsx` and `AssignPlanModal.tsx` to point to the existing registered routes.
 
-| Page | Current description | Action needed |
-|------|-------------------|---------------|
-| Homepage (Index.tsx) | "Find verified personal trainers, nutritionists and boxing coaches across the UK. Book sessions online or in-person. Free to download on iOS and Android." | 155 chars - OK |
-| Marketplace | "Download workout templates, meal plans, e-books and video courses from certified coaches. Free and premium fitness resources for every goal." | 141 chars - OK |
-| Blog | "Read expert fitness articles from UK personal trainers. Workout tips, nutrition guides, weight loss advice and training insights to reach your goals." | 149 chars - OK |
-| Docs pages (auto-generated) | `"Learn about ${title} on FitConnect - comprehensive guides and tutorials for UK fitness coaches and clients."` | Variable - check if any exceed 160 |
+**File:** `src/pages/dashboard/coach/CoachPlans.tsx`
 
-All descriptions appear to be under 160 characters. No changes needed here.
+| Current Link | Fixed Link |
+|-------------|-----------|
+| `/dashboard/coach/plans/new` | `/dashboard/coach/plans/builder` |
+| `/dashboard/coach/plans/nutrition/new` | `/dashboard/coach/nutrition` |
+| `/dashboard/coach/plans/new?duplicate=ID` | `/dashboard/coach/plans/builder?duplicate=ID` |
+| `/dashboard/coach/plans/nutrition/new?duplicate=ID` | `/dashboard/coach/nutrition?duplicate=ID` |
 
-### Step 3: Verify meta title lengths across all pages
+**File:** `src/components/dashboard/clients/AssignPlanModal.tsx`
 
-Ensure all titles (after `SEOHead` appends "| FitConnect") are under 60 characters. The `SEOHead` component does: `title.includes("FitConnect") ? title : ${title} | FitConnect`. 
-
-For docs pages, `DocsLayout` creates: `${title} | FitConnect Help Center`. Long doc titles like "Upsell Insights | FitConnect Help Center" (41 chars) are fine. But titles like "Coach AI Recommendations | FitConnect Help Center" (49 chars) are also fine.
-
-The `index.html` static title was 87 chars -- removing it fixes the title length issue.
-
-### Step 4: Add missing alt text to images
-
-**File:** `src/pages/SuccessStories.tsx` (line 205)
-- Current: `alt={story.name}` -- This is OK but could be more descriptive
-- Change to: `alt={`${story.name} - fitness transformation result`}`
-
-Check all landing page images for missing alt text. The Hero phone image already has alt text. Coach card images in `FeaturedCoaches.tsx` need verification.
-
-### Step 5: Address large images
-
-The "Large Image" warnings likely refer to:
-- The hero phones image or Supabase-hosted images
-- Success story images loaded at full size
-
-Add explicit `width`/`height` dimensions and `loading="lazy"` where missing (some were already added in previous fixes but may not have deployed).
+| Current | Fixed |
+|---------|-------|
+| `/dashboard/coach/plans/new` | `/dashboard/coach/plans/builder` |
 
 ---
 
-## Summary of Changes
+## Files Changed
 
 | File | Change |
 |------|--------|
-| `index.html` | Remove static `<title>`, `<meta name="title">`, `<meta name="description">`, `<meta name="keywords">`, `<meta name="author">`, `<meta name="robots">`, `<meta property="og:url">`, `<meta name="twitter:url">`. Keep only minimal fallback `<title>FitConnect</title>`. |
-| `src/pages/SuccessStories.tsx` | Improve alt text on story images; add `width`, `height`, `loading="lazy"` |
-
-### Expected Impact
-
-| Issue | Pages Affected | Fix |
-|-------|---------------|-----|
-| Duplicate Meta Description Tags (HIGH) | ALL pages | Removing static description from index.html |
-| Meta Description Length (MEDIUM) | Homepage | Removing duplicate resolves confusion |
-| Meta Title Length (MEDIUM) | Docs pages | Removing static 87-char title from index.html |
-| Missing Canonical URL (MEDIUM) | All pages (pre-hydration) | Already handled by SEOHead + Cloudflare prerender |
-| Missing H1 Tag (HIGH) | Docs pages | Already handled by DocsLayout + Cloudflare prerender |
-| Large Image (LOW) | Homepage, Success Stories | Ensure dimensions and lazy loading |
-| Missing Alt Text (LOW) | Success Stories | Add descriptive alt text |
-
-### Expected Score After Fix
-- Health Score: 81 -> 90+
-- Homepage: 79 -> 90+
-- All other pages: 81 -> 90+
+| `src/i18n/locales/en/coach.json` | Add `widgets.sections` with 7 section title/description pairs |
+| `src/i18n/locales/pl/coach.json` | Add Polish `widgets.sections` translations |
+| `src/pages/dashboard/coach/CoachPlans.tsx` | Fix 5 links from `/plans/new` and `/plans/nutrition/new` to `/plans/builder` and `/nutrition` |
+| `src/components/dashboard/clients/AssignPlanModal.tsx` | Fix 1 link from `/plans/new` to `/plans/builder` |
