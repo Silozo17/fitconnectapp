@@ -11,6 +11,9 @@ const invalidateProfileCompletion = (queryClient: ReturnType<typeof useQueryClie
   }
 };
 
+export type EventType = 'class' | 'workshop' | 'live_event' | 'online_event' | 'seminar' | 'bootcamp';
+export type EventFormat = 'in_person' | 'online' | 'hybrid';
+
 export interface GroupClass {
   id: string;
   coach_id: string;
@@ -24,6 +27,13 @@ export interface GroupClass {
   is_waitlist_open: boolean;
   max_participants: number | null;
   is_active: boolean;
+  event_type: EventType;
+  event_format: EventFormat;
+  online_link: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  is_recurring: boolean;
+  community_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -56,7 +66,7 @@ export const useCoachGroupClasses = (coachId?: string) => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as GroupClass[];
+      return (data as unknown as GroupClass[]);
     },
     enabled: !!coachId,
   });
@@ -86,7 +96,7 @@ export const useMyGroupClasses = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data as GroupClass[];
+      return (data as unknown as GroupClass[]);
     },
     enabled: !!user,
   });
@@ -114,7 +124,7 @@ export const useCreateGroupClass = () => {
         .insert({
           ...groupClass,
           coach_id: profile.id,
-        })
+        } as any)
         .select()
         .single();
 
@@ -124,10 +134,10 @@ export const useCreateGroupClass = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-group-classes"] });
       invalidateProfileCompletion(queryClient, user?.id);
-      toast.success("Group class created");
+      toast.success("Class/event created");
     },
     onError: () => {
-      toast.error("Failed to create group class");
+      toast.error("Failed to create class/event");
     },
   });
 };
@@ -140,7 +150,7 @@ export const useUpdateGroupClass = () => {
     mutationFn: async ({ id, ...updates }: Partial<GroupClass> & { id: string }) => {
       const { data, error } = await supabase
         .from("coach_group_classes")
-        .update(updates)
+        .update(updates as any)
         .eq("id", id)
         .select()
         .single();
@@ -150,10 +160,10 @@ export const useUpdateGroupClass = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-group-classes"] });
-      toast.success("Group class updated");
+      toast.success("Class/event updated");
     },
     onError: () => {
-      toast.error("Failed to update group class");
+      toast.error("Failed to update class/event");
     },
   });
 };
@@ -175,10 +185,10 @@ export const useDeleteGroupClass = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["my-group-classes"] });
       invalidateProfileCompletion(queryClient, user?.id);
-      toast.success("Group class deleted");
+      toast.success("Class/event deleted");
     },
     onError: () => {
-      toast.error("Failed to delete group class");
+      toast.error("Failed to delete class/event");
     },
   });
 };

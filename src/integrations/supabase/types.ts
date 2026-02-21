@@ -3233,48 +3233,69 @@ export type Database = {
       coach_group_classes: {
         Row: {
           coach_id: string
+          community_id: string | null
           created_at: string
           currency: string | null
           description: string | null
+          end_date: string | null
+          event_format: string
+          event_type: string
           id: string
           is_active: boolean | null
+          is_recurring: boolean
           is_waitlist_open: boolean | null
           location: string | null
           max_participants: number | null
+          online_link: string | null
           price: number | null
           schedule_info: string | null
+          start_date: string | null
           target_audience: string | null
           title: string
           updated_at: string
         }
         Insert: {
           coach_id: string
+          community_id?: string | null
           created_at?: string
           currency?: string | null
           description?: string | null
+          end_date?: string | null
+          event_format?: string
+          event_type?: string
           id?: string
           is_active?: boolean | null
+          is_recurring?: boolean
           is_waitlist_open?: boolean | null
           location?: string | null
           max_participants?: number | null
+          online_link?: string | null
           price?: number | null
           schedule_info?: string | null
+          start_date?: string | null
           target_audience?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           coach_id?: string
+          community_id?: string | null
           created_at?: string
           currency?: string | null
           description?: string | null
+          end_date?: string | null
+          event_format?: string
+          event_type?: string
           id?: string
           is_active?: boolean | null
+          is_recurring?: boolean
           is_waitlist_open?: boolean | null
           location?: string | null
           max_participants?: number | null
+          online_link?: string | null
           price?: number | null
           schedule_info?: string | null
+          start_date?: string | null
           target_audience?: string | null
           title?: string
           updated_at?: string
@@ -3292,6 +3313,13 @@ export type Database = {
             columns: ["coach_id"]
             isOneToOne: false
             referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "coach_group_classes_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
             referencedColumns: ["id"]
           },
         ]

@@ -1840,7 +1840,7 @@
       "gamification": "Grywalizacja",
       "achievements": "Osiągnięcia",
       "settings": "Ustawienia",
-      "groupClasses": "Zajęcia grupowe",
+      "groupClasses": "Zajęcia i wydarzenia",
       "community": "Społeczność"
     }
   },
@@ -1881,8 +1881,8 @@
     "complete": "Ukończono!"
   },
   "groupClasses": {
-    "pageTitle": "Zajęcia grupowe",
-    "pageDescription": "Twórz i zarządzaj zajęciami grupowymi i aktywnościami dla swoich klientów"
+    "pageTitle": "Zajęcia i wydarzenia",
+    "pageDescription": "Twórz i zarządzaj zajęciami, warsztatami, wydarzeniami na żywo i innymi"
   },
   "community": {
     "title": "Społeczność",

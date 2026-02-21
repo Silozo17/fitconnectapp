@@ -339,6 +339,70 @@ serve(async (req) => {
               console.log("Boost stats updated successfully");
             }
           }
+        } else if (metadata.type === "community_access" || metadata.type === "community_subscription") {
+          // Handle community paid access
+          const communityId = metadata.community_id;
+          const userId = metadata.user_id;
+          const clientId = metadata.client_id;
+          const coachId = metadata.coach_id;
+
+          console.log("Community access payment completed:", { communityId, userId, type: metadata.type });
+
+          // Add user as community member
+          const { error: memberError } = await supabase
+            .from("community_members")
+            .insert({
+              community_id: communityId,
+              user_id: userId,
+              role: "member",
+            })
+            .select()
+            .single();
+
+          if (memberError) {
+            // Might already be a member (duplicate)
+            if (memberError.code !== '23505') {
+              console.error("Error adding community member:", memberError);
+            }
+          } else {
+            console.log("Community member added successfully");
+
+            // Update member count
+            await supabase.rpc("is_community_member", { _user_id: userId, _community_id: communityId });
+          }
+
+          // Create community subscription record
+          const { error: subError } = await supabase
+            .from("community_subscriptions")
+            .insert({
+              community_id: communityId,
+              user_id: userId,
+              status: metadata.type === "community_subscription" ? "active" : "active",
+              amount_paid: parseFloat(metadata.amount || "0"),
+              currency: metadata.currency || "GBP",
+              stripe_subscription_id: metadata.type === "community_subscription" ? (session.subscription as string) : null,
+              stripe_checkout_session_id: session.id,
+            });
+
+          if (subError) {
+            console.error("Error creating community subscription:", subError);
+          } else {
+            console.log("Community subscription recorded");
+          }
+
+          // Update community member_count
+          const { count: memberCount } = await supabase
+            .from("community_members")
+            .select("*", { count: "exact", head: true })
+            .eq("community_id", communityId);
+
+          if (memberCount !== null) {
+            await supabase
+              .from("communities")
+              .update({ member_count: memberCount })
+              .eq("id", communityId);
+          }
+
         } else if (metadata.type === "digital_content") {
           // Handle digital content purchase completion
           const productId = metadata.product_id || null;

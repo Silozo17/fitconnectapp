@@ -490,7 +490,9 @@
       "automations": "Automations",
       "dropoffRescue": "Drop-off Rescue",
       "milestonesCelebration": "Milestone Celebration",
-      "reminderSettings": "Reminder Settings"
+      "reminderSettings": "Reminder Settings",
+      "groupClasses": "Classes & Events",
+      "community": "Community"
     },
     "client": {
       "home": "Home",
@@ -518,7 +520,8 @@
       "favourites": "Favourites",
       "settings": "Settings",
       "foodDiary": "Food Diary",
-      "trainingLogs": "Training Logs"
+      "trainingLogs": "Training Logs",
+      "community": "Community"
     },
     "bottomNav": {
       "home": "Home",
