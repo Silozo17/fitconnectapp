@@ -4540,6 +4540,67 @@ export type Database = {
           },
         ]
       }
+      community_invitations: {
+        Row: {
+          coach_id: string
+          community_id: string
+          created_at: string
+          email: string | null
+          expires_at: string | null
+          id: string
+          invite_code: string
+          is_free_access: boolean
+          max_uses: number | null
+          uses_count: number
+        }
+        Insert: {
+          coach_id: string
+          community_id: string
+          created_at?: string
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          invite_code: string
+          is_free_access?: boolean
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Update: {
+          coach_id?: string
+          community_id?: string
+          created_at?: string
+          email?: string | null
+          expires_at?: string | null
+          id?: string
+          invite_code?: string
+          is_free_access?: boolean
+          max_uses?: number | null
+          uses_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_invitations_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_invitations_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_invitations_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_lesson_progress: {
         Row: {
           completed_at: string | null
@@ -4583,11 +4644,13 @@ export type Database = {
           description: string | null
           display_order: number
           duration_minutes: number | null
+          embed_mode: string
           file_urls: string[] | null
           id: string
           is_free_preview: boolean
           is_published: boolean
           module_id: string
+          preview_image_url: string | null
           title: string
           updated_at: string
           video_url: string | null
@@ -4599,11 +4662,13 @@ export type Database = {
           description?: string | null
           display_order?: number
           duration_minutes?: number | null
+          embed_mode?: string
           file_urls?: string[] | null
           id?: string
           is_free_preview?: boolean
           is_published?: boolean
           module_id: string
+          preview_image_url?: string | null
           title: string
           updated_at?: string
           video_url?: string | null
@@ -4615,11 +4680,13 @@ export type Database = {
           description?: string | null
           display_order?: number
           duration_minutes?: number | null
+          embed_mode?: string
           file_urls?: string[] | null
           id?: string
           is_free_preview?: boolean
           is_published?: boolean
           module_id?: string
+          preview_image_url?: string | null
           title?: string
           updated_at?: string
           video_url?: string | null
@@ -4637,6 +4704,84 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "community_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_linked_packages: {
+        Row: {
+          community_id: string
+          created_at: string
+          id: string
+          is_free_for_members: boolean
+          package_id: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          id?: string
+          is_free_for_members?: boolean
+          package_id: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          id?: string
+          is_free_for_members?: boolean
+          package_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_linked_packages_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_linked_packages_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "coach_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_linked_products: {
+        Row: {
+          community_id: string
+          created_at: string
+          id: string
+          is_free_for_members: boolean
+          product_id: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          id?: string
+          is_free_for_members?: boolean
+          product_id: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          id?: string
+          is_free_for_members?: boolean
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_linked_products_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_linked_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "digital_products"
             referencedColumns: ["id"]
           },
         ]
@@ -4681,6 +4826,7 @@ export type Database = {
           display_order: number
           id: string
           is_published: boolean
+          preview_image_url: string | null
           title: string
           updated_at: string
         }
@@ -4691,6 +4837,7 @@ export type Database = {
           display_order?: number
           id?: string
           is_published?: boolean
+          preview_image_url?: string | null
           title: string
           updated_at?: string
         }
@@ -4701,6 +4848,7 @@ export type Database = {
           display_order?: number
           id?: string
           is_published?: boolean
+          preview_image_url?: string | null
           title?: string
           updated_at?: string
         }

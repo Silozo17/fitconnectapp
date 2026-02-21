@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Pin, Megaphone, Send, MessageCircle, Heart, Trash2, BarChart3, Loader2, Users, Video, Plus, GripVertical, BookOpen, Eye, EyeOff, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowLeft, Pin, Megaphone, Send, MessageCircle, Heart, Trash2, BarChart3, Loader2, Users, Video, Plus, GripVertical, BookOpen, Eye, EyeOff, ChevronDown, ChevronRight, Settings, Link2, Copy, Check, Mail, Package, ShoppingBag, X, Image } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { VideoEmbed } from "@/components/shared/VideoEmbed";
 import {
   useCommunityPosts, useCreatePost, useTogglePin, useDeletePost,
@@ -24,10 +25,19 @@ import {
   useUpdateModule, useDeleteModule, useCreateLesson, useUpdateLesson, useDeleteLesson,
   type CommunityModule,
 } from "@/hooks/useCommunityClassroom";
+import {
+  useCommunityInvitations, useCreateInvitation, useDeleteInvitation,
+} from "@/hooks/useCommunityInvitations";
+import {
+  useCommunityLinkedPackages, useLinkPackage, useUnlinkPackage,
+  useCommunityLinkedProducts, useLinkProduct, useUnlinkProduct,
+} from "@/hooks/useCommunityLinkedContent";
 import { useAuth } from "@/contexts/AuthContext";
+import { useCoachProfileId } from "@/hooks/useCoachProfileId";
 import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 
 // ===== Post Card Component =====
 const PostCard = ({ post, communityId, isAdmin }: { post: CommunityPost; communityId: string; isAdmin: boolean }) => {
@@ -74,10 +84,8 @@ const PostCard = ({ post, communityId, isAdmin }: { post: CommunityPost; communi
 
         <p className="text-sm text-foreground whitespace-pre-wrap">{post.content}</p>
 
-        {/* Video Embed */}
         {post.embed_url && <VideoEmbed url={post.embed_url} />}
 
-        {/* Poll */}
         {post.post_type === "poll" && post.poll_data && <PollDisplay postId={post.id} pollData={post.poll_data} />}
 
         <div className="flex items-center gap-4 pt-2 border-t border-border/30">
@@ -130,6 +138,7 @@ const ModuleCard = ({ module, communityId }: { module: CommunityModule; communit
   const [lessonVideoUrl, setLessonVideoUrl] = useState("");
   const [lessonContent, setLessonContent] = useState("");
   const [lessonFreePreview, setLessonFreePreview] = useState(false);
+  const [lessonPreviewImage, setLessonPreviewImage] = useState("");
   const { data: lessons = [], isLoading } = useCommunityLessons(isOpen ? module.id : undefined);
   const createLesson = useCreateLesson();
   const updateModule = useUpdateModule();
@@ -146,12 +155,15 @@ const ModuleCard = ({ module, communityId }: { module: CommunityModule; communit
         video_url: lessonVideoUrl.trim() || undefined,
         content: lessonContent.trim() || undefined,
         is_free_preview: lessonFreePreview,
+        preview_image_url: lessonPreviewImage.trim() || undefined,
+        embed_mode: "restricted",
         display_order: lessons.length,
       });
       setLessonTitle("");
       setLessonVideoUrl("");
       setLessonContent("");
       setLessonFreePreview(false);
+      setLessonPreviewImage("");
       setShowAddLesson(false);
       toast.success(t("community.lessonCreated"));
     } catch { toast.error(t("community.lessonFailed")); }
@@ -224,9 +236,16 @@ const ModuleCard = ({ module, communityId }: { module: CommunityModule; communit
               <Input placeholder={t("community.lessonTitlePlaceholder")} value={lessonTitle} onChange={(e) => setLessonTitle(e.target.value)} />
             </div>
             <div className="space-y-2">
+              <Label>{t("community.previewImage")}</Label>
+              <Input placeholder={t("community.previewImagePlaceholder")} value={lessonPreviewImage} onChange={(e) => setLessonPreviewImage(e.target.value)} />
+              {lessonPreviewImage && (
+                <img src={lessonPreviewImage} alt="Preview" className="w-full h-32 object-cover rounded-lg mt-1" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+              )}
+            </div>
+            <div className="space-y-2">
               <Label>{t("community.videoUrl")}</Label>
               <Input placeholder="https://youtube.com/watch?v=..." value={lessonVideoUrl} onChange={(e) => setLessonVideoUrl(e.target.value)} />
-              {lessonVideoUrl && <VideoEmbed url={lessonVideoUrl} className="mt-2" />}
+              {lessonVideoUrl && <VideoEmbed url={lessonVideoUrl} className="mt-2" restricted />}
             </div>
             <div className="space-y-2">
               <Label>{t("community.lessonContent")}</Label>
@@ -253,6 +272,241 @@ const ModuleCard = ({ module, communityId }: { module: CommunityModule; communit
   );
 };
 
+// ===== Settings Tab Components =====
+const InviteSection = ({ communityId }: { communityId: string }) => {
+  const { t } = useTranslation("coach");
+  const { data: coachProfileId } = useCoachProfileId();
+  const { data: invitations = [], isLoading } = useCommunityInvitations(communityId);
+  const createInvite = useCreateInvitation();
+  const deleteInvite = useDeleteInvitation();
+  const [copied, setCopied] = useState<string | null>(null);
+  const [freeAccess, setFreeAccess] = useState(false);
+  const [maxUses, setMaxUses] = useState("");
+  const [emailInvite, setEmailInvite] = useState("");
+  const [emailFreeAccess, setEmailFreeAccess] = useState(false);
+
+  const handleCreateLink = async () => {
+    if (!coachProfileId) return;
+    try {
+      await createInvite.mutateAsync({
+        community_id: communityId,
+        coach_id: coachProfileId,
+        is_free_access: freeAccess,
+        max_uses: maxUses ? parseInt(maxUses) : null,
+      });
+      setMaxUses("");
+      setFreeAccess(false);
+      toast.success(t("community.inviteCreated"));
+    } catch { toast.error(t("community.inviteFailed")); }
+  };
+
+  const handleEmailInvite = async () => {
+    if (!coachProfileId || !emailInvite.trim()) return;
+    try {
+      await createInvite.mutateAsync({
+        community_id: communityId,
+        coach_id: coachProfileId,
+        email: emailInvite.trim(),
+        is_free_access: emailFreeAccess,
+        max_uses: 1,
+      });
+      setEmailInvite("");
+      setEmailFreeAccess(false);
+      toast.success(t("community.inviteSent"));
+    } catch { toast.error(t("community.inviteFailed")); }
+  };
+
+  const copyLink = (code: string) => {
+    navigator.clipboard.writeText(`${window.location.origin}/invite/${code}`);
+    setCopied(code);
+    setTimeout(() => setCopied(null), 2000);
+    toast.success(t("community.linkCopied"));
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Create Link */}
+      <Card className="rounded-2xl border-border/50">
+        <CardContent className="p-4 space-y-4">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><Link2 className="h-4 w-4" /> {t("community.createInviteLink")}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label className="text-xs">{t("community.maxUses")}</Label>
+              <Input type="number" placeholder={t("community.unlimited")} value={maxUses} onChange={(e) => setMaxUses(e.target.value)} className="h-9 text-sm" />
+            </div>
+            <div className="flex items-center gap-2 pt-5">
+              <Switch id="free-access" checked={freeAccess} onCheckedChange={setFreeAccess} />
+              <Label htmlFor="free-access" className="text-xs">{t("community.grantFreeAccess")}</Label>
+            </div>
+          </div>
+          <Button size="sm" onClick={handleCreateLink} disabled={createInvite.isPending}>
+            {createInvite.isPending && <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />}
+            <Plus className="h-3.5 w-3.5 mr-1.5" /> {t("community.createInviteLink")}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Email Invite */}
+      <Card className="rounded-2xl border-border/50">
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><Mail className="h-4 w-4" /> {t("community.inviteByEmail")}</h3>
+          <div className="flex gap-2">
+            <Input placeholder={t("community.emailPlaceholder")} type="email" value={emailInvite} onChange={(e) => setEmailInvite(e.target.value)} className="h-9 text-sm" />
+            <Button size="sm" onClick={handleEmailInvite} disabled={!emailInvite.trim()}>
+              <Send className="h-3.5 w-3.5 mr-1.5" /> {t("community.sendInvite")}
+            </Button>
+          </div>
+          <div className="flex items-center gap-2">
+            <Switch id="email-free" checked={emailFreeAccess} onCheckedChange={setEmailFreeAccess} />
+            <Label htmlFor="email-free" className="text-xs">{t("community.grantFreeAccess")}</Label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Active Invites */}
+      <Card className="rounded-2xl border-border/50">
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm">{t("community.activeInvites")}</h3>
+          {isLoading ? <Skeleton className="h-16 w-full" /> : invitations.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("community.noInvites")}</p>
+          ) : invitations.map((inv) => (
+            <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/30">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <code className="text-xs bg-muted px-2 py-0.5 rounded">{inv.invite_code}</code>
+                  {inv.is_free_access && <Badge variant="secondary" className="text-[10px]">{t("community.freeAccess")}</Badge>}
+                  {inv.email && <span className="text-xs text-muted-foreground">{inv.email}</span>}
+                </div>
+                <p className="text-[10px] text-muted-foreground mt-1">
+                  {inv.uses_count}{inv.max_uses ? `/${inv.max_uses}` : ""} {t("community.uses")}
+                </p>
+              </div>
+              <div className="flex gap-1 shrink-0">
+                <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => copyLink(inv.invite_code)}>
+                  {copied === inv.invite_code ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+                </Button>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => deleteInvite.mutate({ id: inv.id, communityId })}>
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+          ))}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const LinkedContentSection = ({ communityId }: { communityId: string }) => {
+  const { t } = useTranslation("coach");
+  const { data: coachProfileId } = useCoachProfileId();
+  const { data: linkedPackages = [] } = useCommunityLinkedPackages(communityId);
+  const { data: linkedProducts = [] } = useCommunityLinkedProducts(communityId);
+  const linkPackage = useLinkPackage();
+  const unlinkPackage = useUnlinkPackage();
+  const linkProduct = useLinkProduct();
+  const unlinkProduct = useUnlinkProduct();
+
+  // Fetch coach's available packages
+  const { data: coachPackages = [] } = useQuery({
+    queryKey: ["coach-packages-for-link", coachProfileId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("coach_packages").select("id, name, price, currency").eq("coach_id", coachProfileId!).eq("is_active", true);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!coachProfileId,
+  });
+
+  // Fetch coach's available products
+  const { data: coachProducts = [] } = useQuery({
+    queryKey: ["coach-products-for-link", coachProfileId],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("digital_products").select("id, title, price, currency").eq("coach_id", coachProfileId!).eq("status", "published");
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!coachProfileId,
+  });
+
+  const linkedPackageIds = new Set(linkedPackages.map((lp: any) => lp.package_id));
+  const linkedProductIds = new Set(linkedProducts.map((lp: any) => lp.product_id));
+  const availablePackages = coachPackages.filter((p) => !linkedPackageIds.has(p.id));
+  const availableProducts = coachProducts.filter((p) => !linkedProductIds.has(p.id));
+
+  return (
+    <div className="space-y-6">
+      {/* Linked Packages */}
+      <Card className="rounded-2xl border-border/50">
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><Package className="h-4 w-4" /> {t("community.linkedPackages")}</h3>
+
+          {linkedPackages.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("community.noLinkedPackages")}</p>
+          ) : linkedPackages.map((lp: any) => (
+            <div key={lp.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/30">
+              <div>
+                <p className="text-sm font-medium">{lp.coach_packages?.name || "Package"}</p>
+                <p className="text-xs text-muted-foreground">{lp.is_free_for_members ? t("community.freeForMembers") : t("community.paidAccess")}</p>
+              </div>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => unlinkPackage.mutate({ id: lp.id, communityId })}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+
+          {availablePackages.length > 0 && (
+            <div className="flex gap-2">
+              <Select onValueChange={(pkgId) => linkPackage.mutate({ community_id: communityId, package_id: pkgId })}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder={t("community.linkPackage")} /></SelectTrigger>
+                <SelectContent>
+                  {availablePackages.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.name} ({p.currency} {p.price})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Linked Products */}
+      <Card className="rounded-2xl border-border/50">
+        <CardContent className="p-4 space-y-3">
+          <h3 className="font-semibold text-sm flex items-center gap-2"><ShoppingBag className="h-4 w-4" /> {t("community.linkedProducts")}</h3>
+
+          {linkedProducts.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("community.noLinkedProducts")}</p>
+          ) : linkedProducts.map((lp: any) => (
+            <div key={lp.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/20 border border-border/30">
+              <div>
+                <p className="text-sm font-medium">{lp.digital_products?.title || "Product"}</p>
+                <p className="text-xs text-muted-foreground">{lp.is_free_for_members ? t("community.freeForMembers") : t("community.paidAccess")}</p>
+              </div>
+              <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => unlinkProduct.mutate({ id: lp.id, communityId })}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          ))}
+
+          {availableProducts.length > 0 && (
+            <div className="flex gap-2">
+              <Select onValueChange={(prodId) => linkProduct.mutate({ community_id: communityId, product_id: prodId })}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue placeholder={t("community.linkProduct")} /></SelectTrigger>
+                <SelectContent>
+                  {availableProducts.map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.title} ({p.currency} {p.price})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 // ===== Main Page =====
 const CoachCommunityDetail = () => {
   const { t } = useTranslation("coach");
@@ -274,6 +528,30 @@ const CoachCommunityDetail = () => {
 
   const currentMember = members.find((m) => m.user_id === user?.id);
   const isAdmin = currentMember?.role === "admin" || currentMember?.role === "moderator";
+
+  // Fetch member display names
+  const memberUserIds = members.map(m => m.user_id);
+  const { data: memberProfiles = [] } = useQuery({
+    queryKey: ["community-member-profiles", communityId],
+    queryFn: async () => {
+      if (!memberUserIds.length) return [];
+      // Try client profiles first, then coach profiles
+      const { data: clients } = await supabase.from("client_profiles").select("user_id, first_name, last_name").in("user_id", memberUserIds);
+      const { data: coaches } = await supabase.from("coach_profiles").select("user_id, display_name").in("user_id", memberUserIds);
+      const map: Record<string, string> = {};
+      clients?.forEach((c: any) => { if (c.first_name) map[c.user_id] = `${c.first_name} ${c.last_name || ""}`.trim(); });
+      coaches?.forEach((c: any) => { if (c.display_name) map[c.user_id] = c.display_name; });
+      return map;
+    },
+    enabled: memberUserIds.length > 0,
+  });
+
+  const getMemberName = (userId: string) => {
+    if (typeof memberProfiles === "object" && !Array.isArray(memberProfiles)) {
+      return (memberProfiles as Record<string, string>)[userId] || userId.slice(0, 8) + "...";
+    }
+    return userId.slice(0, 8) + "...";
+  };
 
   useEffect(() => {
     if (!communityId) return;
@@ -316,6 +594,19 @@ const CoachCommunityDetail = () => {
     } catch { toast.error(t("community.moduleFailed")); }
   };
 
+  // Member management
+  const handleRemoveMember = async (memberId: string) => {
+    const { error } = await supabase.from("community_members").delete().eq("id", memberId);
+    if (error) toast.error("Failed to remove member");
+    else toast.success(t("community.memberRemoved"));
+  };
+
+  const handleChangeRole = async (memberId: string, role: string) => {
+    const { error } = await supabase.from("community_members").update({ role }).eq("id", memberId);
+    if (error) toast.error("Failed to update role");
+    else toast.success(t("community.roleUpdated"));
+  };
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
@@ -334,6 +625,7 @@ const CoachCommunityDetail = () => {
             <TabsTrigger value="feed">{t("community.feed")}</TabsTrigger>
             <TabsTrigger value="classroom"><BookOpen className="h-3.5 w-3.5 mr-1.5" />{t("community.classroom")}</TabsTrigger>
             <TabsTrigger value="members">{t("community.membersTab")}</TabsTrigger>
+            <TabsTrigger value="settings"><Settings className="h-3.5 w-3.5 mr-1.5" />{t("community.settings")}</TabsTrigger>
           </TabsList>
 
           {/* Feed Tab */}
@@ -400,7 +692,6 @@ const CoachCommunityDetail = () => {
               </div>
             )}
 
-            {/* Add Module Dialog */}
             <Dialog open={showAddModule} onOpenChange={setShowAddModule}>
               <DialogContent className="sm:max-w-md">
                 <DialogHeader><DialogTitle>{t("community.addModule")}</DialogTitle></DialogHeader>
@@ -430,14 +721,48 @@ const CoachCommunityDetail = () => {
                     <div key={member.id} className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center"><Users className="h-4 w-4 text-muted-foreground" /></div>
-                        <span className="text-sm font-medium">{member.user_id.slice(0, 8)}...</span>
+                        <span className="text-sm font-medium">{getMemberName(member.user_id)}</span>
                       </div>
-                      <Badge variant="secondary" className="text-xs capitalize">{member.role}</Badge>
+                      <div className="flex items-center gap-2">
+                        {isAdmin && member.user_id !== user?.id && (
+                          <>
+                            <Select value={member.role} onValueChange={(role) => handleChangeRole(member.id, role)}>
+                              <SelectTrigger className="h-7 w-28 text-xs"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="member">Member</SelectItem>
+                                <SelectItem value="moderator">Moderator</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive" onClick={() => handleRemoveMember(member.id)}>
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </>
+                        )}
+                        {(!isAdmin || member.user_id === user?.id) && (
+                          <Badge variant="secondary" className="text-xs capitalize">{member.role}</Badge>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings" className="space-y-6 mt-4">
+            <div>
+              <h2 className="font-semibold text-lg">{t("community.inviteMembers")}</h2>
+              <p className="text-sm text-muted-foreground mb-4">{t("community.inviteMembersDesc")}</p>
+              <InviteSection communityId={communityId!} />
+            </div>
+
+            <div>
+              <h2 className="font-semibold text-lg">{t("community.resources")}</h2>
+              <p className="text-sm text-muted-foreground mb-4">{t("community.resourcesDesc")}</p>
+              <LinkedContentSection communityId={communityId!} />
+            </div>
           </TabsContent>
         </Tabs>
       </div>

@@ -141,6 +141,7 @@ const CoachCommunityPage = lazy(() => import('@/pages/dashboard/coach/CoachCommu
 const CoachCommunityDetailPage = lazy(() => import('@/pages/dashboard/coach/CoachCommunityDetail'));
 const ClientCommunityPage = lazy(() => import('@/pages/dashboard/client/ClientCommunity'));
 const ClientCommunityDetailPage = lazy(() => import('@/pages/dashboard/client/ClientCommunityDetail'));
+const InviteRedeem = lazy(() => import('@/pages/InviteRedeem'));
 
 // Gym Admin Pages
 const GymAuth = lazy(() => import('@/pages/gym/GymAuth'));
@@ -573,6 +574,13 @@ const App = () => (
                                     <Reset />
                                   </Suspense>
                                 </WebsiteLocaleWrapper>
+                              } />
+
+                              {/* Invite Redemption */}
+                              <Route path="/invite/:code" element={
+                                <Suspense fallback={<PageLoadingSpinner />}>
+                                  <InviteRedeem />
+                                </Suspense>
                               } />
 
                               {/* Subscribe routes (coach registration via Stripe) - wrap with WebsiteLocaleWrapper */}

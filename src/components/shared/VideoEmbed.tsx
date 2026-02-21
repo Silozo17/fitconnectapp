@@ -1,9 +1,10 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 
 interface VideoEmbedProps {
   url: string;
   className?: string;
   title?: string;
+  restricted?: boolean;
 }
 
 type EmbedInfo = {
@@ -73,8 +74,34 @@ const ALLOWED_HOSTS = [
   "fast.wistia.net",
 ];
 
-export const VideoEmbed = ({ url, className = "", title = "Embedded video" }: VideoEmbedProps) => {
+const getRestrictedEmbedUrl = (embed: EmbedInfo): string => {
+  const url = new URL(embed.embedUrl);
+
+  if (embed.type === "youtube") {
+    url.searchParams.set("modestbranding", "1");
+    url.searchParams.set("rel", "0");
+    url.searchParams.set("controls", "1");
+    url.searchParams.set("showinfo", "0");
+    url.searchParams.set("disablekb", "1");
+    url.searchParams.set("fs", "0");
+    url.searchParams.set("iv_load_policy", "3");
+    url.searchParams.set("cc_load_policy", "0");
+  } else if (embed.type === "vimeo") {
+    url.searchParams.set("title", "0");
+    url.searchParams.set("byline", "0");
+    url.searchParams.set("portrait", "0");
+    url.searchParams.set("dnt", "1");
+  }
+
+  return url.toString();
+};
+
+export const VideoEmbed = ({ url, className = "", title = "Embedded video", restricted = false }: VideoEmbedProps) => {
   const embed = useMemo(() => parseVideoUrl(url), [url]);
+  const finalEmbedUrl = useMemo(
+    () => (restricted && (embed.type === "youtube" || embed.type === "vimeo") ? getRestrictedEmbedUrl(embed) : embed.embedUrl),
+    [embed, restricted]
+  );
 
   if (embed.type === "direct") {
     return (
@@ -84,6 +111,9 @@ export const VideoEmbed = ({ url, className = "", title = "Embedded video" }: Vi
           controls
           className="w-full h-full object-contain"
           preload="metadata"
+          controlsList={restricted ? "nodownload nofullscreen noremoteplayback" : undefined}
+          disablePictureInPicture={restricted}
+          onContextMenu={restricted ? (e) => e.preventDefault() : undefined}
         />
       </div>
     );
@@ -104,7 +134,7 @@ export const VideoEmbed = ({ url, className = "", title = "Embedded video" }: Vi
 
   // Validate embed URL host
   try {
-    const u = new URL(embed.embedUrl);
+    const u = new URL(finalEmbedUrl);
     if (!ALLOWED_HOSTS.includes(u.hostname)) {
       return (
         <a href={url} target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline break-all">
@@ -119,14 +149,31 @@ export const VideoEmbed = ({ url, className = "", title = "Embedded video" }: Vi
   return (
     <div className={`relative w-full aspect-video rounded-xl overflow-hidden bg-muted ${className}`}>
       <iframe
-        src={embed.embedUrl}
+        src={finalEmbedUrl}
         title={title}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
+        allowFullScreen={!restricted}
         className="absolute inset-0 w-full h-full border-0"
         loading="lazy"
         sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
       />
+      {/* Restricted overlay: blocks click on YouTube logo/branding in top-left */}
+      {restricted && embed.type === "youtube" && (
+        <>
+          <div
+            className="absolute top-0 left-0 w-full h-12 z-10"
+            style={{ pointerEvents: "auto" }}
+            onContextMenu={(e) => e.preventDefault()}
+            onClick={(e) => e.preventDefault()}
+          />
+          <div
+            className="absolute bottom-0 right-0 w-20 h-10 z-10"
+            style={{ pointerEvents: "auto" }}
+            onContextMenu={(e) => e.preventDefault()}
+            onClick={(e) => e.preventDefault()}
+          />
+        </>
+      )}
     </div>
   );
 };
