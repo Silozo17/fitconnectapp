@@ -120,6 +120,7 @@ const CoachNutritionBuilder = lazy(() => import('@/pages/dashboard/coach/CoachNu
 const CoachEarnings = lazy(() => import('@/pages/dashboard/coach/CoachEarnings'));
 const CoachSettings = lazy(() => import('@/pages/dashboard/coach/CoachSettings'));
 const CoachPackages = lazy(() => import('@/pages/dashboard/coach/CoachPackages'));
+const CoachGroupClasses = lazy(() => import('@/pages/dashboard/coach/CoachGroupClasses'));
 const CoachIntegrations = lazy(() => import('@/pages/dashboard/coach/CoachIntegrations'));
 const CoachReviews = lazy(() => import('@/pages/dashboard/coach/CoachReviews'));
 const CoachFinancial = lazy(() => import('@/pages/dashboard/coach/CoachFinancial'));
@@ -136,6 +137,10 @@ const CoachAutomations = lazy(() => import('@/pages/dashboard/coach/CoachAutomat
 const CoachWearableDashboard = lazy(() => import('@/pages/dashboard/coach/CoachWearableDashboard'));
 const CoachClientComparison = lazy(() => import('@/pages/dashboard/coach/CoachClientComparison'));
 const CoachCaseStudies = lazy(() => import('@/pages/dashboard/coach/CoachCaseStudies'));
+const CoachCommunityPage = lazy(() => import('@/pages/dashboard/coach/CoachCommunity'));
+const CoachCommunityDetailPage = lazy(() => import('@/pages/dashboard/coach/CoachCommunityDetail'));
+const ClientCommunityPage = lazy(() => import('@/pages/dashboard/client/ClientCommunity'));
+const ClientCommunityDetailPage = lazy(() => import('@/pages/dashboard/client/ClientCommunityDetail'));
 
 // Gym Admin Pages
 const GymAuth = lazy(() => import('@/pages/gym/GymAuth'));
@@ -1916,6 +1921,20 @@ const App = () => (
                                     </Suspense>
                                   </ProtectedRoute>
                                 } />
+                                <Route path="client/community" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientCommunityPage />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="client/community/:communityId" element={
+                                  <ProtectedRoute allowedRoles={["client"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <ClientCommunityDetailPage />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
                                 <Route path="client/integrations" element={
                                   <ProtectedRoute allowedRoles={["client"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
@@ -2127,6 +2146,27 @@ const App = () => (
                                   <ProtectedRoute allowedRoles={["coach"]}>
                                     <Suspense fallback={<PageLoadingSpinner />}>
                                       <CoachPackages />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/group-classes" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachGroupClasses />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/community" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachCommunityPage />
+                                    </Suspense>
+                                  </ProtectedRoute>
+                                } />
+                                <Route path="coach/community/:communityId" element={
+                                  <ProtectedRoute allowedRoles={["coach"]}>
+                                    <Suspense fallback={<PageLoadingSpinner />}>
+                                      <CoachCommunityDetailPage />
                                     </Suspense>
                                   </ProtectedRoute>
                                 } />

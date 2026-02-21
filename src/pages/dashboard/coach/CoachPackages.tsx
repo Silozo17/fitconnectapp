@@ -90,6 +90,27 @@ const CoachPackages = () => {
           </div>
         </div>
 
+        {/* Hybrid/Group badges */}
+        {(pkg.is_hybrid || pkg.is_group_package) && (
+          <div className="flex flex-wrap gap-1.5 pt-2">
+            {pkg.is_hybrid && (
+              <Badge variant="outline" className="text-xs">
+                {t('packages.hybrid')}: {pkg.in_person_sessions} {t('packages.inPerson')} + {pkg.online_sessions} {t('packages.online')}
+              </Badge>
+            )}
+            {pkg.is_group_package && (
+              <Badge variant="outline" className="text-xs">
+                {t('packages.group')}: {pkg.min_group_size}-{pkg.max_group_size} {t('packages.people')}
+              </Badge>
+            )}
+            {pkg.billing_months > 1 && (
+              <Badge variant="outline" className="text-xs">
+                {pkg.billing_months} {t('packages.months')}
+              </Badge>
+            )}
+          </div>
+        )}
+
         <div className="grid grid-cols-3 gap-4 text-center pt-4 border-t border-border/50">
           <div>
             <p className="text-2xl font-bold text-foreground">{pkg.session_count}</p>

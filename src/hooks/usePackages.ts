@@ -13,6 +13,14 @@ export interface CoachPackage {
   currency: string;
   validity_days: number;
   is_active: boolean;
+  is_hybrid: boolean;
+  in_person_sessions: number | null;
+  online_sessions: number | null;
+  billing_months: number;
+  is_group_package: boolean;
+  min_group_size: number;
+  max_group_size: number;
+  sessions_per_month: number | null;
   created_at: string;
   updated_at: string;
 }

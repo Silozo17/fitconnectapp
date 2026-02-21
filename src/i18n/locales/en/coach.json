@@ -726,7 +726,26 @@
       "1hr": "1 hour",
       "1.5hr": "1.5 hours",
       "2hr": "2 hours"
-    }
+    },
+    "hybridPackage": "Hybrid Package",
+    "hybridDescription": "Mix of in-person and online sessions",
+    "inPersonSessions": "In-Person Sessions",
+    "onlineSessions": "Online Sessions",
+    "totalSessionsHybrid": "Total: {{total}} sessions per period",
+    "groupPackage": "Group Package",
+    "groupDescription": "For groups of 2 or more clients",
+    "minGroupSize": "Min Group Size",
+    "maxGroupSize": "Max Group Size",
+    "packageDuration": "Duration (months)",
+    "packageDurationNote": "How many months this package covers",
+    "sessionsPerMonth": "Sessions per Month",
+    "optional": "Optional",
+    "hybrid": "Hybrid",
+    "inPerson": "in-person",
+    "online": "online",
+    "group": "Group",
+    "people": "people",
+    "months": "months"
   },
   "subscriptionPlans": {
     "title": "Subscription Plans",
@@ -1827,7 +1846,9 @@
       "earnings": "Earnings",
       "gamification": "Gamification",
       "achievements": "Achievements",
-      "settings": "Settings"
+      "settings": "Settings",
+      "groupClasses": "Group Classes",
+      "community": "Community"
     }
   },
   "widgets": {
@@ -1865,5 +1886,49 @@
   "profileCompletion": {
     "title": "Profile Completion",
     "complete": "Complete!"
+  },
+  "groupClasses": {
+    "pageTitle": "Group Classes",
+    "pageDescription": "Create and manage group classes and activities for your clients"
+  },
+  "community": {
+    "title": "Community",
+    "description": "Build communities for your clients to interact and share experiences",
+    "createCommunity": "Create Community",
+    "communityName": "Community Name",
+    "namePlaceholder": "e.g., My Fitness Tribe",
+    "communityDescription": "Description",
+    "descriptionPlaceholder": "What is this community about?",
+    "public": "Public",
+    "publicDesc": "Anyone can discover and join this community",
+    "active": "Active",
+    "inactive": "Inactive",
+    "members": "members",
+    "membersTab": "Members",
+    "noCommunities": "No communities yet",
+    "noCommunitiesDesc": "Create a community for your clients to interact, share experiences and build connections",
+    "createFirst": "Create Your First Community",
+    "created": "Community created!",
+    "createFailed": "Failed to create community",
+    "deleted": "Community deleted",
+    "deleteFailed": "Failed to delete community",
+    "deleteConfirmTitle": "Delete Community?",
+    "deleteConfirmDesc": "This will permanently delete the community and all its posts. This cannot be undone.",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "create": "Create",
+    "communityFeed": "Community Feed",
+    "feed": "Feed",
+    "writePost": "Share something with your community...",
+    "markAnnouncement": "Announcement",
+    "post": "Post",
+    "postCreated": "Post shared!",
+    "postFailed": "Failed to create post",
+    "noPosts": "No posts yet. Be the first to share something!",
+    "pinned": "Pinned",
+    "announcement": "Announcement",
+    "writeComment": "Write a comment...",
+    "commentFailed": "Failed to add comment",
+    "poll": "Poll"
   }
 }
