@@ -16,6 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Sparkles, Upload, Link, Loader2, FileUp } from "lucide-react";
 import { getErrorMessage } from "@/lib/error-utils";
+import { VideoEmbed } from "@/components/shared/VideoEmbed";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -722,6 +723,11 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                       <Input placeholder="https://youtube.com/watch?v=..." {...field} />
                     </FormControl>
                     <FormDescription>Free preview so buyers can see what they're getting</FormDescription>
+                    {field.value && (
+                      <div className="mt-2">
+                        <VideoEmbed url={field.value} title="Preview video" />
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
@@ -737,6 +743,11 @@ export default function CreateProductModal({ open, onOpenChange }: CreateProduct
                       <FormControl>
                         <Input placeholder="Video/audio streaming URL" {...field} />
                       </FormControl>
+                      {field.value && (
+                        <div className="mt-2">
+                          <VideoEmbed url={field.value} title="Streaming preview" />
+                        </div>
+                      )}
                       <FormMessage />
                     </FormItem>
                   )}

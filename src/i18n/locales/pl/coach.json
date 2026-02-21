@@ -676,6 +676,10 @@
       "createExercise": "Utwórz ćwiczenie",
       "creating": "Tworzenie..."
     },
+    "watchDemo": "Obejrzyj demo",
+    "watchVideo": "Obejrzyj wideo",
+    "hideVideo": "Ukryj wideo",
+    "videoPreview": "Podgląd wideo",
     "categories": {
       "chest": "Klatka piersiowa",
       "back": "Plecy",

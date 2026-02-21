@@ -676,6 +676,10 @@
       "createExercise": "Create Exercise",
       "creating": "Creating..."
     },
+    "watchDemo": "Watch demo",
+    "watchVideo": "Watch video",
+    "hideVideo": "Hide video",
+    "videoPreview": "Video preview",
     "categories": {
       "chest": "Chest",
       "back": "Back",

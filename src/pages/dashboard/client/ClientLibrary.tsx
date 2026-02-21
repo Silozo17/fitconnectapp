@@ -5,6 +5,8 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { VideoEmbed } from "@/components/shared/VideoEmbed";
 import ClientDashboardLayout from "@/components/dashboard/ClientDashboardLayout";
 import { useMyLibrary, CONTENT_TYPES, ContentPurchase } from "@/hooks/useDigitalProducts";
 import { useToast } from "@/hooks/use-toast";
@@ -38,6 +40,7 @@ export default function ClientLibrary() {
   const marketplaceLinkPrefix = useMarketplaceLinkPrefix();
   const { isNativeMobile } = usePlatformRestrictions();
   const [showWebOnlyDialog, setShowWebOnlyDialog] = useState(false);
+  const [watchingVideo, setWatchingVideo] = useState<{ url: string; title: string } | null>(null);
 
   const handleMarketplaceClick = () => {
     if (isNativeMobile) {
@@ -162,11 +165,13 @@ export default function ClientLibrary() {
           ) : (
             <>
               {product?.is_streamable && product?.video_url && (
-                <Button size="sm" className="flex-1" asChild>
-                  <a href={product.video_url} target="_blank" rel="noopener noreferrer">
-                    <Play className="h-4 w-4 mr-1" />
-                    Watch
-                  </a>
+                <Button 
+                  size="sm" 
+                  className="flex-1"
+                  onClick={() => setWatchingVideo({ url: product.video_url!, title: item.title })}
+                >
+                  <Play className="h-4 w-4 mr-1" />
+                  Watch
                 </Button>
               )}
               {product?.is_downloadable && product?.content_url && (
@@ -275,6 +280,18 @@ export default function ClientLibrary() {
         onOpenChange={setShowWebOnlyDialog}
         featureName="marketplace"
       />
+
+      {/* Video Player Dialog */}
+      <Dialog open={!!watchingVideo} onOpenChange={() => setWatchingVideo(null)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{watchingVideo?.title}</DialogTitle>
+          </DialogHeader>
+          {watchingVideo && (
+            <VideoEmbed url={watchingVideo.url} restricted title={watchingVideo.title} />
+          )}
+        </DialogContent>
+      </Dialog>
     </ClientDashboardLayout>
   );
 }
