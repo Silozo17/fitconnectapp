@@ -46,11 +46,21 @@ const GuestOnlyRoute = ({ children }: GuestOnlyRouteProps) => {
   if (user && !pending2FA) {
     hasRenderedContent.current = true;
     
+    // Check for saved gym view or selectedGymId
+    const selectedGymId = localStorage.getItem("selectedGymId");
+    const savedViewState = localStorage.getItem(STORAGE_KEYS.VIEW_STATE);
+    let savedViewMode: string | null = null;
+    try {
+      if (savedViewState) savedViewMode = JSON.parse(savedViewState)?.viewMode;
+    } catch {}
+
     let redirectTo = "/dashboard/client";
     if (isAdminRole(role)) {
       redirectTo = "/dashboard/admin";
     } else if (role === "coach") {
       redirectTo = "/dashboard/coach";
+    } else if (savedViewMode === "gym" && selectedGymId) {
+      redirectTo = `/gym-admin/${selectedGymId}`;
     }
     
     debugLogger.navigation(window.location.pathname, redirectTo, { 

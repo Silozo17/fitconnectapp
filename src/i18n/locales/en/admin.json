@@ -643,5 +643,12 @@
     "advanced": "Advanced",
     "limited": "Limited",
     "unlimited": "Unlimited"
+  },
+  "viewSwitcher": {
+    "selectView": "Select View",
+    "adminView": "Admin",
+    "coachView": "Coach",
+    "clientView": "Client",
+    "gymView": "Gym Dashboard"
   }
 }

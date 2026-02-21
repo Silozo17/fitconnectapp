@@ -642,5 +642,12 @@
     "advanced": "Zaawansowany",
     "limited": "Ograniczony",
     "unlimited": "Nieograniczony"
+  },
+  "viewSwitcher": {
+    "selectView": "Wybierz widok",
+    "adminView": "Administrator",
+    "coachView": "Trener",
+    "clientView": "Klient",
+    "gymView": "Panel Siłowni"
   }
 }
