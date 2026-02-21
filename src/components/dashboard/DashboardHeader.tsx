@@ -7,6 +7,7 @@ import { UpgradeSuggestionTooltip } from "@/components/subscription/UpgradeSugge
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
+import { useAdminView } from "@/contexts/AdminContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { useSelectedAvatar } from "@/hooks/useAvatars";
 import { useNavigate } from "react-router-dom";
@@ -34,6 +35,7 @@ const DashboardHeader = memo(({ subscriptionTier, coachId, onMenuToggle }: Dashb
   const { t } = useTranslation('dashboard');
   const navigate = useNavigate();
   const { signOut, role } = useAuth();
+  const { availableProfiles } = useAdminView();
   const { displayName, avatarUrl } = useUserProfile();
   const { data: selectedAvatar } = useSelectedAvatar('coach');
   const [upgradeDrawerOpen, setUpgradeDrawerOpen] = useState(false);
@@ -71,7 +73,7 @@ const DashboardHeader = memo(({ subscriptionTier, coachId, onMenuToggle }: Dashb
 
         {/* Right Section */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {(role === "admin" || role === "manager" || role === "staff" || role === "coach") && (
+          {(role === "admin" || role === "manager" || role === "staff" || role === "coach" || availableProfiles.gym?.length) && (
             <div className="hidden xl:block">
               <ViewSwitcher />
             </div>

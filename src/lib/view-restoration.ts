@@ -7,7 +7,7 @@
 
 import { STORAGE_KEYS, getStorage, setStorage, removeStorage } from './storage-keys';
 
-export type ViewMode = 'admin' | 'coach' | 'client';
+export type ViewMode = 'admin' | 'coach' | 'client' | 'gym';
 
 interface ViewState {
   route: string;
@@ -40,6 +40,7 @@ export function validateRouteForRole(route: string, role: string | null): boolea
   if (route.startsWith('/dashboard/admin')) return isAdminUser;
   if (route.startsWith('/dashboard/coach')) return isAdminUser || isCoach;
   if (route.startsWith('/dashboard/client')) return true;
+  if (route.startsWith('/gym-admin/')) return true; // gym access checked separately via gym_profiles/gym_staff
   return false;
 }
 
@@ -47,6 +48,7 @@ export function validateRouteForRole(route: string, role: string | null): boolea
  * Extract view mode from a dashboard route path
  */
 export function getViewModeFromPath(pathname: string): ViewMode | null {
+  if (pathname.startsWith('/gym-admin/')) return 'gym';
   const match = pathname.match(/^\/dashboard\/(admin|coach|client)/);
   return match ? (match[1] as ViewMode) : null;
 }
@@ -55,7 +57,7 @@ export function getViewModeFromPath(pathname: string): ViewMode | null {
  * Save the current route for restoration
  */
 export function saveRoute(route: string): void {
-  if (!route.startsWith('/dashboard')) return;
+  if (!route.startsWith('/dashboard') && !route.startsWith('/gym-admin/')) return;
   
   const viewMode = getViewModeFromPath(route);
   if (viewMode) {

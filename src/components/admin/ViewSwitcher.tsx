@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { requestCloseMobileNav } from "@/lib/mobile-nav";
 import { debugLogger } from "@/lib/debug-logger";
+import { saveRoute } from "@/lib/view-restoration";
 
 // Routes that exist in multiple views - maps route segment to which views support it
 const ROUTE_EQUIVALENTS: Record<string, Record<string, boolean>> = {
@@ -29,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Shield, User, Briefcase, Check, Plus, Loader2 } from "lucide-react";
+import { Shield, User, Briefcase, Building2, Check, Plus, Loader2 } from "lucide-react";
 import BecomeClientModal from "@/components/shared/BecomeClientModal";
 import BecomeCoachModal from "@/components/shared/BecomeCoachModal";
 import { FirstTimeTooltip } from "@/components/shared/FirstTimeTooltip";
@@ -65,7 +66,8 @@ const ViewSwitcher = () => {
   const profileCount = 
     (availableProfiles.client ? 1 : 0) + 
     (availableProfiles.coach ? 1 : 0) + 
-    (availableProfiles.admin ? 1 : 0);
+    (availableProfiles.admin ? 1 : 0) +
+    (availableProfiles.gym?.length ? 1 : 0);
   const hasMultipleProfiles = profileCount > 1;
 
   const [, startTransition] = useTransition();
@@ -85,6 +87,23 @@ const ViewSwitcher = () => {
 
     // Only close mobile nav when actually navigating (not when opening modals)
     requestCloseMobileNav();
+
+    // Handle gym view separately - gym routes are different from dashboard routes
+    if (value === "gym") {
+      const gyms = availableProfiles.gym;
+      if (gyms && gyms.length > 0) {
+        setActiveProfile("gym", gyms[0].id);
+        const targetPath = gyms.length === 1 
+          ? `/gym-admin/${gyms[0].id}` 
+          : "/gym-login";
+        localStorage.setItem("selectedGymId", gyms[0].id);
+        saveRoute(targetPath);
+        startTransition(() => {
+          navigate(targetPath);
+        });
+      }
+      return;
+    }
 
     const viewMode = value as "admin" | "client" | "coach";
     const profileId = availableProfiles[viewMode] || null;
@@ -112,6 +131,11 @@ const ViewSwitcher = () => {
     );
   }
 
+  // Determine display value for gym (show gym name if active)
+  const activeGymName = activeProfileType === "gym" && availableProfiles.gym?.length
+    ? availableProfiles.gym[0].name
+    : null;
+
   const selectContent = (
     <Select value={activeProfileType} onValueChange={handleViewChange}>
       <SelectTrigger className="w-[180px] bg-card border-border">
@@ -127,6 +151,21 @@ const ViewSwitcher = () => {
               {availableProfiles.admin && (
                 <Check className="w-3 h-3 text-green-500 ml-auto" />
               )}
+            </div>
+          </SelectItem>
+        )}
+
+        {/* Gym View - Only if user has gym access */}
+        {availableProfiles.gym && availableProfiles.gym.length > 0 && (
+          <SelectItem value="gym">
+            <div className="flex items-center gap-2">
+              <Building2 className="w-4 h-4 text-emerald-500" />
+              <span className="truncate max-w-[120px]">
+                {availableProfiles.gym.length === 1 
+                  ? availableProfiles.gym[0].name 
+                  : t('viewSwitcher.gymView')}
+              </span>
+              <Check className="w-3 h-3 text-green-500 ml-auto" />
             </div>
           </SelectItem>
         )}

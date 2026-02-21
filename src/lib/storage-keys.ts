@@ -20,8 +20,10 @@ export const STORAGE_KEYS = {
   // =====================
   /** Last visited dashboard route */
   LAST_ROUTE: 'fc_last_route',
-  /** Active view mode (admin/coach/client) with profile ID */
+  /** Active view mode (admin/coach/client/gym) with profile ID */
   VIEW_STATE: 'fc_view_state',
+  /** Selected gym ID for gym view mode */
+  SELECTED_GYM_ID: 'fc_selected_gym_id',
   
   // =====================
   // Onboarding

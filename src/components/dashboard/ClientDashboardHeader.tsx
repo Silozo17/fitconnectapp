@@ -35,7 +35,8 @@ const ClientDashboardHeader = ({ onMenuToggle }: ClientDashboardHeaderProps) => 
   const hasMultipleProfiles = 
     (availableProfiles.client ? 1 : 0) + 
     (availableProfiles.coach ? 1 : 0) + 
-    (availableProfiles.admin ? 1 : 0) > 1;
+    (availableProfiles.admin ? 1 : 0) +
+    (availableProfiles.gym?.length ? 1 : 0) > 1;
 
   return (
     <header 

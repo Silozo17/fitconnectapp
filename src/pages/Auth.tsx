@@ -162,15 +162,41 @@ const Auth = () => {
       
       // Check onboarding status for clients and coaches
       if (role === "client") {
-        const { data } = await supabase
-          .from("client_profiles")
-          .select("onboarding_completed")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        
-        if (data?.onboarding_completed) {
-          navigate("/dashboard/client", { replace: true });
+        // Check if user has gym access (gym owners get "client" role)
+        const [clientResult, ownedGymsResult, staffGymsResult] = await Promise.all([
+          supabase.from("client_profiles").select("onboarding_completed").eq("user_id", user.id).maybeSingle(),
+          supabase.from("gym_profiles").select("id, name").eq("user_id", user.id).eq("status", "active"),
+          supabase.from("gym_staff").select("gym_id, gym_profiles!inner(id, name)").eq("user_id", user.id).eq("status", "active"),
+        ]);
+
+        // Build gym list
+        const gymsMap = new Map<string, { id: string; name: string }>();
+        ownedGymsResult.data?.forEach((g: any) => gymsMap.set(g.id, g));
+        staffGymsResult.data?.forEach((r: any) => {
+          const g = r.gym_profiles;
+          if (g && !gymsMap.has(g.id)) gymsMap.set(g.id, g);
+        });
+        const gyms = Array.from(gymsMap.values());
+
+        const hasClientProfile = !!clientResult.data;
+        const hasGymAccess = gyms.length > 0;
+
+        if (hasGymAccess && !hasClientProfile) {
+          // Pure gym user - redirect to gym dashboard
+          if (gyms.length === 1) {
+            localStorage.setItem("selectedGymId", gyms[0].id);
+            navigate(`/gym-admin/${gyms[0].id}`, { replace: true });
+          } else {
+            navigate("/gym-login", { replace: true });
+          }
+        } else if (hasClientProfile) {
+          if (clientResult.data?.onboarding_completed) {
+            navigate("/dashboard/client", { replace: true });
+          } else {
+            navigate("/onboarding/client", { replace: true });
+          }
         } else {
+          // No client profile and no gym - send to client onboarding
           navigate("/onboarding/client", { replace: true });
         }
       } else if (role === "coach") {

@@ -15,10 +15,30 @@ import {
 } from "@/lib/view-restoration";
 import { debugLogger } from "@/lib/debug-logger";
 
+interface GymInfo {
+  id: string;
+  name: string;
+}
+
 interface AvailableProfiles {
   admin?: string;
   client?: string;
   coach?: string;
+  gym?: GymInfo[];
+}
+
+/** Helper to get a string profile ID from available profiles for a given view mode */
+function getProfileIdForMode(profiles: AvailableProfiles, mode: ViewMode): string | null {
+  if (mode === 'gym') {
+    return profiles.gym?.[0]?.id ?? null;
+  }
+  return (profiles[mode] as string | undefined) ?? null;
+}
+
+/** Helper to check if a profile exists for a view mode */
+function hasProfileForMode(profiles: AvailableProfiles, mode: ViewMode): boolean {
+  if (mode === 'gym') return !!profiles.gym?.length;
+  return !!profiles[mode];
 }
 
 interface AdminContextType {
@@ -41,7 +61,7 @@ export const AdminContext = createContext<AdminContextType | undefined>(undefine
 const getInitialViewFromStorage = (): ViewMode => {
   try {
     const saved = getSavedViewState();
-    if (saved?.viewMode && ["admin", "coach", "client"].includes(saved.viewMode)) {
+    if (saved?.viewMode && ["admin", "coach", "client", "gym"].includes(saved.viewMode)) {
       return saved.viewMode;
     }
   } catch {}
@@ -153,7 +173,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       
       if (cachedProfiles) {
         setAvailableProfiles(cachedProfiles);
-        const profileId = cachedProfiles[savedState.viewMode] || null;
+        const profileId = getProfileIdForMode(cachedProfiles, savedState.viewMode);
         if (profileId) {
           setActiveProfileId(profileId);
         }
@@ -172,16 +192,38 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
     if (!canSwitchRoles) {
       if (role === "client") {
-        setActiveProfileType("client");
-        setViewModeState("client");
-        const { data } = await supabase
-          .from("client_profiles")
-          .select("id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        if (data?.id) {
-          setActiveProfileId(data.id);
-          setAvailableProfiles({ client: data.id });
+        setActiveProfileType(activeProfileType === "gym" ? "gym" : "client");
+        setViewModeState(activeProfileType === "gym" ? "gym" : "client");
+        
+        // For client-role users, also check gym access
+        const [clientResult, ownedGymsResult, staffGymsResult] = await Promise.all([
+          supabase.from("client_profiles").select("id").eq("user_id", user.id).maybeSingle(),
+          supabase.from("gym_profiles").select("id, name").eq("user_id", user.id).eq("status", "active"),
+          supabase.from("gym_staff").select("gym_id, gym_profiles!inner(id, name)").eq("user_id", user.id).eq("status", "active"),
+        ]);
+        
+        const newProfiles: AvailableProfiles = {};
+        if (clientResult.data?.id) {
+          newProfiles.client = clientResult.data.id;
+        }
+        
+        // Build gym list
+        const gymsMap = new Map<string, GymInfo>();
+        ownedGymsResult.data?.forEach((g: any) => gymsMap.set(g.id, { id: g.id, name: g.name }));
+        staffGymsResult.data?.forEach((r: any) => {
+          const g = r.gym_profiles;
+          if (g && !gymsMap.has(g.id)) gymsMap.set(g.id, { id: g.id, name: g.name });
+        });
+        if (gymsMap.size > 0) newProfiles.gym = Array.from(gymsMap.values());
+        
+        setAvailableProfiles(newProfiles);
+        
+        if (clientResult.data?.id) {
+          setActiveProfileId(clientResult.data.id);
+        } else if (newProfiles.gym?.length) {
+          setActiveProfileId(newProfiles.gym[0].id);
+          setActiveProfileType("gym");
+          setViewModeState("gym");
         }
       }
       setIsLoadingProfiles(false);
@@ -191,7 +233,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setIsLoadingProfiles(true);
 
     try {
-      const [adminResult, clientResult, coachResult] = await Promise.all([
+      const [adminResult, clientResult, coachResult, ownedGymsResult, staffGymsResult] = await Promise.all([
         supabase
           .from("admin_profiles")
           .select("id")
@@ -207,6 +249,16 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           .select("id")
           .eq("user_id", user.id)
           .maybeSingle(),
+        supabase
+          .from("gym_profiles")
+          .select("id, name")
+          .eq("user_id", user.id)
+          .eq("status", "active"),
+        supabase
+          .from("gym_staff")
+          .select("gym_id, gym_profiles!inner(id, name)")
+          .eq("user_id", user.id)
+          .eq("status", "active"),
       ]);
 
       const profiles: AvailableProfiles = {};
@@ -214,6 +266,15 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       if (adminResult.data?.id) profiles.admin = adminResult.data.id;
       if (clientResult.data?.id) profiles.client = clientResult.data.id;
       if (coachResult.data?.id) profiles.coach = coachResult.data.id;
+
+      // Build gym list from owned + staff gyms
+      const gymsMap = new Map<string, GymInfo>();
+      ownedGymsResult.data?.forEach((g: any) => gymsMap.set(g.id, { id: g.id, name: g.name }));
+      staffGymsResult.data?.forEach((r: any) => {
+        const g = r.gym_profiles;
+        if (g && !gymsMap.has(g.id)) gymsMap.set(g.id, { id: g.id, name: g.name });
+      });
+      if (gymsMap.size > 0) profiles.gym = Array.from(gymsMap.values());
 
       setAvailableProfiles(profiles);
       
@@ -226,10 +287,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       if (hasRestoredFromStorageRef.current && currentSavedState) {
         const hasValidProfile = currentSavedState.viewMode === "admin" 
           ? isAdminUser 
-          : !!profiles[currentSavedState.viewMode];
+          : hasProfileForMode(profiles, currentSavedState.viewMode);
         
         if (hasValidProfile) {
-          const profileId = profiles[currentSavedState.viewMode] || null;
+          const profileId = getProfileIdForMode(profiles, currentSavedState.viewMode);
           if (profileId && !activeProfileId) {
             setActiveProfileId(profileId);
           }
@@ -246,25 +307,25 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       if (pathViewMode) {
         const hasAccessToPath = pathViewMode === "admin" 
           ? isAdminUser 
-          : !!profiles[pathViewMode];
+          : hasProfileForMode(profiles, pathViewMode);
         
         if (hasAccessToPath) {
-          const pathProfileId = profiles[pathViewMode] || null;
+          const pathProfileId = getProfileIdForMode(profiles, pathViewMode);
           setActiveProfileType(pathViewMode);
           setActiveProfileId(pathProfileId);
           setViewModeState(pathViewMode);
-          saveRoute(`/dashboard/${pathViewMode}`);
+          saveRoute(pathViewMode === 'gym' ? location.pathname : `/dashboard/${pathViewMode}`);
           return;
         }
       }
       
       if (currentSavedState) {
-        const isValidSavedRole = profiles[currentSavedState.viewMode] && 
+        const isValidSavedRole = hasProfileForMode(profiles, currentSavedState.viewMode) && 
           (isAdminUser || currentSavedState.viewMode !== "admin");
         
         if (isValidSavedRole) {
           setActiveProfileType(currentSavedState.viewMode);
-          setActiveProfileId(profiles[currentSavedState.viewMode] || null);
+          setActiveProfileId(getProfileIdForMode(profiles, currentSavedState.viewMode));
           setViewModeState(currentSavedState.viewMode);
           return;
         }
@@ -293,14 +354,14 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     if (pathViewMode) {
       const hasAccess = pathViewMode === "admin" 
         ? isAdminUser 
-        : !!availableProfiles[pathViewMode];
+        : hasProfileForMode(availableProfiles, pathViewMode);
       
       if (hasAccess && pathViewMode !== activeProfileType) {
-        const profileId = availableProfiles[pathViewMode] || null;
+        const profileId = getProfileIdForMode(availableProfiles, pathViewMode);
         setActiveProfileType(pathViewMode);
         setActiveProfileId(profileId);
         setViewModeState(pathViewMode);
-        saveRoute(`/dashboard/${pathViewMode}`);
+        saveRoute(pathViewMode === 'gym' ? location.pathname : `/dashboard/${pathViewMode}`);
       }
     }
   }, [location.pathname, availableProfiles, isLoadingProfiles, isAdminUser, activeProfileType]);

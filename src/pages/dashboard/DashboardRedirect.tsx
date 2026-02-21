@@ -2,11 +2,12 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
-import { getBestDashboardRoute } from "@/lib/view-restoration";
+import { getBestDashboardRoute, getSavedViewState } from "@/lib/view-restoration";
 
 /**
  * Simple redirect component that sends users to their appropriate dashboard.
  * Waits for auth to load, then navigates to the best dashboard for their role.
+ * Supports gym view restoration via saved view state.
  */
 const DashboardRedirect = () => {
   const { role, loading } = useAuth();
@@ -14,6 +15,13 @@ const DashboardRedirect = () => {
 
   useEffect(() => {
     if (loading) return;
+
+    // Check for gym view restoration first
+    const saved = getSavedViewState();
+    if (saved?.viewMode === "gym" && saved.route?.startsWith("/gym-admin/")) {
+      navigate(saved.route, { replace: true });
+      return;
+    }
 
     // Get the best route based on saved preferences and role
     const targetRoute = getBestDashboardRoute(role);
