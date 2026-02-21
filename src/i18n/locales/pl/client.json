@@ -635,6 +635,11 @@
     "enterDiscountCode": "Wpisz kod rabatowy",
     "discountApplied": "Zastosowano {{percent}}% rabatu!",
     "cancel": "Anuluj",
-    "joinNow": "Dołącz teraz"
+    "joinNow": "Dołącz teraz",
+    "resources": "Zasoby",
+    "freeForMembers": "Bezpłatne dla członków",
+    "viewPackage": "Zobacz pakiet",
+    "viewProduct": "Zobacz produkt",
+    "noResources": "Brak dostępnych zasobów"
   }
 }
