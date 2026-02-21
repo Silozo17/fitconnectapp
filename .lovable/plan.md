@@ -1,231 +1,135 @@
 
 
-# Video Embeds + Skool-style Community Classroom + Community Pricing
+# Fix Missing Translation Keys, Add Event Types to Classes, and Wire Stripe Checkout for Communities
 
-This plan adds three interconnected capabilities:
-1. **Video embed support** across the platform (YouTube, Vimeo, etc.)
-2. **Community Classroom** (Skool-style) -- structured course/lesson content inside communities
-3. **Community pricing** -- paid communities with subscription plans, packages, and discounts
+## Problem Summary
 
----
+1. **Missing translation keys in `common.json`**: The sidebars use `useTranslation()` which defaults to the `common` namespace. The keys `navigation.coach.groupClasses` and `navigation.coach.community` exist in `coach.json` but are missing from `common.json` (both EN and PL). Similarly `navigation.client.community` is in `client.json` but missing from EN `common.json` and PL `common.json`. This causes raw key strings to display in the sidebar.
 
-## Part 1: Video Embed Support
+2. **Group classes lack event type support**: The `coach_group_classes` table has no `event_type` column. Coaches want to create not just classes but also live events, online events, workshops, etc.
 
-### Problem
-Currently `digital_products` has a `video_url` field and `preview_url`, but the UI only supports direct video files (`<video>` tag) or raw iframes. There is no intelligent YouTube/Vimeo embed detection. Community posts have no video embed capability at all.
-
-### Solution
-Create a shared `VideoEmbed` component that:
-- Detects YouTube, Vimeo, Loom, Wistia URLs and converts them to proper embed iframes
-- Falls back to `<video>` tag for direct file URLs
-- Sanitizes embed URLs (only allow known hosts)
-- Is reusable across: digital products, community posts, and classroom lessons
-
-### Changes
-
-**New shared component:** `src/components/shared/VideoEmbed.tsx`
-- Accepts a `url` string prop
-- Parses the URL to detect platform (YouTube, Vimeo, Loom, etc.)
-- Renders the appropriate embed iframe with proper sandbox attributes
-- Responsive aspect-ratio container (16:9)
-
-**Update `community_posts` table** -- add `embed_url` column (text, nullable) for embedding videos in posts
-
-**Update `CreatePostForm` in both coach and client community detail pages:**
-- Add a "Video" post type button alongside existing poll/announcement
-- When selected, show an input field for pasting a YouTube/Vimeo/other URL
-- Store in `embed_url` column
-- Render using the shared `VideoEmbed` component in post cards
-
-**Update `MarketplaceProduct.tsx`:**
-- Replace the raw `<video>` / `<iframe>` preview with the new `VideoEmbed` component
-- This means YouTube links in `preview_url` or `video_url` will render properly as embeds
-
-**Update `PostCard` components** (both coach and client):
-- If post has `embed_url`, render `VideoEmbed` below the text content
-
-### URL Parsing Logic (inside VideoEmbed)
-```
-YouTube: youtube.com/watch?v=ID, youtu.be/ID, youtube.com/embed/ID
-  -> https://www.youtube.com/embed/ID
-
-Vimeo: vimeo.com/ID
-  -> https://player.vimeo.com/video/ID
-
-Loom: loom.com/share/ID
-  -> https://www.loom.com/embed/ID
-
-Other: render as <video> with controls, or show link
-```
+3. **Community Stripe checkout is not wired**: The `handlePaidJoin` in `ClientCommunity.tsx` just calls `joinCommunity.mutateAsync()` directly with a TODO comment. No edge function exists to handle community checkout via Stripe Connect.
 
 ---
 
-## Part 2: Community Classroom (Skool-style)
+## Part 1: Fix All Missing Translation Keys
 
-### Concept
-Like Skool, each community gets a "Classroom" tab where the coach organizes structured content into **modules** and **lessons**. Members who join (or pay for) the community get access to all classroom content. This is different from individual digital products -- classroom content is tied to the community membership.
+### Files to update
 
-### Database Schema
+**`src/i18n/locales/en/common.json`** -- Add to `navigation.coach`:
+- `"groupClasses": "Group Classes"`
+- `"community": "Community"`
 
-**`community_modules`** -- Course sections/chapters
-- `id` (uuid, PK)
-- `community_id` (uuid, FK to communities)
-- `title` (text)
-- `description` (text, nullable)
-- `display_order` (integer, default 0)
-- `is_published` (boolean, default true)
-- `created_at`, `updated_at`
+Also add to `navigation.client`:
+- `"community": "Community"`
 
-**`community_lessons`** -- Individual lessons within modules
-- `id` (uuid, PK)
-- `module_id` (uuid, FK to community_modules)
-- `community_id` (uuid, FK to communities) -- denormalized for faster queries
-- `title` (text)
-- `description` (text, nullable)
-- `content` (text, nullable) -- rich text/markdown lesson content
-- `video_url` (text, nullable) -- YouTube/Vimeo embed URL
-- `file_urls` (text[], nullable) -- downloadable attachments
-- `duration_minutes` (integer, nullable)
-- `display_order` (integer, default 0)
-- `is_published` (boolean, default true)
-- `is_free_preview` (boolean, default false) -- allow non-members to preview this lesson
-- `created_at`, `updated_at`
+**`src/i18n/locales/pl/common.json`** -- Add to `navigation.coach`:
+- `"groupClasses": "Zajecia grupowe"`
+- `"community": "Spolecznosc"`
 
-**`community_lesson_progress`** -- Track which lessons members have completed
-- `id` (uuid, PK)
-- `lesson_id` (uuid, FK to community_lessons)
-- `user_id` (uuid, FK to auth.users)
-- `completed_at` (timestamptz, nullable)
-- `last_watched_seconds` (integer, default 0) -- resume position
-- Unique constraint on (lesson_id, user_id)
+Also add to `navigation.client`:
+- `"community": "Spolecznosc"`
 
-### RLS Policies
-- Modules/lessons: readable by community members (or free preview lessons for anyone); writable only by community admin (coach)
-- Lesson progress: users can read/write their own progress
+---
+
+## Part 2: Expand Group Classes to Support Events
+
+### Database Migration
+
+ALTER `coach_group_classes` to add:
+- `event_type` (text, default 'class') -- values: 'class', 'workshop', 'live_event', 'online_event', 'seminar', 'bootcamp'
+- `event_format` (text, default 'in_person') -- values: 'in_person', 'online', 'hybrid'
+- `online_link` (text, nullable) -- Zoom/Meet/etc URL for online events
+- `start_date` (timestamptz, nullable) -- for one-off events (not recurring classes)
+- `end_date` (timestamptz, nullable)
+- `is_recurring` (boolean, default true) -- recurring class vs one-off event
+- `community_id` (uuid, nullable, FK to communities) -- link events to a community
 
 ### Frontend Changes
 
-**Coach Community Detail page** -- add a "Classroom" tab alongside Feed and Members:
-- List modules with drag-and-drop reorder (using existing @dnd-kit)
-- Each module expands to show lessons
-- "Add Module" / "Add Lesson" buttons
-- Lesson editor: title, description, video URL (uses VideoEmbed for preview), content (textarea), file attachments, free preview toggle
-- Publish/unpublish toggle per module/lesson
+**`src/components/coach/CoachGroupClassesManager.tsx`** -- Update the create/edit form:
+- Add "Type" dropdown: Class, Workshop, Live Event, Online Event, Seminar, Bootcamp
+- Add "Format" toggle: In-Person / Online / Hybrid
+- Show "Online Link" field when format is online or hybrid
+- Add "One-off Event" toggle that reveals date/time pickers
+- Add optional "Link to Community" selector
 
-**Client Community Detail page** -- add a "Classroom" tab:
-- List modules and lessons in a sidebar/accordion layout
-- Click a lesson to view: video embed at top, content below, "Mark Complete" button
-- Progress bar showing completion percentage per module and overall
-- Free preview lessons accessible even before joining/paying
+**`src/hooks/useCoachGroupClasses.ts`** -- Update the `GroupClass` interface and CRUD operations to include the new fields
 
-**New hooks:** `src/hooks/useCommunityClassroom.ts`
-- `useCommunityModules(communityId)` -- fetch modules with lesson count
-- `useCommunityLessons(moduleId)` -- fetch lessons for a module
-- `useCreateModule`, `useUpdateModule`, `useDeleteModule`
-- `useCreateLesson`, `useUpdateLesson`, `useDeleteLesson`
-- `useReorderModules`, `useReorderLessons`
-- `useLessonProgress(communityId)` -- fetch user's progress
-- `useMarkLessonComplete` -- toggle completion
+**Update display components** -- Show event type badges and format indicators on class/event cards
 
----
+### Rename sidebar label
 
-## Part 3: Community Pricing and Access Control
-
-### Concept
-Coaches can set their communities as free or paid. Paid communities require a subscription or one-time payment to join. This transforms communities from simple free groups into monetizable Skool-style products.
-
-### Database Schema Changes
-
-**ALTER `communities`** -- add pricing columns:
-- `access_type` (text, default 'free') -- 'free', 'paid', 'subscription'
-- `price` (numeric, nullable) -- one-time access price
-- `monthly_price` (numeric, nullable) -- recurring monthly subscription
-- `currency` (text, default 'GBP')
-- `trial_days` (integer, default 0) -- free trial period for subscriptions
-- `discount_code` (text, nullable) -- simple discount code
-- `discount_percent` (integer, nullable) -- percentage off (0-100)
-- `max_members` (integer, nullable) -- cap on membership
-
-**`community_subscriptions`** -- Track paid memberships
-- `id` (uuid, PK)
-- `community_id` (uuid, FK to communities)
-- `user_id` (uuid, FK to auth.users)
-- `status` (text: 'active', 'cancelled', 'expired', 'trial')
-- `amount_paid` (numeric)
-- `currency` (text)
-- `started_at` (timestamptz)
-- `expires_at` (timestamptz, nullable)
-- `cancelled_at` (timestamptz, nullable)
-- `stripe_subscription_id` (text, nullable) -- for recurring billing
-- `created_at`
-
-### Access Control Logic
-- Free communities: anyone can join (existing behavior)
-- Paid communities: joining triggers a checkout flow (using the existing Stripe checkout infrastructure)
-- Subscription communities: monthly billing via Stripe
-- Discount codes: coach sets a code + percentage; client enters at checkout for reduced price
-- Trial: for subscription communities, X days free before billing starts
-
-### Frontend Changes
-
-**Coach Community create/edit dialog** -- add pricing fields:
-- Access type selector: Free / One-time Payment / Monthly Subscription
-- Price field (shown for paid/subscription)
-- Trial days (shown for subscription)
-- Discount code + percentage fields
-- Max members cap
-
-**Client Community discovery/join flow:**
-- Free communities: "Join" button (existing)
-- Paid communities: "Join" button shows price, redirects to checkout
-- Subscription communities: shows monthly price, checkout for subscription
-- Discount code input at checkout
-- Show "Free Trial: X days" badge
-
-**Coach community dashboard:**
-- Revenue summary per community
-- Active subscriber count
-- Discount code usage stats
+Update the sidebar item label from "Group Classes" to "Classes & Events" in both EN and PL:
+- `en/common.json`: `"groupClasses": "Classes & Events"`
+- `pl/common.json`: `"groupClasses": "Zajecia i wydarzenia"`
+- `en/coach.json` navigation: same
+- `pl/coach.json` navigation: same
 
 ### Translation Keys
-Add keys for pricing, access types, subscription status, discount codes, trial period, etc. to all 4 locale files (en/pl coach/client).
+
+Add keys for event types, formats, online link labels, date pickers, etc. to coach locale files.
+
+---
+
+## Part 3: Wire Stripe Checkout for Paid Communities
+
+### New Edge Function: `community-checkout`
+
+Create `supabase/functions/community-checkout/index.ts` that:
+1. Authenticates the user
+2. Fetches the community to get pricing (`access_type`, `price`, `monthly_price`, `currency`)
+3. Fetches the coach's Stripe Connect account from `coach_profiles`
+4. Validates discount code if provided
+5. Creates a Stripe Checkout session:
+   - `mode: "payment"` for one-time paid communities
+   - `mode: "subscription"` for subscription communities (with `trial_period_days` if configured)
+   - Uses `application_fee_amount` / `application_fee_percent` with `transfer_data.destination` pointing to coach's Stripe Connect account (same pattern as `stripe-checkout`)
+6. Returns the checkout session URL (or clientSecret for embedded mode)
+
+### Frontend Changes
+
+**`src/pages/dashboard/client/ClientCommunity.tsx`**:
+- Update `handlePaidJoin` to invoke `supabase.functions.invoke('community-checkout', ...)` instead of directly joining
+- Pass `communityId`, `discountCode` (if entered), and `returnUrl`
+- On success, redirect to Stripe checkout URL
+- After successful payment return, the webhook or return-URL logic adds the member
+
+### Webhook Handling
+
+Update `supabase/functions/stripe-webhook/index.ts` (or the relevant webhook handler) to:
+- Detect `checkout.session.completed` events with metadata `type: "community_access"` or `type: "community_subscription"`
+- Insert a row into `community_members` with role `member`
+- Insert a row into `community_subscriptions` with appropriate status
+- Update `communities.member_count`
 
 ---
 
 ## Implementation Order
 
-| Step | Description | Scope |
-|------|------------|-------|
-| 1 | `VideoEmbed` shared component + URL parser | Small |
-| 2 | Add `embed_url` to `community_posts` + post creation UI | Small |
-| 3 | Update `PostCard` (coach + client) to render embeds | Small |
-| 4 | Update `MarketplaceProduct` preview to use `VideoEmbed` | Small |
-| 5 | Database migration: `community_modules`, `community_lessons`, `community_lesson_progress` | Medium |
-| 6 | `useCommunityClassroom` hooks | Medium |
-| 7 | Coach Classroom tab: module/lesson CRUD + reorder | Large |
-| 8 | Client Classroom tab: lesson viewer + progress tracking | Large |
-| 9 | Database migration: pricing columns on `communities` + `community_subscriptions` table | Medium |
-| 10 | Coach community pricing UI (create/edit dialog) | Medium |
-| 11 | Client join flow with checkout for paid communities | Medium |
-| 12 | Translation keys for all new features | Small |
+| Step | Description | Size |
+|------|-------------|------|
+| 1 | Add missing translation keys to EN + PL `common.json` | Small |
+| 2 | Database migration: add event columns to `coach_group_classes` | Small |
+| 3 | Update `CoachGroupClassesManager` UI for event types + formats | Medium |
+| 4 | Update `useCoachGroupClasses` hook for new fields | Small |
+| 5 | Create `community-checkout` edge function | Medium |
+| 6 | Update `ClientCommunity.tsx` to use Stripe checkout for paid joins | Small |
+| 7 | Update stripe webhook to handle community payments | Medium |
+| 8 | Add all new translation keys (event types, checkout, etc.) | Small |
 
----
-
-## Summary of Files
+## Files Summary
 
 | File | Change |
 |------|--------|
-| `src/components/shared/VideoEmbed.tsx` | NEW -- reusable video embed component |
-| `src/hooks/useCommunityClassroom.ts` | NEW -- classroom CRUD hooks |
-| `src/hooks/useCommunity.ts` | UPDATE -- add embed_url to post types, new subscription hooks |
-| `src/pages/dashboard/coach/CoachCommunityDetail.tsx` | UPDATE -- add Classroom tab, video embeds in posts |
-| `src/pages/dashboard/client/ClientCommunityDetail.tsx` | UPDATE -- add Classroom tab, video embeds in posts |
-| `src/pages/dashboard/coach/CoachCommunity.tsx` | UPDATE -- pricing fields in create/edit dialog |
-| `src/pages/dashboard/client/ClientCommunity.tsx` | UPDATE -- paid join flow |
-| `src/pages/MarketplaceProduct.tsx` | UPDATE -- use VideoEmbed for previews |
-| Database migrations (2-3) | NEW -- embed_url column, classroom tables, pricing columns + subscriptions table |
-| `src/i18n/locales/en/coach.json` | UPDATE -- classroom + pricing keys |
-| `src/i18n/locales/pl/coach.json` | UPDATE -- classroom + pricing keys |
-| `src/i18n/locales/en/client.json` | UPDATE -- classroom + pricing keys |
-| `src/i18n/locales/pl/client.json` | UPDATE -- classroom + pricing keys |
+| `src/i18n/locales/en/common.json` | Add missing nav keys |
+| `src/i18n/locales/pl/common.json` | Add missing nav keys |
+| `src/i18n/locales/en/coach.json` | Rename groupClasses label + event type keys |
+| `src/i18n/locales/pl/coach.json` | Same in Polish |
+| Database migration | Add event columns to `coach_group_classes` |
+| `src/hooks/useCoachGroupClasses.ts` | Add new fields to interface + queries |
+| `src/components/coach/CoachGroupClassesManager.tsx` | Event type/format UI |
+| `supabase/functions/community-checkout/index.ts` | NEW -- Stripe Connect checkout for communities |
+| `src/pages/dashboard/client/ClientCommunity.tsx` | Wire paid join to checkout function |
+| `supabase/functions/stripe-webhook/index.ts` | Handle community payment completion |
 
