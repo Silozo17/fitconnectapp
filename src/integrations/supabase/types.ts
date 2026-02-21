@@ -4391,39 +4391,63 @@ export type Database = {
       }
       communities: {
         Row: {
+          access_type: string
           coach_id: string
           cover_image_url: string | null
           created_at: string | null
+          currency: string
           description: string | null
+          discount_code: string | null
+          discount_percent: number | null
           id: string
           is_active: boolean | null
           is_public: boolean | null
+          max_members: number | null
           member_count: number | null
+          monthly_price: number | null
           name: string
+          price: number | null
+          trial_days: number
           updated_at: string | null
         }
         Insert: {
+          access_type?: string
           coach_id: string
           cover_image_url?: string | null
           created_at?: string | null
+          currency?: string
           description?: string | null
+          discount_code?: string | null
+          discount_percent?: number | null
           id?: string
           is_active?: boolean | null
           is_public?: boolean | null
+          max_members?: number | null
           member_count?: number | null
+          monthly_price?: number | null
           name: string
+          price?: number | null
+          trial_days?: number
           updated_at?: string | null
         }
         Update: {
+          access_type?: string
           coach_id?: string
           cover_image_url?: string | null
           created_at?: string | null
+          currency?: string
           description?: string | null
+          discount_code?: string | null
+          discount_percent?: number | null
           id?: string
           is_active?: boolean | null
           is_public?: boolean | null
+          max_members?: number | null
           member_count?: number | null
+          monthly_price?: number | null
           name?: string
+          price?: number | null
+          trial_days?: number
           updated_at?: string | null
         }
         Relationships: [
@@ -4488,6 +4512,107 @@ export type Database = {
           },
         ]
       }
+      community_lesson_progress: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          last_watched_seconds: number
+          lesson_id: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          last_watched_seconds?: number
+          lesson_id: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          last_watched_seconds?: number
+          lesson_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_lesson_progress_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "community_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_lessons: {
+        Row: {
+          community_id: string
+          content: string | null
+          created_at: string
+          description: string | null
+          display_order: number
+          duration_minutes: number | null
+          file_urls: string[] | null
+          id: string
+          is_free_preview: boolean
+          is_published: boolean
+          module_id: string
+          title: string
+          updated_at: string
+          video_url: string | null
+        }
+        Insert: {
+          community_id: string
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_minutes?: number | null
+          file_urls?: string[] | null
+          id?: string
+          is_free_preview?: boolean
+          is_published?: boolean
+          module_id: string
+          title: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Update: {
+          community_id?: string
+          content?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          duration_minutes?: number | null
+          file_urls?: string[] | null
+          id?: string
+          is_free_preview?: boolean
+          is_published?: boolean
+          module_id?: string
+          title?: string
+          updated_at?: string
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_lessons_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_lessons_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "community_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       community_members: {
         Row: {
           community_id: string
@@ -4513,6 +4638,47 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_modules: {
+        Row: {
+          community_id: string
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          is_published: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          is_published?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_modules_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
@@ -4559,6 +4725,7 @@ export type Database = {
           community_id: string
           content: string
           created_at: string | null
+          embed_url: string | null
           event_data: Json | null
           id: string
           image_urls: string[] | null
@@ -4575,6 +4742,7 @@ export type Database = {
           community_id: string
           content: string
           created_at?: string | null
+          embed_url?: string | null
           event_data?: Json | null
           id?: string
           image_urls?: string[] | null
@@ -4591,6 +4759,7 @@ export type Database = {
           community_id?: string
           content?: string
           created_at?: string | null
+          embed_url?: string | null
           event_data?: Json | null
           id?: string
           image_urls?: string[] | null
@@ -4649,6 +4818,56 @@ export type Database = {
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_subscriptions: {
+        Row: {
+          amount_paid: number
+          cancelled_at: string | null
+          community_id: string
+          created_at: string
+          currency: string
+          expires_at: string | null
+          id: string
+          started_at: string
+          status: string
+          stripe_subscription_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          cancelled_at?: string | null
+          community_id: string
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_paid?: number
+          cancelled_at?: string | null
+          community_id?: string
+          created_at?: string
+          currency?: string
+          expires_at?: string | null
+          id?: string
+          started_at?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_subscriptions_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
             referencedColumns: ["id"]
           },
         ]

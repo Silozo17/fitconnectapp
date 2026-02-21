@@ -12,6 +12,14 @@ export interface Community {
   is_active: boolean;
   is_public: boolean;
   member_count: number;
+  access_type: "free" | "paid" | "subscription";
+  price: number | null;
+  monthly_price: number | null;
+  currency: string;
+  trial_days: number;
+  discount_code: string | null;
+  discount_percent: number | null;
+  max_members: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -30,9 +38,10 @@ export interface CommunityPost {
   author_id: string;
   content: string;
   image_urls: string[] | null;
+  embed_url: string | null;
   is_pinned: boolean;
   is_announcement: boolean;
-  post_type: "text" | "poll" | "event" | "file";
+  post_type: "text" | "poll" | "event" | "file" | "video";
   poll_data: any | null;
   event_data: any | null;
   likes_count: number;
@@ -221,6 +230,7 @@ export const useCreatePost = () => {
       post_type?: string;
       poll_data?: any;
       event_data?: any;
+      embed_url?: string;
       is_announcement?: boolean;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
