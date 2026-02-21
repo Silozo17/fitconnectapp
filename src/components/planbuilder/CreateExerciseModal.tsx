@@ -14,6 +14,7 @@ import {
 import { useExerciseCategories, useCreateExercise } from "@/hooks/useExercises";
 import { Loader2, Video } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
+import { VideoEmbed } from "@/components/shared/VideoEmbed";
 
 interface CreateExerciseModalProps {
   open: boolean;
@@ -151,6 +152,11 @@ const CreateExerciseModal = ({ open, onOpenChange, coachId }: CreateExerciseModa
                 className="pl-10"
               />
             </div>
+            {videoUrl && (
+              <div className="mt-2">
+                <VideoEmbed url={videoUrl} title="Video preview" />
+              </div>
+            )}
           </div>
 
           <div>

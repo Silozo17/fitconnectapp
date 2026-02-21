@@ -19,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/reviews/StarRating";
 import { useCoachLinkPrefix } from "@/hooks/useCoachLinkPrefix";
+import { VideoEmbed } from "@/components/shared/VideoEmbed";
 
 const getContentIcon = (type: string) => {
   switch (type) {
@@ -216,11 +217,7 @@ export default function ClientMarketplaceProduct() {
                     </CardHeader>
                     <CardContent>
                       {product.content_type.includes("video") ? (
-                        <video
-                          src={product.preview_url}
-                          controls
-                          className="w-full rounded-lg"
-                        />
+                        <VideoEmbed url={product.preview_url} title={`${product.title} preview`} />
                       ) : (
                         <a
                           href={product.preview_url}
@@ -387,22 +384,9 @@ export default function ClientMarketplaceProduct() {
             <DialogHeader>
               <DialogTitle>Preview: {product.title}</DialogTitle>
             </DialogHeader>
-            <div className="aspect-video">
-              {product.content_type?.includes("video") ? (
-                <video
-                  src={product.preview_url || ""}
-                  controls
-                  autoPlay
-                  className="w-full h-full rounded-lg"
-                />
-              ) : (
-                <iframe
-                  src={product.preview_url || ""}
-                  className="w-full h-full rounded-lg"
-                  title="Preview"
-                />
-              )}
-            </div>
+            {product.preview_url && (
+              <VideoEmbed url={product.preview_url} title={`${product.title} preview`} />
+            )}
           </DialogContent>
         </Dialog>
       </div>

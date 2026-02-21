@@ -20,6 +20,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import StarRating from "@/components/reviews/StarRating";
 import { useTranslation } from "@/hooks/useTranslation";
+import { VideoEmbed } from "@/components/shared/VideoEmbed";
 
 const getContentIcon = (type: string) => {
   switch (type) {
@@ -254,12 +255,8 @@ export default function MarketplaceProduct() {
                         <CardTitle className="text-lg">{t('product.preview')}</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        {product.content_type.includes("video") ? (
-                          <video
-                            src={product.preview_url}
-                            controls
-                            className="w-full rounded-lg"
-                          />
+                       {product.content_type.includes("video") ? (
+                          <VideoEmbed url={product.preview_url} title={`${product.title} preview`} />
                         ) : (
                           <a
                             href={product.preview_url}
@@ -427,22 +424,9 @@ export default function MarketplaceProduct() {
             <DialogHeader>
               <DialogTitle>{t('product.preview')}: {product.title}</DialogTitle>
             </DialogHeader>
-            <div className="aspect-video">
-              {product.preview_url && product.content_type.includes("video") ? (
-                <video
-                  src={product.preview_url}
-                  controls
-                  autoPlay
-                  className="w-full h-full rounded-lg"
-                />
-              ) : product.preview_url ? (
-                <iframe
-                  src={product.preview_url}
-                  className="w-full h-full rounded-lg"
-                  title="Preview"
-                />
-              ) : null}
-            </div>
+            {product.preview_url && (
+              <VideoEmbed url={product.preview_url} title={`${product.title} preview`} />
+            )}
           </DialogContent>
         </Dialog>
       </div>

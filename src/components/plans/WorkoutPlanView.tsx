@@ -1,8 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
-import { Dumbbell, Clock, RotateCcw, FileText, Play } from "lucide-react";
+import { Dumbbell, Clock, RotateCcw, FileText } from "lucide-react";
 import { PlanDay, PlanExercise } from "@/hooks/useTrainingPlans";
+import { VideoEmbed } from "@/components/shared/VideoEmbed";
 
 interface WorkoutPlanViewProps {
   content: PlanDay[];
@@ -95,15 +96,9 @@ const ExerciseCard = ({ exercise }: { exercise: PlanExercise }) => {
           </p>
         )}
         {exercise.video_url && (
-          <a 
-            href={exercise.video_url} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm text-primary hover:underline mt-2"
-          >
-            <Play className="h-3 w-3" />
-            Watch demo
-          </a>
+          <div className="mt-3">
+            <VideoEmbed url={exercise.video_url} restricted title={exercise.exercise_name} />
+          </div>
         )}
       </div>
     </div>
