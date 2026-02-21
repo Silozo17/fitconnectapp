@@ -27,6 +27,8 @@ export interface CommunityLesson {
   display_order: number;
   is_published: boolean;
   is_free_preview: boolean;
+  preview_image_url: string | null;
+  embed_mode: string;
   created_at: string;
   updated_at: string;
 }
@@ -150,6 +152,8 @@ export const useCreateLesson = () => {
       duration_minutes?: number;
       display_order?: number;
       is_free_preview?: boolean;
+      preview_image_url?: string;
+      embed_mode?: string;
     }) => {
       const { data: lesson, error } = await supabase
         .from("community_lessons")
