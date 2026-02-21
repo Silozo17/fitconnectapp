@@ -635,6 +635,11 @@
     "enterDiscountCode": "Enter discount code",
     "discountApplied": "{{percent}}% discount applied!",
     "cancel": "Cancel",
-    "joinNow": "Join Now"
+    "joinNow": "Join Now",
+    "resources": "Resources",
+    "freeForMembers": "Free for members",
+    "viewPackage": "View Package",
+    "viewProduct": "View Product",
+    "noResources": "No resources available yet"
   }
 }

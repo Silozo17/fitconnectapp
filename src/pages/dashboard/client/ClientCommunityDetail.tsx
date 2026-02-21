@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Send, MessageCircle, Heart, Pin, Megaphone, Users, BookOpen, Video, CheckCircle2, Circle } from "lucide-react";
+import { ArrowLeft, Send, MessageCircle, Heart, Pin, Megaphone, Users, BookOpen, Video, CheckCircle2, Circle, Package, ShoppingBag, Image } from "lucide-react";
 import DashboardLayout from "@/components/dashboard/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +21,9 @@ import {
   useCommunityModules, useAllCommunityLessons, useLessonProgress, useMarkLessonComplete,
   type CommunityModule, type CommunityLesson,
 } from "@/hooks/useCommunityClassroom";
+import {
+  useCommunityLinkedPackages, useCommunityLinkedProducts,
+} from "@/hooks/useCommunityLinkedContent";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "@/hooks/useTranslation";
 import { toast } from "sonner";
@@ -90,7 +93,10 @@ const LessonViewer = ({ lesson, isCompleted, communityId }: { lesson: CommunityL
   return (
     <Card className="rounded-2xl border-border/50">
       <CardContent className="p-5 space-y-4">
-        {lesson.video_url && <VideoEmbed url={lesson.video_url} />}
+        {(lesson as any).preview_image_url && !lesson.video_url && (
+          <img src={(lesson as any).preview_image_url} alt={lesson.title} className="w-full h-48 object-cover rounded-xl" />
+        )}
+        {lesson.video_url && <VideoEmbed url={lesson.video_url} restricted />}
         <div>
           <h3 className="font-semibold text-lg">{lesson.title}</h3>
           {lesson.description && <p className="text-sm text-muted-foreground mt-1">{lesson.description}</p>}
@@ -107,6 +113,82 @@ const LessonViewer = ({ lesson, isCompleted, communityId }: { lesson: CommunityL
         </Button>
       </CardContent>
     </Card>
+  );
+};
+
+// ===== Resources Tab =====
+const ResourcesTab = ({ communityId }: { communityId: string }) => {
+  const { t } = useTranslation("client");
+  const { data: linkedPackages = [], isLoading: packagesLoading } = useCommunityLinkedPackages(communityId);
+  const { data: linkedProducts = [], isLoading: productsLoading } = useCommunityLinkedProducts(communityId);
+
+  const isLoading = packagesLoading || productsLoading;
+  const hasContent = linkedPackages.length > 0 || linkedProducts.length > 0;
+
+  if (isLoading) return <div className="space-y-3">{[1, 2].map((i) => <Skeleton key={i} className="h-20 rounded-xl" />)}</div>;
+
+  if (!hasContent) {
+    return (
+      <Card className="rounded-2xl border-dashed">
+        <CardContent className="py-12 text-center">
+          <Package className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+          <p className="text-muted-foreground">{t("community.noResources")}</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {linkedPackages.length > 0 && (
+        <div className="space-y-3">
+          {linkedPackages.map((lp: any) => (
+            <Card key={lp.id} className="rounded-2xl border-border/50">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <Package className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">{lp.coach_packages?.name || "Package"}</p>
+                    {lp.coach_packages?.description && <p className="text-xs text-muted-foreground line-clamp-1">{lp.coach_packages.description}</p>}
+                  </div>
+                </div>
+                {lp.is_free_for_members && (
+                  <Badge variant="secondary" className="text-xs">{t("community.freeForMembers")}</Badge>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+      {linkedProducts.length > 0 && (
+        <div className="space-y-3">
+          {linkedProducts.map((lp: any) => (
+            <Card key={lp.id} className="rounded-2xl border-border/50">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  {lp.digital_products?.cover_image_url ? (
+                    <img src={lp.digital_products.cover_image_url} alt="" className="w-10 h-10 rounded-xl object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center">
+                      <ShoppingBag className="h-5 w-5 text-accent-foreground" />
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-sm font-medium">{lp.digital_products?.title || "Product"}</p>
+                    {lp.digital_products?.description && <p className="text-xs text-muted-foreground line-clamp-1">{lp.digital_products.description}</p>}
+                  </div>
+                </div>
+                {lp.is_free_for_members && (
+                  <Badge variant="secondary" className="text-xs">{t("community.freeForMembers")}</Badge>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
@@ -173,6 +255,7 @@ const ClientCommunityDetail = () => {
           <TabsList>
             <TabsTrigger value="feed">{t("community.feed")}</TabsTrigger>
             <TabsTrigger value="classroom"><BookOpen className="h-3.5 w-3.5 mr-1.5" />{t("community.classroom")}</TabsTrigger>
+            <TabsTrigger value="resources"><Package className="h-3.5 w-3.5 mr-1.5" />{t("community.resources")}</TabsTrigger>
           </TabsList>
 
           {/* Feed */}
@@ -263,6 +346,9 @@ const ClientCommunityDetail = () => {
                                   ? <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                                   : <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
                                 }
+                                {(lesson as any).preview_image_url && (
+                                  <img src={(lesson as any).preview_image_url} alt="" className="w-12 h-8 rounded object-cover shrink-0" />
+                                )}
                                 <div className="min-w-0 flex-1">
                                   <p className="text-sm font-medium truncate">{lesson.title}</p>
                                   <div className="flex items-center gap-2">
@@ -281,6 +367,11 @@ const ClientCommunityDetail = () => {
                 })}
               </div>
             )}
+          </TabsContent>
+
+          {/* Resources */}
+          <TabsContent value="resources" className="mt-4">
+            <ResourcesTab communityId={communityId!} />
           </TabsContent>
         </Tabs>
       </div>
