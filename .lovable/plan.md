@@ -1,95 +1,128 @@
 
-# Embed Videos Platform-Wide and Fix Missing Translation Keys
+# Add Gym Account to View Switcher and Fix Login Routing
 
 ## Problem
 
-Several areas of the platform still use raw `<a href>` links or bare `<video>` tags for video content, which directs users away from the platform. The `VideoEmbed` component (with its `restricted` mode) should be used everywhere videos appear. Additionally, the `ClientMarketplaceProduct.tsx` page has multiple hardcoded English strings instead of translation keys.
+When a gym owner/staff logs in via the unified login page (`/auth`), the system only checks their `user_roles` entry (which is "client" by default for gym registrations). This causes:
 
-## Locations Requiring VideoEmbed Integration
+1. They get redirected to `/dashboard/client` instead of their gym dashboard
+2. The client dashboard tries to load a `client_profiles` record that doesn't exist
+3. The ViewSwitcher only shows Admin/Coach/Client -- no Gym option
+4. The user gets prompted to "become a client/coach" instead of reaching their gym
 
-### 1. Exercise Video in Workout Plan View
-**File:** `src/components/plans/WorkoutPlanView.tsx` (lines 97-106)
+## Solution
 
-Currently renders a plain `<a>` link ("Watch demo") that opens YouTube in a new tab. Replace with `<VideoEmbed url={exercise.video_url} restricted />` to embed the video inline.
+### 1. Extend ViewMode to include "gym"
 
-### 2. Exercise Video in Sortable Exercise Item (Plan Builder)
-**File:** `src/components/planbuilder/SortableExerciseItem.tsx` (lines 50-62)
+**File:** `src/lib/view-restoration.ts`
 
-Same issue -- a plain `<a>` link with "Watch video" text. Replace with a small inline `<VideoEmbed>` or a clickable thumbnail that expands to show the embedded video (a collapsible/dialog approach works best here since the item is compact).
+- Add `'gym'` to the `ViewMode` type: `'admin' | 'coach' | 'client' | 'gym'`
+- Update `getDefaultDashboardForRole` to handle gym users (new check)
+- Update `validateRouteForRole` to allow gym routes (`/gym-admin/`)
 
-### 3. Exercise Creation Modal -- Video Preview
-**File:** `src/components/planbuilder/CreateExerciseModal.tsx` (lines 142-153)
+### 2. Extend AdminContext to detect gym profiles
 
-The video URL input has no preview. Add a `<VideoEmbed>` preview below the input when a URL is entered (same pattern as the community lesson editor).
+**File:** `src/contexts/AdminContext.tsx`
 
-### 4. Client Library -- Streaming Video
-**File:** `src/pages/dashboard/client/ClientLibrary.tsx` (lines 164-170)
+- Add `gym` to `AvailableProfiles` interface: `gym?: { id: string; name: string }`
+- In `fetchProfiles`, also query `gym_profiles` (owned) and `gym_staff` (staff member) to detect gym access
+- When `activeProfileType` is `'gym'`, store the gym ID for navigation
 
-The "Watch" button opens `product.video_url` in a new tab. Replace with a dialog/modal containing `<VideoEmbed url={product.video_url} restricted />` so users watch within the platform.
+### 3. Add Gym option to ViewSwitcher
 
-### 5. Marketplace Product Page (Public) -- Preview Video
-**File:** `src/pages/MarketplaceProduct.tsx` (lines 257-262, 431-437)
+**File:** `src/components/admin/ViewSwitcher.tsx`
 
-Uses raw `<video src={product.preview_url}>` tags. Replace both the inline preview and the preview dialog with `<VideoEmbed url={product.preview_url} />`.
+- Add a `Building2` icon "Gym" option in the Select dropdown
+- When selected, navigate to `/gym-admin/{gymId}` using the stored gym ID
+- If user has multiple gyms, navigate to `/gym-login` (gym selection page)
+- No "create gym" option in the switcher (gym registration is a separate flow)
 
-### 6. Client Marketplace Product Page -- Preview Video
-**File:** `src/pages/dashboard/client/ClientMarketplaceProduct.tsx` (lines 218-223, 391-397)
+### 4. Fix login redirect flow in Auth.tsx
 
-Same issue as above -- raw `<video>` tags. Replace with `<VideoEmbed>`.
+**File:** `src/pages/Auth.tsx`
 
-### 7. Create Product Modal -- Video URL Preview
-**File:** `src/components/marketplace/CreateProductModal.tsx` (lines 715-743)
+In the `handleRedirect` effect (line 143), after checking role, also check if the user owns/staffs any gyms:
 
-The "Trial/Preview Video URL" and "Streaming URL" inputs have no live preview. Add `<VideoEmbed>` preview when a URL is entered.
+```text
+if role === "client":
+  1. Check gym_profiles WHERE user_id = user.id
+  2. Check gym_staff WHERE user_id = user.id AND status = 'active'
+  3. If gyms found AND no client_profiles exists:
+     -> Redirect to /gym-admin/{gymId} (single gym) or /gym-login (multi)
+  4. If both gym AND client profile exist:
+     -> Redirect to last saved view (gym or client dashboard)
+  5. If only client profile exists:
+     -> Existing behavior (client dashboard)
+```
 
-## Missing Translation Keys
+### 5. Fix GuestOnlyRoute redirect
 
-### `src/pages/dashboard/client/ClientMarketplaceProduct.tsx`
-This file has many hardcoded English strings that need translation keys:
+**File:** `src/components/auth/GuestOnlyRoute.tsx`
 
-| Hardcoded String | Suggested Key |
-|-----------------|---------------|
-| "Preview" (CardTitle) | `product.preview` |
-| "View Preview" | `product.viewPreview` |
-| "Preview: {title}" (dialog title) | `product.preview` (reuse) |
-| Several other inline strings | Audit needed |
+Currently redirects all authenticated users to `/dashboard/client` by default. Update to:
+- Check localStorage for `selectedGymId` -- if present and user role is "client", redirect to `/gym-admin/{gymId}` instead
+- This handles the case where a gym user refreshes a public page
 
-The public `MarketplaceProduct.tsx` already uses `t('product.preview')` etc. from the `marketplace` namespace. The client version should do the same.
+### 6. Fix DashboardRedirect
 
-### `src/components/marketplace/CreateProductModal.tsx`
-Contains hardcoded labels like "Trial/Preview Video URL", "Streaming URL", "Free preview so buyers can see what they're getting". These should use translation keys from the `coach` namespace.
+**File:** `src/pages/dashboard/DashboardRedirect.tsx`
 
-### `src/components/planbuilder/SortableExerciseItem.tsx`
-"Watch video" text is hardcoded -- should use `t("workoutBuilder.watchVideo")`.
+Update `getBestDashboardRoute` logic or add a gym-aware check:
+- If saved view state has viewMode "gym", redirect to `/gym-admin/{gymId}` using stored gym ID
+- Otherwise fall through to existing role-based logic
 
-### `src/components/plans/WorkoutPlanView.tsx`
-"Watch demo" text is hardcoded -- should use `t("workoutBuilder.watchDemo")`.
+### 7. Translation keys
 
-## Implementation Details
+**Files:** `src/i18n/locales/en/admin.json`, `src/i18n/locales/pl/admin.json`
 
-### Files to Modify
+Add: `viewSwitcher.gymView` = "Gym Dashboard" / "Panel Siłowni"
 
-| File | Changes |
-|------|---------|
-| `src/components/plans/WorkoutPlanView.tsx` | Replace `<a>` link with `<VideoEmbed restricted />` |
-| `src/components/planbuilder/SortableExerciseItem.tsx` | Replace `<a>` link with expandable `<VideoEmbed restricted />` |
-| `src/components/planbuilder/CreateExerciseModal.tsx` | Add `<VideoEmbed>` preview below video URL input |
-| `src/pages/dashboard/client/ClientLibrary.tsx` | Replace "Watch" button with in-app dialog using `<VideoEmbed restricted />` |
-| `src/pages/MarketplaceProduct.tsx` | Replace raw `<video>` with `<VideoEmbed>` in preview section and preview dialog |
-| `src/pages/dashboard/client/ClientMarketplaceProduct.tsx` | Replace raw `<video>` with `<VideoEmbed>`, add translation keys |
-| `src/components/marketplace/CreateProductModal.tsx` | Add `<VideoEmbed>` preview for video URL inputs, add translation keys |
-| `src/i18n/locales/en/coach.json` | Add keys: `workoutBuilder.watchDemo`, `workoutBuilder.watchVideo`, marketplace product modal labels |
-| `src/i18n/locales/pl/coach.json` | Polish equivalents |
-| `src/i18n/locales/en/client.json` | No changes needed if reusing `marketplace` namespace keys |
-| `src/i18n/locales/pl/client.json` | Same |
+---
 
-### Approach for Compact Contexts (Exercise Items)
+## Technical Details
 
-For the plan builder's sortable exercise items, where space is limited, the approach will be:
-- Replace the external link with a small "Play" button
-- Clicking it opens a dialog/collapsible section with the `<VideoEmbed restricted />` component
-- This keeps the UI compact while keeping users on-platform
+### View Mode Flow
 
-### No Database Changes Required
+```text
+User logs in
+  |
+  v
+Auth.tsx handleRedirect
+  |
+  +-- role = admin/manager/staff --> /dashboard/admin
+  +-- role = coach --> /dashboard/coach  
+  +-- role = client -->
+        |
+        +-- Has gym_profiles or gym_staff? 
+        |     |
+        |     +-- YES, no client_profile --> /gym-admin/{id}
+        |     +-- YES, has client_profile --> restore saved view (gym or client)
+        |     +-- NO --> /dashboard/client (existing behavior)
+```
 
-All changes are frontend-only -- using the existing `VideoEmbed` component in more places and adding missing translation keys.
+### ViewSwitcher with Gym
+
+The switcher will show up to 4 options:
+- Admin (if admin role)
+- Coach (or "Become Coach")  
+- Client (or "Become Client")
+- Gym (if user has gym access -- shows gym name)
+
+When "Gym" is selected and user has multiple gyms, navigate to `/gym-login` (the existing gym selection page). When they have one gym, go directly to `/gym-admin/{gymId}`.
+
+### Files Changed
+
+| File | Change |
+|------|--------|
+| `src/lib/view-restoration.ts` | Add 'gym' to ViewMode, update route helpers |
+| `src/contexts/AdminContext.tsx` | Add gym profile detection to fetchProfiles |
+| `src/components/admin/ViewSwitcher.tsx` | Add Gym option with Building2 icon |
+| `src/pages/Auth.tsx` | Check gym access in login redirect |
+| `src/components/auth/GuestOnlyRoute.tsx` | Handle gym user redirect |
+| `src/pages/dashboard/DashboardRedirect.tsx` | Support gym view restoration |
+| `src/i18n/locales/en/admin.json` | Add gymView key |
+| `src/i18n/locales/pl/admin.json` | Add gymView key (Polish) |
+
+### No Database Changes
+
+All gym data already exists in `gym_profiles` and `gym_staff` tables. No schema changes needed.
