@@ -1228,6 +1228,8 @@
     "thisYear": "Ten rok"
   },
   "groupClasses": {
+    "pageTitle": "Zajęcia i wydarzenia",
+    "pageDescription": "Twórz i zarządzaj zajęciami, warsztatami, wydarzeniami na żywo i innymi",
     "title": "Zajęcia grupowe",
     "subtitle": "Zarządzaj sesjami grupowymi",
     "createClass": "Utwórz zajęcia",
@@ -1249,7 +1251,29 @@
     "participants": "Uczestnicy",
     "viewParticipants": "Zobacz uczestników",
     "noClasses": "Brak zajęć grupowych",
-    "createFirst": "Utwórz swoje pierwsze zajęcia grupowe"
+    "createFirst": "Utwórz swoje pierwsze zajęcia grupowe",
+    "form": {
+      "eventType": "Typ wydarzenia",
+      "eventFormat": "Format",
+      "recurring": "Cykliczne",
+      "recurringDesc": "To regularnie planowane zajęcia",
+      "onlineLink": "Link online",
+      "classTitle": "Tytuł zajęć",
+      "classTitlePlaceholder": "np. Poranny HIIT",
+      "descriptionPlaceholder": "Opisz czego dotyczą zajęcia...",
+      "schedulePlaceholder": "np. Pon/Śr/Pt 7:00",
+      "locationPlaceholder": "np. Park Centralny",
+      "whoIsThisFor": "Dla kogo?",
+      "whoIsThisForPlaceholder": "np. Wszystkie poziomy zaawansowania",
+      "startDate": "Data rozpoczęcia",
+      "endDate": "Data zakończenia",
+      "maxParticipantsPlaceholder": "Pozostaw puste dla nieograniczonej liczby",
+      "waitlistOpen": "Lista oczekujących",
+      "waitlistOpenDesc": "Pozwól klientom dołączać do listy oczekujących",
+      "active": "Aktywne",
+      "activeDesc": "Pokaż te zajęcia na profilu",
+      "price": "Cena"
+    }
   },
   "plans": {
     "assignPlan": "Przypisz plan",
@@ -1847,10 +1871,6 @@
   "profileCompletion": {
     "title": "Ukończenie profilu",
     "complete": "Ukończono!"
-  },
-  "groupClasses": {
-    "pageTitle": "Zajęcia i wydarzenia",
-    "pageDescription": "Twórz i zarządzaj zajęciami, warsztatami, wydarzeniami na żywo i innymi"
   },
   "community": {
     "title": "Społeczność",
