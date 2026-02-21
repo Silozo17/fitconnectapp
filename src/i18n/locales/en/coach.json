@@ -1847,7 +1847,7 @@
       "gamification": "Gamification",
       "achievements": "Achievements",
       "settings": "Settings",
-      "groupClasses": "Group Classes",
+      "groupClasses": "Classes & Events",
       "community": "Community"
     }
   },
@@ -1888,8 +1888,8 @@
     "complete": "Complete!"
   },
   "groupClasses": {
-    "pageTitle": "Group Classes",
-    "pageDescription": "Create and manage group classes and activities for your clients"
+    "pageTitle": "Classes & Events",
+    "pageDescription": "Create and manage classes, workshops, live events and more for your clients"
   },
   "community": {
     "title": "Community",

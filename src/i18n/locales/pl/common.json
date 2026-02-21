@@ -489,7 +489,9 @@
       "automations": "Automatyzacje",
       "dropoffRescue": "Ratowanie porzuceń",
       "milestonesCelebration": "Świętowanie kamieni milowych",
-      "reminderSettings": "Ustawienia przypomnień"
+      "reminderSettings": "Ustawienia przypomnień",
+      "groupClasses": "Zajęcia i wydarzenia",
+      "community": "Społeczność"
     },
     "client": {
       "home": "Strona główna",
@@ -517,7 +519,8 @@
       "favourites": "Ulubione",
       "settings": "Ustawienia",
       "foodDiary": "Dziennik żywienia",
-      "trainingLogs": "Dziennik treningów"
+      "trainingLogs": "Dziennik treningów",
+      "community": "Społeczność"
     },
     "bottomNav": {
       "home": "Start",

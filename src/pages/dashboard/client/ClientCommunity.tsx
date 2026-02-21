@@ -13,6 +13,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const ClientCommunity = () => {
   const { t } = useTranslation("client");
@@ -22,6 +23,7 @@ const ClientCommunity = () => {
   const joinCommunity = useJoinCommunity();
   const [joinTarget, setJoinTarget] = useState<Community | null>(null);
   const [discountInput, setDiscountInput] = useState("");
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
 
   const myCommunityIds = new Set(myCommunities.map((c) => c.id));
   const availableToJoin = discoverCommunities.filter((c) => !myCommunityIds.has(c.id));
@@ -39,13 +41,29 @@ const ClientCommunity = () => {
 
   const handlePaidJoin = async () => {
     if (!joinTarget) return;
-    // For now, join directly (Stripe checkout can be integrated later)
+    setCheckoutLoading(true);
     try {
-      await joinCommunity.mutateAsync(joinTarget.id);
-      toast.success(t("community.joined"));
-      setJoinTarget(null);
-      setDiscountInput("");
-    } catch { toast.error(t("community.joinFailed")); }
+      const { data, error } = await supabase.functions.invoke("community-checkout", {
+        body: {
+          communityId: joinTarget.id,
+          discountCode: discountInput || undefined,
+          returnUrl: `${window.location.origin}/dashboard/client/community/${joinTarget.id}?checkout=success`,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL returned");
+      }
+    } catch (err: any) {
+      console.error("Community checkout error:", err);
+      const msg = err?.message || err?.context?.body?.error || t("community.joinFailed");
+      toast.error(msg);
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
   const formatPrice = (community: Community) => {
@@ -155,8 +173,8 @@ const ClientCommunity = () => {
           )}
           <DialogFooter>
             <Button variant="outline" onClick={() => { setJoinTarget(null); setDiscountInput(""); }}>{t("community.cancel")}</Button>
-            <Button onClick={handlePaidJoin} disabled={joinCommunity.isPending}>
-              {joinCommunity.isPending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+            <Button onClick={handlePaidJoin} disabled={checkoutLoading}>
+              {checkoutLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {t("community.joinNow")}
             </Button>
           </DialogFooter>
