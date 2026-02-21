@@ -21,7 +21,7 @@ export const ReviewsWidget = memo(function ReviewsWidget({ averageRating, totalR
         <h2 className="font-display font-bold text-foreground">{t("dashboard.yourReviews")}</h2>
         <Link to="/dashboard/coach/reviews">
           <Button variant="ghost" size="sm" className="text-primary rounded-xl">
-            {t("common:viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
+            {t("common:actions.viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </Link>
       </div>

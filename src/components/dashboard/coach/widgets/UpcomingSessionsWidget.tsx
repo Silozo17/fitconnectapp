@@ -27,7 +27,7 @@ export function UpcomingSessionsWidget({ sessions, isLoading }: UpcomingSessions
         <h2 className="font-display font-bold text-foreground">{t("clients.upcomingSessions")}</h2>
         <Link to="/dashboard/coach/schedule">
           <Button variant="ghost" size="sm" className="text-primary rounded-xl">
-            {t("common:viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
+            {t("common:actions.viewAll")} <ArrowRight className="w-4 h-4 ml-1" />
           </Button>
         </Link>
       </div>
