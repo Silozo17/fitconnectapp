@@ -1229,6 +1229,8 @@
     "thisYear": "This Year"
   },
   "groupClasses": {
+    "pageTitle": "Classes & Events",
+    "pageDescription": "Create and manage classes, workshops, live events and more for your clients",
     "title": "Group Classes",
     "subtitle": "Manage group sessions",
     "createClass": "Create Class",
@@ -1250,7 +1252,29 @@
     "participants": "Participants",
     "viewParticipants": "View Participants",
     "noClasses": "No group classes",
-    "createFirst": "Create your first group class"
+    "createFirst": "Create your first group class",
+    "form": {
+      "eventType": "Event Type",
+      "eventFormat": "Format",
+      "recurring": "Recurring",
+      "recurringDesc": "This is a regularly scheduled class",
+      "onlineLink": "Online Link",
+      "classTitle": "Class Title",
+      "classTitlePlaceholder": "e.g., Morning HIIT Class",
+      "descriptionPlaceholder": "Describe what the class involves...",
+      "schedulePlaceholder": "e.g., Mon/Wed/Fri 7:00 AM",
+      "locationPlaceholder": "e.g., Central Park, NYC",
+      "whoIsThisFor": "Who is this for?",
+      "whoIsThisForPlaceholder": "e.g., All fitness levels welcome",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "maxParticipantsPlaceholder": "Leave empty for unlimited",
+      "waitlistOpen": "Waitlist Open",
+      "waitlistOpenDesc": "Allow clients to join the waitlist",
+      "active": "Active",
+      "activeDesc": "Show this class on your profile",
+      "price": "Price"
+    }
   },
   "plans": {
     "assignPlan": "Assign Plan",
@@ -1854,10 +1878,6 @@
   "profileCompletion": {
     "title": "Profile Completion",
     "complete": "Complete!"
-  },
-  "groupClasses": {
-    "pageTitle": "Classes & Events",
-    "pageDescription": "Create and manage classes, workshops, live events and more for your clients"
   },
   "community": {
     "title": "Community",
