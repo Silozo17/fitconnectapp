@@ -3746,44 +3746,68 @@ export type Database = {
       }
       coach_packages: {
         Row: {
+          billing_months: number | null
           coach_id: string
           created_at: string
           currency: string | null
           description: string | null
           id: string
+          in_person_sessions: number | null
           is_active: boolean | null
+          is_group_package: boolean | null
+          is_hybrid: boolean | null
+          max_group_size: number | null
+          min_group_size: number | null
           name: string
+          online_sessions: number | null
           price: number
           session_count: number
           session_duration_minutes: number | null
+          sessions_per_month: number | null
           updated_at: string
           validity_days: number | null
         }
         Insert: {
+          billing_months?: number | null
           coach_id: string
           created_at?: string
           currency?: string | null
           description?: string | null
           id?: string
+          in_person_sessions?: number | null
           is_active?: boolean | null
+          is_group_package?: boolean | null
+          is_hybrid?: boolean | null
+          max_group_size?: number | null
+          min_group_size?: number | null
           name: string
+          online_sessions?: number | null
           price: number
           session_count: number
           session_duration_minutes?: number | null
+          sessions_per_month?: number | null
           updated_at?: string
           validity_days?: number | null
         }
         Update: {
+          billing_months?: number | null
           coach_id?: string
           created_at?: string
           currency?: string | null
           description?: string | null
           id?: string
+          in_person_sessions?: number | null
           is_active?: boolean | null
+          is_group_package?: boolean | null
+          is_hybrid?: boolean | null
+          max_group_size?: number | null
+          min_group_size?: number | null
           name?: string
+          online_sessions?: number | null
           price?: number
           session_count?: number
           session_duration_minutes?: number | null
+          sessions_per_month?: number | null
           updated_at?: string
           validity_days?: number | null
         }
@@ -4361,6 +4385,270 @@ export type Database = {
             columns: ["package_purchase_id"]
             isOneToOne: false
             referencedRelation: "client_package_purchases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communities: {
+        Row: {
+          coach_id: string
+          cover_image_url: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_active: boolean | null
+          is_public: boolean | null
+          member_count: number | null
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          coach_id: string
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_public?: boolean | null
+          member_count?: number | null
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          coach_id?: string
+          cover_image_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_public?: boolean | null
+          member_count?: number | null
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communities_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "coach_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communities_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "public_coach_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_comments: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          id: string
+          likes_count: number | null
+          parent_comment_id: string | null
+          post_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          parent_comment_id?: string | null
+          post_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          parent_comment_id?: string | null
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_members: {
+        Row: {
+          community_id: string
+          id: string
+          joined_at: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          community_id: string
+          id?: string
+          joined_at?: string | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          community_id?: string
+          id?: string
+          joined_at?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_members_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_poll_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          option_index: number
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          option_index: number
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          option_index?: number
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_poll_votes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_posts: {
+        Row: {
+          author_id: string
+          comments_count: number | null
+          community_id: string
+          content: string
+          created_at: string | null
+          event_data: Json | null
+          id: string
+          image_urls: string[] | null
+          is_announcement: boolean | null
+          is_pinned: boolean | null
+          likes_count: number | null
+          poll_data: Json | null
+          post_type: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          author_id: string
+          comments_count?: number | null
+          community_id: string
+          content: string
+          created_at?: string | null
+          event_data?: Json | null
+          id?: string
+          image_urls?: string[] | null
+          is_announcement?: boolean | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          poll_data?: Json | null
+          post_type?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string
+          comments_count?: number | null
+          community_id?: string
+          content?: string
+          created_at?: string | null
+          event_data?: Json | null
+          id?: string
+          image_urls?: string[] | null
+          is_announcement?: boolean | null
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          poll_data?: Json | null
+          post_type?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_posts_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_reactions: {
+        Row: {
+          comment_id: string | null
+          created_at: string | null
+          id: string
+          post_id: string | null
+          reaction_type: string | null
+          user_id: string
+        }
+        Insert: {
+          comment_id?: string | null
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          reaction_type?: string | null
+          user_id: string
+        }
+        Update: {
+          comment_id?: string | null
+          created_at?: string | null
+          id?: string
+          post_id?: string | null
+          reaction_type?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "community_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "community_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -13884,6 +14172,14 @@ export type Database = {
       increment_food_popularity: {
         Args: { p_country?: string; p_external_id: string }
         Returns: undefined
+      }
+      is_community_admin: {
+        Args: { _community_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_community_member: {
+        Args: { _community_id: string; _user_id: string }
+        Returns: boolean
       }
       is_gym_member:
         | { Args: { check_gym_id: string }; Returns: boolean }

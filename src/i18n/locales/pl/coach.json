@@ -726,7 +726,26 @@
       "1hr": "1 godzina",
       "1.5hr": "1,5 godziny",
       "2hr": "2 godziny"
-    }
+    },
+    "hybridPackage": "Pakiet hybrydowy",
+    "hybridDescription": "Mieszanka sesji stacjonarnych i online",
+    "inPersonSessions": "Sesje stacjonarne",
+    "onlineSessions": "Sesje online",
+    "totalSessionsHybrid": "Łącznie: {{total}} sesji na okres",
+    "groupPackage": "Pakiet grupowy",
+    "groupDescription": "Dla grup od 2 osób",
+    "minGroupSize": "Min. rozmiar grupy",
+    "maxGroupSize": "Maks. rozmiar grupy",
+    "packageDuration": "Czas trwania (miesiące)",
+    "packageDurationNote": "Ile miesięcy obejmuje pakiet",
+    "sessionsPerMonth": "Sesji miesięcznie",
+    "optional": "Opcjonalne",
+    "hybrid": "Hybrydowy",
+    "inPerson": "stacjonarne",
+    "online": "online",
+    "group": "Grupowy",
+    "people": "osób",
+    "months": "miesiące"
   },
   "subscriptionPlans": {
     "title": "Plany subskrypcyjne",
@@ -1820,7 +1839,9 @@
       "earnings": "Zarobki",
       "gamification": "Grywalizacja",
       "achievements": "Osiągnięcia",
-      "settings": "Ustawienia"
+      "settings": "Ustawienia",
+      "groupClasses": "Zajęcia grupowe",
+      "community": "Społeczność"
     }
   },
   "widgets": {
@@ -1858,5 +1879,49 @@
   "profileCompletion": {
     "title": "Ukończenie profilu",
     "complete": "Ukończono!"
+  },
+  "groupClasses": {
+    "pageTitle": "Zajęcia grupowe",
+    "pageDescription": "Twórz i zarządzaj zajęciami grupowymi i aktywnościami dla swoich klientów"
+  },
+  "community": {
+    "title": "Społeczność",
+    "description": "Buduj społeczności dla swoich klientów",
+    "createCommunity": "Utwórz społeczność",
+    "communityName": "Nazwa społeczności",
+    "namePlaceholder": "np. Moje Fitness Tribe",
+    "communityDescription": "Opis",
+    "descriptionPlaceholder": "O czym jest ta społeczność?",
+    "public": "Publiczna",
+    "publicDesc": "Każdy może odkryć i dołączyć",
+    "active": "Aktywna",
+    "inactive": "Nieaktywna",
+    "members": "członków",
+    "membersTab": "Członkowie",
+    "noCommunities": "Brak społeczności",
+    "noCommunitiesDesc": "Utwórz społeczność dla swoich klientów",
+    "createFirst": "Utwórz pierwszą społeczność",
+    "created": "Społeczność utworzona!",
+    "createFailed": "Nie udało się utworzyć",
+    "deleted": "Społeczność usunięta",
+    "deleteFailed": "Nie udało się usunąć",
+    "deleteConfirmTitle": "Usunąć społeczność?",
+    "deleteConfirmDesc": "To trwale usunie społeczność i wszystkie posty.",
+    "cancel": "Anuluj",
+    "delete": "Usuń",
+    "create": "Utwórz",
+    "communityFeed": "Aktualności",
+    "feed": "Aktualności",
+    "writePost": "Podziel się czymś...",
+    "markAnnouncement": "Ogłoszenie",
+    "post": "Opublikuj",
+    "postCreated": "Post opublikowany!",
+    "postFailed": "Nie udało się opublikować",
+    "noPosts": "Brak postów. Bądź pierwszy!",
+    "pinned": "Przypięty",
+    "announcement": "Ogłoszenie",
+    "writeComment": "Napisz komentarz...",
+    "commentFailed": "Nie udało się dodać komentarza",
+    "poll": "Ankieta"
   }
 }

@@ -128,6 +128,7 @@ const menuGroupsConfig: MenuGroup[] = [
     icon: Trophy,
     collapsible: true,
     items: [
+      { titleKey: "navigation.client.community", icon: Users, path: "/dashboard/client/community" },
       { titleKey: "navigation.client.achievements", icon: Trophy, path: "/dashboard/client/achievements" },
       { titleKey: "navigation.client.leaderboard", icon: Medal, path: "/dashboard/client/leaderboard" },
       { titleKey: "navigation.client.challenges", icon: Flame, path: "/dashboard/client/challenges" },

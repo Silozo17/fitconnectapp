@@ -112,6 +112,7 @@ const menuGroups: MenuGroup[] = [
       { titleKey: "navigation.coach.clients", icon: Users, path: "/dashboard/coach/clients", badgeKey: "clients", badgeVariant: "warning" },
       { titleKey: "navigation.coach.schedule", icon: Calendar, path: "/dashboard/coach/schedule", badgeKey: "schedule", badgeVariant: "warning" },
       { titleKey: "navigation.coach.trainingPlans", icon: ClipboardList, path: "/dashboard/coach/plans", requiredFeature: "workout_plan_builder" },
+      { titleKey: "navigation.coach.community", icon: Users2, path: "/dashboard/coach/community" },
       { titleKey: "navigation.coach.wearableInsights", icon: Activity, path: "/dashboard/coach/wearables", requiredFeature: "wearable_dashboard" },
       { titleKey: "navigation.coach.clientComparison", icon: Users2, path: "/dashboard/coach/compare", requiredFeature: "client_comparison_analytics" },
       { titleKey: "navigation.coach.aiRecommendations", icon: Sparkles, path: "/dashboard/coach/ai-recommendations", requiredFeature: "ai_plan_recommendations" },
@@ -124,6 +125,7 @@ const menuGroups: MenuGroup[] = [
     collapsible: true,
     items: [
       { titleKey: "navigation.coach.packages", icon: Package, path: "/dashboard/coach/packages" },
+      { titleKey: "navigation.coach.groupClasses", icon: Users2, path: "/dashboard/coach/group-classes" },
       { titleKey: "navigation.coach.digitalProducts", icon: ShoppingBag, path: "/dashboard/coach/products" },
     ],
   },
