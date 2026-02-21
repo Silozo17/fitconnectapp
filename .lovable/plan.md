@@ -1,42 +1,55 @@
 
 
-# Fix: Duplicate JSON Keys Causing Missing Translations on Coach Dashboard
+# Fix Missing Translation Keys in Group Classes Form
 
 ## Root Cause
 
-The `en/coach.json` (and `pl/coach.json`) files have **duplicate top-level `"widgets"` keys**. In JSON, when a key appears twice, the last value wins. This means:
-
-- **First `"widgets"` (line 22):** Contains `emptyStates`, `pipeline`, `connectionRequests`, AND `sections` -- all the keys needed by the dashboard
-- **Second `"widgets"` (line 1854):** Contains ONLY `sections` -- this was added during the recent community/navigation update and **silently overwrites** the first block
-
-As a result, all of these are lost at runtime:
-- `widgets.emptyStates.recentClients.title` / `.description`
-- `widgets.pipeline.title` / `.totalLeads` / `.conversionRate` / `.viewPipeline` / `.stages.*`
-- `widgets.connectionRequests.title` / `.emptyTitle` / `.emptyDescription`
-
-The same duplicate exists in `pl/coach.json` (line 22 and line 1847).
+Same duplicate-key issue as before: both `en/coach.json` and `pl/coach.json` have **two** top-level `"groupClasses"` keys. The second one (containing only `pageTitle` and `pageDescription`) overwrites the first one (containing all the form labels), so the form displays raw key strings like `groupClasses.form.eventType`.
 
 ## Fix
 
-### Step 1: Merge duplicate `"widgets"` blocks in `en/coach.json`
+### 1. Merge duplicate `groupClasses` blocks in `en/coach.json`
 
-Remove the second `"widgets"` block (lines 1854-1884) entirely. Its only content (`sections`) already exists in the first `"widgets"` block (lines 74-103), so nothing is lost.
+The first block (line 1231) has all the existing keys. The second block (line 1858) has only `pageTitle` and `pageDescription`. The fix:
+- Add `pageTitle` and `pageDescription` into the first `groupClasses` block
+- Add a new `form` sub-object with all the missing form keys: `eventType`, `eventFormat`, `recurring`, `recurringDesc`, `onlineLink`, `classTitle`, `classTitlePlaceholder`, `descriptionPlaceholder`, `schedulePlaceholder`, `locationPlaceholder`, `whoIsThisFor`, `whoIsThisForPlaceholder`, `startDate`, `endDate`, `maxParticipantsPlaceholder`, `waitlistOpen`, `waitlistOpenDesc`, `active`, `activeDesc`, `price`
+- Remove the second duplicate `groupClasses` block entirely
 
-### Step 2: Merge duplicate `"widgets"` blocks in `pl/coach.json`
+### 2. Same merge in `pl/coach.json`
 
-Same fix -- remove the second duplicate `"widgets"` block.
+Identical fix with Polish translations.
 
-### Step 3: Fix `viewAll` cross-namespace reference
+## Keys to Add
 
-The `UpcomingSessionsWidget` and `ReviewsWidget` use `t("common:viewAll")`, but `viewAll` in `common.json` is nested at `common.viewAll` (inside a `"common"` object), not at the root. Fix to `t("common:common.viewAll")`.
+Under `groupClasses.form`:
+| Key | EN | PL |
+|-----|----|----|
+| `eventType` | Event Type | Typ wydarzenia |
+| `eventFormat` | Format | Format |
+| `recurring` | Recurring | Cykliczne |
+| `recurringDesc` | This is a regularly scheduled class | To regularnie planowane zajecia |
+| `onlineLink` | Online Link | Link online |
+| `classTitle` | Class Title | Tytul zajec |
+| `classTitlePlaceholder` | e.g., Morning HIIT Class | np. Poranny HIIT |
+| `descriptionPlaceholder` | Describe what the class involves... | Opisz czego dotycza zajecia... |
+| `schedulePlaceholder` | e.g., Mon/Wed/Fri 7:00 AM | np. Pon/Sr/Pt 7:00 |
+| `locationPlaceholder` | e.g., Central Park, NYC | np. Park Centralny |
+| `whoIsThisFor` | Who is this for? | Dla kogo? |
+| `whoIsThisForPlaceholder` | e.g., All fitness levels welcome | np. Wszystkie poziomy |
+| `startDate` | Start Date | Data rozpoczecia |
+| `endDate` | End Date | Data zakonczenia |
+| `maxParticipantsPlaceholder` | Leave empty for unlimited | Pozostaw puste dla nieograniczonej |
+| `waitlistOpen` | Waitlist Open | Lista oczekujacych |
+| `waitlistOpenDesc` | Allow clients to join the waitlist | Pozwol klientom dolaczac do listy |
+| `active` | Active | Aktywne |
+| `activeDesc` | Show this class on your profile | Pokaz te zajecia na profilu |
+| `price` | Price | Cena |
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/i18n/locales/en/coach.json` | Remove duplicate `"widgets"` block (lines 1854-1884) |
-| `src/i18n/locales/pl/coach.json` | Remove duplicate `"widgets"` block |
-| `src/components/dashboard/coach/widgets/UpcomingSessionsWidget.tsx` | Fix `viewAll` key path |
-| `src/components/dashboard/coach/widgets/ReviewsWidget.tsx` | Fix `viewAll` key path |
+| `src/i18n/locales/en/coach.json` | Merge `pageTitle`, `pageDescription`, and `form` keys into first `groupClasses` block; remove duplicate second block |
+| `src/i18n/locales/pl/coach.json` | Same merge with Polish translations |
 
-No database changes. No new files. This is purely a localization fix.
+No database changes. No new files.
