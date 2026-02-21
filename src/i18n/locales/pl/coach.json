@@ -1844,38 +1844,6 @@
       "community": "Społeczność"
     }
   },
-  "widgets": {
-    "sections": {
-      "clients": {
-        "title": "Podgląd klientów",
-        "description": "Szybki dostęp do statystyk klientów"
-      },
-      "stats": {
-        "title": "Przegląd panelu",
-        "description": "Twoje kluczowe wskaźniki w skrócie"
-      },
-      "activity": {
-        "title": "Aktywność klientów",
-        "description": "Aktywność klientów i sesje"
-      },
-      "actions": {
-        "title": "Szybkie akcje",
-        "description": "Typowe zadania"
-      },
-      "engagement": {
-        "title": "Zaangażowanie klientów",
-        "description": "Recenzje i połączenia"
-      },
-      "intelligence": {
-        "title": "Inteligentne spostrzeżenia",
-        "description": "Spostrzeżenia oparte na AI"
-      },
-      "business": {
-        "title": "Analityka biznesowa",
-        "description": "Przychody i analityka"
-      }
-    }
-  },
   "profileCompletion": {
     "title": "Ukończenie profilu",
     "complete": "Ukończono!"
