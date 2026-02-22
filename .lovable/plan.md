@@ -1,128 +1,69 @@
 
-# Add Gym Account to View Switcher and Fix Login Routing
+# Add Comprehensive Sports Specialties for Coaches
 
-## Problem
+## Overview
 
-When a gym owner/staff logs in via the unified login page (`/auth`), the system only checks their `user_roles` entry (which is "client" by default for gym registrations). This causes:
+The current `COACH_TYPES` in `src/constants/coachTypes.ts` only has 6 categories with ~40 types, missing major sports like football, tennis, basketball, cricket, golf, etc. The discipline catalog (`catalog.ts`) already has many of these for clients, but coaches can't select them during onboarding. This update adds 5 new categories and ~50 new coach specialties.
 
-1. They get redirected to `/dashboard/client` instead of their gym dashboard
-2. The client dashboard tries to load a `client_profiles` record that doesn't exist
-3. The ViewSwitcher only shows Admin/Coach/Client -- no Gym option
-4. The user gets prompted to "become a client/coach" instead of reaching their gym
+## Changes
 
-## Solution
+### File: `src/constants/coachTypes.ts`
 
-### 1. Extend ViewMode to include "gym"
+Add 5 new categories and their corresponding types:
 
-**File:** `src/lib/view-restoration.ts`
+**New Categories:**
+- `teamSports` -- "Team Sports" (Trophy icon)
+- `racket` -- "Racket Sports" (Target icon)
+- `water` -- "Water & Aquatic" (Wind icon)
+- `winter` -- "Winter Sports" (Snowflake icon -- new import)
+- `outdoor` -- "Outdoor & Adventure" (Mountain icon -- new import)
 
-- Add `'gym'` to the `ViewMode` type: `'admin' | 'coach' | 'client' | 'gym'`
-- Update `getDefaultDashboardForRole` to handle gym users (new check)
-- Update `validateRouteForRole` to allow gym routes (`/gym-admin/`)
+**New Coach Types (~50 additions):**
 
-### 2. Extend AdminContext to detect gym profiles
+| Category | Types |
+|----------|-------|
+| **Combat** (existing, add 3) | Judo, Taekwondo, Krav Maga |
+| **Team Sports** (new) | Football, Basketball, American Football, Rugby, Ice Hockey, Volleyball, Handball, Cricket, Baseball, Softball, Lacrosse, Field Hockey, Netball, Water Polo |
+| **Racket Sports** (new) | Tennis, Badminton, Squash, Table Tennis, Padel, Pickleball |
+| **Fitness** (existing, add 4) | Cycling, Triathlon, Dance Fitness, Gymnastics |
+| **Water & Aquatic** (new) | Swimming, Diving, Surfing, Rowing, Sailing, Kayaking |
+| **Winter Sports** (new) | Skiing, Snowboarding, Figure Skating, Speed Skating |
+| **Outdoor & Adventure** (new) | Rock Climbing, Hiking, Trail Running, Obstacle Course Racing, Horse Riding, Archery, Fencing, Skateboarding |
+| **Specialist** (existing, add 3) | Golf Coach, Esports Performance, Adaptive/Para Sports |
 
-**File:** `src/contexts/AdminContext.tsx`
+**Icon imports to add:** `Mountain`, `Snowflake`, `Waves` (or reuse `Wind`), `Bike`, `Volleyball` (if available, else `Users`)
 
-- Add `gym` to `AvailableProfiles` interface: `gym?: { id: string; name: string }`
-- In `fetchProfiles`, also query `gym_profiles` (owned) and `gym_staff` (staff member) to detect gym access
-- When `activeProfileType` is `'gym'`, store the gym ID for navigation
+Since Lucide doesn't have sport-specific icons for every sport, we'll reuse contextually appropriate icons (e.g., `Trophy` for team sports, `Target` for racket, `Wind`/`Waves` for water).
 
-### 3. Add Gym option to ViewSwitcher
+### File: `src/pages/onboarding/CoachOnboarding.tsx`
 
-**File:** `src/components/admin/ViewSwitcher.tsx`
+No structural changes needed -- the onboarding "Specialties" step already iterates over `COACH_TYPE_CATEGORIES` and renders all types per category dynamically. Adding categories/types to the constants file automatically populates the onboarding UI.
 
-- Add a `Building2` icon "Gym" option in the Select dropdown
-- When selected, navigate to `/gym-admin/{gymId}` using the stored gym ID
-- If user has multiple gyms, navigate to `/gym-login` (gym selection page)
-- No "create gym" option in the switcher (gym registration is a separate flow)
+However, with 11 categories and 90+ types, the step will be long. Add a **search/filter input** at the top of the Specialties step so coaches can quickly find their sport:
+- A simple text input that filters the displayed types by name
+- Categories with no matching types are hidden
+- This keeps the step usable despite the large list
 
-### 4. Fix login redirect flow in Auth.tsx
+### File: `src/components/coach/CoachTypeSelector.tsx`
 
-**File:** `src/pages/Auth.tsx`
+This component (used in Coach Settings) also iterates over `COACH_TYPE_CATEGORIES`. Verify it handles the new categories -- it should work automatically since it uses the same constants. Add the same search filter here for consistency.
 
-In the `handleRedirect` effect (line 143), after checking role, also check if the user owns/staffs any gyms:
+### Translation files
 
-```text
-if role === "client":
-  1. Check gym_profiles WHERE user_id = user.id
-  2. Check gym_staff WHERE user_id = user.id AND status = 'active'
-  3. If gyms found AND no client_profiles exists:
-     -> Redirect to /gym-admin/{gymId} (single gym) or /gym-login (multi)
-  4. If both gym AND client profile exist:
-     -> Redirect to last saved view (gym or client dashboard)
-  5. If only client profile exists:
-     -> Existing behavior (client dashboard)
-```
+No translation changes needed -- coach type labels are stored as plain English strings in the constants file and displayed directly. The `getCoachTypeDisplayLabel` helper already handles title-casing for any ID.
 
-### 5. Fix GuestOnlyRoute redirect
+## Technical Notes
 
-**File:** `src/components/auth/GuestOnlyRoute.tsx`
+- The `coach_types` column in `coach_profiles` is a text array (`text[]`), so any string value is valid -- no database migration needed
+- The `primary_coach_type` field is also `text`, so new IDs work immediately
+- Client search filters in `CoachFilters.tsx` also use `COACH_TYPE_CATEGORIES` and will automatically show the new categories
+- Existing coaches with old type IDs are unaffected -- no data migration required
+- The discipline catalog (for client tracking) is separate from coach types and doesn't need changes here
 
-Currently redirects all authenticated users to `/dashboard/client` by default. Update to:
-- Check localStorage for `selectedGymId` -- if present and user role is "client", redirect to `/gym-admin/{gymId}` instead
-- This handles the case where a gym user refreshes a public page
-
-### 6. Fix DashboardRedirect
-
-**File:** `src/pages/dashboard/DashboardRedirect.tsx`
-
-Update `getBestDashboardRoute` logic or add a gym-aware check:
-- If saved view state has viewMode "gym", redirect to `/gym-admin/{gymId}` using stored gym ID
-- Otherwise fall through to existing role-based logic
-
-### 7. Translation keys
-
-**Files:** `src/i18n/locales/en/admin.json`, `src/i18n/locales/pl/admin.json`
-
-Add: `viewSwitcher.gymView` = "Gym Dashboard" / "Panel Siłowni"
-
----
-
-## Technical Details
-
-### View Mode Flow
-
-```text
-User logs in
-  |
-  v
-Auth.tsx handleRedirect
-  |
-  +-- role = admin/manager/staff --> /dashboard/admin
-  +-- role = coach --> /dashboard/coach  
-  +-- role = client -->
-        |
-        +-- Has gym_profiles or gym_staff? 
-        |     |
-        |     +-- YES, no client_profile --> /gym-admin/{id}
-        |     +-- YES, has client_profile --> restore saved view (gym or client)
-        |     +-- NO --> /dashboard/client (existing behavior)
-```
-
-### ViewSwitcher with Gym
-
-The switcher will show up to 4 options:
-- Admin (if admin role)
-- Coach (or "Become Coach")  
-- Client (or "Become Client")
-- Gym (if user has gym access -- shows gym name)
-
-When "Gym" is selected and user has multiple gyms, navigate to `/gym-login` (the existing gym selection page). When they have one gym, go directly to `/gym-admin/{gymId}`.
-
-### Files Changed
+## Files to Modify
 
 | File | Change |
 |------|--------|
-| `src/lib/view-restoration.ts` | Add 'gym' to ViewMode, update route helpers |
-| `src/contexts/AdminContext.tsx` | Add gym profile detection to fetchProfiles |
-| `src/components/admin/ViewSwitcher.tsx` | Add Gym option with Building2 icon |
-| `src/pages/Auth.tsx` | Check gym access in login redirect |
-| `src/components/auth/GuestOnlyRoute.tsx` | Handle gym user redirect |
-| `src/pages/dashboard/DashboardRedirect.tsx` | Support gym view restoration |
-| `src/i18n/locales/en/admin.json` | Add gymView key |
-| `src/i18n/locales/pl/admin.json` | Add gymView key (Polish) |
-
-### No Database Changes
-
-All gym data already exists in `gym_profiles` and `gym_staff` tables. No schema changes needed.
+| `src/constants/coachTypes.ts` | Add 5 new categories, ~50 new types, new icon imports |
+| `src/pages/onboarding/CoachOnboarding.tsx` | Add search filter input to Specialties step |
+| `src/components/coach/CoachTypeSelector.tsx` | Add search filter for consistency |
